@@ -7,6 +7,7 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController as AdminPasswordResetLinkController;
 use App\Http\Controllers\Admin\Auth\NewPasswordController as AdminNewPasswordController;
+use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -39,7 +40,7 @@ Route::middleware('auth')->post('/logout', [AuthenticatedSessionController::clas
 
 /*
 |--------------------------------------------------------------------------
-| Admin routes  -> /admin/*   (role: admin)
+| Admin routes  -> /admin/* (role: admin)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -49,24 +50,27 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pengguna', [AdminUserController::class, 'index'])->name('pengguna.index');
     Route::get('/pengguna/{user}', [AdminUserController::class, 'show'])->name('pengguna.show');
     Route::patch('/pengguna/{user}/status', [AdminUserController::class, 'updateStatus'])->name('pengguna.updateStatus');
+
+    // Halaman Vendor / Partner (Sudah di dalam grup Admin)
+    Route::get('/partners', [AdminPartnerController::class, 'index'])->name('partners.index');
+    Route::get('/partners/{partner}', [AdminPartnerController::class, 'show'])->name('partners.show');
+    Route::patch('/partners/{partner}/status', [AdminPartnerController::class, 'updateStatus'])->name('partners.updateStatus');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Customer web app routes  -> /app/*   (role: customer)
+| Customer web app routes  -> /app/* (role: customer)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
-
-
 });
 
 /*
 |--------------------------------------------------------------------------
-| Partner (Mitra) routes  -> /mitra/*   (role: partner)
+| Partner (Mitra) routes  -> /mitra/* (role: partner)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
-
+    // Route khusus internal Mitra/Vendor di sini jika ada
 });
