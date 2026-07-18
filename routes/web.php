@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\Auth\PasswordResetLinkController as AdminPassword
 use App\Http\Controllers\Admin\Auth\NewPasswordController as AdminNewPasswordController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Admin\PengaturanController;
+use App\Http\Controllers\Admin\KotaController;
+use App\Http\Controllers\Admin\OrderController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -85,3 +87,14 @@ Route::prefix('admin/pengaturan')->name('admin.pengaturan.')->group(function () 
     Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
     Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
 });
+
+
+
+Route::resource('admin/kota', KotaController::class)
+    ->except(['show', 'create', 'edit']);
+
+
+
+
+Route::get('admin/orders', [OrderController::class, 'index'])->name('admin.orders.index');
+Route::patch('admin/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
