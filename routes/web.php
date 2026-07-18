@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ReportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -74,7 +75,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
 | Partner (Mitra) routes  -> /mitra/* (role: partner)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {    
+Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
 });
 
 Route::get('/admin/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('admin.profil.edit');
@@ -88,13 +89,17 @@ Route::prefix('admin/pengaturan')->name('admin.pengaturan.')->group(function () 
     Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
 });
 
-
-
 Route::resource('admin/kota', KotaController::class)
     ->except(['show', 'create', 'edit']);
 
-
-
-
 Route::get('admin/orders', [OrderController::class, 'index'])->name('admin.orders.index');
 Route::patch('admin/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+
+Route::prefix('admin/reports')->name('admin.reports.')->group(function () {
+    Route::get('/', [ReportController::class, 'index'])->name('index');
+    Route::get('export', [ReportController::class, 'export'])->name('export');
+    Route::get('{report}', [ReportController::class, 'show'])->name('show');
+    Route::put('{report}/suspend', [ReportController::class, 'suspend'])->name('suspend');
+    Route::put('{report}/restore', [ReportController::class, 'restore'])->name('restore');
+    Route::get('{report}/penangguhan', [ReportController::class, 'penangguhan'])->name('penangguhan');
+});
