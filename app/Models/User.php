@@ -28,6 +28,11 @@ class User extends Authenticatable
         'pin',
         'rejection_reason',
         'verified_at',
+        'foto',
+        'tanggal_lahir',
+        'provinsi',
+        'kecamatan',
+        'wilayah',
     ];
 
     protected $hidden = [

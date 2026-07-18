@@ -71,6 +71,9 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
 | Partner (Mitra) routes  -> /mitra/* (role: partner)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
-    // Route khusus internal Mitra/Vendor di sini jika ada
+Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {    
 });
+
+Route::get('/admin/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('admin.profil.edit');
+Route::put('/admin/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('admin.profil.update');
+
