@@ -3,21 +3,30 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\Admin\DashboardService;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
-    {
-        // TODO: replace with real queries (OrderRepository, PartnerRepository, dsb)
-        $stats = [
-            'totalOrders' => 0,
-            'activeOrders' => 0,
-            'verifiedPartners' => 0,
-            'monthlyRevenue' => 'Rp 0',
-        ];
+    public function __construct(protected DashboardService $dashboardService) {}
 
-        return Inertia::render('Admin/Dashboard', compact('stats'));
+    public function index(Request $request): Response
+    {
+        $filters = $request->validate([
+            'city' => ['nullable', 'string'],
+            'period' => ['nullable', 'in:all,month,quarter,year'],
+        ]);
+
+        $data = $this->dashboardService->getDashboardData($filters);
+
+        return Inertia::render('Admin/Dashboard', [
+            ...$data,
+            'filters' => [
+                'city' => $filters['city'] ?? '',
+                'period' => $filters['period'] ?? 'all',
+            ],
+        ]);
     }
 }

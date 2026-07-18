@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -20,6 +21,8 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
+        'city',
+        'verification_status',
     ];
 
     protected $hidden = [
@@ -48,5 +51,20 @@ class User extends Authenticatable
     public function isPartner(): bool
     {
         return $this->role === 'partner';
+    }
+
+    public function isVerifiedPartner(): bool
+    {
+        return $this->role === 'partner' && $this->verification_status === 'terverifikasi';
+    }
+
+    public function ordersAsCustomer(): HasMany
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
+
+    public function ordersAsPartner(): HasMany
+    {
+        return $this->hasMany(Order::class, 'partner_id');
     }
 }
