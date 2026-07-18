@@ -23,18 +23,26 @@ class User extends Authenticatable
         'phone',
         'city',
         'verification_status',
+        'gender',
+        'address',
+        'pin',
+        'rejection_reason',
+        'verified_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'pin',
     ];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
+            'verified_at' => 'datetime',
             'password' => 'hashed',
+            'pin' => 'hashed',
         ];
     }
 
