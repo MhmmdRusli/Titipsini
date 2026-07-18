@@ -6,7 +6,7 @@ import {
 
 const navItems = [
     { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Pengguna', href: '/admin/users', icon: Users },
+    { label: 'Pengguna', href: '/admin/pengguna', icon: Users },
     { label: 'Mitra', href: '/admin/partners', icon: Handshake },
     { label: 'Pesanan', href: '/admin/orders', icon: Package },
     { label: 'Pembayaran', href: '/admin/payments', icon: Wallet },
