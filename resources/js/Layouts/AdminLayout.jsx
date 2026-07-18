@@ -1,18 +1,18 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
-    LayoutDashboard, Users, Handshake, Package, Wallet,
-    Megaphone, MessageSquareWarning, BarChart3, LogOut,
+    MapPin, LayoutDashboard, CircleUserRound, Users, Handshake,
+    Package, BarChart3, Settings, LogOut,
 } from 'lucide-react';
 
 const navItems = [
+    { label: 'Kota', href: '/admin/kota', icon: MapPin },
     { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Pengguna', href: '/admin/pengguna', icon: Users },
-    { label: 'Mitra', href: '/admin/partners', icon: Handshake },
+    { label: 'Profil', href: '/admin/profil', icon: CircleUserRound },
+    { label: 'Customer', href: '/admin/pengguna', icon: Users },
+    { label: 'Vendor', href: '/admin/partners', icon: Handshake },
     { label: 'Pesanan', href: '/admin/orders', icon: Package },
-    { label: 'Pembayaran', href: '/admin/payments', icon: Wallet },
-    { label: 'Promo & Konten', href: '/admin/promotions', icon: Megaphone },
-    { label: 'Komplain', href: '/admin/complaints', icon: MessageSquareWarning },
     { label: 'Laporan', href: '/admin/reports', icon: BarChart3 },
+    { label: 'Pengaturan', href: '/admin/pengaturan', icon: Settings },
 ];
 
 export default function AdminLayout({ children, title }) {
