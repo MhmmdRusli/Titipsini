@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthe
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController as AdminPasswordResetLinkController;
 use App\Http\Controllers\Admin\Auth\NewPasswordController as AdminNewPasswordController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
+use App\Http\Controllers\Admin\PengaturanController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -77,3 +78,10 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->
 Route::get('/admin/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('admin.profil.edit');
 Route::put('/admin/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('admin.profil.update');
 
+Route::prefix('admin/pengaturan')->name('admin.pengaturan.')->group(function () {
+    Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
+    Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
+
+    Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
+    Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
+});
