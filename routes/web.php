@@ -50,15 +50,44 @@ Route::middleware('auth')->post('/logout', [AuthenticatedSessionController::clas
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // Halaman Pengguna (Manajemen Pelanggan)
+    // Pengguna
     Route::get('/pengguna', [AdminUserController::class, 'index'])->name('pengguna.index');
     Route::get('/pengguna/{user}', [AdminUserController::class, 'show'])->name('pengguna.show');
     Route::patch('/pengguna/{user}/status', [AdminUserController::class, 'updateStatus'])->name('pengguna.updateStatus');
 
-    // Halaman Vendor / Partner (Sudah di dalam grup Admin)
+    // Vendor / Partner
     Route::get('/partners', [AdminPartnerController::class, 'index'])->name('partners.index');
     Route::get('/partners/{partner}', [AdminPartnerController::class, 'show'])->name('partners.show');
     Route::patch('/partners/{partner}/status', [AdminPartnerController::class, 'updateStatus'])->name('partners.updateStatus');
+
+    // Profil
+    Route::get('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profil.edit');
+    Route::put('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profil.update');
+
+    // Pengaturan
+    Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
+        Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
+        Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
+        Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
+        Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
+    });
+
+    // Kota
+    Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
+
+    // Pesanan
+    Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+    // Reports
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('export', [ReportController::class, 'export'])->name('export');
+        Route::get('{report}', [ReportController::class, 'show'])->name('show');
+        Route::put('{report}/suspend', [ReportController::class, 'suspend'])->name('suspend');
+        Route::put('{report}/restore', [ReportController::class, 'restore'])->name('restore');
+        Route::get('{report}/penangguhan', [ReportController::class, 'penangguhan'])->name('penangguhan');
+    });
 });
 
 /*
@@ -76,30 +105,4 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
-});
-
-Route::get('/admin/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('admin.profil.edit');
-Route::put('/admin/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('admin.profil.update');
-
-Route::prefix('admin/pengaturan')->name('admin.pengaturan.')->group(function () {
-    Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
-    Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
-
-    Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
-    Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
-});
-
-Route::resource('admin/kota', KotaController::class)
-    ->except(['show', 'create', 'edit']);
-
-Route::get('admin/orders', [OrderController::class, 'index'])->name('admin.orders.index');
-Route::patch('admin/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
-
-Route::prefix('admin/reports')->name('admin.reports.')->group(function () {
-    Route::get('/', [ReportController::class, 'index'])->name('index');
-    Route::get('export', [ReportController::class, 'export'])->name('export');
-    Route::get('{report}', [ReportController::class, 'show'])->name('show');
-    Route::put('{report}/suspend', [ReportController::class, 'suspend'])->name('suspend');
-    Route::put('{report}/restore', [ReportController::class, 'restore'])->name('restore');
-    Route::get('{report}/penangguhan', [ReportController::class, 'penangguhan'])->name('penangguhan');
 });

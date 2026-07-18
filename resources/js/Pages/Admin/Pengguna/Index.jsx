@@ -53,7 +53,6 @@ export default function Index({ users, filters }) {
         <AdminLayout title="Pengguna">
             <Head title="Pengguna" />
 
-            {/* Tabs filter status */}
             <div className="mt-6 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
                 {TABS.map((tab) => (
                     <button
@@ -70,7 +69,6 @@ export default function Index({ users, filters }) {
                 ))}
             </div>
 
-            {/* Search bar */}
             <form onSubmit={handleSearchSubmit} className="mt-4 flex gap-2">
                 <input
                     type="text"
@@ -87,7 +85,6 @@ export default function Index({ users, filters }) {
                 </button>
             </form>
 
-            {/* Tabel */}
             <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -139,7 +136,6 @@ export default function Index({ users, filters }) {
                 </table>
             </div>
 
-            {/* Pagination */}
             {users.links.length > 3 && (
                 <div className="mt-4 flex flex-wrap gap-1">
                     {users.links.map((link, i) => (
