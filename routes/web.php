@@ -21,7 +21,15 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    if (auth()->check()) {
+        return match (auth()->user()->role) {
+            'admin' => redirect()->route('admin.dashboard'),
+            'partner' => redirect('/mitra/dashboard'),
+            default => redirect()->route('customer.dashboard'),
+        };
+    }
+
+    return Inertia::render('Onboarding');
 })->name('welcome');
 
 Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
