@@ -1,20 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { Package, Bike, MapPin, ShieldCheck } from 'lucide-react';
 
 const SLIDES = [
     {
-        icon: Package,
+        image: '/images/onboarding-1.png',
         title: 'Bingung mau nitip barang dimana?',
         subtitle: 'Nikmati pengalaman menitipkan barang yang lebih nyaman dengan titipsini.com',
     },
     {
-        icon: Bike,
+        image: '/images/onboarding-2.png',
         title: 'Bukan Hanya Penitipan Barang!',
         subtitle: 'Kami juga menawarkan solusi penitipan kendaraan dan bangunan kamu',
     },
     {
-        icon: MapPin,
+        image: '/images/onboarding-3.png',
         title: 'Tersedia di Berbagai Kota di Indonesia',
         subtitle: 'Kamu dapat dengan mudah menemukan layanan terdekat di daerah kamu sendiri',
     },
@@ -25,10 +24,22 @@ export default function Onboarding() {
     const [slide, setSlide] = useState(0);
     const touchStartX = useRef(null);
 
+    // Effect untuk menghilangkan Splash Screen
     useEffect(() => {
         const timer = setTimeout(() => setShowSplash(false), 1800);
         return () => clearTimeout(timer);
     }, []);
+
+    // Effect untuk menjalankan Auto-Play Slide Otomatis
+    useEffect(() => {
+        if (showSplash) return;
+
+        const autoPlay = setInterval(() => {
+            setSlide((prevSlide) => (prevSlide + 1) % SLIDES.length);
+        }, 3000);
+
+        return () => clearInterval(autoPlay);
+    }, [showSplash]);
 
     function handleTouchStart(e) {
         touchStartX.current = e.touches[0].clientX;
@@ -46,90 +57,95 @@ export default function Onboarding() {
         return (
             <div
                 onClick={() => setShowSplash(false)}
-                className="flex min-h-screen flex-col items-center justify-between bg-green-900 px-8 py-16 text-white"
+                className="flex min-h-screen flex-col items-center justify-between bg-[#15803d] px-8 py-16 text-white"
             >
                 <Head title="Titipsini.Com" />
                 <div />
+                
                 <div className="flex flex-col items-center">
-                    <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white">
-                        <ShieldCheck size={44} strokeWidth={1.5} />
-                    </div>
-                    <h1 className="mt-5 text-2xl font-semibold">
-                        Titipsini<span className="text-green-300">•</span>Com
+                    <img 
+                        src="/images/logo-titipsini.png" 
+                        alt="Logo White" 
+                        className="h-24 w-auto object-contain brightness-0 invert" 
+                    />
+                    <h1 className="mt-5 text-2xl font-black tracking-tight text-white">
+                        Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                     </h1>
-                    <p className="mt-2 max-w-[220px] text-center text-xs text-green-200">
+                    <p className="mt-2 max-w-[240px] text-center text-xs text-gray-100/90 font-medium">
                         Tempat Yang Aman Untuk Barang Berharga Anda
                     </p>
                 </div>
-                <p className="text-xs text-green-300">Versi Aplikasi 1.0.0.0</p>
+                
+                <p className="text-[11px] text-gray-200/80 font-medium tracking-wide">Versi Aplikasi 1.0.0.0</p>
             </div>
         );
     }
 
     const current = SLIDES[slide];
-    const Icon = current.icon;
 
     return (
-        <div className="mx-auto flex min-h-screen max-w-md flex-col bg-white">
+        <div className="mx-auto flex min-h-screen max-w-md flex-col bg-white text-gray-900 selection:bg-green-100">
             <Head title="Selamat Datang" />
 
-            <div className="flex items-center justify-center gap-2 px-6 pt-6">
-                <ShieldCheck size={18} className="text-brand-teal-600" />
-                <span className="text-sm font-semibold text-gray-800">
-                    Titipsini<span className="text-brand-teal-600">•</span>Com
+            {/* Header Logo Navigasi Atas - LOGO DIPERBESAR LAGI (h-12 & text-xl) */}
+            <div className="flex items-center justify-center gap-3 px-6 pt-6 mb-2">
+                <img 
+                    src="/images/logo-titipsini.png" 
+                    alt="Logo Icon" 
+                    className="h-12 w-auto object-contain" 
+                />
+                <span className="text-xl font-black tracking-tight text-[#15803d]">
+                    Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                 </span>
             </div>
 
-            <div className="mt-4 flex gap-1.5 px-6">
-                {SLIDES.map((_, i) => (
-                    <span
-                        key={i}
-                        className={`h-1 flex-1 rounded-full transition-colors ${
-                            i <= slide ? 'bg-brand-teal-600' : 'bg-gray-200'
-                        }`}
-                    />
-                ))}
-            </div>
-
+            {/* Konten Utama Gambar Ilustrasi dengan Efek Slide */}
             <div
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
-                className="relative flex flex-1 flex-col items-center justify-center px-8"
+                className="relative flex flex-1 flex-col items-center px-6"
             >
-                {/* Tap left/right thirds to navigate, in addition to swipe */}
-                {slide > 0 && (
-                    <button
-                        aria-label="Sebelumnya"
-                        onClick={() => setSlide((s) => s - 1)}
-                        className="absolute left-0 top-0 h-full w-1/3"
+                {/* Lingkaran / Curve Latar Belakang Gambar Ilustrasi */}
+                <div className="relative flex h-64 w-full items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-green-50/70 to-transparent mt-4">
+                    <img 
+                        src={current.image} 
+                        alt={current.title} 
+                        className="h-52 w-auto object-contain transition-all duration-500 transform ease-in-out"
                     />
-                )}
-                {slide < SLIDES.length - 1 && (
-                    <button
-                        aria-label="Selanjutnya"
-                        onClick={() => setSlide((s) => s + 1)}
-                        className="absolute right-0 top-0 h-full w-1/3"
-                    />
-                )}
-
-                <div className="flex h-52 w-52 items-center justify-center rounded-full bg-brand-teal-50">
-                    <Icon size={72} strokeWidth={1.25} className="text-brand-teal-600" />
                 </div>
 
-                <h2 className="mt-8 text-center text-xl font-semibold text-gray-900">{current.title}</h2>
-                <p className="mt-2 text-center text-sm text-gray-500">{current.subtitle}</p>
+                {/* Indikator Progres Bar / Dots */}
+                <div className="mt-8 flex w-full max-w-[120px] gap-1.5 justify-center">
+                    {SLIDES.map((_, i) => (
+                        <span
+                            key={i}
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                                i === slide ? 'bg-[#15803d] w-6' : 'bg-gray-200 w-2'
+                            }`}
+                        />
+                    ))}
+                </div>
+
+                {/* Judul & Subtitle Judul Konten */}
+                <h2 className="mt-8 text-center text-xl font-bold text-gray-900 leading-snug px-2 min-h-[56px]">
+                    {current.title}
+                </h2>
+                <p className="mt-3 text-center text-xs text-gray-400 font-medium leading-relaxed px-4 min-h-[40px]">
+                    {current.subtitle}
+                </p>
             </div>
 
-            <div className="px-6 pb-10">
+            {/* Bagian Aksi Tombol Bawah (Footer Action Buttons) */}
+            <div className="px-6 pb-10 space-y-3">
                 <Link
                     href="/register"
-                    className="block w-full rounded-xl bg-brand-teal-700 py-3 text-center text-sm font-semibold text-white"
+                    className="block w-full rounded-xl bg-[#15803d] py-3.5 text-center text-sm font-bold text-white shadow-sm hover:bg-[#166534] transition-colors"
                 >
                     Daftar
                 </Link>
                 <Link
                     href="/login"
-                    className="mt-3 block w-full rounded-xl border border-brand-teal-700 py-3 text-center text-sm font-semibold text-brand-teal-700"
+                    className="block w-full rounded-xl border border-gray-300 py-3.5 text-center text-sm font-bold text-[#15803d] hover:bg-gray-50 transition-colors"
                 >
                     Masuk
                 </Link>
