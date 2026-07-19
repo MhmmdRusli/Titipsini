@@ -85,6 +85,10 @@ export default function ResetPassword({ email, token }) {
                                 readOnly
                                 className="mt-1 w-full rounded-lg border-gray-200 bg-gray-100 text-sm text-gray-500"
                             />
+                            {/* errors.email dipakai controller buat pesan token invalid/expired,
+                                bukan cuma error format email - makanya penting ditampilkan di sini.
+                                Sebelumnya tidak ada, jadi kegagalan reset kelihatan "diam-diam". */}
+                            {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
                         </div>
 
                         <div>

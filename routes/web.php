@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
+use App\Http\Controllers\Admin\Auth\PasswordResetLinkController as AdminPasswordResetLinkController;
+use App\Http\Controllers\Admin\Auth\NewPasswordController as AdminNewPasswordController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\KotaController;
@@ -56,6 +58,12 @@ Route::middleware('auth')->post('/logout', [AuthenticatedSessionController::clas
 Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AdminAuthenticatedSessionController::class, 'store']);
+
+    // Lupa password khusus admin (route ini sebelumnya hilang/ke-drop)
+    Route::get('/forgot-password', [AdminPasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [AdminPasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::get('/reset-password/{token}', [AdminNewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [AdminNewPasswordController::class, 'store'])->name('password.store');
 });
 
 /*

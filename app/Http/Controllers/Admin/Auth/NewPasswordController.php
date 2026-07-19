@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -42,8 +41,13 @@ class NewPasswordController extends Controller
         $status = Password::broker()->reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
+                // Catatan: TIDAK pakai Hash::make() di sini karena model User
+                // sudah punya cast 'password' => 'hashed', yang otomatis
+                // meng-hash setiap kali kolom password di-set. Kalau di-hash
+                // manual juga di sini, hasilnya di-hash dua kali dan login
+                // pakai password baru akan selalu gagal.
                 $user->forceFill([
-                    'password' => Hash::make($request->password),
+                    'password' => $request->password,
                     'remember_token' => Str::random(60),
                 ])->save();
 
