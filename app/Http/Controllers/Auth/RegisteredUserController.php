@@ -41,6 +41,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('customer.lengkapi-data.intro');
+        return redirect()->intended('/lengkapi-data');
     }
 }

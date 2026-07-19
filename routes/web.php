@@ -36,21 +36,10 @@ Route::get('/', function () {
     return Inertia::render('Onboarding');
 })->name('welcome');
 
-Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/login', [AdminAuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/login', [AdminAuthenticatedSessionController::class, 'store']);
-
-    Route::get('/forgot-password', [AdminPasswordResetLinkController::class, 'create'])->name('password.request');
-    Route::post('/forgot-password', [AdminPasswordResetLinkController::class, 'store'])->name('password.email');
-
-    Route::get('/reset-password/{token}', [AdminNewPasswordController::class, 'create'])->name('password.reset');
-    Route::post('/reset-password', [AdminNewPasswordController::class, 'store'])->name('password.store');
-});
-
+// Auth routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
-
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store']);
 });
@@ -59,42 +48,28 @@ Route::middleware('auth')->post('/logout', [AuthenticatedSessionController::clas
 
 /*
 |--------------------------------------------------------------------------
-| Admin routes  -> /admin/* (role: admin)
+| Admin routes
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-
-    // Pengguna
     Route::get('/pengguna', [AdminUserController::class, 'index'])->name('pengguna.index');
     Route::get('/pengguna/{user}', [AdminUserController::class, 'show'])->name('pengguna.show');
     Route::patch('/pengguna/{user}/status', [AdminUserController::class, 'updateStatus'])->name('pengguna.updateStatus');
-
-    // Vendor / Partner
     Route::get('/partners', [AdminPartnerController::class, 'index'])->name('partners.index');
     Route::get('/partners/{partner}', [AdminPartnerController::class, 'show'])->name('partners.show');
     Route::patch('/partners/{partner}/status', [AdminPartnerController::class, 'updateStatus'])->name('partners.updateStatus');
-
-    // Profil
     Route::get('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profil.update');
-
-    // Pengaturan
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
         Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
         Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
     });
-
-    // Kota
     Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
-
-    // Pesanan
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
-
-    // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('export', [ReportController::class, 'export'])->name('export');
@@ -107,34 +82,25 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 /*
 |--------------------------------------------------------------------------
-| Customer web app routes  -> /app/* (role: customer)
+| Customer routes
 |--------------------------------------------------------------------------
 */
+// Rute dashboard memerlukan role:customer
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Partner (Mitra) routes  -> /mitra/* (role: partner)
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
-});
-
-Route::middleware(['auth', 'role:customer'])->prefix('lengkapi-data')->name('customer.lengkapi-data.')->group(function () {
+// Rute Lengkapi Data diubah agar user baru (status pendaftar) BISA akses
+Route::middleware(['auth'])->prefix('lengkapi-data')->name('customer.lengkapi-data.')->group(function () {
     Route::get('/', [LengkapiDataController::class, 'intro'])->name('intro');
     Route::get('/form', [LengkapiDataController::class, 'form'])->name('form');
     Route::post('/', [LengkapiDataController::class, 'store'])->name('store');
 });
 
-
-
+// Wilayah & Pin
 Route::get('/api/wilayah/provinces', [WilayahController::class, 'provinces']);
 Route::get('/api/wilayah/regencies/{provinceId}', [WilayahController::class, 'regencies']);
 Route::get('/api/wilayah/districts/{regencyId}', [WilayahController::class, 'districts']);
-
-
 
 Route::middleware(['auth', 'role:customer'])->prefix('buat-pin')->name('customer.pin.')->group(function () {
     Route::get('/', [PinController::class, 'create'])->name('create');
