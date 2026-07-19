@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PasswordHistory;
+use App\Models\PaymentSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,44 +13,100 @@ use Inertia\Inertia;
 
 class PengaturanController extends Controller
 {
+    /**
+     * GET /admin/pengaturan/keamanan
+     */
     public function keamanan()
     {
-        return Inertia::render('Admin/Pengaturan/Keamanan');
+        $admin = Auth::user();
+
+        $changesLast24h = PasswordHistory::where('user_id', $admin->id)
+            ->where('changed_at', '>=', now()->subDay())
+            ->count();
+
+        return Inertia::render('Admin/Pengaturan/Keamanan', [
+            'remainingChanges' => max(0, 2 - $changesLast24h),
+        ]);
     }
 
+    /**
+     * PUT /admin/pengaturan/keamanan
+     */
     public function updateKeamanan(Request $request)
     {
-        $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', 'min:8'],
+        $admin = Auth::user();
+
+        $changesLast24h = PasswordHistory::where('user_id', $admin->id)
+            ->where('changed_at', '>=', now()->subDay())
+            ->count();
+
+        if ($changesLast24h >= 2) {
+            return back()->withErrors([
+                'kata_sandi_lama' => 'Anda hanya dapat mengubah kata sandi maksimal 2 kali dalam 24 jam.',
+            ]);
+        }
+
+        $validated = $request->validate([
+            'kata_sandi_lama' => ['required', 'string'],
+            'kata_sandi_baru' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [], [
+            'kata_sandi_lama' => 'kata sandi lama',
+            'kata_sandi_baru' => 'kata sandi baru',
         ]);
 
-        $request->user()->update([
-            'password' => Hash::make($request->password),
+        if (! Hash::check($validated['kata_sandi_lama'], $admin->password)) {
+            return back()->withErrors([
+                'kata_sandi_lama' => 'Kata sandi lama tidak sesuai.',
+            ]);
+        }
+
+        $admin->update([
+            'password' => Hash::make($validated['kata_sandi_baru']),
         ]);
 
-        return back();
+        PasswordHistory::create([
+            'user_id'    => $admin->id,
+            'changed_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('admin.pengaturan.keamanan')
+            ->with('success', 'Kata sandi berhasil diperbarui.');
     }
 
+    /**
+     * GET /admin/pengaturan/qris
+     */
     public function qris()
     {
-        $user = Auth::user();
+        $setting = PaymentSetting::current();
 
         return Inertia::render('Admin/Pengaturan/Qris', [
-            'qris_url' => $user->qris_path ? Storage::url($user->qris_path) : null,
+            'qris_url' => $setting->qris_image ? Storage::url($setting->qris_image) : null,
         ]);
     }
 
+    /**
+     * POST /admin/pengaturan/qris
+     */
     public function updateQris(Request $request)
     {
         $request->validate([
-            'qris_image' => ['required', 'image', 'max:2048'],
+            'qris_image' => ['required', 'image', 'max:4096'],
         ]);
 
-        $path = $request->file('qris_image')->store('qris', 'public');
+        $setting = PaymentSetting::current();
 
-        $request->user()->update(['qris_path' => $path]);
+        if ($setting->qris_image) {
+            Storage::delete($setting->qris_image);
+        }
 
-        return back();
+        $setting->update([
+            'qris_image' => $request->file('qris_image')->store('qris', 'public'),
+        ]);
+
+        return redirect()
+            ->route('admin.pengaturan.qris')
+            ->with('success', 'QRIS berhasil diperbarui.');
     }
 }

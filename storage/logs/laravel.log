@@ -885,3 +885,27 @@
 #40 C:/Users/Siti Mintarsih/Documents/GitHub/Titipsini/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
 #41 {main}
 "} 
+[2026-07-19 03:28:43] local.DEBUG: From: Titipsini <noreply@titipsini.test>
+To: rusli@gmail.com
+Subject: Kode Verifikasi Reset Password - Titipsini
+MIME-Version: 1.0
+Date: Sun, 19 Jul 2026 03:28:43 +0000
+Message-ID: <e7db68ccd9512f9f0a128489f2eddfc6@titipsini.test>
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial, sans-serif; background: #f3f4f6; padding: 24px;">
+    <div style="max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 32px; text-align: center;">
+        <h2 style="color: #0f766e; margin-bottom: 8px;">Titipsini</h2>
+        <p style="color: #374151;">Gunakan kode berikut untuk mereset kata sandi akun kamu:</p>
+        <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #111827; margin: 24px 0;">
+            657627
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">
+            Kode ini berlaku selama 10 menit. Jangan bagikan kode ini ke siapa pun.
+        </p>
+    </div>
+</body>
+</html>  
