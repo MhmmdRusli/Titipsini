@@ -105,17 +105,17 @@ export default function Onboarding() {
                 onTouchEnd={handleTouchEnd}
                 className="relative flex flex-1 flex-col items-center px-6"
             >
-                {/* Lingkaran / Curve Latar Belakang Gambar Ilustrasi */}
-                <div className="relative flex h-64 w-full items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-green-50/70 to-transparent mt-4">
+                {/* Lingkaran / Curve Latar Belakang Gambar Ilustrasi - diperbesar dari h-64 ke h-80 */}
+                <div className="relative flex h-80 w-full items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-green-50/70 to-transparent mt-2">
                     <img 
                         src={current.image} 
                         alt={current.title} 
-                        className="h-52 w-auto object-contain transition-all duration-500 transform ease-in-out"
+                        className="h-72 w-auto object-contain transition-all duration-500 transform ease-in-out"
                     />
                 </div>
 
                 {/* Indikator Progres Bar / Dots */}
-                <div className="mt-8 flex w-full max-w-[120px] gap-1.5 justify-center">
+                <div className="mt-6 flex w-full max-w-[120px] gap-1.5 justify-center">
                     {SLIDES.map((_, i) => (
                         <span
                             key={i}
@@ -127,7 +127,7 @@ export default function Onboarding() {
                 </div>
 
                 {/* Judul & Subtitle Judul Konten */}
-                <h2 className="mt-8 text-center text-xl font-bold text-gray-900 leading-snug px-2 min-h-[56px]">
+                <h2 className="mt-6 text-center text-xl font-bold text-gray-900 leading-snug px-2 min-h-[56px]">
                     {current.title}
                 </h2>
                 <p className="mt-3 text-center text-xs text-gray-400 font-medium leading-relaxed px-4 min-h-[40px]">
