@@ -15,32 +15,33 @@ export default function Login() {
     };
 
     return (
-        // Backdrop abu-abu di layar lebar (desktop) supaya "bingkai HP" di
-        // dalamnya terlihat jelas. Di layar HP asli (lebar < 430px), backdrop
-        // ini gak kelihatan sama sekali karena kontennya sudah full-width.
+        // Backdrop abu-abu di layar lebar (desktop)
         <div className="min-h-dvh bg-gray-100 sm:flex sm:items-center sm:justify-center sm:py-6">
-            {/* Ini "bodi" aplikasi mobile-nya. min-h-dvh dipakai (bukan
-                min-h-screen) supaya tingginya akurat walau address bar
-                browser HP muncul/hilang. max-w-[430px] membatasi lebar
-                seperti layar HP asli waktu dibuka di desktop. */}
+            
+            {/* Bodi Aplikasi Mobile */}
             <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-white sm:min-h-[850px] sm:shadow-xl">
                 <Head title="Masuk" />
 
-                {/* Header, dikasih padding atas buat notch/status bar HP */}
+                {/* Header dengan Link Kembali ke Onboarding */}
                 <div
                     className="flex items-center justify-between border-b border-gray-100 px-4 pb-4"
                     style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
                 >
-                    <button type="button" className="text-gray-800 hover:opacity-70">
+                    {/* Mengubah button menjadi Link Inertia */}
+                    <Link 
+                        href="/" // Sesuaikan dengan route halaman onboarding Anda (misal '/' atau '/onboarding')
+                        className="text-gray-800 hover:opacity-70 flex items-center justify-center p-1 rounded-lg active:bg-gray-50"
+                    >
                         <ChevronLeft size={22} strokeWidth={2.5} />
-                    </button>
+                    </Link>
                     <h2 className="text-base font-bold text-gray-900">Masuk</h2>
                     <div className="w-6"></div> {/* Spacer penyeimbang */}
                 </div>
 
-                {/* Konten utama, scrollable kalau kontennya lebih tinggi dari layar */}
+                {/* Konten Utama */}
                 <div className="flex-1 overflow-y-auto px-6 pt-10 pb-8">
-                    {/* Logo Image dan Teks Berdampingan (Titipsini & Com Full Hijau, Titik Kuning) */}
+                    
+                    {/* Logo Image dan Teks Berdampingan */}
                     <div className="mb-10 flex flex-col items-center justify-center text-center">
                         <div className="flex items-center justify-center gap-3">
                             <img
