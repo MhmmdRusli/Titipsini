@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController as AdminPasswordResetLinkController;
@@ -12,6 +13,9 @@ use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Customer\LengkapiDataController;
+use App\Http\Controllers\WilayahController;
+use App\Http\Controllers\Customer\PinController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -46,6 +50,9 @@ Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/register', [RegisteredUserController::class, 'store']);
 });
 
 Route::middleware('auth')->post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
@@ -113,4 +120,23 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
+});
+
+Route::middleware(['auth', 'role:customer'])->prefix('lengkapi-data')->name('customer.lengkapi-data.')->group(function () {
+    Route::get('/', [LengkapiDataController::class, 'intro'])->name('intro');
+    Route::get('/form', [LengkapiDataController::class, 'form'])->name('form');
+    Route::post('/', [LengkapiDataController::class, 'store'])->name('store');
+});
+
+
+
+Route::get('/api/wilayah/provinces', [WilayahController::class, 'provinces']);
+Route::get('/api/wilayah/regencies/{provinceId}', [WilayahController::class, 'regencies']);
+Route::get('/api/wilayah/districts/{regencyId}', [WilayahController::class, 'districts']);
+
+
+
+Route::middleware(['auth', 'role:customer'])->prefix('buat-pin')->name('customer.pin.')->group(function () {
+    Route::get('/', [PinController::class, 'create'])->name('create');
+    Route::post('/', [PinController::class, 'store'])->name('store');
 });

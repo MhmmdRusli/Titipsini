@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Package, Bell, User, LayoutGrid } from 'lucide-react';
+import { Package, Bell, User, LayoutGrid, LogOut, ChevronDown } from 'lucide-react';
 
 const navItems = [
     { label: 'Beranda', href: '/app/dashboard', icon: LayoutGrid },
@@ -11,6 +12,7 @@ const navItems = [
 export default function CustomerLayout({ children, title }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
+    const [menuOpen, setMenuOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -38,11 +40,43 @@ export default function CustomerLayout({ children, title }) {
                             );
                         })}
                     </nav>
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <span className="hidden sm:inline">{user?.name ?? 'Pelanggan'}</span>
-                        <div className="h-8 w-8 rounded-full bg-brand-amber-50 text-brand-amber-700 flex items-center justify-center text-xs font-semibold">
-                            {(user?.name ?? 'P').charAt(0).toUpperCase()}
-                        </div>
+
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={() => setMenuOpen((v) => !v)}
+                            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+                        >
+                            <span className="hidden sm:inline">{user?.name ?? 'Pelanggan'}</span>
+                            <div className="h-8 w-8 rounded-full bg-brand-amber-50 text-brand-amber-700 flex items-center justify-center text-xs font-semibold">
+                                {(user?.name ?? 'P').charAt(0).toUpperCase()}
+                            </div>
+                            <ChevronDown size={14} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {menuOpen && (
+                            <>
+                                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                                <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+                                    <Link
+                                        href="/app/profile"
+                                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                    >
+                                        <User size={15} />
+                                        Profil Saya
+                                    </Link>
+                                    <Link
+                                        href="/logout"
+                                        method="post"
+                                        as="button"
+                                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                    >
+                                        <LogOut size={15} />
+                                        Keluar
+                                    </Link>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </header>
