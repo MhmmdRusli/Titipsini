@@ -29,6 +29,17 @@ class AuthenticatedSessionController extends Controller
             ])->onlyInput('email');
         }
 
+        // Admin tidak boleh login lewat halaman ini, hanya lewat /admin/login
+        if ($request->user()->role === 'admin') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'Akun admin harus login melalui halaman khusus admin.',
+            ])->onlyInput('email');
+        }
+
         $request->session()->regenerate();
 
         return $this->redirectByRole($request);
@@ -46,7 +57,6 @@ class AuthenticatedSessionController extends Controller
     protected function redirectByRole(Request $request): RedirectResponse
     {
         return match ($request->user()->role) {
-            'admin' => redirect()->intended('/admin/dashboard'),
             'partner' => redirect()->intended('/mitra/dashboard'),
             default => redirect()->intended('/app/dashboard'),
         };
