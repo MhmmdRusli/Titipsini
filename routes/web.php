@@ -33,6 +33,9 @@ use App\Http\Controllers\Mitra\AlamatController;
 use App\Http\Controllers\Mitra\JamOperasionalController;
 use App\Http\Controllers\Mitra\RekeningController;
 use App\Http\Controllers\Mitra\PenarikanController;
+use App\Http\Controllers\Mitra\KeamananController;
+use App\Http\Controllers\Mitra\KebijakanPrivasiController;
+use App\Http\Controllers\Mitra\BantuanController as MitraBantuanController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -181,6 +184,9 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->
     Route::post('/profil/saya', [\App\Http\Controllers\Mitra\ProfileController::class, 'update'])->name('profil.update');
 });
 
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Customer routes  -> /app/* (role: customer)
@@ -296,4 +302,13 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->
     Route::get('/pendapatan/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
     Route::post('/pendapatan/penarikan', [PenarikanController::class, 'store'])->name('penarikan.store');
     Route::get('/pendapatan/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
+});
+
+Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
+    Route::get('/keamanan', [KeamananController::class, 'edit'])->name('keamanan.edit');
+    Route::put('/keamanan', [KeamananController::class, 'update'])->name('keamanan.update');
+
+    Route::get('/kebijakan-privasi', [KebijakanPrivasiController::class, 'index'])->name('kebijakan-privasi.index');
+
+    Route::get('/bantuan', [MitraBantuanController::class, 'index'])->name('bantuan.index');
 });
