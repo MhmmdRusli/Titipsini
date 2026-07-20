@@ -71,13 +71,22 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Order::class, 'customer_id');
     }
 
+    public function notifikasi(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\Notifikasi::class);
+    }
+
     public function ordersAsPartner(): HasMany
     {
         return $this->hasMany(Order::class, 'partner_id');
     }
 
+<<<<<<< HEAD
     public function services(): HasMany
     {
         return $this->hasMany(Service::class);
     }
+=======
+    
+>>>>>>> ef50b43f4f829777c3d15ddfca8e992aa2b87152
 }

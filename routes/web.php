@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthe
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController as AdminPasswordResetLinkController;
 use App\Http\Controllers\Admin\Auth\NewPasswordController as AdminNewPasswordController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
+use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
+use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
 use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\OrderController;
@@ -19,6 +21,12 @@ use App\Http\Controllers\Customer\PinController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Customer\ServiceController;
 use App\Http\Controllers\Mitra\OnboardingController as MitraOnboardingController;
+use App\Http\Controllers\Customer\BeritaController;
+use App\Http\Controllers\Customer\NotifikasiController;
+use App\Http\Controllers\Customer\NotificationSettingController;
+use App\Http\Controllers\Customer\TentangController;
+use App\Http\Controllers\Customer\BantuanController;
+use App\Http\Controllers\Customer\SecurityController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -178,4 +186,71 @@ Route::get('/api/wilayah/districts/{regencyId}', [WilayahController::class, 'dis
 Route::middleware(['auth', 'role:customer'])->prefix('buat-pin')->name('customer.pin.')->group(function () {
     Route::get('/', [PinController::class, 'create'])->name('create');
     Route::post('/', [PinController::class, 'store'])->name('store');
+});
+
+
+
+Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
+    Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
+});
+
+
+Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
+    Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
+    Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
+});
+
+Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
+    // ...route yang sudah ada
+    Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+});
+
+
+Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
+    // ...route yang sudah ada
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::patch('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
+});
+
+
+Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
+    // ...route yang sudah ada
+    Route::get('/profile', [CustomerProfileController::class, 'index'])->name('profile.index');
+});
+
+
+
+Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
+    // ...route yang sudah ada
+    Route::get('/profile/notifikasi', [NotificationSettingController::class, 'edit'])->name('profile.notifikasi.edit');
+    Route::patch('/profile/notifikasi', [NotificationSettingController::class, 'update'])->name('profile.notifikasi.update');
+});
+
+
+
+
+Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
+    // ...route yang sudah ada
+    Route::get('/profile/bantuan', [BantuanController::class, 'index'])->name('profile.bantuan');
+});
+
+
+
+Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
+    // ...route yang sudah ada
+    Route::get('/profile/tentang', [TentangController::class, 'index'])->name('profile.tentang');
+    Route::get('/profile/tentang/syarat-ketentuan', [TentangController::class, 'syaratKetentuan'])->name('profile.tentang.syarat');
+    Route::get('/profile/tentang/kebijakan-privasi', [TentangController::class, 'kebijakanPrivasi'])->name('profile.tentang.privasi');
+});
+
+
+Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
+    // ...route yang sudah ada
+    Route::get('/profile/keamanan', [SecurityController::class, 'edit'])->name('profile.keamanan');
+    Route::put('/profile/keamanan/password', [SecurityController::class, 'updatePassword'])->name('profile.keamanan.password');
+    Route::put('/profile/keamanan/pin', [SecurityController::class, 'updatePin'])->name('profile.keamanan.pin');
 });
