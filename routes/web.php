@@ -29,6 +29,10 @@ use App\Http\Controllers\Customer\BantuanController;
 use App\Http\Controllers\Customer\SecurityController;
 use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
 use App\Http\Controllers\Mitra\OrderController as MitraOrderController;
+use App\Http\Controllers\Mitra\AlamatController;
+use App\Http\Controllers\Mitra\JamOperasionalController;
+use App\Http\Controllers\Mitra\RekeningController;
+use App\Http\Controllers\Mitra\PenarikanController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -276,4 +280,20 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->
     Route::get('/dashboard', [MitraDashboardController::class, 'index'])->name('dashboard');
     Route::get('/pesanan', [MitraOrderController::class, 'index'])->name('orders.index');
     Route::get('/pesanan/{order}', [MitraOrderController::class, 'show'])->name('orders.show');
+});
+Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
+    Route::get('/alamat', [AlamatController::class, 'edit'])->name('alamat.edit');
+    Route::put('/alamat', [AlamatController::class, 'update'])->name('alamat.update');
+
+    Route::get('/layanan/jam-operasional', [JamOperasionalController::class, 'edit'])->name('jam-operasional.edit');
+    Route::put('/layanan/jam-operasional', [JamOperasionalController::class, 'update'])->name('jam-operasional.update');
+});
+Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
+    Route::get('/rekening', [RekeningController::class, 'edit'])->name('rekening.edit');
+    Route::put('/rekening', [RekeningController::class, 'update'])->name('rekening.update');
+
+    Route::get('/pendapatan/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');
+    Route::get('/pendapatan/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
+    Route::post('/pendapatan/penarikan', [PenarikanController::class, 'store'])->name('penarikan.store');
+    Route::get('/pendapatan/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
 });

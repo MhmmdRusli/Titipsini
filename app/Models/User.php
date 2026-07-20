@@ -16,19 +16,29 @@ class User extends Authenticatable implements MustVerifyEmail
      * role: admin | customer | partner
      */
     protected $fillable = [
-    'name',
-    'email',
-    'password',
-    'pin',
-    'avatar',
-    'cover_photo',
-    'gender',
-    'birth_date',
-    'address',
-    'role',
-    'phone',
-    'city',
-    'verification_status',
+        'name',
+        'username',
+        'email',
+        'password',
+        'pin',
+        'avatar',
+        'cover_photo',
+        'gender',
+        'birth_date',
+        'address',
+        'role',
+        'phone',
+        'city',
+        'provinsi',
+        'kecamatan',
+        'wilayah',
+        'postal_code',
+        'toko_buka',
+        'jam_buka',
+        'jam_tutup',
+        'layanan_kategori',
+        'verification_status',
+        'rejection_reason',
     ];
 
     protected $hidden = [
@@ -42,8 +52,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'verified_at' => 'datetime',
+            'birth_date' => 'date',
             'password' => 'hashed',
             'pin' => 'hashed',
+            'toko_buka' => 'boolean',
+            'layanan_kategori' => 'array',
         ];
     }
 
@@ -87,10 +100,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Order::class, 'partner_id');
     }
 
-
     public function services(): HasMany
     {
         return $this->hasMany(Service::class);
     }
-
 }

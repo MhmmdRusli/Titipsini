@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Package, Bell, User, LogOut, ChevronDown } from 'lucide-react';
+import { LayoutGrid, Package, Bell, User, LogOut, ChevronDown, CheckCircle2, XCircle, X } from 'lucide-react';
 
 const navItems = [
     { label: 'Beranda', href: '/mitra/dashboard', icon: LayoutGrid },
@@ -9,10 +9,46 @@ const navItems = [
     { label: 'Profil', href: '/mitra/profil', icon: User },
 ];
 
+function Toast({ type, message, onClose }) {
+    useEffect(() => {
+        const timer = setTimeout(onClose, 3500);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    const isSuccess = type === 'success';
+
+    return (
+        <div
+            className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 shadow-lg ${
+                isSuccess ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+            }`}
+        >
+            {isSuccess ? (
+                <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-green-600" />
+            ) : (
+                <XCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
+            )}
+            <p className={`flex-1 text-sm ${isSuccess ? 'text-green-800' : 'text-red-700'}`}>{message}</p>
+            <button onClick={onClose} className={isSuccess ? 'text-green-500' : 'text-red-400'}>
+                <X size={15} />
+            </button>
+        </div>
+    );
+}
+
 export default function MitraLayout({ children, title }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
     const [menuOpen, setMenuOpen] = useState(false);
+    const [toast, setToast] = useState(null);
+
+    useEffect(() => {
+        if (props.flash?.success) {
+            setToast({ type: 'success', message: props.flash.success });
+        } else if (props.flash?.error) {
+            setToast({ type: 'error', message: props.flash.error });
+        }
+    }, [props.flash?.success, props.flash?.error]);
 
     return (
         <div className="min-h-dvh bg-gray-200 sm:flex sm:items-center sm:justify-center sm:py-6">
@@ -23,7 +59,7 @@ export default function MitraLayout({ children, title }) {
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
                     >
                         <Link href="/mitra/dashboard" className="flex items-center gap-2">
-                            <span className="font-mono text-xs tracking-widest text-green-600">TITIPSINI &middot; MITRA</span>
+                            <span className="font-mono text-xs tracking-widest text-green-600">TITIPSINI &middot;MITRA</span>
                         </Link>
 
                         <div className="relative">
@@ -64,6 +100,12 @@ export default function MitraLayout({ children, title }) {
                         </div>
                     </div>
                 </header>
+
+                {toast && (
+                    <div className="absolute inset-x-0 top-3 z-30 px-4">
+                        <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />
+                    </div>
+                )}
 
                 <main className="flex-1 overflow-y-auto pb-20">
                     {title && (

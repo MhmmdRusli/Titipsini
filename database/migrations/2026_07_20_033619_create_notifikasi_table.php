@@ -1,4 +1,4 @@
-<?php
+php artisan make:migration create_rekening_bank_table<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
