@@ -14,12 +14,18 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // TODO: saat modul Lupa Sandi Customer/Mitra dibuat, tambahkan percabangan
-        // berdasarkan $notifiable->role di sini (saat ini baru role admin).
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
-            return url(route('admin.password.reset', [
+            $email = $notifiable->getEmailForPasswordReset();
+
+            $routeName = match ($notifiable->role ?? null) {
+                'admin' => 'admin.password.reset',
+                'partner' => 'mitra.password.reset',
+                default => 'password.reset.form', // customer (flow OTP terpisah, ini cuma fallback)
+            };
+
+            return url(route($routeName, [
                 'token' => $token,
-                'email' => $notifiable->getEmailForPasswordReset(),
+                'email' => $email,
             ], false));
         });
     }

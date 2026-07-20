@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -28,11 +28,6 @@ class User extends Authenticatable
         'pin',
         'rejection_reason',
         'verified_at',
-        'foto',
-        'tanggal_lahir',
-        'provinsi',
-        'kecamatan',
-        'wilayah',
     ];
 
     protected $hidden = [
@@ -79,5 +74,10 @@ class User extends Authenticatable
     public function ordersAsPartner(): HasMany
     {
         return $this->hasMany(Order::class, 'partner_id');
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
     }
 }

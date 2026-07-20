@@ -18,6 +18,7 @@ use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\Customer\PinController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Customer\ServiceController;
+use App\Http\Controllers\Mitra\OnboardingController as MitraOnboardingController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -60,12 +61,45 @@ Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AdminAuthenticatedSessionController::class, 'store']);
 
-    // Lupa password khusus admin (route ini sebelumnya hilang/ke-drop)
+    // Lupa password khusus admin
     Route::get('/forgot-password', [AdminPasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('/forgot-password', [AdminPasswordResetLinkController::class, 'store'])->name('password.email');
     Route::get('/reset-password/{token}', [AdminNewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password', [AdminNewPasswordController::class, 'store'])->name('password.store');
 });
+
+// Onboarding & auth publik khusus mitra -> /mitra/*
+Route::middleware('guest')->prefix('mitra')->name('mitra.')->group(function () {
+    Route::get('/', [MitraOnboardingController::class, 'index'])->name('onboarding');
+
+    Route::get('/daftar', [\App\Http\Controllers\Mitra\Auth\RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/daftar', [\App\Http\Controllers\Mitra\Auth\RegisteredUserController::class, 'store'])->name('register.store');
+
+    Route::get('/masuk', [\App\Http\Controllers\Mitra\Auth\AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/masuk', [\App\Http\Controllers\Mitra\Auth\AuthenticatedSessionController::class, 'store'])->name('login.store');
+
+    Route::get('/lupa-password', [\App\Http\Controllers\Mitra\Auth\PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/lupa-password', [\App\Http\Controllers\Mitra\Auth\PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::get('/reset-password/{token}', [\App\Http\Controllers\Mitra\Auth\NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [\App\Http\Controllers\Mitra\Auth\NewPasswordController::class, 'store'])->name('password.update');
+});
+
+// Verifikasi email mitra (butuh login, tapi belum tentu role:partner ke-assign penuh / belum ke-approve admin)
+Route::middleware(['auth'])->prefix('mitra')->name('mitra.')->group(function () {
+    Route::get('/verifikasi-email', [\App\Http\Controllers\Mitra\Auth\EmailVerificationPromptController::class, '__invoke'])
+        ->name('verify-email.notice');
+
+    Route::post('/verifikasi-email/kirim-ulang', [\App\Http\Controllers\Mitra\Auth\EmailVerificationNotificationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verify-email.send');
+
+    Route::get('/registrasi-sukses', [\App\Http\Controllers\Mitra\Auth\VerifyEmailController::class, 'success'])
+        ->name('register.success');
+});
+
+Route::get('/mitra/verifikasi-email/{id}/{hash}', [\App\Http\Controllers\Mitra\Auth\VerifyEmailController::class, 'verify'])
+    ->middleware(['auth', 'signed'])
+    ->name('verification.verify');
 
 /*
 |--------------------------------------------------------------------------
@@ -106,6 +140,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::put('{report}/restore', [ReportController::class, 'restore'])->name('restore');
         Route::get('{report}/penangguhan', [ReportController::class, 'penangguhan'])->name('penangguhan');
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Partner (Mitra) routes  -> /mitra/* (role: partner)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Mitra\DashboardController::class, 'index'])->name('dashboard');
 });
 
 /*
