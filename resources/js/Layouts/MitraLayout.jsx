@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Package, Store, User, LogOut, ChevronDown } from 'lucide-react';
+import { LayoutGrid, Package, Bell, User, LogOut, ChevronDown } from 'lucide-react';
 
 const navItems = [
     { label: 'Beranda', href: '/mitra/dashboard', icon: LayoutGrid },
     { label: 'Pesanan', href: '/mitra/pesanan', icon: Package },
-    { label: 'Layanan', href: '/mitra/layanan', icon: Store },
+    { label: 'Notifikasi', href: '/mitra/notifikasi', icon: Bell },
     { label: 'Profil', href: '/mitra/profil', icon: User },
 ];
 

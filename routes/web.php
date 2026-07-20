@@ -157,6 +157,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 */
 Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Mitra\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/notifikasi', [\App\Http\Controllers\Mitra\NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::patch('/notifikasi/{notifikasi}/read', [\App\Http\Controllers\Mitra\NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
+    Route::patch('/notifikasi/tandai-semua', [\App\Http\Controllers\Mitra\NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.readAll');
 });
 
 /*
