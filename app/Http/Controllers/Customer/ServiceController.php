@@ -20,19 +20,20 @@ class ServiceController extends Controller
         $search = $request->string('search')->toString();
 
         $services = Service::query()
-            ->where('is_active', true)
-            ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
-            ->when($jenis, fn ($query) => $query->where('jenis_kendaraan', $jenis))
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('kota', 'like', "%{$search}%")
-                        ->orWhere('kecamatan', 'like', "%{$search}%");
-                });
-            })
-            ->with('vendor:id,name')
-            ->orderBy('kota')
-            ->paginate(10)
-            ->withQueryString();
+    ->where('is_active', true)
+    ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
+    ->when($jenis && $kategori === 'kendaraan', fn ($query) => $query->where('jenis_kendaraan', $jenis))
+    ->when($jenis && $kategori === 'bangunan', fn ($query) => $query->where('jenis_bangunan', $jenis))
+    ->when($search, function ($query) use ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('kota', 'like', "%{$search}%")
+                ->orWhere('kecamatan', 'like', "%{$search}%");
+        });
+    })
+    ->with('vendor:id,name')
+    ->orderBy('kota')
+    ->paginate(10)
+    ->withQueryString();
 
         return Inertia::render('Customer/Services/Index', [
             'services' => $services,

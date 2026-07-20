@@ -8,16 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Service extends Model
 {
     protected $fillable = [
-        'user_id',
-        'kategori',
-        'jenis_kendaraan',
-        'nama',
-        'foto',
-        'kota',
-        'kecamatan',
-        'harga',
-        'is_active',
-    ];
+    'user_id',
+    'kategori',
+    'jenis_kendaraan',
+    'jenis_bangunan',
+    'nama',
+    'foto',
+    'kota',
+    'kecamatan',
+    'harga',
+    'is_active',
+];
 
     protected function casts(): array
     {

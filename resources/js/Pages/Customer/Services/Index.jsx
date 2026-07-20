@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { Search, MapPin, X, Car } from 'lucide-react';
+import { Search, MapPin, X, Car, Building2 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const VEHICLE_TYPES = [
@@ -13,6 +13,34 @@ const VEHICLE_TYPES = [
     { value: 'mobil_pick_up', label: 'Mobil pick up' },
 ];
 
+const BUILDING_TYPES = [
+    { value: 'rumah', label: 'Rumah' },
+    { value: 'apartemen', label: 'Apartemen' },
+    { value: 'kosan', label: 'Kosan' },
+    { value: 'gudang', label: 'Gudang' },
+    { value: 'kamar', label: 'Kamar' },
+];
+
+// Kategori yang butuh popup pilih jenis sebelum menampilkan daftar layanan.
+// Tambahkan kategori baru di sini kalau nanti ada jenis serupa.
+const TYPE_OPTIONS_BY_KATEGORI = {
+    kendaraan: VEHICLE_TYPES,
+    bangunan: BUILDING_TYPES,
+};
+
+const MODAL_LABEL_BY_KATEGORI = {
+    kendaraan: {
+        title: 'Pilih Kendaraan',
+        description: 'Pilih jenis kendaraan yang sesuai dengan kebutuhan Anda untuk melanjutkan transaksi.',
+        icon: Car,
+    },
+    bangunan: {
+        title: 'Pilih Bangunan',
+        description: 'Pilih jenis bangunan yang sesuai dengan kebutuhan Anda untuk melanjutkan transaksi.',
+        icon: Building2,
+    },
+};
+
 const KATEGORI_LABEL = {
     barang: 'Barang',
     bangunan: 'Bangunan',
@@ -22,20 +50,22 @@ const KATEGORI_LABEL = {
 
 export default function ServicesIndex({ services, filters }) {
     const kategori = filters?.kategori ?? '';
-    const isKendaraan = kategori === 'kendaraan';
+    const typeOptions = TYPE_OPTIONS_BY_KATEGORI[kategori] ?? null;
+    const needsTypeSelection = !!typeOptions;
+    const modalLabel = MODAL_LABEL_BY_KATEGORI[kategori];
 
-    // Modal pilih jenis kendaraan hanya tampil kalau kategorinya "kendaraan"
+    // Modal pilih jenis hanya tampil kalau kategorinya butuh pemilihan jenis
     // DAN belum ada jenis yang dipilih di URL (filters.jenis kosong).
-    const [modalOpen, setModalOpen] = useState(isKendaraan && !filters?.jenis);
+    const [modalOpen, setModalOpen] = useState(needsTypeSelection && !filters?.jenis);
     const [selectedType, setSelectedType] = useState(filters?.jenis ?? '');
     const [search, setSearch] = useState(filters?.search ?? '');
 
-    function confirmVehicleType() {
+    function confirmType() {
         if (!selectedType) return;
         setModalOpen(false);
         router.get(
             '/app/services',
-            { kategori: 'kendaraan', jenis: selectedType, search },
+            { kategori, jenis: selectedType, search },
             { preserveState: true, replace: true }
         );
     }
@@ -50,12 +80,13 @@ export default function ServicesIndex({ services, filters }) {
     }
 
     const pageTitle = KATEGORI_LABEL[kategori] ?? 'Layanan';
+    const ModalIcon = modalLabel?.icon ?? Car;
 
     return (
         <CustomerLayout title={pageTitle} backHref="/app/dashboard">
             <Head title={pageTitle} />
 
-            {/* Konten daftar layanan - diberi blur waktu modal jenis kendaraan masih terbuka */}
+            {/* Konten daftar layanan - diberi blur waktu modal jenis masih terbuka */}
             <div className={`px-4 py-3 ${modalOpen ? 'pointer-events-none blur-sm' : ''}`}>
                 <form onSubmit={handleSearchSubmit} className="relative">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -68,14 +99,14 @@ export default function ServicesIndex({ services, filters }) {
                     />
                 </form>
 
-                {isKendaraan && selectedType && (
+                {needsTypeSelection && selectedType && (
                     <button
                         type="button"
                         onClick={() => setModalOpen(true)}
                         className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-teal-600 px-3 py-1.5 text-xs font-semibold text-white"
                     >
-                        <Car size={13} />
-                        {VEHICLE_TYPES.find((v) => v.value === selectedType)?.label}
+                        <ModalIcon size={13} />
+                        {typeOptions.find((t) => t.value === selectedType)?.label}
                     </button>
                 )}
 
@@ -96,7 +127,7 @@ export default function ServicesIndex({ services, filters }) {
                                     <img src={service.foto} alt={service.nama} className="h-full w-full object-cover" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center text-gray-300">
-                                        <Car size={28} />
+                                        <ModalIcon size={28} />
                                     </div>
                                 )}
                             </div>
@@ -107,7 +138,7 @@ export default function ServicesIndex({ services, filters }) {
                                     Kecamatan {service.kecamatan}
                                 </p>
                                 <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-brand-teal-50 px-2 py-0.5 text-[10px] font-medium text-brand-teal-700">
-                                    <Car size={10} />
+                                    <ModalIcon size={10} />
                                     {KATEGORI_LABEL[service.kategori]}
                                 </span>
                             </div>
@@ -116,17 +147,14 @@ export default function ServicesIndex({ services, filters }) {
                 </div>
             </div>
 
-            {/* Modal Pilih Kendaraan */}
-            {modalOpen && (
+            {/* Modal Pilih Jenis (kendaraan / bangunan / kategori lain yang butuh jenis) */}
+            {modalOpen && needsTypeSelection && (
                 <div className="absolute inset-0 z-20 flex items-end bg-black/40">
                     <div className="w-full rounded-t-2xl bg-white p-5 pb-8">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <h2 className="text-base font-bold text-gray-900">Pilih Kendaraan</h2>
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Pilih jenis kendaraan yang sesuai dengan kebutuhan Anda untuk melanjutkan
-                                    transaksi.
-                                </p>
+                                <h2 className="text-base font-bold text-gray-900">{modalLabel.title}</h2>
+                                <p className="mt-1 text-xs text-gray-500">{modalLabel.description}</p>
                             </div>
                             <Link href="/app/dashboard" className="text-gray-400 hover:text-gray-600">
                                 <X size={18} />
@@ -134,7 +162,7 @@ export default function ServicesIndex({ services, filters }) {
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                            {VEHICLE_TYPES.map((type) => (
+                            {typeOptions.map((type) => (
                                 <button
                                     key={type.value}
                                     type="button"
@@ -153,7 +181,7 @@ export default function ServicesIndex({ services, filters }) {
                         <button
                             type="button"
                             disabled={!selectedType}
-                            onClick={confirmVehicleType}
+                            onClick={confirmType}
                             className="mt-6 w-full rounded-xl bg-brand-teal-600 py-3 text-sm font-bold text-white disabled:opacity-40"
                         >
                             OK
