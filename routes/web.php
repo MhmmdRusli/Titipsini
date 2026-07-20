@@ -27,6 +27,8 @@ use App\Http\Controllers\Customer\NotificationSettingController;
 use App\Http\Controllers\Customer\TentangController;
 use App\Http\Controllers\Customer\BantuanController;
 use App\Http\Controllers\Customer\SecurityController;
+use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
+use App\Http\Controllers\Mitra\OrderController as MitraOrderController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -253,4 +255,9 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/profile/keamanan', [SecurityController::class, 'edit'])->name('profile.keamanan');
     Route::put('/profile/keamanan/password', [SecurityController::class, 'updatePassword'])->name('profile.keamanan.password');
     Route::put('/profile/keamanan/pin', [SecurityController::class, 'updatePin'])->name('profile.keamanan.pin');
+});
+Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
+    Route::get('/dashboard', [MitraDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/pesanan', [MitraOrderController::class, 'index'])->name('orders.index');
+    Route::get('/pesanan/{order}', [MitraOrderController::class, 'show'])->name('orders.show');
 });
