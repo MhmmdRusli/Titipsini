@@ -4,9 +4,9 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 
 // Kategori disesuaikan persis dengan 3 item utama pada mockup gambar
 const CATEGORIES = [
-    { key: 'barang', label: 'Titip Barang', icon: Package, href: '/app/services?kategori=barang' },
-    { key: 'bangunan', label: 'Titip Bangunan', icon: Building2, href: '/app/services?kategori=bangunan' },
-    { key: 'kendaraan', label: 'Titip Kendaraan', icon: Car, href: '/app/services?kategori=kendaraan' },
+    { key: 'barang', label: ' Barang', icon: Package, href: '/app/services?kategori=barang' },
+    { key: 'bangunan', label: ' Bangunan', icon: Building2, href: '/app/services?kategori=bangunan' },
+    { key: 'kendaraan', label: ' Kendaraan', icon: Car, href: '/app/services?kategori=kendaraan' },
 ];
 
 function formatRupiah(value) {

@@ -17,6 +17,7 @@ use App\Http\Controllers\Customer\LengkapiDataController;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\Customer\PinController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Customer\ServiceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -114,6 +115,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 */
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+
+    // Halaman list layanan (dipakai untuk kategori barang/bangunan/kendaraan/pindahan)
+    Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
 });
 
 // Rute Lengkapi Data: user baru (status pendaftar) tetap bisa akses, tanpa role:customer
