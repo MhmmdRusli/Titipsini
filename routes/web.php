@@ -165,6 +165,18 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->
     Route::patch('/notifikasi/tandai-semua', [\App\Http\Controllers\Mitra\NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.readAll');
 });
 
+Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Mitra\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/notifikasi', [\App\Http\Controllers\Mitra\NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::patch('/notifikasi/{notifikasi}/read', [\App\Http\Controllers\Mitra\NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
+    Route::patch('/notifikasi/tandai-semua', [\App\Http\Controllers\Mitra\NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.readAll');
+
+    Route::get('/profil', [\App\Http\Controllers\Mitra\ProfileController::class, 'index'])->name('profil.index');
+    Route::get('/profil/saya', [\App\Http\Controllers\Mitra\ProfileController::class, 'edit'])->name('profil.edit');
+    Route::post('/profil/saya', [\App\Http\Controllers\Mitra\ProfileController::class, 'update'])->name('profil.update');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Customer routes  -> /app/* (role: customer)

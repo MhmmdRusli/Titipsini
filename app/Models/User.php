@@ -16,18 +16,19 @@ class User extends Authenticatable implements MustVerifyEmail
      * role: admin | customer | partner
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'phone',
-        'city',
-        'verification_status',
-        'gender',
-        'address',
-        'pin',
-        'rejection_reason',
-        'verified_at',
+    'name',
+    'email',
+    'password',
+    'pin',
+    'avatar',
+    'cover_photo',
+    'gender',
+    'birth_date',
+    'address',
+    'role',
+    'phone',
+    'city',
+    'verification_status',
     ];
 
     protected $hidden = [
@@ -64,6 +65,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isVerifiedPartner(): bool
     {
         return $this->role === 'partner' && $this->verification_status === 'terverifikasi';
+    }
+
+    public function getVendorIdAttribute(): string
+    {
+        return 'VDR-'.str_pad((string) $this->id, 5, '0', STR_PAD_LEFT);
     }
 
     public function ordersAsCustomer(): HasMany
