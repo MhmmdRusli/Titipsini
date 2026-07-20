@@ -81,12 +81,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Order::class, 'partner_id');
     }
 
-<<<<<<< HEAD
+
     public function services(): HasMany
     {
         return $this->hasMany(Service::class);
     }
-=======
-    
->>>>>>> ef50b43f4f829777c3d15ddfca8e992aa2b87152
+
 }
