@@ -15,11 +15,21 @@ function formatRupiah(value) {
         .replace("IDR", "Rp");
 }
 
+function formatTanggal(value) {
+    if (!value) return 'Terbaru';
+    return new Date(value).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
+}
+
 export default function Dashboard({ user, saldo = 10000, vendors = [], berita = [] }) {
     // Data berita tiruan agar langsung memunculkan list item sesuai mockup jika kosong
     const displayBerita = berita.length > 0 ? berita : [
-        { id: 1, judul: 'Rilis. Buat Akun Lebih Muda...', waktu: 'Terbaru', foto: null },
-        { id: 2, judul: 'Terbaru yang me...', waktu: 'Terbaru', foto: null }
+        { id: 1, judul: 'Rilis. Buat Akun Lebih Muda...', published_at: null, foto: null },
+        { id: 2, judul: 'Terbaru yang me...', published_at: null, foto: null },
+        { id: 3, judul: 'Aplikasi Titipsini.Com terbaru Rilis, Buat...', published_at: null, foto: null },
     ];
 
     return (
@@ -98,7 +108,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     </div>
                 </div>
 
-                {/* Section Berita */}
+                {/* Section Berita - scroll horizontal, kartu ~62% lebar biar kelihatan 1.5 kartu */}
                 <div className="mt-6">
                     <div className="mb-3 flex items-center justify-between">
                         <p className="text-sm font-bold text-gray-900">Berita</p>
@@ -107,19 +117,21 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1">
                         {displayBerita.map((b) => (
                             <Link
                                 key={b.id}
                                 href={`/app/berita/${b.id}`}
-                                className="flex flex-col rounded-xl border border-gray-100 bg-white overflow-hidden shadow-sm"
+                                className="flex w-[62%] shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm"
                             >
                                 {/* Thumbnail Box Berita */}
                                 <div className="h-24 w-full bg-gradient-to-br from-green-50 to-emerald-100 p-3 flex flex-col justify-between relative">
                                     <div className="text-[10px] bg-green-600 text-white px-1.5 py-0.5 rounded self-start font-medium">
                                         Titipsini
                                     </div>
-                                    <p className="text-[10px] text-gray-400 font-medium z-10">{b.waktu}</p>
+                                    <p className="text-[10px] text-gray-400 font-medium z-10">
+                                        {formatTanggal(b.published_at)}
+                                    </p>
                                     <div className="absolute right-2 bottom-2 w-10 h-10 bg-green-600/10 rounded-full" />
                                 </div>
                                 {/* Judul Berita */}

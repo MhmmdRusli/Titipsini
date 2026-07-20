@@ -76,8 +76,15 @@ class User extends Authenticatable
         return $this->hasMany(Order::class, 'customer_id');
     }
 
+    public function notifikasi(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\Notifikasi::class);
+    }
+
     public function ordersAsPartner(): HasMany
     {
         return $this->hasMany(Order::class, 'partner_id');
     }
+
+    
 }

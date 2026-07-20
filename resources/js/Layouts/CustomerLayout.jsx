@@ -5,7 +5,7 @@ import { Package, Bell, User, LayoutGrid, LogOut, ChevronDown, ChevronLeft } fro
 const navItems = [
     { label: 'Beranda', href: '/app/dashboard', icon: LayoutGrid },
     { label: 'Pesanan Saya', href: '/app/orders', icon: Package },
-    { label: 'Notifikasi', href: '/app/notifications', icon: Bell },
+    { label: 'Notifikasi', href: '/app/notifikasi', icon: Bell },
     { label: 'Profil', href: '/app/profile', icon: User },
 ];
 
