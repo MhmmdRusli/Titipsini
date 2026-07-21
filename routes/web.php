@@ -20,6 +20,7 @@ use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\Customer\PinController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Customer\ServiceController;
+use App\Http\Controllers\Customer\TopUpController;
 use App\Http\Controllers\Mitra\OnboardingController as MitraOnboardingController;
 use App\Http\Controllers\Customer\BeritaController;
 use App\Http\Controllers\Customer\NotifikasiController;
@@ -175,6 +176,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 /*
 |--------------------------------------------------------------------------
 | Mitra routes  -> /mitra/* (role: partner, sudah login)
+| Semua digabung jadi SATU grup - sebelumnya kepisah di banyak grup
+| terpisah dengan nama 'partner.' yang bahkan ada duplikat /dashboard 3x.
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->group(function () {
@@ -219,43 +222,22 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->gr
 /*
 |--------------------------------------------------------------------------
 | Customer routes  -> /app/* (role: customer)
+| Digabung jadi SATU grup juga - sebelumnya kepisah di banyak grup terpisah
+| dengan prefix & name yang sama persis.
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
-    Route::get('/services/barang/paket-pilihan', [ServiceController::class, 'pilihPaket'])
-    ->name('services.barang.pilihPaket');
-    Route::get('/services/barang', [ServiceController::class, 'formBarang'])->name('services.barang.form');
-    Route::post('/services/barang', [ServiceController::class, 'simpanBarang'])->name('services.barang.store');
-    Route::get('/services/barang/pemesanan', [ServiceController::class, 'pemesanan'])
-    ->name('services.barang.pemesanan');
-    Route::get('/services/barang/metode-pembayaran', [ServiceController::class, 'metodePembayaran'])
-    ->name('services.barang.metodePembayaran');
-    Route::post('/services/barang/konfirmasi', [ServiceController::class, 'konfirmasiPesanan'])
-    ->name('services.barang.konfirmasi');
-    Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
-    Route::post('/services/{service}/pesan', [ServiceController::class, 'storePesanan'])->name('services.pesan');
-    Route::get('/services/{service}/metode-pembayaran', [ServiceController::class, 'metodePembayaranLayanan'])->name('services.metodePembayaranLayanan');
-    Route::post('/services/{service}/konfirmasi', [ServiceController::class, 'konfirmasiLayanan'])->name('services.konfirmasiLayanan');
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
 
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
-    Route::get('/orders/{order}/sukses', [CustomerOrderController::class, 'success'])->name('orders.success');
-    Route::get('/orders/{order}/bukti-pembayaran', [CustomerOrderController::class, 'buktiPembayaran'])->name('orders.buktiPembayaran');
-    
-    // RUTE PEMBAYARAN & UPLOAD BUKTI:
-    Route::get('/orders/{order}/pembayaran', [CustomerOrderController::class, 'pembayaran'])->name('orders.pembayaran');
-    Route::post('/orders/{order}/upload-bukti', [CustomerOrderController::class, 'uploadBukti'])->name('orders.uploadBukti');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::patch('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
 
-    // Profil: index (lihat), edit (form ubah), update (simpan perubahan)
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('profile.index');
-    Route::get('/profile/edit', [CustomerProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/profile/notifikasi', [NotificationSettingController::class, 'edit'])->name('profile.notifikasi.edit');
     Route::patch('/profile/notifikasi', [NotificationSettingController::class, 'update'])->name('profile.notifikasi.update');
@@ -269,6 +251,13 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/profile/keamanan', [SecurityController::class, 'edit'])->name('profile.keamanan');
     Route::put('/profile/keamanan/password', [SecurityController::class, 'updatePassword'])->name('profile.keamanan.password');
     Route::put('/profile/keamanan/pin', [SecurityController::class, 'updatePin'])->name('profile.keamanan.pin');
+
+    // Top Up Saldo
+    Route::get('/saldo/topup', [TopUpController::class, 'create'])->name('topup.create');
+    Route::post('/saldo/topup', [TopUpController::class, 'store'])->name('topup.store');
+    Route::get('/saldo/topup/{topup}/instruksi', [TopUpController::class, 'instruksi'])->name('topup.instruksi');
+    Route::post('/saldo/topup/{topup}/konfirmasi', [TopUpController::class, 'konfirmasi'])->name('topup.konfirmasi');
+    Route::get('/saldo/topup/{topup}/sukses', [TopUpController::class, 'sukses'])->name('topup.sukses');
 });
 
 // Rute Lengkapi Data: user baru (status pendaftar) tetap bisa akses, tanpa role:customer
