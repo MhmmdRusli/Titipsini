@@ -129,7 +129,7 @@ Route::middleware(['auth'])->prefix('mitra')->name('mitra.')->group(function () 
 
 Route::get('/mitra/verifikasi-email/{id}/{hash}', [MitraVerifyEmailController::class, 'verify'])
     ->middleware(['auth', 'signed'])
-    ->name('verification.verify');
+    ->name('mitra.verification.verify');
 
 /*
 |--------------------------------------------------------------------------
@@ -234,10 +234,20 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     ->name('services.barang.metodePembayaran');
     Route::post('/services/barang/konfirmasi', [ServiceController::class, 'konfirmasiPesanan'])
     ->name('services.barang.konfirmasi');
+    Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
+    Route::post('/services/{service}/pesan', [ServiceController::class, 'storePesanan'])->name('services.pesan');
+    Route::get('/services/{service}/metode-pembayaran', [ServiceController::class, 'metodePembayaranLayanan'])->name('services.metodePembayaranLayanan');
+    Route::post('/services/{service}/konfirmasi', [ServiceController::class, 'konfirmasiLayanan'])->name('services.konfirmasiLayanan');
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
 
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/sukses', [CustomerOrderController::class, 'success'])->name('orders.success');
+    Route::get('/orders/{order}/bukti-pembayaran', [CustomerOrderController::class, 'buktiPembayaran'])->name('orders.buktiPembayaran');
+    
+    // RUTE PEMBAYARAN & UPLOAD BUKTI:
+    Route::get('/orders/{order}/pembayaran', [CustomerOrderController::class, 'pembayaran'])->name('orders.pembayaran');
+    Route::post('/orders/{order}/upload-bukti', [CustomerOrderController::class, 'uploadBukti'])->name('orders.uploadBukti');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::patch('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');

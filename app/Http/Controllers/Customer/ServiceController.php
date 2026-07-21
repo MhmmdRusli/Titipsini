@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Order;
 use Inertia\Response;
 
 class ServiceController extends Controller
@@ -166,7 +167,115 @@ public function konfirmasiPesanan(Request $request)
 
     session()->forget('pesanan_barang');
 
-    return redirect()->route('customer.orders.show', $order->id)
-        ->with('success', 'Pesanan berhasil dibuat, menunggu konfirmasi mitra.');
+    return redirect()->route('customer.orders.success', $order->id);
+}
+
+protected function jenisLabel(\App\Models\Service $service): string
+{
+    $vehicleLabels = [
+        'motor' => 'Motor', 'mobil' => 'Mobil', 'truk' => 'Truk', 'becak' => 'Becak',
+        'sepeda' => 'Sepeda', 'bus' => 'Bus', 'mobil_pick_up' => 'Mobil pick up',
+    ];
+    $buildingLabels = [
+        'rumah' => 'Rumah', 'apartemen' => 'Apartemen', 'kosan' => 'Kosan',
+        'gudang' => 'Gudang', 'kamar' => 'Kamar',
+    ];
+
+    return match ($service->kategori) {
+        'kendaraan' => $vehicleLabels[$service->jenis_kendaraan] ?? '-',
+        'bangunan' => $buildingLabels[$service->jenis_bangunan] ?? '-',
+        default => ucfirst($service->kategori),
+    };
+}
+
+/**
+ * GET /app/services/{service}
+ */
+public function show(\App\Models\Service $service)
+{
+    return Inertia::render('Customer/Services/Show', [
+        'service' => [
+            'id' => $service->id,
+            'nama' => $service->nama,
+            'kota' => $service->kota,
+            'kecamatan' => $service->kecamatan,
+            'kategori' => $service->kategori,
+            'jenisLabel' => $this->jenisLabel($service),
+            'harga' => (float) $service->harga,
+        ],
+    ]);
+}
+
+/**
+ * POST /app/services/{service}/pesan
+ */
+public function storePesanan(Request $request, \App\Models\Service $service)
+{
+    $data = $request->validate([
+        'tanggalMasuk' => 'required|date',
+        'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
+    ]);
+
+    session(['pesanan_layanan' => [
+        'service_id' => $service->id,
+        'tanggalMasuk' => $data['tanggalMasuk'],
+        'tanggalKeluar' => $data['tanggalKeluar'],
+    ]]);
+
+    return redirect()->route('customer.services.metodePembayaranLayanan', $service->id);
+}
+
+/**
+ * GET /app/services/{service}/metode-pembayaran
+ */
+public function metodePembayaranLayanan(\App\Models\Service $service)
+{
+    $data = session('pesanan_layanan');
+
+    if (!$data || $data['service_id'] !== $service->id) {
+        return redirect()->route('customer.services.show', $service->id);
+    }
+
+    return Inertia::render('Customer/Services/MetodePembayaranLayanan', [
+        'serviceId' => $service->id,
+        'total' => (float) $service->harga,
+    ]);
+}
+
+/**
+ * POST /app/services/{service}/konfirmasi
+ */
+public function konfirmasiLayanan(Request $request, \App\Models\Service $service)
+{
+    $validated = $request->validate([
+        'payment_method' => ['required', 'string'],
+    ]);
+
+    $data = session('pesanan_layanan');
+
+    if (!$data || $data['service_id'] !== $service->id) {
+        return redirect()->route('customer.services.show', $service->id);
+    }
+
+    $customer = auth()->user();
+
+    $order = \App\Models\Order::create([
+        'order_code' => 'TS-'.strtoupper(uniqid()),
+        'customer_id' => $customer->id,
+        'partner_id' => $service->user_id,
+        'service_type' => $service->kategori,
+        'item_name' => $service->nama.' ('.$this->jenisLabel($service).')',
+        'start_date' => $data['tanggalMasuk'],
+        'end_date' => $data['tanggalKeluar'],
+        'is_pickup' => false,
+        'city' => $service->kota,
+        'status' => 'baru',
+        'total_price' => $service->harga,
+        'payment_method' => $validated['payment_method'],
+    ]);
+
+    session()->forget('pesanan_layanan');
+
+    return redirect()->route('customer.orders.success', $order->id);
 }
 }
