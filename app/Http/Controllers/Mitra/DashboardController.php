@@ -21,11 +21,24 @@ class DashboardController extends Controller
         $pesananBarang = (clone $pesananAktifQuery)->where('service_type', 'barang')->count();
         $pesananKendaraan = (clone $pesananAktifQuery)->where('service_type', 'kendaraan')->count();
 
+        // Ambil kategori layanan unik dari layanan aktif yang partner ini
+        // sudah tambahkan lewat "Kelola Layanan" (tabel services) - bukan
+        // dari kolom users.layanan_kategori yang gak pernah diisi.
+        $layananKategori = $partner->services()
+            ->where('is_active', true)
+            ->distinct()
+            ->pluck('kategori')
+            ->values()
+            ->all();
+
         return Inertia::render('Mitra/Dashboard', [
             'partner' => [
                 'name' => $partner->name,
                 'foto' => $partner->foto ? Storage::url($partner->foto) : null,
-                'is_verified' => $partner->verification_status === 'verified',
+                // Nilai enum verification_status di project ini pakai Bahasa
+                // Indonesia ('terverifikasi'), bukan 'verified'. Sebelumnya
+                // salah bandingkan jadi banner verifikasi selalu muncul.
+                'is_verified' => $partner->verification_status === 'terverifikasi',
             ],
             'saldo' => $partner->saldo ?? 0,
             'toko' => [
@@ -33,7 +46,7 @@ class DashboardController extends Controller
                 'jam_buka' => $partner->jam_buka ? substr($partner->jam_buka, 0, 5) : null,
                 'jam_tutup' => $partner->jam_tutup ? substr($partner->jam_tutup, 0, 5) : null,
             ],
-            'layanan' => $partner->layanan_kategori ?? [],
+            'layanan' => $layananKategori,
             'pesanan' => [
                 'barang' => $pesananBarang,
                 'kendaraan' => $pesananKendaraan,
