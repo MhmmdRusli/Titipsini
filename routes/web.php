@@ -175,8 +175,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 /*
 |--------------------------------------------------------------------------
 | Mitra routes  -> /mitra/* (role: partner, sudah login)
-| Semua digabung jadi SATU grup - sebelumnya kepisah di banyak grup
-| terpisah dengan nama 'partner.' yang bahkan ada duplikat /dashboard 3x.
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->group(function () {
@@ -221,8 +219,6 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->gr
 /*
 |--------------------------------------------------------------------------
 | Customer routes  -> /app/* (role: customer)
-| Digabung jadi SATU grup juga - sebelumnya kepisah di banyak grup terpisah
-| dengan prefix & name yang sama persis.
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
@@ -244,7 +240,10 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::patch('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
 
+    // Profil: index (lihat), edit (form ubah), update (simpan perubahan)
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [CustomerProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/profile/notifikasi', [NotificationSettingController::class, 'edit'])->name('profile.notifikasi.edit');
     Route::patch('/profile/notifikasi', [NotificationSettingController::class, 'update'])->name('profile.notifikasi.update');
