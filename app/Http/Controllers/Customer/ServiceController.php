@@ -47,7 +47,7 @@ class ServiceController extends Controller
 
     public function pilihPaket()
     {
-        return Inertia::render('Customer/Services/Barang/PilihPaket', [
+        return Inertia::render('Customer/Services/PilihPaket', [
             'hargaMulai' => 100000,
         ]);
     }
@@ -109,13 +109,64 @@ public function pemesanan()
     ]);
 }
 
+
+public function metodePembayaran()
+{
+    $data = session('pesanan_barang');
+
+    if (!$data) {
+        return redirect()->route('customer.services.barang.pilihPaket');
+    }
+
+    $items = collect(explode(',', $data['namaBarang']))
+        ->map(fn ($nama) => trim($nama))
+        ->filter()
+        ->values();
+
+    $total = $items->count() * 15000;
+
+    return Inertia::render('Customer/Services/Barang/MetodePembayaran', [
+        'total' => $total,
+    ]);
+}
+
 public function konfirmasiPesanan(Request $request)
 {
-    // TODO: baru di sini order sungguhan dibuat di database, setelah
-    // customer pilih metode pembayaran. Skema tabel order kamu perlu
-    // dikasih tahu dulu biar saya bisa isi bagian ini.
+    $validated = $request->validate([
+        'payment_method' => ['required', 'string'],
+    ]);
+
+    $data = session('pesanan_barang');
+
+    if (!$data) {
+        return redirect()->route('customer.services.barang.pilihPaket');
+    }
+
+    $items = collect(explode(',', $data['namaBarang']))
+        ->map(fn ($nama) => trim($nama))
+        ->filter();
+
+    $total = $items->count() * 15000;
+
+    $customer = auth()->user();
+
+    $order = \App\Models\Order::create([
+        'order_code' => 'TS-'.strtoupper(uniqid()),
+        'customer_id' => $customer->id,
+        'service_type' => 'barang',
+        'item_name' => $data['namaBarang'],
+        'start_date' => $data['tanggalMasuk'],
+        'end_date' => $data['tanggalKeluar'],
+        'is_pickup' => (bool) $data['pickup'],
+        'city' => $customer->city ?? '-',
+        'status' => 'baru',
+        'total_price' => $total,
+        'payment_method' => $validated['payment_method'],
+    ]);
+
     session()->forget('pesanan_barang');
 
-    return redirect()->route('customer.orders.index');
+    return redirect()->route('customer.orders.show', $order->id)
+        ->with('success', 'Pesanan berhasil dibuat, menunggu konfirmasi mitra.');
 }
 }

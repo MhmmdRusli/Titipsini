@@ -28,12 +28,7 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
     const subtotalPaket = items.reduce((sum, item) => sum + item.harga * item.qty, 0);
 
     function handleKonfirmasi() {
-        setProcessing(true);
-        router.post(
-            '/app/services/barang/konfirmasi',
-            { items },
-            { onFinish: () => setProcessing(false) }
-        );
+        router.visit('/app/services/barang/metode-pembayaran');
     }
 
     return (
@@ -172,10 +167,10 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
                         <button
                             type="button"
                             onClick={handleKonfirmasi}
-                            disabled={processing || items.length === 0}
+                            disabled={items.length === 0}
                             className="mt-2 w-full rounded-full bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-50"
                         >
-                            {processing ? 'Memproses...' : 'Konfirmasi Pesanan'}
+                            Lanjut ke Pembayaran
                         </button>
                     </div>
                 </div>
