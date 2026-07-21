@@ -11,20 +11,21 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-    'order_code',
-    'customer_id',
-    'partner_id',
-    'service_type',
-    'item_name',
-    'start_date',
-    'end_date',
-    'is_pickup',
-    'city',
-    'status',
-    'cancel_reason',
-    'total_price',
-    'payment_method',
-];
+        'order_code',
+        'customer_id',
+        'partner_id',
+        'service_type',
+        'item_name',
+        'start_date',
+        'end_date',
+        'is_pickup',
+        'city',
+        'status',
+        'cancel_reason',
+        'total_price',
+        'payment_method',
+        'payment_receipt', // 🟢 Ditambahkan agar bukti pembayaran dapat disimpan
+    ];
 
     protected function casts(): array
     {

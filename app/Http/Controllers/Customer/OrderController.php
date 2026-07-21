@@ -68,7 +68,6 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        // Ambil data gambar QRIS dari setting pembayaran admin
         $setting = PaymentSetting::current();
         $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
 
@@ -83,7 +82,7 @@ class OrderController extends Controller
                 'status',
                 'created_at',
             ]),
-            'qris_url' => $qrisUrl, // Dikirim ke frontend
+            'qris_url' => $qrisUrl,
         ]);
     }
 
@@ -91,7 +90,6 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        // Ambil data gambar QRIS jika halaman upload bukti juga memerlukan gambarnya
         $setting = PaymentSetting::current();
         $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
 
@@ -105,7 +103,7 @@ class OrderController extends Controller
                 'total_price', 
                 'created_at',
             ]),
-            'qris_url' => $qrisUrl, // Dikirim ke frontend
+            'qris_url' => $qrisUrl,
         ]);
     }
 
@@ -118,6 +116,11 @@ class OrderController extends Controller
 
         // 2. Simpan file gambar ke storage public
         if ($request->hasFile('payment_receipt')) {
+            // Hapus bukti lama jika ada
+            if ($order->payment_receipt) {
+                Storage::disk('public')->delete($order->payment_receipt);
+            }
+
             $path = $request->file('payment_receipt')->store('payment_proofs', 'public');
 
             // 3. Update status pesanan & simpan path foto bukti ke database

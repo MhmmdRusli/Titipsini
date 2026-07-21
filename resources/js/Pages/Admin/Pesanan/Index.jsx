@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Search, Eye, Truck, X } from 'lucide-react';
+import { Search, Eye, Truck, X, FileText, Image, ExternalLink } from 'lucide-react';
 
 const SERVICE_TYPES = [
     { value: '', label: 'Semua Layanan' },
@@ -41,11 +41,6 @@ function formatRupiah(value) {
     }).format(value ?? 0);
 }
 
-// Expected props from OrderController@index:
-//   orders: { data: [{ id, order_code, customer, partner, service_type,
-//              is_pickup, city, status, cancel_reason, total_price, created_at }], links }
-//   filters: { search, service_type, status, city }
-//   cities: string[]   <- distinct list of order cities, for the filter dropdown
 export default function PesananIndex({ orders, filters, cities = [] }) {
     const [search, setSearch] = useState(filters?.search ?? '');
     const [serviceType, setServiceType] = useState(filters?.service_type ?? '');
@@ -159,7 +154,14 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                         )}
                         {orders.data.map((order) => (
                             <tr key={order.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 font-medium text-gray-900">{order.order_code}</td>
+                                <td className="px-6 py-4 font-medium text-gray-900">
+                                    <div>{order.order_code}</div>
+                                    {order.payment_receipt && (
+                                        <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                                            <FileText size={11} /> Bukti Diunggah
+                                        </span>
+                                    )}
+                                </td>
                                 <td className="px-6 py-4 text-gray-600">{order.customer?.name ?? '-'}</td>
                                 <td className="px-6 py-4 text-gray-600">{order.partner?.name ?? '-'}</td>
                                 <td className="px-6 py-4">
@@ -181,6 +183,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <button
+                                        type="button"
                                         onClick={() => setSelectedOrder(order)}
                                         className="inline-flex items-center gap-1 rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-teal-700"
                                     >
@@ -222,10 +225,12 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
 }
 
 function OrderDetailModal({ order, onClose }) {
-    const { data, setData, patch, processing, errors } = useForm({
+    const [previewImage, setPreviewImage] = useState(false);
+    const { data, setData, errors } = useForm({
         status: order.status,
         cancel_reason: order.cancel_reason ?? '',
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const nextActions = {
         baru: ['diproses', 'dibatalkan'],
@@ -235,27 +240,44 @@ function OrderDetailModal({ order, onClose }) {
     }[order.status] ?? [];
 
     const actionLabel = {
-        diproses: 'Proses Pesanan',
+        diproses: 'Verifikasi & Proses',
         selesai: 'Selesaikan Pesanan',
         dibatalkan: 'Batalkan Pesanan',
     };
 
     function submitStatus(nextStatus) {
         if (nextStatus === 'dibatalkan' && !data.cancel_reason.trim()) {
+            alert('Mohon isi alasan pembatalan terlebih dahulu.');
             return;
         }
-        setData('status', nextStatus);
-        patch(`/admin/orders/${order.id}/status`, {
-            data: { status: nextStatus, cancel_reason: data.cancel_reason },
-            onSuccess: onClose,
-            preserveScroll: true,
-        });
+
+        setIsSubmitting(true);
+
+        router.patch(
+            `/admin/orders/${order.id}/status`,
+            {
+                status: nextStatus,
+                cancel_reason: nextStatus === 'dibatalkan' ? data.cancel_reason : null,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    onClose();
+                },
+                onError: (err) => {
+                    setIsSubmitting(false);
+                    console.error('Gagal memperbarui status:', err);
+                },
+            }
+        );
     }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
-                <div className="mb-4 flex items-center justify-between">
+            <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+                <div className="mb-4 flex items-center justify-between border-b pb-3">
                     <div>
                         <h2 className="text-base font-semibold text-gray-900">{order.order_code}</h2>
                         <span
@@ -266,14 +288,14 @@ function OrderDetailModal({ order, onClose }) {
                             {order.status}
                         </span>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                    <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600">
                         <X size={18} />
                     </button>
                 </div>
 
                 <dl className="grid grid-cols-2 gap-y-3 text-sm">
                     <dt className="text-gray-500">Customer</dt>
-                    <dd className="text-gray-900">{order.customer?.name ?? '-'}</dd>
+                    <dd className="text-gray-900 font-medium">{order.customer?.name ?? '-'}</dd>
 
                     <dt className="text-gray-500">Vendor</dt>
                     <dd className="text-gray-900">{order.partner?.name ?? 'Belum ditugaskan'}</dd>
@@ -284,33 +306,65 @@ function OrderDetailModal({ order, onClose }) {
                     <dt className="text-gray-500">Antar-Jemput</dt>
                     <dd className="text-gray-900">{order.is_pickup ? 'Ya' : 'Tidak'}</dd>
 
+                    <dt className="text-gray-500">Metode Bayar</dt>
+                    <dd className="text-gray-900 uppercase font-medium">{order.payment_method ?? '-'}</dd>
+
                     <dt className="text-gray-500">Kota</dt>
                     <dd className="text-gray-900">{order.city}</dd>
 
                     <dt className="text-gray-500">Total Harga</dt>
-                    <dd className="text-gray-900">{formatRupiah(order.total_price)}</dd>
+                    <dd className="text-gray-900 font-bold text-brand-teal-700">{formatRupiah(order.total_price)}</dd>
 
                     {order.status === 'dibatalkan' && order.cancel_reason && (
                         <>
                             <dt className="text-gray-500">Alasan Batal</dt>
-                            <dd className="text-gray-900">{order.cancel_reason}</dd>
+                            <dd className="text-red-600">{order.cancel_reason}</dd>
                         </>
                     )}
                 </dl>
+
+                <div className="mt-5 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold uppercase text-gray-600 flex items-center gap-1.5">
+                            <Image size={14} /> Bukti Pembayaran
+                        </span>
+                    </div>
+
+                    {order.payment_receipt ? (
+                        <div className="space-y-2">
+                            <div className="relative group overflow-hidden rounded-lg border bg-white">
+                                <img
+                                    src={order.payment_receipt}
+                                    alt="Bukti Transfer"
+                                    className="h-40 w-full object-contain bg-gray-100 cursor-pointer"
+                                    onClick={() => setPreviewImage(true)}
+                                />
+                                <div 
+                                    className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition cursor-pointer text-white text-xs font-medium gap-1"
+                                    onClick={() => setPreviewImage(true)}
+                                >
+                                    <ExternalLink size={14} /> Klik untuk memperbesar
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-xs text-gray-400 italic">Customer belum mengunggah bukti pembayaran.</p>
+                    )}
+                </div>
 
                 {nextActions.length > 0 && (
                     <div className="mt-5 border-t border-gray-100 pt-4">
                         {nextActions.includes('dibatalkan') && (
                             <div className="mb-3">
                                 <label className="mb-1 block text-xs font-medium text-gray-600">
-                                    Alasan pembatalan (wajib diisi kalau membatalkan)
+                                    Alasan pembatalan (wajib jika membatalkan)
                                 </label>
                                 <input
                                     type="text"
                                     value={data.cancel_reason}
                                     onChange={(e) => setData('cancel_reason', e.target.value)}
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
-                                    placeholder="Contoh: Customer membatalkan sendiri"
+                                    placeholder="Contoh: Bukti pembayaran tidak valid"
                                 />
                                 {errors.cancel_reason && (
                                     <p className="mt-1 text-xs text-red-500">{errors.cancel_reason}</p>
@@ -321,7 +375,8 @@ function OrderDetailModal({ order, onClose }) {
                             {nextActions.map((next) => (
                                 <button
                                     key={next}
-                                    disabled={processing}
+                                    type="button"
+                                    disabled={isSubmitting}
                                     onClick={() => submitStatus(next)}
                                     className={`rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60 ${
                                         next === 'dibatalkan'
@@ -329,13 +384,35 @@ function OrderDetailModal({ order, onClose }) {
                                             : 'bg-brand-teal-700 hover:bg-brand-teal-800'
                                     }`}
                                 >
-                                    {actionLabel[next]}
+                                    {isSubmitting ? 'Memproses...' : actionLabel[next]}
                                 </button>
                             ))}
                         </div>
                     </div>
                 )}
             </div>
+
+            {previewImage && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+                    onClick={() => setPreviewImage(false)}
+                >
+                    <div className="relative max-w-3xl max-h-[90vh]">
+                        <img 
+                            src={order.payment_receipt} 
+                            alt="Bukti Transfer Perbesar" 
+                            className="max-h-[85vh] max-w-full rounded-lg object-contain shadow-2xl"
+                        />
+                        <button 
+                            type="button"
+                            className="absolute -top-10 right-0 text-white hover:text-gray-300"
+                            onClick={() => setPreviewImage(false)}
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
-}   
+}
