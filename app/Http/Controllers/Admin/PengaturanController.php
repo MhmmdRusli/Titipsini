@@ -81,8 +81,12 @@ class PengaturanController extends Controller
     {
         $setting = PaymentSetting::current();
 
+        $qrisUrl = ($setting && $setting->qris_image) 
+            ? Storage::url($setting->qris_image) . '?v=' . time() 
+            : null;
+
         return Inertia::render('Admin/Pengaturan/Qris', [
-            'qris_url' => $setting->qris_image ? Storage::url($setting->qris_image) : null,
+            'qris_url' => $qrisUrl,
         ]);
     }
 
@@ -108,5 +112,24 @@ class PengaturanController extends Controller
         return redirect()
             ->route('admin.pengaturan.qris')
             ->with('success', 'QRIS berhasil diperbarui.');
+    }
+
+    /**
+     * DELETE /admin/pengaturan/qris
+     */
+    public function destroyQris()
+    {
+        $setting = PaymentSetting::current();
+
+        if ($setting && $setting->qris_image) {
+            Storage::disk('public')->delete($setting->qris_image);
+            $setting->update([
+                'qris_image' => null,
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.pengaturan.qris')
+            ->with('success', 'QRIS berhasil dihapus.');
     }
 }

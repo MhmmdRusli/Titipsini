@@ -1,16 +1,20 @@
-import { useState, useRef } from 'react';
-import { useForm, usePage } from '@inertiajs/react';
+import { useState, useRef, useEffect } from 'react';
+import { useForm, usePage, router } from '@inertiajs/react';
 import { QrCode, UploadCloud, Trash2 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 export default function Qris() {
-    const { qris_url } = usePage().props; // URL gambar QRIS yang sudah tersimpan (jika ada), dikirim dari controller
+    const { qris_url } = usePage().props;
     const [preview, setPreview] = useState(qris_url ?? null);
     const fileInput = useRef(null);
 
     const { data, setData, post, processing, errors, recentlySuccessful } = useForm({
         qris_image: null,
     });
+
+    useEffect(() => {
+        setPreview(qris_url ?? null);
+    }, [qris_url]);
 
     const handleFile = (file) => {
         if (!file) return;
@@ -23,10 +27,21 @@ export default function Qris() {
         handleFile(e.dataTransfer.files?.[0]);
     };
 
-    const clearImage = () => {
-        setData('qris_image', null);
-        setPreview(null);
-        if (fileInput.current) fileInput.current.value = '';
+    const handleRemoveImage = () => {
+        if (data.qris_image) {
+            setData('qris_image', null);
+            setPreview(qris_url ?? null);
+            if (fileInput.current) fileInput.current.value = '';
+        } else if (qris_url) {
+            if (confirm('Apakah Anda yakin ingin menghapus QRIS ini?')) {
+                router.delete(route('admin.pengaturan.qris.destroy'), {
+                    onSuccess: () => {
+                        setPreview(null);
+                        if (fileInput.current) fileInput.current.value = '';
+                    },
+                });
+            }
+        }
     };
 
     const submit = (e) => {
@@ -66,8 +81,9 @@ export default function Qris() {
                                     />
                                     <button
                                         type="button"
-                                        onClick={clearImage}
-                                        className="absolute -right-2 -top-2 rounded-full bg-white p-1 text-red-600 shadow hover:bg-red-50"
+                                        onClick={handleRemoveImage}
+                                        className="absolute -right-2 -top-2 rounded-full bg-white p-1.5 text-red-600 shadow-md hover:bg-red-50 border border-gray-100 transition"
+                                        title="Hapus QRIS"
                                     >
                                         <Trash2 size={16} />
                                     </button>

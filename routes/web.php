@@ -156,6 +156,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
         Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
+        Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy'); // 🟢 ROUTE HAPUS QRIS
     });
 
     Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
