@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\PaymentSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -66,6 +68,10 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
+        // Ambil data gambar QRIS dari setting pembayaran admin
+        $setting = PaymentSetting::current();
+        $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
+
         return Inertia::render('Customer/Orders/Pembayaran', [
             'order' => $order->only([
                 'id', 
@@ -77,12 +83,17 @@ class OrderController extends Controller
                 'status',
                 'created_at',
             ]),
+            'qris_url' => $qrisUrl, // Dikirim ke frontend
         ]);
     }
 
     public function buktiPembayaran(Request $request, Order $order): Response
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
+
+        // Ambil data gambar QRIS jika halaman upload bukti juga memerlukan gambarnya
+        $setting = PaymentSetting::current();
+        $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
 
         return Inertia::render('Customer/Orders/BuktiPembayaran', [
             'order' => $order->only([
@@ -94,8 +105,10 @@ class OrderController extends Controller
                 'total_price', 
                 'created_at',
             ]),
+            'qris_url' => $qrisUrl, // Dikirim ke frontend
         ]);
     }
+
     public function uploadBukti(Request $request, Order $order)
     {
         // 1. Validasi file gambar
@@ -110,7 +123,7 @@ class OrderController extends Controller
             // 3. Update status pesanan & simpan path foto bukti ke database
             $order->update([
                 'payment_receipt' => $path,
-                'status'          => 'diproses', // Sesuaikan dengan enum status pesananmu
+                'status'          => 'diproses',
             ]);
         }
 

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { ArrowLeft, Upload, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Upload, CheckCircle2, QrCode } from 'lucide-react';
 
-export default function BuktiPembayaran({ order }) {
+export default function BuktiPembayaran({ order, qris_url }) {
     const { data, setData, post, processing, errors } = useForm({
         payment_receipt: null,
     });
@@ -39,6 +39,24 @@ export default function BuktiPembayaran({ order }) {
                     </Link>
                     <h1 className="text-lg font-bold text-gray-900">Upload Bukti Transfer</h1>
                 </div>
+
+                {/* 🟢 TAMPILAN QRIS PEMBAYARAN DARI ADMIN */}
+                {qris_url && (
+                    <div className="mb-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm text-center">
+                        <div className="flex items-center justify-center gap-2 mb-3 text-brand-teal-700 font-semibold text-sm">
+                            <QrCode size={18} />
+                            <span>Scan QRIS untuk Pembayaran</span>
+                        </div>
+                        <img 
+                            src={qris_url} 
+                            alt="QRIS Pembayaran" 
+                            className="mx-auto w-52 h-52 rounded-xl border p-2 bg-white object-contain shadow-xs"
+                        />
+                        <p className="mt-2 text-[11px] text-gray-400">
+                            Silakan transfer sesuai total tagihan sebelum mengunggah bukti.
+                        </p>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm space-y-5">
                     <div className="rounded-xl bg-gray-50 p-3 text-xs text-gray-600 space-y-1">

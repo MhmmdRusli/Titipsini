@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Order;
 use Inertia\Response;
 
 class ServiceController extends Controller
@@ -21,20 +21,20 @@ class ServiceController extends Controller
         $search = $request->string('search')->toString();
 
         $services = Service::query()
-    ->where('is_active', true)
-    ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
-    ->when($jenis && $kategori === 'kendaraan', fn ($query) => $query->where('jenis_kendaraan', $jenis))
-    ->when($jenis && $kategori === 'bangunan', fn ($query) => $query->where('jenis_bangunan', $jenis))
-    ->when($search, function ($query) use ($search) {
-        $query->where(function ($q) use ($search) {
-            $q->where('kota', 'like', "%{$search}%")
-                ->orWhere('kecamatan', 'like', "%{$search}%");
-        });
-    })
-    ->with('vendor:id,name')
-    ->orderBy('kota')
-    ->paginate(10)
-    ->withQueryString();
+            ->where('is_active', true)
+            ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
+            ->when($jenis && $kategori === 'kendaraan', fn ($query) => $query->where('jenis_kendaraan', $jenis))
+            ->when($jenis && $kategori === 'bangunan', fn ($query) => $query->where('jenis_bangunan', $jenis))
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('kota', 'like', "%{$search}%")
+                        ->orWhere('kecamatan', 'like', "%{$search}%");
+                });
+            })
+            ->with('vendor:id,name')
+            ->orderBy('kota')
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Customer/Services/Index', [
             'services' => $services,
@@ -61,221 +61,151 @@ class ServiceController extends Controller
     }
 
     public function simpanBarang(Request $request)
-{
-    $data = $request->validate([
-        'namaBarang' => 'required|string',
-        'pickup' => 'boolean',
-        'tanggalMasuk' => 'required|date',
-        'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
-    ]);
+    {
+        $data = $request->validate([
+            'namaBarang' => 'required|string',
+            'pickup' => 'boolean',
+            'tanggalMasuk' => 'required|date',
+            'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
+        ]);
 
-    // Order beneran baru dibuat setelah customer konfirmasi + pilih pembayaran,
-    // jadi untuk sekarang cuma disimpan sementara di session.
-    session(['pesanan_barang' => $data]);
+        session(['pesanan_barang' => $data]);
 
-    return redirect()->route('customer.services.barang.pemesanan');
-}
-
-public function pemesanan()
-{
-    $data = session('pesanan_barang');
-
-    if (!$data) {
-        return redirect()->route('customer.services.barang.pilihPaket');
+        return redirect()->route('customer.services.barang.pemesanan');
     }
 
-    // TODO: harga per barang masih hardcode Rp 15.000 karena Form.jsx cuma
-    // nampung nama barang (comma-separated), belum ada harga per item.
-    // Kalau kamu punya tabel harga per jenis barang, ganti bagian ini.
-    $items = collect(explode(',', $data['namaBarang']))
-        ->map(fn ($nama) => trim($nama))
-        ->filter()
-        ->map(fn ($nama) => ['nama' => $nama, 'harga' => 15000, 'qty' => 1])
-        ->values();
+    public function pemesanan()
+    {
+        $data = session('pesanan_barang');
 
-    $customer = auth()->user();
+        if (!$data) {
+            return redirect()->route('customer.services.barang.pilihPaket');
+        }
 
-    return Inertia::render('Customer/Services/Barang/Pemesanan', [
-        'customer' => [
-            'nama' => $customer->name,
-            'telepon' => $customer->phone ?? '-',
-            'alamat' => $customer->alamat ?? '-',
-        ],
-        'items' => $items,
-        'detail' => [
-            'checkIn' => $data['tanggalMasuk'],
-            'checkOut' => $data['tanggalKeluar'],
-            'pickup' => (bool) $data['pickup'],
-        ],
-    ]);
-}
+        $items = collect(explode(',', $data['namaBarang']))
+            ->map(fn ($nama) => trim($nama))
+            ->filter()
+            ->map(fn ($nama) => ['nama' => $nama, 'harga' => 15000, 'qty' => 1])
+            ->values();
 
+        $customer = auth()->user();
 
-public function metodePembayaran()
-{
-    $data = session('pesanan_barang');
-
-    if (!$data) {
-        return redirect()->route('customer.services.barang.pilihPaket');
+        return Inertia::render('Customer/Services/Barang/Pemesanan', [
+            'customer' => [
+                'nama' => $customer->name,
+                'telepon' => $customer->phone ?? '-',
+                'alamat' => $customer->alamat ?? '-',
+            ],
+            'items' => $items,
+            'detail' => [
+                'checkIn' => $data['tanggalMasuk'],
+                'checkOut' => $data['tanggalKeluar'],
+                'pickup' => (bool) $data['pickup'],
+            ],
+        ]);
     }
 
-    $items = collect(explode(',', $data['namaBarang']))
-        ->map(fn ($nama) => trim($nama))
-        ->filter()
-        ->values();
+    /**
+     * 🟢 PROSES PEMESANAN BARANG (Langsung Buat Order & Ke Halaman Sukses)
+     */
+    public function konfirmasiPesanan(Request $request)
+    {
+        $data = session('pesanan_barang');
 
-    $total = $items->count() * 15000;
+        if (!$data) {
+            return redirect()->route('customer.services.barang.pilihPaket');
+        }
 
-    return Inertia::render('Customer/Services/Barang/MetodePembayaran', [
-        'total' => $total,
-    ]);
-}
+        $items = collect(explode(',', $data['namaBarang']))
+            ->map(fn ($nama) => trim($nama))
+            ->filter();
 
-public function konfirmasiPesanan(Request $request)
-{
-    $validated = $request->validate([
-        'payment_method' => ['required', 'string'],
-    ]);
+        $total = $items->count() * 15000;
+        $customer = auth()->user();
 
-    $data = session('pesanan_barang');
+        $order = Order::create([
+            'order_code' => 'TS-'.strtoupper(uniqid()),
+            'customer_id' => $customer->id,
+            'service_type' => 'barang',
+            'item_name' => $data['namaBarang'],
+            'start_date' => $data['tanggalMasuk'],
+            'end_date' => $data['tanggalKeluar'],
+            'is_pickup' => (bool) $data['pickup'],
+            'city' => $customer->city ?? '-',
+            'status' => 'baru',
+            'total_price' => $total,
+            'payment_method' => 'default', // Menggunakan nilai bawaan/default
+        ]);
 
-    if (!$data) {
-        return redirect()->route('customer.services.barang.pilihPaket');
+        session()->forget('pesanan_barang');
+
+        return redirect()->route('customer.orders.success', $order->id);
     }
 
-    $items = collect(explode(',', $data['namaBarang']))
-        ->map(fn ($nama) => trim($nama))
-        ->filter();
+    protected function jenisLabel(Service $service): string
+    {
+        $vehicleLabels = [
+            'motor' => 'Motor', 'mobil' => 'Mobil', 'truk' => 'Truk', 'becak' => 'Becak',
+            'sepeda' => 'Sepeda', 'bus' => 'Bus', 'mobil_pick_up' => 'Mobil pick up',
+        ];
+        $buildingLabels = [
+            'rumah' => 'Rumah', 'apartemen' => 'Apartemen', 'kosan' => 'Kosan',
+            'gudang' => 'Gudang', 'kamar' => 'Kamar',
+        ];
 
-    $total = $items->count() * 15000;
-
-    $customer = auth()->user();
-
-    $order = \App\Models\Order::create([
-        'order_code' => 'TS-'.strtoupper(uniqid()),
-        'customer_id' => $customer->id,
-        'service_type' => 'barang',
-        'item_name' => $data['namaBarang'],
-        'start_date' => $data['tanggalMasuk'],
-        'end_date' => $data['tanggalKeluar'],
-        'is_pickup' => (bool) $data['pickup'],
-        'city' => $customer->city ?? '-',
-        'status' => 'baru',
-        'total_price' => $total,
-        'payment_method' => $validated['payment_method'],
-    ]);
-
-    session()->forget('pesanan_barang');
-
-    return redirect()->route('customer.orders.success', $order->id);
-}
-
-protected function jenisLabel(\App\Models\Service $service): string
-{
-    $vehicleLabels = [
-        'motor' => 'Motor', 'mobil' => 'Mobil', 'truk' => 'Truk', 'becak' => 'Becak',
-        'sepeda' => 'Sepeda', 'bus' => 'Bus', 'mobil_pick_up' => 'Mobil pick up',
-    ];
-    $buildingLabels = [
-        'rumah' => 'Rumah', 'apartemen' => 'Apartemen', 'kosan' => 'Kosan',
-        'gudang' => 'Gudang', 'kamar' => 'Kamar',
-    ];
-
-    return match ($service->kategori) {
-        'kendaraan' => $vehicleLabels[$service->jenis_kendaraan] ?? '-',
-        'bangunan' => $buildingLabels[$service->jenis_bangunan] ?? '-',
-        default => ucfirst($service->kategori),
-    };
-}
-
-/**
- * GET /app/services/{service}
- */
-public function show(\App\Models\Service $service)
-{
-    return Inertia::render('Customer/Services/Show', [
-        'service' => [
-            'id' => $service->id,
-            'nama' => $service->nama,
-            'kota' => $service->kota,
-            'kecamatan' => $service->kecamatan,
-            'kategori' => $service->kategori,
-            'jenisLabel' => $this->jenisLabel($service),
-            'harga' => (float) $service->harga,
-        ],
-    ]);
-}
-
-/**
- * POST /app/services/{service}/pesan
- */
-public function storePesanan(Request $request, \App\Models\Service $service)
-{
-    $data = $request->validate([
-        'tanggalMasuk' => 'required|date',
-        'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
-    ]);
-
-    session(['pesanan_layanan' => [
-        'service_id' => $service->id,
-        'tanggalMasuk' => $data['tanggalMasuk'],
-        'tanggalKeluar' => $data['tanggalKeluar'],
-    ]]);
-
-    return redirect()->route('customer.services.metodePembayaranLayanan', $service->id);
-}
-
-/**
- * GET /app/services/{service}/metode-pembayaran
- */
-public function metodePembayaranLayanan(\App\Models\Service $service)
-{
-    $data = session('pesanan_layanan');
-
-    if (!$data || $data['service_id'] !== $service->id) {
-        return redirect()->route('customer.services.show', $service->id);
+        return match ($service->kategori) {
+            'kendaraan' => $vehicleLabels[$service->jenis_kendaraan] ?? '-',
+            'bangunan' => $buildingLabels[$service->jenis_bangunan] ?? '-',
+            default => ucfirst($service->kategori),
+        };
     }
 
-    return Inertia::render('Customer/Services/MetodePembayaranLayanan', [
-        'serviceId' => $service->id,
-        'total' => (float) $service->harga,
-    ]);
-}
-
-/**
- * POST /app/services/{service}/konfirmasi
- */
-public function konfirmasiLayanan(Request $request, \App\Models\Service $service)
-{
-    $validated = $request->validate([
-        'payment_method' => ['required', 'string'],
-    ]);
-
-    $data = session('pesanan_layanan');
-
-    if (!$data || $data['service_id'] !== $service->id) {
-        return redirect()->route('customer.services.show', $service->id);
+    /**
+     * GET /app/services/{service}
+     */
+    public function show(Service $service)
+    {
+        return Inertia::render('Customer/Services/Show', [
+            'service' => [
+                'id' => $service->id,
+                'nama' => $service->nama,
+                'kota' => $service->kota,
+                'kecamatan' => $service->kecamatan,
+                'kategori' => $service->kategori,
+                'jenisLabel' => $this->jenisLabel($service),
+                'harga' => (float) $service->harga,
+            ],
+        ]);
     }
 
-    $customer = auth()->user();
+    /**
+     * 🟢 PROSES PEMESANAN LAYANAN/TITIPAN (Langsung Buat Order & Ke Halaman Sukses)
+     * POST /app/services/{service}/pesan
+     */
+    public function storePesanan(Request $request, Service $service)
+    {
+        $data = $request->validate([
+            'tanggalMasuk' => 'required|date',
+            'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
+        ]);
 
-    $order = \App\Models\Order::create([
-        'order_code' => 'TS-'.strtoupper(uniqid()),
-        'customer_id' => $customer->id,
-        'partner_id' => $service->user_id,
-        'service_type' => $service->kategori,
-        'item_name' => $service->nama.' ('.$this->jenisLabel($service).')',
-        'start_date' => $data['tanggalMasuk'],
-        'end_date' => $data['tanggalKeluar'],
-        'is_pickup' => false,
-        'city' => $service->kota,
-        'status' => 'baru',
-        'total_price' => $service->harga,
-        'payment_method' => $validated['payment_method'],
-    ]);
+        $customer = auth()->user();
 
-    session()->forget('pesanan_layanan');
+        $order = Order::create([
+            'order_code' => 'TS-'.strtoupper(uniqid()),
+            'customer_id' => $customer->id,
+            'partner_id' => $service->user_id,
+            'service_type' => $service->kategori,
+            'item_name' => $service->nama.' ('.$this->jenisLabel($service).')',
+            'start_date' => $data['tanggalMasuk'],
+            'end_date' => $data['tanggalKeluar'],
+            'is_pickup' => false,
+            'city' => $service->kota,
+            'status' => 'baru',
+            'total_price' => $service->harga,
+            'payment_method' => 'default', // Menggunakan nilai bawaan/default
+        ]);
 
-    return redirect()->route('customer.orders.success', $order->id);
-}
+        return redirect()->route('customer.orders.success', $order->id);
+    }
 }
