@@ -98,7 +98,7 @@ Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Mitra - Onboarding & Auth (belum login)  -> /mitra/*
+| Mitra - Onboarding & Auth (belum login) -> /mitra/*
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->prefix('mitra')->name('mitra.')->group(function () {
@@ -135,7 +135,7 @@ Route::get('/mitra/verifikasi-email/{id}/{hash}', [MitraVerifyEmailController::c
 
 /*
 |--------------------------------------------------------------------------
-| Admin routes  -> /admin/* (role: admin)
+| Admin routes -> /admin/* (role: admin)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -157,7 +157,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
         Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
-        Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy'); // 🟢 ROUTE HAPUS QRIS
+        Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
     });
 
     Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
@@ -185,7 +185,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 /*
 |--------------------------------------------------------------------------
-| Mitra routes  -> /mitra/* (role: partner, sudah login)
+| Mitra routes -> /mitra/* (role: partner, sudah login)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->group(function () {
@@ -228,7 +228,7 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->gr
 
 /*
 |--------------------------------------------------------------------------
-| Customer routes  -> /app/* (role: customer)
+| Customer routes -> /app/* (role: customer)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
