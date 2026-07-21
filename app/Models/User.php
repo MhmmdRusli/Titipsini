@@ -109,4 +109,5 @@ public function topups(): HasMany
 {
     return $this->hasMany(Topup::class);
 }
+
 }

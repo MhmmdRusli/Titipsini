@@ -79,21 +79,7 @@ class TopUpController extends Controller
      * Xendit dll), method ini diganti jadi webhook callback yang dipanggil
      * otomatis oleh gateway, bukan ditekan manual oleh user.
      */
-    public function konfirmasi(Request $request, Topup $topup): RedirectResponse
-    {
-        $this->authorizeOwnership($request, $topup);
-
-        if ($topup->status === 'pending') {
-            $topup->update([
-                'status' => 'berhasil',
-                'paid_at' => now(),
-            ]);
-
-            $topup->user->increment('saldo', $topup->nominal);
-        }
-
-        return redirect()->route('customer.topup.sukses', $topup);
-    }
+   
 
     /**
      * GET /app/saldo/topup/{topup}/sukses - Step 4: halaman sukses
@@ -112,4 +98,49 @@ class TopUpController extends Controller
     {
         abort_unless($topup->user_id === $request->user()->id, 403);
     }
+
+  
+public function konfirmasi(Request $request, Topup $topup): RedirectResponse
+{
+    $this->authorizeOwnership($request, $topup);
+
+    abort_unless($topup->status === 'pending', 422, 'Transaksi ini sudah diproses sebelumnya.');
+
+    $validated = $request->validate([
+        'bukti_transfer' => ['required', 'image', 'max:2048'],
+    ], [
+        'bukti_transfer.required' => 'Silakan unggah bukti pembayaran terlebih dahulu.',
+        'bukti_transfer.image' => 'File harus berupa gambar (screenshot bukti transfer).',
+    ]);
+
+    $path = $request->file('bukti_transfer')->store('bukti-topup', 'public');
+
+    $topup->update([
+        'status' => 'menunggu_verifikasi',
+        'bukti_transfer' => '/storage/' . $path,
+        'paid_at' => now(), // waktu user klaim sudah bayar, bukan waktu terverifikasi
+    ]);
+
+    return redirect()->route('customer.topup.menunggu', $topup);
+}
+
+public function menunggu(Request $request, Topup $topup): Response
+{
+    $this->authorizeOwnership($request, $topup);
+
+    return Inertia::render('Customer/Topup/Menunggu', [
+        'topup' => $topup,
+    ]);
+}
+public function riwayat(Request $request): Response
+{
+    $topups = $request->user()->topups()
+        ->latest()
+        ->paginate(10);
+
+    return Inertia::render('Customer/Topup/Riwayat', [
+        'topups' => $topups,
+        'saldo' => $request->user()->saldo,
+    ]);
+}
 }

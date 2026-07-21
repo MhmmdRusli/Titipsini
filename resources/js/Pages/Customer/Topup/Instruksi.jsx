@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { Building2, Copy, Check, ChevronDown } from 'lucide-react';
+import { Building2, Copy, Check, ChevronDown, Upload, X } from 'lucide-react';
 
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(
@@ -12,7 +12,11 @@ function formatRupiah(value) {
 export default function Instruksi({ topup }) {
     const [copied, setCopied] = useState(false);
     const [openAccordion, setOpenAccordion] = useState('mbanking');
-    const [confirming, setConfirming] = useState(false);
+    const [preview, setPreview] = useState(null);
+
+    const { data, setData, post, processing, errors } = useForm({
+        bukti_transfer: null,
+    });
 
     function copyVa() {
         navigator.clipboard.writeText(topup.va_number);
@@ -20,20 +24,29 @@ export default function Instruksi({ topup }) {
         setTimeout(() => setCopied(false), 2000);
     }
 
-    function handleSelesai() {
-        setConfirming(true);
-        router.post(
-            `/app/saldo/topup/${topup.id}/konfirmasi`,
-            {},
-            { onFinish: () => setConfirming(false) }
-        );
+    function handleFileChange(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setData('bukti_transfer', file);
+        setPreview(URL.createObjectURL(file));
+    }
+
+    function removeFile() {
+        setData('bukti_transfer', null);
+        setPreview(null);
+    }
+
+    function handleSelesai(e) {
+        e.preventDefault();
+        post(`/app/saldo/topup/${topup.id}/konfirmasi`, { forceFormData: true });
     }
 
     return (
         <CustomerLayout title="Instruksi Pembayaran" backHref="/app/dashboard">
             <Head title="Instruksi Pembayaran" />
 
-            <div className="px-4 py-4">
+            <div className="px-4 py-4 pb-32">
+                {/* Info channel pembayaran */}
                 {topup.metode_pembayaran === 'transfer_bank' ? (
                     <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
@@ -68,6 +81,7 @@ export default function Instruksi({ topup }) {
                     </div>
                 )}
 
+                {/* Accordion cara bayar - khusus transfer bank */}
                 {topup.metode_pembayaran === 'transfer_bank' && (
                     <div className="mt-4 divide-y divide-gray-100 rounded-xl border border-gray-100 bg-white shadow-sm">
                         <button
@@ -134,6 +148,7 @@ export default function Instruksi({ topup }) {
                     </div>
                 )}
 
+                {/* Rincian biaya */}
                 <div className="mt-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
                     <div className="flex justify-between text-xs text-gray-500">
                         <span>Subtotal Top Up</span>
@@ -148,16 +163,47 @@ export default function Instruksi({ topup }) {
                         <span>{formatRupiah(topup.total)}</span>
                     </div>
                 </div>
+
+                {/* Upload bukti transfer */}
+                <div className="mt-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <p className="text-sm font-semibold text-gray-900">Unggah Bukti Pembayaran</p>
+                    <p className="mt-1 text-xs text-gray-500">
+                        Setelah transfer selesai, unggah screenshot bukti pembayaran. Tim kami akan
+                        memverifikasi dalam waktu kurang dari 10 menit.
+                    </p>
+
+                    {preview ? (
+                        <div className="relative mt-3">
+                            <img src={preview} alt="Bukti transfer" className="w-full rounded-lg object-cover" />
+                            <button
+                                type="button"
+                                onClick={removeFile}
+                                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white"
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+                    ) : (
+                        <label className="mt-3 flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-gray-200 py-6 text-gray-400">
+                            <Upload size={20} />
+                            <span className="text-xs">Tap untuk unggah gambar</span>
+                            <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                        </label>
+                    )}
+                    {errors.bukti_transfer && (
+                        <p className="mt-1.5 text-xs text-red-500">{errors.bukti_transfer}</p>
+                    )}
+                </div>
             </div>
 
             <div className="absolute inset-x-0 bottom-16 px-4 pb-2">
                 <button
                     type="button"
-                    disabled={confirming}
+                    disabled={processing || !data.bukti_transfer}
                     onClick={handleSelesai}
-                    className="w-full rounded-xl bg-green-600 py-3.5 text-sm font-bold text-white shadow-lg disabled:opacity-60"
+                    className="w-full rounded-xl bg-green-600 py-3.5 text-sm font-bold text-white shadow-lg disabled:opacity-40"
                 >
-                    {confirming ? 'Memproses...' : 'Selesai'}
+                    {processing ? 'Mengirim...' : 'Saya Sudah Bayar'}
                 </button>
             </div>
         </CustomerLayout>

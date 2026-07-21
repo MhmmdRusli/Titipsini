@@ -47,6 +47,7 @@ use App\Http\Controllers\Mitra\Auth\NewPasswordController as MitraNewPasswordCon
 use App\Http\Controllers\Mitra\Auth\EmailVerificationPromptController as MitraEmailVerificationPromptController;
 use App\Http\Controllers\Mitra\Auth\EmailVerificationNotificationController as MitraEmailVerificationNotificationController;
 use App\Http\Controllers\Mitra\Auth\VerifyEmailController as MitraVerifyEmailController;
+use App\Http\Controllers\Admin\TopupVerifikasiController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -172,6 +173,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::put('{report}/restore', [ReportController::class, 'restore'])->name('restore');
         Route::get('{report}/penangguhan', [ReportController::class, 'penangguhan'])->name('penangguhan');
     });
+
+    // Verifikasi Top Up manual
+    Route::prefix('topup')->name('topup.')->group(function () {
+        Route::get('/', [TopupVerifikasiController::class, 'index'])->name('index');
+        Route::get('/{topup}', [TopupVerifikasiController::class, 'show'])->name('show');
+        Route::post('/{topup}/approve', [TopupVerifikasiController::class, 'approve'])->name('approve');
+        Route::post('/{topup}/reject', [TopupVerifikasiController::class, 'reject'])->name('reject');
+    });
 });
 
 /*
@@ -271,7 +280,9 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::post('/saldo/topup', [TopUpController::class, 'store'])->name('topup.store');
     Route::get('/saldo/topup/{topup}/instruksi', [TopUpController::class, 'instruksi'])->name('topup.instruksi');
     Route::post('/saldo/topup/{topup}/konfirmasi', [TopUpController::class, 'konfirmasi'])->name('topup.konfirmasi');
+    Route::get('/saldo/topup/{topup}/menunggu', [TopUpController::class, 'menunggu'])->name('topup.menunggu');
     Route::get('/saldo/topup/{topup}/sukses', [TopUpController::class, 'sukses'])->name('topup.sukses');
+    Route::get('/saldo/riwayat', [TopUpController::class, 'riwayat'])->name('topup.riwayat');
 });
 
 // Rute Lengkapi Data
