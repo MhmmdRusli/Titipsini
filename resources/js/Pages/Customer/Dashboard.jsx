@@ -4,7 +4,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 
 // Kategori disesuaikan persis dengan 3 item utama pada mockup gambar
 const CATEGORIES = [
-    { key: 'barang', label: ' Barang', icon: Package, href: '/app/services?kategori=barang' },
+    { key: 'barang', label: ' Barang', icon: Package, href: '/app/services/barang/paket-pilihan' }, // diubah
     { key: 'bangunan', label: ' Bangunan', icon: Building2, href: '/app/services?kategori=bangunan' },
     { key: 'kendaraan', label: ' Kendaraan', icon: Car, href: '/app/services?kategori=kendaraan' },
 ];

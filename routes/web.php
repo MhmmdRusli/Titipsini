@@ -228,6 +228,14 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->gr
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('/services/barang/paket-pilihan', [ServiceController::class, 'pilihPaket'])
+    ->name('services.barang.pilihPaket');
+    Route::get('/services/barang', [ServiceController::class, 'formBarang'])->name('services.barang.form');
+    Route::post('/services/barang', [ServiceController::class, 'simpanBarang'])->name('services.barang.store');
+    Route::get('/services/barang/pemesanan', [ServiceController::class, 'pemesanan'])
+    ->name('services.barang.pemesanan');
+    Route::post('/services/barang/konfirmasi', [ServiceController::class, 'konfirmasiPesanan'])
+    ->name('services.barang.konfirmasi');
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
 
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
