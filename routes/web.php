@@ -131,7 +131,7 @@ Route::middleware(['auth'])->prefix('mitra')->name('mitra.')->group(function () 
 
 Route::get('/mitra/verifikasi-email/{id}/{hash}', [MitraVerifyEmailController::class, 'verify'])
     ->middleware(['auth', 'signed'])
-    ->name('mitra.verification.verify');
+    ->name('verification.verify');
 
 /*
 |--------------------------------------------------------------------------
