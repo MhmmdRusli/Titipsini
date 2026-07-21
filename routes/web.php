@@ -67,7 +67,7 @@ Route::get('/', function () {
     return Inertia::render('Onboarding');
 })->name('welcome');
 
-// Auth routes (customer login lewat sini; admin & mitra ditolak & diarahkan ke halaman masing-masing)
+// Auth routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -115,7 +115,7 @@ Route::middleware('guest')->prefix('mitra')->name('mitra.')->group(function () {
     Route::post('/reset-password', [MitraNewPasswordController::class, 'store'])->name('password.update');
 });
 
-// Verifikasi email mitra (butuh login, tapi belum tentu sudah full ke-approve admin)
+// Verifikasi email mitra
 Route::middleware(['auth'])->prefix('mitra')->name('mitra.')->group(function () {
     Route::get('/verifikasi-email', [MitraEmailVerificationPromptController::class, '__invoke'])
         ->name('verify-email.notice');
@@ -176,8 +176,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 /*
 |--------------------------------------------------------------------------
 | Mitra routes  -> /mitra/* (role: partner, sudah login)
-| Semua digabung jadi SATU grup - sebelumnya kepisah di banyak grup
-| terpisah dengan nama 'partner.' yang bahkan ada duplikat /dashboard 3x.
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->group(function () {
@@ -200,7 +198,6 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->gr
     Route::get('/layanan/jam-operasional', [JamOperasionalController::class, 'edit'])->name('jam-operasional.edit');
     Route::put('/layanan/jam-operasional', [JamOperasionalController::class, 'update'])->name('jam-operasional.update');
 
-    // Kelola Layanan (Barang/Bangunan/Kendaraan/Pindahan) yang partner tawarkan
     Route::resource('layanan', MitraServiceController::class)->except(['show', 'create', 'edit']);
 
     Route::get('/rekening', [RekeningController::class, 'edit'])->name('rekening.edit');
@@ -222,32 +219,48 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->gr
 /*
 |--------------------------------------------------------------------------
 | Customer routes  -> /app/* (role: customer)
-| Digabung jadi SATU grup juga - sebelumnya kepisah di banyak grup terpisah
-| dengan prefix & name yang sama persis.
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+    
+    // Services / Layanan
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('/services/barang/paket-pilihan', [ServiceController::class, 'pilihPaket'])->name('services.barang.pilihPaket');
+    Route::get('/services/barang', [ServiceController::class, 'formBarang'])->name('services.barang.form');
+    Route::post('/services/barang', [ServiceController::class, 'simpanBarang'])->name('services.barang.store');
+    Route::get('/services/barang/pemesanan', [ServiceController::class, 'pemesanan'])->name('services.barang.pemesanan');
+    Route::get('/services/barang/metode-pembayaran', [ServiceController::class, 'metodePembayaran'])->name('services.barang.metodePembayaran');
+    Route::post('/services/barang/konfirmasi', [ServiceController::class, 'konfirmasiPesanan'])->name('services.barang.konfirmasi');
+    Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
+    Route::post('/services/{service}/pesan', [ServiceController::class, 'storePesanan'])->name('services.pesan');
+    Route::get('/services/{service}/metode-pembayaran', [ServiceController::class, 'metodePembayaranLayanan'])->name('services.metodePembayaranLayanan');
+    Route::post('/services/{service}/konfirmasi', [ServiceController::class, 'konfirmasiLayanan'])->name('services.konfirmasiLayanan');
+    
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
 
+    // Pesanan & Pembayaran
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/sukses', [CustomerOrderController::class, 'success'])->name('orders.success');
+    Route::get('/orders/{order}/pembayaran', [CustomerOrderController::class, 'pembayaran'])->name('orders.pembayaran');
+    Route::get('/orders/{order}/bukti-pembayaran', [CustomerOrderController::class, 'buktiPembayaran'])->name('orders.buktiPembayaran');
+    Route::post('/orders/{order}/upload-bukti', [CustomerOrderController::class, 'uploadBukti'])->name('orders.uploadBukti');
 
+    // Notifikasi
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::patch('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
 
+    // Profil & Pengaturan
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('profile.index');
-
+    Route::get('/profile/edit', [CustomerProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
     Route::get('/profile/notifikasi', [NotificationSettingController::class, 'edit'])->name('profile.notifikasi.edit');
     Route::patch('/profile/notifikasi', [NotificationSettingController::class, 'update'])->name('profile.notifikasi.update');
-
     Route::get('/profile/bantuan', [BantuanController::class, 'index'])->name('profile.bantuan');
-
     Route::get('/profile/tentang', [TentangController::class, 'index'])->name('profile.tentang');
     Route::get('/profile/tentang/syarat-ketentuan', [TentangController::class, 'syaratKetentuan'])->name('profile.tentang.syarat');
     Route::get('/profile/tentang/kebijakan-privasi', [TentangController::class, 'kebijakanPrivasi'])->name('profile.tentang.privasi');
-
     Route::get('/profile/keamanan', [SecurityController::class, 'edit'])->name('profile.keamanan');
     Route::put('/profile/keamanan/password', [SecurityController::class, 'updatePassword'])->name('profile.keamanan.password');
     Route::put('/profile/keamanan/pin', [SecurityController::class, 'updatePin'])->name('profile.keamanan.pin');
@@ -260,7 +273,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/saldo/topup/{topup}/sukses', [TopUpController::class, 'sukses'])->name('topup.sukses');
 });
 
-// Rute Lengkapi Data: user baru (status pendaftar) tetap bisa akses, tanpa role:customer
+// Rute Lengkapi Data
 Route::middleware(['auth'])->prefix('lengkapi-data')->name('customer.lengkapi-data.')->group(function () {
     Route::get('/', [LengkapiDataController::class, 'intro'])->name('intro');
     Route::get('/form', [LengkapiDataController::class, 'form'])->name('form');
