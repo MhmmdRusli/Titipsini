@@ -10,15 +10,16 @@
         'Konsultasi & Support',
     ];
 
-    export default function FormBarang({ hargaMulai = 100000 }) {
+    export default function FormBarang({ hargaMulai = 100000, serviceId }) {
         const formattedHarga = new Intl.NumberFormat('id-ID').format(hargaMulai);
 
         const [form, setForm] = useState({
-            namaBarang: '',
-            pickup: false,
-            tanggalMasuk: '',
-            tanggalKeluar: '',
-        });
+    namaBarang: '',
+    pickup: false,
+    tanggalMasuk: '',
+    tanggalKeluar: '',
+    service_id: serviceId ?? null,
+});
 
         function update(field, value) {
             setForm((prev) => ({ ...prev, [field]: value }));

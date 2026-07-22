@@ -119,7 +119,7 @@ export default function ServicesIndex({ services, filters }) {
                     {services.data.map((service) => (
                         <Link
                             key={service.id}
-                            href={`/app/services/${service.id}`}
+                            href={service.kategori === 'barang' ? `/app/services/barang/paket-pilihan?service_id=${service.id}` : `/app/services/${service.id}`}
                             className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm"
                         >
                             <div className="h-24 w-full bg-gray-100">

@@ -50,19 +50,21 @@ class ServiceController extends Controller
         ]);
     }
 
-    public function pilihPaket()
-    {
-        return Inertia::render('Customer/Services/PilihPaket', [
-            'hargaMulai' => 100000,
-        ]);
-    }
+    public function pilihPaket(Request $request)
+{
+    return Inertia::render('Customer/Services/PilihPaket', [
+        'hargaMulai' => 100000,
+        'serviceId' => $request->query('service_id'),
+    ]);
+}
 
-    public function formBarang()
-    {
-        return Inertia::render('Customer/Services/Barang/Form', [
-            'hargaMulai' => 100000,
-        ]);
-    }
+    public function formBarang(Request $request)
+{
+    return Inertia::render('Customer/Services/Barang/Form', [
+        'hargaMulai' => 100000,
+        'serviceId' => $request->query('service_id'),
+    ]);
+}
 
     public function simpanBarang(Request $request)
     {
@@ -71,6 +73,7 @@ class ServiceController extends Controller
             'pickup' => 'boolean',
             'tanggalMasuk' => 'required|date',
             'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
+            'service_id' => 'nullable|integer|exists:services,id',
         ]);
 
         session(['pesanan_barang' => $data]);
@@ -126,19 +129,13 @@ class ServiceController extends Controller
 
         $total = $items->count() * 15000;
         $customer = auth()->user();
+$service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
 
-        $order = Order::create([
-            'order_code' => 'TS-'.strtoupper(uniqid()),
-            'customer_id' => $customer->id,
-            'service_type' => 'barang',
-            'item_name' => $data['namaBarang'],
-            'start_date' => $data['tanggalMasuk'],
-            'end_date' => $data['tanggalKeluar'],
-            'is_pickup' => (bool) $data['pickup'],
-            'city' => $customer->city ?? '-',
-            'status' => 'baru',
-            'total_price' => $total,
-            'payment_method' => 'default', // Menggunakan nilai bawaan/default
+$order = Order::create([
+    'order_code' => 'TS-'.strtoupper(uniqid()),
+    'customer_id' => $customer->id,
+    'partner_id' => $service?->user_id,
+    'service_type' => 'barang',// Menggunakan nilai bawaan/default
         ]);
 
         session()->forget('pesanan_barang');
