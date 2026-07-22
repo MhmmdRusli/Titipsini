@@ -208,4 +208,71 @@ class ServiceController extends Controller
 
         return redirect()->route('customer.orders.success', $order->id);
     }
+
+    /**
+     * GET /app/services/barang/metode-pembayaran
+     * Menampilkan halaman pilih metode pembayaran untuk pesanan barang
+     */
+    public function metodePembayaran()
+    {
+        $data = session('pesanan_barang');
+
+        if (!$data) {
+            return redirect()->route('customer.services.barang.pilihPaket');
+        }
+
+        $items = collect(explode(',', $data['namaBarang']))
+            ->map(fn ($nama) => trim($nama))
+            ->filter();
+
+        $total = $items->count() * 15000;
+
+        return Inertia::render('Customer/Services/Barang/MetodePembayaran', [
+            'total' => $total,
+        ]);
+    }
+
+    /**
+     * GET /app/services/{service}/metode-pembayaran
+     * Menampilkan halaman pilih metode pembayaran untuk layanan titipan
+     */
+    public function metodePembayaranLayanan(Service $service)
+    {
+        return Inertia::render('Customer/Services/MetodePembayaranLayanan', [
+            'serviceId' => $service->id,
+            'total' => (float) $service->harga,
+        ]);
+    }
+
+    /**
+     * POST /app/services/{service}/konfirmasi
+     * Proses konfirmasi pesanan layanan/titipan dengan metode pembayaran
+     */
+    public function konfirmasiLayanan(Request $request, Service $service)
+    {
+        $data = $request->validate([
+            'payment_method' => 'required|string',
+            'tanggalMasuk' => 'required|date',
+            'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
+        ]);
+
+        $customer = auth()->user();
+
+        $order = Order::create([
+            'order_code' => 'TS-'.strtoupper(uniqid()),
+            'customer_id' => $customer->id,
+            'partner_id' => $service->user_id,
+            'service_type' => $service->kategori,
+            'item_name' => $service->nama.' ('.$this->jenisLabel($service).')',
+            'start_date' => $data['tanggalMasuk'],
+            'end_date' => $data['tanggalKeluar'],
+            'is_pickup' => false,
+            'city' => $service->kota,
+            'status' => 'baru',
+            'total_price' => $service->harga,
+            'payment_method' => $data['payment_method'],
+        ]);
+
+        return redirect()->route('customer.orders.success', $order->id);
+    }
 }

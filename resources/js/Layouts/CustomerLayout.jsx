@@ -34,9 +34,14 @@ export default function CustomerLayout({ children, title, backHref }) {
                             </>
                         ) : (
                             <div className="flex flex-1 items-center justify-between">
-                                <Link href="/app/dashboard" className="flex items-center gap-2">
-                                    <span className="font-mono text-xs tracking-widest text-brand-teal-700">
-                                        TITIPSINI
+                                <Link href="/app/dashboard" className="flex items-center gap-1.5">
+                                    <img
+                                        src="/images/logo-titipsini.png"
+                                        alt="Logo"
+                                        className="h-6 w-auto object-contain"
+                                    />
+                                    <span className="text-base font-bold tracking-tight text-[#15803d]">
+                                        Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                                     </span>
                                 </Link>
 
