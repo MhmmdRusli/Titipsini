@@ -58,8 +58,15 @@ export default function MitraLayout({ children, title }) {
                         className="flex items-center justify-between px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
                     >
-                        <Link href="/mitra/dashboard" className="flex items-center gap-2">
-                            <span className="font-mono text-xs tracking-widest text-green-600">TITIPSINI &middot;MITRA</span>
+                        <Link href="/mitra/dashboard" className="flex items-center gap-1.5">
+                            <img
+                                src="/images/logo-titipsini.png"
+                                alt="Logo"
+                                className="h-6 w-auto object-contain"
+                            />
+                            <span className="text-base font-bold tracking-tight text-[#15803d]">
+                                Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
+                            </span>
                         </Link>
 
                         <div className="relative">
