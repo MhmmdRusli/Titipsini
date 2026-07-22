@@ -1,12 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
-import { Plus, History, Package, Building2, Car, ChevronRight, MapPin } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+import { Plus, History, Package, Building2, Car, Truck, ChevronRight, MapPin } from 'lucide-react';
 
 // Kategori disesuaikan persis dengan 3 item utama pada mockup gambar
 const CATEGORIES = [
-    { key: 'barang', label: ' Barang', icon: Package, href: '/app/services?kategori=barang' },// diubah
+    { key: 'barang', label: ' Barang', icon: Package, href: '/app/services?kategori=barang' },
     { key: 'bangunan', label: ' Bangunan', icon: Building2, href: '/app/services?kategori=bangunan' },
     { key: 'kendaraan', label: ' Kendaraan', icon: Car, href: '/app/services?kategori=kendaraan' },
+    { key: 'pindahan', label: ' Pindahan', icon: Truck, href: '/app/services?kategori=pindahan' },
 ];
 
 function formatRupiah(value) {
@@ -83,7 +84,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                 {/* Kategori Layanan Section */}
                 <div className="mt-5">
                     <p className="mb-3 text-sm font-bold text-gray-900">Mau nitip apa hari ini?</p>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-4 gap-2.5">
                         {CATEGORIES.map(({ key, label, icon: Icon, href }) => (
                             <Link
                                 key={key}
