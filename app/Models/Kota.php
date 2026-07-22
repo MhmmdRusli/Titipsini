@@ -13,10 +13,11 @@ class Kota extends Model
     protected $table = 'kota';
 
     protected $fillable = [
-        'nama',
-        'provinsi',
-        'is_active',
-    ];
+    'nama',
+    'provinsi',
+    'foto',
+    'is_active',
+];
 
     protected $casts = [
         'is_active' => 'boolean',

@@ -19,7 +19,11 @@ class ServiceController extends Controller
     $layanan = Service::query()
         ->where('user_id', $request->user()->id)
         ->orderBy('created_at', 'desc')
-        ->get();
+        ->get()
+        ->map(function ($item) {
+            $item->foto_url = $item->foto ? \Illuminate\Support\Facades\Storage::url($item->foto) : null;
+            return $item;
+        });
 
     return Inertia::render('Mitra/Layanan/Index', [
         'layanan' => $layanan,
@@ -31,39 +35,54 @@ class ServiceController extends Controller
      * POST /mitra/layanan
      */
     public function store(Request $request): RedirectResponse
-    {
-        $validated = $this->validated($request);
+{
+    $validated = $this->validated($request);
 
-        $request->user()->services()->create($validated);
-
-        return redirect()->back()->with('success', 'Layanan berhasil ditambahkan.');
+    if ($request->hasFile('foto')) {
+        $validated['foto'] = $request->file('foto')->store('services', 'public');
     }
+
+    $request->user()->services()->create($validated);
+
+    return redirect()->back()->with('success', 'Layanan berhasil ditambahkan.');
+}
 
     /**
      * PUT /mitra/layanan/{service}
      */
-    public function update(Request $request, Service $service): RedirectResponse
-    {
-        $this->authorizeOwnership($request, $service);
+    public function update(Request $request, Service $layanan): RedirectResponse
+{
+    $this->authorizeOwnership($request, $layanan);
 
-        $validated = $this->validated($request);
+    $validated = $this->validated($request);
 
-        $service->update($validated);
-
-        return redirect()->back()->with('success', 'Layanan berhasil diperbarui.');
+    if ($request->hasFile('foto')) {
+        if ($layanan->foto) {
+            \Illuminate\Support\Facades\Storage::delete($layanan->foto);
+        }
+        $validated['foto'] = $request->file('foto')->store('services', 'public');
     }
+
+    $layanan->update($validated);
+
+    return redirect()->back()->with('success', 'Layanan berhasil diperbarui.');
+}
 
     /**
      * DELETE /mitra/layanan/{service}
      */
-    public function destroy(Request $request, Service $service): RedirectResponse
-    {
-        $this->authorizeOwnership($request, $service);
+    public function destroy(Request $request, Service $layanan): RedirectResponse
+{
+    $this->authorizeOwnership($request, $layanan);
 
-        $service->delete();
-
-        return redirect()->back()->with('success', 'Layanan berhasil dihapus.');
+    if ($layanan->foto) {
+        \Illuminate\Support\Facades\Storage::delete($layanan->foto);
     }
+
+    $layanan->delete();
+
+    return redirect()->back()->with('success', 'Layanan berhasil dihapus.');
+}
 
     protected function validated(Request $request): array
 {
@@ -84,6 +103,7 @@ class ServiceController extends Controller
         'kecamatan' => ['required', 'string', 'max:100'],
         'harga' => ['nullable', 'numeric', 'min:0'],
         'is_active' => ['boolean'],
+        'foto' => ['nullable', 'image', 'max:2048'],
     ], [
         'kota.exists' => 'Kota belum terdaftar atau tidak aktif. Hubungi Admin untuk menambahkan kota ini.',
     ]);

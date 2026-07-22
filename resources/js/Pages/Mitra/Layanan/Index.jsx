@@ -43,6 +43,7 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [fotoPreview, setFotoPreview] = useState(null);
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         kategori: 'kendaraan',
@@ -53,13 +54,21 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
         kecamatan: '',
         harga: '',
         is_active: true,
+        foto: null,
     });
-
     function openCreateModal() {
         reset();
         clearErrors();
         setEditingItem(null);
         setModalOpen(true);
+    }
+
+    function handleFotoChange(e) {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('foto', file);
+            setFotoPreview(URL.createObjectURL(file));
+        }
     }
 
     function openEditModal(item) {
@@ -73,7 +82,9 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
             kecamatan: item.kecamatan,
             harga: item.harga ?? '',
             is_active: item.is_active,
+            foto: null,
         });
+        setFotoPreview(item.foto_url ?? null);
         clearErrors();
         setModalOpen(true);
     }
@@ -81,6 +92,7 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
     function closeModal() {
         setModalOpen(false);
         setEditingItem(null);
+        setFotoPreview(null);
         reset();
         clearErrors();
     }
@@ -88,9 +100,12 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
     function handleSubmit(e) {
         e.preventDefault();
         if (editingItem) {
-            put(`/mitra/layanan/${editingItem.id}`, { onSuccess: closeModal });
+            router.post(`/mitra/layanan/${editingItem.id}`, { ...data, _method: 'put' }, {
+                forceFormData: true,
+                onSuccess: closeModal,
+            });
         } else {
-            post('/mitra/layanan', { onSuccess: closeModal });
+            post('/mitra/layanan', { forceFormData: true, onSuccess: closeModal });
         }
     }
 
@@ -200,8 +215,8 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
                                             type="button"
                                             onClick={() => setData('kategori', value)}
                                             className={`flex flex-col items-center gap-1 rounded-lg border py-2 text-[10px] font-medium ${data.kategori === value
-                                                    ? 'border-green-600 bg-green-50 text-green-700'
-                                                    : 'border-gray-200 text-gray-500'
+                                                ? 'border-green-600 bg-green-50 text-green-700'
+                                                : 'border-gray-200 text-gray-500'
                                                 }`}
                                         >
                                             <Icon size={16} />
@@ -224,8 +239,8 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
                                                 type="button"
                                                 onClick={() => setData('jenis_kendaraan', opt.value)}
                                                 className={`rounded-full border px-3 py-1.5 text-xs font-medium ${data.jenis_kendaraan === opt.value
-                                                        ? 'border-green-600 bg-green-600 text-white'
-                                                        : 'border-gray-200 text-gray-600'
+                                                    ? 'border-green-600 bg-green-600 text-white'
+                                                    : 'border-gray-200 text-gray-600'
                                                     }`}
                                             >
                                                 {opt.label}
@@ -250,8 +265,8 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
                                                 type="button"
                                                 onClick={() => setData('jenis_bangunan', opt.value)}
                                                 className={`rounded-full border px-3 py-1.5 text-xs font-medium ${data.jenis_bangunan === opt.value
-                                                        ? 'border-green-600 bg-green-600 text-white'
-                                                        : 'border-gray-200 text-gray-600'
+                                                    ? 'border-green-600 bg-green-600 text-white'
+                                                    : 'border-gray-200 text-gray-600'
                                                     }`}
                                             >
                                                 {opt.label}
@@ -263,6 +278,28 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
                                     )}
                                 </div>
                             )}
+
+                            <div>
+                                <label className="mb-1.5 block text-xs font-medium text-gray-600">Foto Layanan</label>
+                                <label
+                                    htmlFor="foto-layanan"
+                                    className="flex h-32 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 bg-gray-50"
+                                >
+                                    {fotoPreview ? (
+                                        <img src={fotoPreview} alt="Preview" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <span className="text-xs text-gray-400">Klik untuk pilih foto</span>
+                                    )}
+                                    <input
+                                        id="foto-layanan"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleFotoChange}
+                                    />
+                                </label>
+                                {errors.foto && <p className="mt-1 text-xs text-red-500">{errors.foto}</p>}
+                            </div>
 
                             <div>
                                 <label className="mb-1 block text-xs font-medium text-gray-600">Nama Layanan</label>

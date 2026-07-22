@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Kota;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class KotaController extends Controller
@@ -20,7 +21,11 @@ class KotaController extends Controller
             })
             ->orderBy('nama')
             ->paginate(10)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(function ($item) {
+                $item->foto_url = $item->foto ? Storage::url($item->foto) : null;
+                return $item;
+            });
 
         return Inertia::render('Admin/Kota/Index', [
             'kota' => $kota,
@@ -36,7 +41,12 @@ class KotaController extends Controller
             'nama' => ['required', 'string', 'max:100', 'unique:kota,nama'],
             'provinsi' => ['required', 'string', 'max:100'],
             'is_active' => ['boolean'],
+            'foto' => ['nullable', 'image', 'max:2048'],
         ]);
+
+        if ($request->hasFile('foto')) {
+            $validated['foto'] = $request->file('foto')->store('kota', 'public');
+        }
 
         Kota::create($validated);
 
@@ -49,7 +59,15 @@ class KotaController extends Controller
             'nama' => ['required', 'string', 'max:100', 'unique:kota,nama,' . $kotum->id],
             'provinsi' => ['required', 'string', 'max:100'],
             'is_active' => ['boolean'],
+            'foto' => ['nullable', 'image', 'max:2048'],
         ]);
+
+        if ($request->hasFile('foto')) {
+            if ($kotum->foto) {
+                Storage::delete($kotum->foto);
+            }
+            $validated['foto'] = $request->file('foto')->store('kota', 'public');
+        }
 
         $kotum->update($validated);
 
@@ -58,6 +76,10 @@ class KotaController extends Controller
 
     public function destroy(Kota $kotum)
     {
+        if ($kotum->foto) {
+            Storage::delete($kotum->foto);
+        }
+
         $kotum->delete();
 
         return redirect()->back()->with('success', 'Kota berhasil dihapus.');

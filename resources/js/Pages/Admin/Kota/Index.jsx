@@ -11,11 +11,13 @@ export default function KotaIndex({ kota, filters }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingKota, setEditingKota] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [fotoPreview, setFotoPreview] = useState(null);
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         nama: '',
         provinsi: '',
         is_active: true,
+        foto: null,
     });
 
     function handleSearch(e) {
@@ -36,7 +38,9 @@ export default function KotaIndex({ kota, filters }) {
             nama: item.nama,
             provinsi: item.provinsi,
             is_active: item.is_active,
+            foto: null,
         });
+        setFotoPreview(item.foto_url ?? null);
         clearErrors();
         setModalOpen(true);
     }
@@ -44,6 +48,7 @@ export default function KotaIndex({ kota, filters }) {
     function closeModal() {
         setModalOpen(false);
         setEditingKota(null);
+        setFotoPreview(null);
         reset();
         clearErrors();
     }
@@ -51,9 +56,12 @@ export default function KotaIndex({ kota, filters }) {
     function handleSubmit(e) {
         e.preventDefault();
         if (editingKota) {
-            put(`/admin/kota/${editingKota.id}`, { onSuccess: closeModal });
+            router.post(`/admin/kota/${editingKota.id}`, { ...data, _method: 'put' }, {
+                forceFormData: true,
+                onSuccess: closeModal,
+            });
         } else {
-            post('/admin/kota', { onSuccess: closeModal });
+            post('/admin/kota', { forceFormData: true, onSuccess: closeModal });
         }
     }
 
@@ -61,6 +69,14 @@ export default function KotaIndex({ kota, filters }) {
         router.delete(`/admin/kota/${deleteTarget.id}`, {
             onSuccess: () => setDeleteTarget(null),
         });
+    }
+
+    function handleFotoChange(e) {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('foto', file);
+            setFotoPreview(URL.createObjectURL(file));
+        }
     }
 
     return (
@@ -108,8 +124,14 @@ export default function KotaIndex({ kota, filters }) {
                         {kota.data.map((item) => (
                             <tr key={item.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2 font-medium text-gray-900">
-                                        <MapPin size={15} className="text-brand-teal-600" />
+                                    <div className="flex items-center gap-2.5 font-medium text-gray-900">
+                                        {item.foto_url ? (
+                                            <img src={item.foto_url} alt={item.nama} className="h-8 w-8 rounded-full object-cover" />
+                                        ) : (
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-teal-50 text-brand-teal-600">
+                                                <MapPin size={15} />
+                                            </div>
+                                        )}
                                         {item.nama}
                                     </div>
                                 </td>
@@ -117,11 +139,10 @@ export default function KotaIndex({ kota, filters }) {
                                 <td className="px-6 py-4 text-gray-600">{item.jumlah_vendor ?? 0}</td>
                                 <td className="px-6 py-4">
                                     <span
-                                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                                            item.is_active
-                                                ? 'bg-brand-teal-100 text-brand-teal-700'
-                                                : 'bg-gray-100 text-gray-500'
-                                        }`}
+                                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${item.is_active
+                                            ? 'bg-brand-teal-100 text-brand-teal-700'
+                                            : 'bg-gray-100 text-gray-500'
+                                            }`}
                                     >
                                         {item.is_active ? 'Aktif' : 'Nonaktif'}
                                     </span>
@@ -155,13 +176,12 @@ export default function KotaIndex({ kota, filters }) {
                                 href={link.url ?? '#'}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 preserveScroll
-                                className={`rounded-md px-3 py-1.5 text-xs ${
-                                    link.active
-                                        ? 'bg-brand-teal-700 text-white'
-                                        : link.url
+                                className={`rounded-md px-3 py-1.5 text-xs ${link.active
+                                    ? 'bg-brand-teal-700 text-white'
+                                    : link.url
                                         ? 'text-gray-500 hover:bg-gray-100'
                                         : 'text-gray-300 cursor-not-allowed'
-                                }`}
+                                    }`}
                             />
                         ))}
                     </div>
@@ -181,6 +201,21 @@ export default function KotaIndex({ kota, filters }) {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="mb-1.5 block text-xs font-medium text-gray-600">Foto / Ikon Kota</label>
+                                <label
+                                    htmlFor="foto-kota"
+                                    className="flex h-28 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 bg-gray-50"
+                                >
+                                    {fotoPreview ? (
+                                        <img src={fotoPreview} alt="Preview" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <span className="text-xs text-gray-400">Klik untuk pilih foto</span>
+                                    )}
+                                    <input id="foto-kota" type="file" accept="image/*" className="hidden" onChange={handleFotoChange} />
+                                </label>
+                                {errors.foto && <p className="mt-1 text-xs text-red-500">{errors.foto}</p>}
+                            </div>
                             <div>
                                 <label className="mb-1 block text-xs font-medium text-gray-600">Nama Kota</label>
                                 <input
@@ -210,14 +245,12 @@ export default function KotaIndex({ kota, filters }) {
                                 <button
                                     type="button"
                                     onClick={() => setData('is_active', !data.is_active)}
-                                    className={`relative h-6 w-11 rounded-full transition-colors ${
-                                        data.is_active ? 'bg-brand-teal-600' : 'bg-gray-300'
-                                    }`}
+                                    className={`relative h-6 w-11 rounded-full transition-colors ${data.is_active ? 'bg-brand-teal-600' : 'bg-gray-300'
+                                        }`}
                                 >
                                     <span
-                                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                                            data.is_active ? 'translate-x-5' : 'translate-x-0.5'
-                                        }`}
+                                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${data.is_active ? 'translate-x-5' : 'translate-x-0.5'
+                                            }`}
                                     />
                                 </button>
                             </div>
