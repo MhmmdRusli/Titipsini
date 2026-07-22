@@ -10,7 +10,7 @@ const BENEFITS = [
     'Konsultasi & Support',
 ];
 
-export default function PilihPaket({ hargaMulai = 100000 }) {
+export default function PilihPaket({ hargaMulai = 100000, serviceId }) {
     const formattedHarga = new Intl.NumberFormat('id-ID').format(hargaMulai);
 
     return (
@@ -43,7 +43,7 @@ export default function PilihPaket({ hargaMulai = 100000 }) {
 
                 <div className="mt-4 space-y-3">
                     <Link
-                        href="/app/services/barang"
+                        href={`/app/services/barang?service_id=${serviceId ?? ''}`}
                         className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-green-300"
                     >
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600">
