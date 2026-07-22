@@ -170,7 +170,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Rute Pesanan (Orders)
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
-    Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy'); // <-- Rute Hapus Pesanan ditambahkan di sini
+    Route::delete('orders/bulk-delete', [OrderController::class, 'bulkDestroy'])->name('orders.bulkDestroy'); // <-- Bulk delete, HARUS di atas route destroy single di bawah
+    Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy'); // <-- Rute Hapus Pesanan (single)
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
@@ -240,7 +241,7 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->gr
 */
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
-    
+
     // Services / Layanan
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
     Route::get('/services/barang/paket-pilihan', [ServiceController::class, 'pilihPaket'])->name('services.barang.pilihPaket');
@@ -253,7 +254,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::post('/services/{service}/pesan', [ServiceController::class, 'storePesanan'])->name('services.pesan');
     Route::get('/services/{service}/metode-pembayaran', [ServiceController::class, 'metodePembayaranLayanan'])->name('services.metodePembayaranLayanan');
     Route::post('/services/{service}/konfirmasi', [ServiceController::class, 'konfirmasiLayanan'])->name('services.konfirmasiLayanan');
-    
+
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
     Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('berita.show');
 

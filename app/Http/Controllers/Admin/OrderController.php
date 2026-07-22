@@ -75,14 +75,34 @@ class OrderController extends Controller
     }
 
     public function destroy(Order $order)
-    {
-        // Hapus file bukti pembayaran fisik jika ada
+{
+    // Hapus file bukti pembayaran fisik jika ada
+    if ($order->payment_receipt) {
+        Storage::disk('public')->delete(str_replace('/storage/', '', $order->payment_receipt));
+    }
+
+    $order->delete();
+
+    return back()->with('success', 'Pesanan berhasil dihapus.');
+}
+
+public function bulkDestroy(Request $request)
+{
+    $validated = $request->validate([
+        'ids'   => ['required', 'array', 'min:1'],
+        'ids.*' => ['integer', 'exists:orders,id'],
+    ]);
+
+    $orders = Order::whereIn('id', $validated['ids'])->get();
+
+    foreach ($orders as $order) {
         if ($order->payment_receipt) {
             Storage::disk('public')->delete(str_replace('/storage/', '', $order->payment_receipt));
         }
-
-        $order->delete();
-
-        return back()->with('success', 'Pesanan berhasil dihapus.');
     }
+
+    $count = Order::whereIn('id', $validated['ids'])->delete();
+
+    return back()->with('success', "{$count} pesanan berhasil dihapus.");
+}
 }

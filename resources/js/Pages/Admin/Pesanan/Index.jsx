@@ -49,6 +49,13 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
 
+    const [selectMode, setSelectMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
+    const allOnPageSelected = orders.data.length > 0 && orders.data.every((o) => selectedIds.includes(o.id));
+
     function applyFilters(overrides = {}) {
         router.get(
             '/admin/orders',
@@ -72,6 +79,41 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
         router.delete(`/admin/orders/${deleteTarget.id}`, {
             preserveScroll: true,
             onSuccess: () => setDeleteTarget(null),
+        });
+    }
+
+    function toggleSelectMode() {
+        setSelectMode((v) => !v);
+        setSelectedIds([]);
+    }
+
+    function toggleSelectOne(id) {
+        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+    }
+
+    function toggleSelectAllOnPage() {
+        if (allOnPageSelected) {
+            setSelectedIds((prev) => prev.filter((id) => !orders.data.some((o) => o.id === id)));
+        } else {
+            const pageIds = orders.data.map((o) => o.id);
+            setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+        }
+    }
+
+    function handleBulkDelete() {
+        setIsBulkDeleting(true);
+        router.delete('/admin/orders/bulk-delete', {
+            data: { ids: selectedIds },
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsBulkDeleting(false);
+                setBulkDeleteConfirm(false);
+                setSelectedIds([]);
+                setSelectMode(false);
+            },
+            onError: () => {
+                setIsBulkDeleting(false);
+            },
         });
     }
 
@@ -136,12 +178,59 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                         ))}
                     </select>
                 )}
+
+                <button
+                    type="button"
+                    onClick={toggleSelectMode}
+                    className={`ml-auto rounded-lg border px-3 py-2 text-sm font-medium ${
+                        selectMode
+                            ? 'border-brand-teal-600 bg-brand-teal-50 text-brand-teal-700'
+                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                >
+                    {selectMode ? 'Batal Pilih' : 'Pilih Banyak'}
+                </button>
             </div>
+
+            {selectMode && selectedIds.length > 0 && (
+                <div className="mb-4 flex items-center justify-between rounded-xl border border-brand-teal-200 bg-brand-teal-50 px-4 py-3">
+                    <span className="text-sm font-medium text-brand-teal-800">
+                        {selectedIds.length} pesanan dipilih
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setSelectedIds([])}
+                            className="rounded-lg px-3 py-1.5 text-xs text-gray-600 hover:bg-white"
+                        >
+                            Batalkan Pilihan
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setBulkDeleteConfirm(true)}
+                            className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                        >
+                            <Trash2 size={13} />
+                            Hapus {selectedIds.length} Pesanan
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                            {selectMode && (
+                                <th className="w-10 px-4 py-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={allOnPageSelected}
+                                        onChange={toggleSelectAllOnPage}
+                                        className="rounded text-brand-teal-600 focus:ring-brand-teal-500"
+                                    />
+                                </th>
+                            )}
                             <th className="px-6 py-3">Kode Pesanan</th>
                             <th className="px-6 py-3">Customer</th>
                             <th className="px-6 py-3">Vendor</th>
@@ -155,13 +244,23 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                     <tbody className="divide-y divide-gray-100">
                         {orders.data.length === 0 && (
                             <tr>
-                                <td colSpan={8} className="px-6 py-10 text-center text-gray-400">
+                                <td colSpan={selectMode ? 9 : 8} className="px-6 py-10 text-center text-gray-400">
                                     Belum ada pesanan yang cocok dengan filter ini.
                                 </td>
                             </tr>
                         )}
                         {orders.data.map((order) => (
-                            <tr key={order.id} className="hover:bg-gray-50">
+                            <tr key={order.id} className={`hover:bg-gray-50 ${selectedIds.includes(order.id) ? 'bg-brand-teal-50/50' : ''}`}>
+                                {selectMode && (
+                                    <td className="px-4 py-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.includes(order.id)}
+                                            onChange={() => toggleSelectOne(order.id)}
+                                            className="rounded text-brand-teal-600 focus:ring-brand-teal-500"
+                                        />
+                                    </td>
+                                )}
                                 <td className="px-6 py-4 font-medium text-gray-900">
                                     <div>{order.order_code}</div>
                                     {order.payment_receipt && (
@@ -260,6 +359,37 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                             >
                                 Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {bulkDeleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                    <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
+                        <h2 className="text-base font-semibold text-gray-900">
+                            Hapus {selectedIds.length} Pesanan?
+                        </h2>
+                        <p className="mt-2 text-sm text-gray-500">
+                            Semua pesanan yang dipilih akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setBulkDeleteConfirm(false)}
+                                disabled={isBulkDeleting}
+                                className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-60"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleBulkDelete}
+                                disabled={isBulkDeleting}
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+                            >
+                                {isBulkDeleting ? 'Menghapus...' : 'Ya, Hapus Semua'}
                             </button>
                         </div>
                     </div>
@@ -384,7 +514,7 @@ function OrderDetailModal({ order, onClose }) {
                                     className="h-40 w-full object-contain bg-gray-100 cursor-pointer"
                                     onClick={() => setPreviewImage(true)}
                                 />
-                                <div 
+                                <div
                                     className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition cursor-pointer text-white text-xs font-medium gap-1"
                                     onClick={() => setPreviewImage(true)}
                                 >
@@ -438,17 +568,17 @@ function OrderDetailModal({ order, onClose }) {
             </div>
 
             {previewImage && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
                     onClick={() => setPreviewImage(false)}
                 >
                     <div className="relative max-w-3xl max-h-[90vh]">
-                        <img 
-                            src={order.payment_receipt} 
-                            alt="Bukti Transfer Perbesar" 
+                        <img
+                            src={order.payment_receipt}
+                            alt="Bukti Transfer Perbesar"
                             className="max-h-[85vh] max-w-full rounded-lg object-contain shadow-2xl"
                         />
-                        <button 
+                        <button
                             type="button"
                             className="absolute -top-10 right-0 text-white hover:text-gray-300"
                             onClick={() => setPreviewImage(false)}
