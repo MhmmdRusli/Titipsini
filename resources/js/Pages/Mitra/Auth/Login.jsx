@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Eye, EyeOff, Handshake } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
     const { data, setData, post, processing, errors } = useForm({
@@ -23,12 +23,13 @@ export default function Login() {
             <Head title="Masuk Mitra" />
 
             <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-y-auto bg-white px-6 py-8 sm:h-[850px] sm:shadow-xl">
-                <div className="flex items-center gap-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600">
-                        <Handshake size={20} />
-                    </div>
-                    <span className="font-mono text-xs tracking-widest text-green-600">TITIPSINI &middot; MITRA</span>
+                <div className="flex items-center gap-1.5">
+                    <img src="/images/logo-titipsini.png" alt="Logo" className="h-8 w-auto object-contain" />
+                    <span className="text-lg font-bold tracking-tight text-[#15803d]">
+                        Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
+                    </span>
                 </div>
+                <span className="mt-0.5 text-xs font-medium tracking-wide text-gray-400">Panel Mitra</span>
 
                 <h1 className="mt-6 text-xl font-bold text-gray-900">Masuk ke Akun Mitra</h1>
                 <p className="mt-1 text-sm text-gray-500">Kelola bisnis penitipanmu dari sini.</p>

@@ -1,15 +1,11 @@
-# Fix 404 Errors - Task Progress
-
-## Issues Found
-1. ❌ Vite assets not built → CSS/JS 404
-2. ❌ Migrations not fully run → missing columns: `bukti_transfer`, `item_name`, `privacy_policies`
-3. ❌ Route name `verification.verify` mismatch for mitra email verification
+# Fix: Call to undefined method ServiceController::metodePembayaran()
 
 ## Steps
-- [x] Step 0: Analyze error logs & codebase
-- [x] Step 1: Plan approved by user
-- [ ] Step 2: Fix route name issue for verification
-- [ ] Step 3: Run `php artisan migrate` to apply pending migrations
-- [ ] Step 4: Run `npm run build` to compile Vite assets
-- [ ] Step 5: Verify all fixes
+- [x] Analyze routes and controller
+- [x] Read frontend pages for context
+- [x] Plan approved by user
+- [x] Add `metodePembayaran()` method to ServiceController
+- [x] Add `metodePembayaranLayanan()` method to ServiceController  
+- [x] Add `konfirmasiLayanan()` method to ServiceController
+- [x] Verify fix
 
