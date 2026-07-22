@@ -11,10 +11,10 @@ const TABS = [
 ];
 
 const STATUS_STYLE = {
-    baru: 'bg-blue-50 text-blue-600',
-    diproses: 'bg-amber-50 text-amber-600',
-    selesai: 'bg-brand-teal-100 text-brand-teal-700',
-    dibatalkan: 'bg-red-50 text-red-600',
+    baru: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300',
+    diproses: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300',
+    selesai: 'bg-brand-teal-100 text-brand-teal-700 dark:bg-brand-teal-900/40 dark:text-brand-teal-300',
+    dibatalkan: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300',
 };
 
 const SERVICE_LABEL = {
@@ -61,8 +61,8 @@ export default function OrdersIndex({ orders, filters }) {
                             onClick={() => changeTab(tab.value)}
                             className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition ${
                                 activeStatus === tab.value
-                                    ? 'bg-brand-teal-700 text-white'
-                                    : 'bg-gray-100 text-gray-600'
+                                    ? 'bg-brand-teal-700 text-white dark:bg-brand-teal-600'
+                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
                             }`}
                         >
                             {tab.label}
@@ -73,7 +73,7 @@ export default function OrdersIndex({ orders, filters }) {
                 {/* Daftar pesanan */}
                 <div className="mt-4 flex flex-col gap-3">
                     {orders.data.length === 0 && (
-                        <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400">
+                        <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400 dark:border-gray-700 dark:text-gray-500">
                             Belum ada pesanan untuk status ini.
                         </div>
                     )}
@@ -82,33 +82,33 @@ export default function OrdersIndex({ orders, filters }) {
                         <Link
                             key={order.id}
                             href={`/app/orders/${order.id}`}
-                            className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm"
+                            className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800"
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-2">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-teal-50 text-brand-teal-700">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-900/40 dark:text-brand-teal-300">
                                         <Package size={16} />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-semibold text-gray-900">{order.order_code}</p>
-                                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500">
+                                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">{order.order_code}</p>
+                                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
                                             {SERVICE_LABEL[order.service_type] ?? order.service_type}
-                                            {order.is_pickup && <Truck size={11} className="text-brand-teal-600" />}
+                                            {order.is_pickup && <Truck size={11} className="text-brand-teal-600 dark:text-brand-teal-400" />}
                                         </p>
                                     </div>
                                 </div>
                                 <span
                                     className={`rounded-full px-2 py-1 text-[10px] font-medium capitalize ${
-                                        STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500'
+                                        STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300'
                                     }`}
                                 >
                                     {order.status}
                                 </span>
                             </div>
 
-                            <div className="mt-2 flex items-center justify-between border-t border-gray-50 pt-2 text-[11px] text-gray-500">
+                            <div className="mt-2 flex items-center justify-between border-t border-gray-50 pt-2 text-[11px] text-gray-500 dark:border-gray-700 dark:text-gray-400">
                                 <span>{formatTanggal(order.created_at)}</span>
-                                <span className="font-semibold text-gray-800">{formatRupiah(order.total_price)}</span>
+                                <span className="font-semibold text-gray-800 dark:text-gray-200">{formatRupiah(order.total_price)}</span>
                             </div>
                         </Link>
                     ))}
@@ -123,10 +123,10 @@ export default function OrdersIndex({ orders, filters }) {
                                 preserveScroll
                                 className={`rounded-md px-3 py-1.5 text-xs ${
                                     link.active
-                                        ? 'bg-brand-teal-700 text-white'
+                                        ? 'bg-brand-teal-700 text-white dark:bg-brand-teal-600'
                                         : link.url
-                                        ? 'text-gray-500 hover:bg-gray-100'
-                                        : 'text-gray-300'
+                                        ? 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                                        : 'text-gray-300 dark:text-gray-700'
                                 }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />
