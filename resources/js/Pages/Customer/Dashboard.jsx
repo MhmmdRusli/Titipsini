@@ -125,14 +125,22 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                                 className="flex w-[62%] shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm"
                             >
                                 {/* Thumbnail Box Berita */}
-                                <div className="h-24 w-full bg-gradient-to-br from-green-50 to-emerald-100 p-3 flex flex-col justify-between relative">
-                                    <div className="text-[10px] bg-green-600 text-white px-1.5 py-0.5 rounded self-start font-medium">
-                                        Titipsini
+                                <div className="relative h-24 w-full overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100">
+                                    {b.foto && (
+                                        <img
+                                            src={b.foto}
+                                            alt={b.judul}
+                                            className="absolute inset-0 h-full w-full object-cover"
+                                        />
+                                    )}
+                                    <div className="relative z-10 flex h-full flex-col justify-between p-3">
+                                        <div className="self-start rounded bg-green-600 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                                            Titipsini
+                                        </div>
+                                        <p className="text-[10px] font-medium text-white drop-shadow">
+                                            {b.waktu ?? formatTanggal(b.published_at)}
+                                        </p>
                                     </div>
-                                    <p className="text-[10px] text-gray-400 font-medium z-10">
-                                        {formatTanggal(b.published_at)}
-                                    </p>
-                                    <div className="absolute right-2 bottom-2 w-10 h-10 bg-green-600/10 rounded-full" />
                                 </div>
                                 {/* Judul Berita */}
                                 <div className="p-2">

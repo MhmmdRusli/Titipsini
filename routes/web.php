@@ -48,6 +48,7 @@ use App\Http\Controllers\Mitra\Auth\EmailVerificationPromptController as MitraEm
 use App\Http\Controllers\Mitra\Auth\EmailVerificationNotificationController as MitraEmailVerificationNotificationController;
 use App\Http\Controllers\Mitra\Auth\VerifyEmailController as MitraVerifyEmailController;
 use App\Http\Controllers\Admin\TopupVerifikasiController;
+use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -160,6 +161,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
     });
 
+    Route::resource('berita', AdminBeritaController::class)->except(['show', 'create', 'edit']);
+
     Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
 
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
@@ -248,6 +251,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::post('/services/{service}/konfirmasi', [ServiceController::class, 'konfirmasiLayanan'])->name('services.konfirmasiLayanan');
     
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
+    Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('berita.show');
 
     // Pesanan & Pembayaran
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
