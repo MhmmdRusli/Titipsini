@@ -39,7 +39,7 @@ function labelFor(options, value) {
     return options.find((o) => o.value === value)?.label ?? value;
 }
 
-export default function LayananIndex({ layanan }) {
+export default function LayananIndex({ layanan, daftarKota = [] }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
@@ -124,8 +124,8 @@ export default function LayananIndex({ layanan }) {
                         const subLabel = item.jenis_kendaraan
                             ? labelFor(JENIS_KENDARAAN_OPTIONS, item.jenis_kendaraan)
                             : item.jenis_bangunan
-                            ? labelFor(JENIS_BANGUNAN_OPTIONS, item.jenis_bangunan)
-                            : null;
+                                ? labelFor(JENIS_BANGUNAN_OPTIONS, item.jenis_bangunan)
+                                : null;
 
                         return (
                             <div key={item.id} className="rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm">
@@ -199,11 +199,10 @@ export default function LayananIndex({ layanan }) {
                                             key={value}
                                             type="button"
                                             onClick={() => setData('kategori', value)}
-                                            className={`flex flex-col items-center gap-1 rounded-lg border py-2 text-[10px] font-medium ${
-                                                data.kategori === value
+                                            className={`flex flex-col items-center gap-1 rounded-lg border py-2 text-[10px] font-medium ${data.kategori === value
                                                     ? 'border-green-600 bg-green-50 text-green-700'
                                                     : 'border-gray-200 text-gray-500'
-                                            }`}
+                                                }`}
                                         >
                                             <Icon size={16} />
                                             {label}
@@ -224,11 +223,10 @@ export default function LayananIndex({ layanan }) {
                                                 key={opt.value}
                                                 type="button"
                                                 onClick={() => setData('jenis_kendaraan', opt.value)}
-                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
-                                                    data.jenis_kendaraan === opt.value
+                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${data.jenis_kendaraan === opt.value
                                                         ? 'border-green-600 bg-green-600 text-white'
                                                         : 'border-gray-200 text-gray-600'
-                                                }`}
+                                                    }`}
                                             >
                                                 {opt.label}
                                             </button>
@@ -251,11 +249,10 @@ export default function LayananIndex({ layanan }) {
                                                 key={opt.value}
                                                 type="button"
                                                 onClick={() => setData('jenis_bangunan', opt.value)}
-                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
-                                                    data.jenis_bangunan === opt.value
+                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${data.jenis_bangunan === opt.value
                                                         ? 'border-green-600 bg-green-600 text-white'
                                                         : 'border-gray-200 text-gray-600'
-                                                }`}
+                                                    }`}
                                             >
                                                 {opt.label}
                                             </button>
@@ -282,14 +279,20 @@ export default function LayananIndex({ layanan }) {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="mb-1 block text-xs font-medium text-gray-600">Kota</label>
-                                    <input
-                                        type="text"
+                                    <select
                                         value={data.kota}
                                         onChange={(e) => setData('kota', e.target.value)}
                                         className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                                        placeholder="Yogyakarta"
-                                    />
+                                    >
+                                        <option value="">Pilih kota</option>
+                                        {daftarKota.map((kota) => (
+                                            <option key={kota} value={kota}>{kota}</option>
+                                        ))}
+                                    </select>
                                     {errors.kota && <p className="mt-1 text-xs text-red-500">{errors.kota}</p>}
+                                    {daftarKota.length === 0 && (
+                                        <p className="mt-1 text-xs text-amber-600">Belum ada kota aktif dari Admin. Hubungi Admin dulu.</p>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="mb-1 block text-xs font-medium text-gray-600">Kecamatan</label>
@@ -325,14 +328,12 @@ export default function LayananIndex({ layanan }) {
                                 <button
                                     type="button"
                                     onClick={() => setData('is_active', !data.is_active)}
-                                    className={`relative h-6 w-11 rounded-full transition-colors ${
-                                        data.is_active ? 'bg-green-600' : 'bg-gray-300'
-                                    }`}
+                                    className={`relative h-6 w-11 rounded-full transition-colors ${data.is_active ? 'bg-green-600' : 'bg-gray-300'
+                                        }`}
                                 >
                                     <span
-                                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                                            data.is_active ? 'translate-x-5' : 'translate-x-0.5'
-                                        }`}
+                                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${data.is_active ? 'translate-x-5' : 'translate-x-0.5'
+                                            }`}
                                     />
                                 </button>
                             </div>

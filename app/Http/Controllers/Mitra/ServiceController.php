@@ -15,16 +15,17 @@ class ServiceController extends Controller
      * GET /mitra/layanan
      */
     public function index(Request $request): Response
-    {
-        $layanan = Service::query()
-            ->where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+{
+    $layanan = Service::query()
+        ->where('user_id', $request->user()->id)
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-        return Inertia::render('Mitra/Layanan/Index', [
-            'layanan' => $layanan,
-        ]);
-    }
+    return Inertia::render('Mitra/Layanan/Index', [
+        'layanan' => $layanan,
+        'daftarKota' => \App\Models\Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
+    ]);
+}
 
     /**
      * POST /mitra/layanan
@@ -65,26 +66,28 @@ class ServiceController extends Controller
     }
 
     protected function validated(Request $request): array
-    {
-        return $request->validate([
-            'kategori' => ['required', 'in:barang,bangunan,kendaraan,pindahan'],
-            'jenis_kendaraan' => [
-                'nullable',
-                'required_if:kategori,kendaraan',
-                'in:motor,mobil,truk,becak,sepeda,bus,mobil_pick_up',
-            ],
-            'jenis_bangunan' => [
-                'nullable',
-                'required_if:kategori,bangunan',
-                'in:rumah,apartemen,kosan,gudang,kamar',
-            ],
-            'nama' => ['required', 'string', 'max:150'],
-            'kota' => ['required', 'string', 'max:100'],
-            'kecamatan' => ['required', 'string', 'max:100'],
-            'harga' => ['nullable', 'numeric', 'min:0'],
-            'is_active' => ['boolean'],
-        ]);
-    }
+{
+    return $request->validate([
+        'kategori' => ['required', 'in:barang,bangunan,kendaraan,pindahan'],
+        'jenis_kendaraan' => [
+            'nullable',
+            'required_if:kategori,kendaraan',
+            'in:motor,mobil,truk,becak,sepeda,bus,mobil_pick_up',
+        ],
+        'jenis_bangunan' => [
+            'nullable',
+            'required_if:kategori,bangunan',
+            'in:rumah,apartemen,kosan,gudang,kamar',
+        ],
+        'nama' => ['required', 'string', 'max:150'],
+        'kota' => ['required', 'string', 'max:100', \Illuminate\Validation\Rule::exists('kota', 'nama')->where('is_active', true)],
+        'kecamatan' => ['required', 'string', 'max:100'],
+        'harga' => ['nullable', 'numeric', 'min:0'],
+        'is_active' => ['boolean'],
+    ], [
+        'kota.exists' => 'Kota belum terdaftar atau tidak aktif. Hubungi Admin untuk menambahkan kota ini.',
+    ]);
+}
 
     // Mencegah partner mengedit/menghapus layanan milik partner lain lewat
     // manipulasi ID di request.
