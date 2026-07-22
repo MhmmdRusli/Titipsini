@@ -167,8 +167,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
 
+    // Rute Pesanan (Orders)
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy'); // <-- Rute Hapus Pesanan ditambahkan di sini
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');

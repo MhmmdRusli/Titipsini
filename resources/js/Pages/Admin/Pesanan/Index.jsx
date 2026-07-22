@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Search, Eye, Truck, X, FileText, Image, ExternalLink } from 'lucide-react';
+import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2 } from 'lucide-react';
 
 const SERVICE_TYPES = [
     { value: '', label: 'Semua Layanan' },
@@ -47,6 +47,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
     const [status, setStatus] = useState(filters?.status ?? '');
     const [city, setCity] = useState(filters?.city ?? '');
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     function applyFilters(overrides = {}) {
         router.get(
@@ -65,6 +66,13 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
     function handleSearchSubmit(e) {
         e.preventDefault();
         applyFilters();
+    }
+
+    function handleDelete() {
+        router.delete(`/admin/orders/${deleteTarget.id}`, {
+            preserveScroll: true,
+            onSuccess: () => setDeleteTarget(null),
+        });
     }
 
     return (
@@ -182,14 +190,24 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedOrder(order)}
-                                        className="inline-flex items-center gap-1 rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-teal-700"
-                                    >
-                                        <Eye size={15} />
-                                        Detail
-                                    </button>
+                                    <div className="flex items-center justify-end gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedOrder(order)}
+                                            className="inline-flex items-center gap-1 rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-teal-700"
+                                            title="Detail Pesanan"
+                                        >
+                                            <Eye size={15} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setDeleteTarget(order)}
+                                            className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
+                                            title="Hapus Pesanan"
+                                        >
+                                            <Trash2 size={15} />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -219,6 +237,33 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
 
             {selectedOrder && (
                 <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+            )}
+
+            {deleteTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                    <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
+                        <h2 className="text-base font-semibold text-gray-900">Hapus Pesanan?</h2>
+                        <p className="mt-2 text-sm text-gray-500">
+                            Pesanan dengan kode "{deleteTarget.order_code}" akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setDeleteTarget(null)}
+                                className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                            >
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </AdminLayout>
     );

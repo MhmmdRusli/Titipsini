@@ -73,4 +73,16 @@ class OrderController extends Controller
 
         return back()->with('success', 'Status pesanan berhasil diperbarui.');
     }
+
+    public function destroy(Order $order)
+    {
+        // Hapus file bukti pembayaran fisik jika ada
+        if ($order->payment_receipt) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $order->payment_receipt));
+        }
+
+        $order->delete();
+
+        return back()->with('success', 'Pesanan berhasil dihapus.');
+    }
 }
