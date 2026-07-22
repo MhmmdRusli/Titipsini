@@ -36,7 +36,10 @@ class DashboardController extends Controller
             ->map(fn (Berita $b) => [
                 'id' => $b->id,
                 'judul' => $b->judul,
-                'foto' => $b->foto ? Storage::url($b->foto) : null,
+                // Foto berita disimpan lewat disk 'direct_public' (langsung
+                // di public/berita/, bukan lewat symlink storage), jadi
+                // pakai path absolut biasa, BUKAN Storage::url().
+                'foto' => $b->foto ? '/' . ltrim($b->foto, '/') : null,
                 'waktu' => $b->published_at->diffForHumans(),
             ]);
 
