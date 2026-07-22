@@ -24,6 +24,17 @@ function formatTanggal(value) {
     });
 }
 
+// Ikon kotak titipan sederhana untuk stub tiket
+function BoxIcon({ className }) {
+    return (
+        <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M3 8l9-4 9 4-9 4-9-4z" />
+            <path d="M3 8v8l9 4 9-4V8" />
+            <path d="M12 12v8" />
+        </svg>
+    );
+}
+
 export default function Dashboard({ user, saldo = 10000, vendors = [], berita = [] }) {
     // Data berita tiruan agar langsung memunculkan list item sesuai mockup jika kosong
     const displayBerita = berita.length > 0 ? berita : [
@@ -88,23 +99,56 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     </div>
                 </div>
 
-                {/* Banner Promo Cashback 30% */}
-                <div className="mt-5 overflow-hidden rounded-xl bg-gradient-to-r from-green-500 to-green-600 p-4 text-white shadow-sm relative">
-                    <div className="max-w-[65%]">
-                        <p className="text-xl font-black italic tracking-wide">Cashback 30%</p>
-                        <p className="text-[10px] font-light text-green-100 mt-0.5">Cuman ada di Titipsini.Com</p>
-                        <div className="mt-3 flex gap-1">
-                            <div className="bg-black text-[8px] px-2 py-1 rounded font-bold uppercase tracking-wider">
-                                Download on the
+                {/* Banner Promo — konsep "tiket klaim penitipan", bukan banner iklan generik */}
+                <div className="mt-5 relative flex h-[128px] rounded-2xl shadow-md">
+                    {/* pola garis diagonal halus di background, kesan kertas keamanan/tiket */}
+                    <div
+                        className="absolute inset-0 rounded-2xl bg-green-700"
+                        style={{
+                            backgroundImage:
+                                'repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 10px)',
+                        }}
+                    />
+
+                    {/* bagian utama tiket */}
+                    <div className="relative z-10 flex flex-1 flex-col justify-between p-4">
+                        <div>
+                            <p className="font-mono text-[10px] tracking-[0.2em] text-green-200">
+                                TIKET-PROMO &middot; BULAN INI
+                            </p>
+                            <div className="mt-1 flex items-baseline gap-1">
+                                <span className="text-[13px] font-semibold text-green-100">Cashback</span>
+                                <span className="text-4xl font-black italic leading-none text-amber-300">30%</span>
                             </div>
-                            <div className="bg-black text-[9px] px-2 py-1 rounded font-black tracking-tight">
-                                App Store
-                            </div>
+                            <p className="mt-1 text-[10px] text-green-200">
+                                untuk penitipan Barang, Bangunan & Kendaraan
+                            </p>
                         </div>
+                        <p className="font-mono text-[9px] text-green-300">Berlaku s.d. akhir bulan &middot; S&amp;K berlaku</p>
                     </div>
-                    {/* Ilustrasi HP di sebelah kanan */}
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 w-20 h-24 bg-green-400/30 rounded-lg border border-white/20 rotate-12 flex items-center justify-center">
-                        <span className="text-[9px] font-bold text-white/50">Titipsini</span>
+
+                    {/* stub tiket di kanan, dipisah garis perforasi */}
+                    <div className="relative z-10 flex w-16 shrink-0 flex-col items-center justify-between py-3">
+                        {/* garis perforasi putus-putus */}
+                        <div className="absolute inset-y-2 left-0 border-l-2 border-dashed border-green-400/50" />
+                        {/* lubang tiket atas & bawah, warnanya samakan dengan bg halaman (gray-50) supaya kesan "bolong" */}
+                        <div className="absolute -left-2 -top-2 h-4 w-4 rounded-full bg-gray-50" />
+                        <div className="absolute -bottom-2 -left-2 h-4 w-4 rounded-full bg-gray-50" />
+
+                        <BoxIcon className="h-6 w-6 text-green-200" />
+                        <span
+                            className="font-mono text-[10px] font-bold tracking-wider text-green-100"
+                            style={{ writingMode: 'vertical-rl' }}
+                        >
+                            NO. 0030
+                        </span>
+                    </div>
+
+                    {/* cap tinta "PROMO" miring di pojok, kesan stempel */}
+                    <div className="pointer-events-none absolute -right-3 -top-3 z-20 rotate-[18deg]">
+                        <div className="rounded-md border-[3px] border-red-600 bg-red-600/10 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-red-600">
+                            Promo
+                        </div>
                     </div>
                 </div>
 
