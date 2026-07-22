@@ -18,7 +18,7 @@ export default function PilihPaket({ hargaMulai = 100000, serviceId }) {
             <Head title="Pilih Paket" />
 
             <div className="px-4 py-3">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500 to-green-600 p-5 text-white shadow-md">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500 to-green-600 dark:from-green-700 dark:to-green-900 p-5 text-white shadow-md">
                     <div className="absolute right-4 top-4 rounded-xl bg-white/15 p-2">
                         <Package size={20} />
                     </div>
@@ -44,30 +44,30 @@ export default function PilihPaket({ hargaMulai = 100000, serviceId }) {
                 <div className="mt-4 space-y-3">
                     <Link
                         href={`/app/services/barang?service_id=${serviceId ?? ''}`}
-                        className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-green-300"
+                        className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-green-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-green-600"
                     >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400">
                             <PackagePlus size={20} />
                         </div>
                         <div className="flex-1">
-                            <p className="text-sm font-semibold text-gray-900">Pilih barang</p>
-                            <p className="mt-0.5 text-xs text-gray-500">Kamu bisa titip barang apa aja di sini</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pilih barang</p>
+                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Kamu bisa titip barang apa aja di sini</p>
                         </div>
-                        <ChevronRight size={18} className="text-gray-300" />
+                        <ChevronRight size={18} className="text-gray-300 dark:text-gray-600" />
                     </Link>
 
                     <Link
                         href="/app/services/barang"
-                        className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-green-300"
+                        className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-green-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-green-600"
                     >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400">
                             <Warehouse size={20} />
                         </div>
                         <div className="flex-1">
-                            <p className="text-sm font-semibold text-gray-900">Pilih paket</p>
-                            <p className="mt-0.5 text-xs text-gray-500">Paket buat nitip barang sak kosanmu</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pilih paket</p>
+                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Paket buat nitip barang sak kosanmu</p>
                         </div>
-                        <ChevronRight size={18} className="text-gray-300" />
+                        <ChevronRight size={18} className="text-gray-300 dark:text-gray-600" />
                     </Link>
                 </div>
             </div>
