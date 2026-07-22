@@ -3,106 +3,147 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notifikasi;
 use App\Models\Order;
+use App\Models\PaymentSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class OrderController extends Controller
 {
-    public function index(Request $request)
+    protected function statusesForTab(string $tab): array
     {
-        $search = $request->string('search')->toString();
-        $serviceType = $request->string('service_type')->toString();
-        $status = $request->string('status')->toString();
-        $city = $request->string('city')->toString();
+        return match ($tab) {
+            'selesai' => ['selesai'],
+            'dibatalkan' => ['dibatalkan'],
+            default => ['baru', 'diproses'],
+        };
+    }
 
-        $orders = Order::with(['customer:id,name,phone', 'partner:id,name,phone'])
-            ->when($search, function ($query, $search) {
-                $query->where('order_code', 'like', "%{$search}%")
-                    ->orWhereHas('customer', fn ($q) => $q->where('name', 'like', "%{$search}%"));
-            })
-            ->when($serviceType, fn ($query, $value) => $query->where('service_type', $value))
-            ->when($status, fn ($query, $value) => $query->where('status', $value))
-            ->when($city, fn ($query, $value) => $query->where('city', $value))
+    public function index(Request $request): Response
+    {
+        $tab = $request->string('tab')->toString() ?: 'berjalan';
+
+        $orders = $request->user()
+            ->ordersAsCustomer()
+            ->with('partner:id,name')
+            ->whereIn('status', $this->statusesForTab($tab))
             ->latest()
             ->paginate(10)
-            ->through(function ($order) {
-                return [
-                    'id'              => $order->id,
-                    'order_code'      => $order->order_code,
-                    'service_type'    => $order->service_type,
-                    'is_pickup'       => $order->is_pickup,
-                    'city'            => $order->city,
-                    'status'          => $order->status,
-                    'cancel_reason'   => $order->cancel_reason,
-                    'total_price'     => $order->total_price,
-                    'payment_method'  => $order->payment_method,
-                    'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
-                    'created_at'      => $order->created_at ? $order->created_at->format('d M Y H:i') : null,
-                    'customer'        => $order->customer,
-                    'partner'         => $order->partner,
-                ];
-            })
             ->withQueryString();
 
-        return Inertia::render('Admin/Pesanan/Index', [
-            'orders'  => $orders,
+        return Inertia::render('Customer/Orders/Index', [
+            'orders' => $orders,
             'filters' => [
-                'search'       => $search,
-                'service_type' => $serviceType,
-                'status'       => $status,
-                'city'         => $city,
+                'tab' => $tab,
             ],
-            'cities'  => Order::query()->whereNotNull('city')->distinct()->orderBy('city')->pluck('city'),
         ]);
     }
 
-    public function updateStatus(Request $request, Order $order)
+    public function show(Request $request, Order $order): Response
     {
-        $validated = $request->validate([
-            'status'        => ['required', Rule::in(['baru', 'diproses', 'selesai', 'dibatalkan'])],
-            'cancel_reason' => ['required_if:status,dibatalkan', 'nullable', 'string', 'max:255'],
-        ]);
+        abort_unless($order->customer_id === $request->user()->id, 403);
 
-        $order->update([
-            'status'        => $validated['status'],
-            'cancel_reason' => $validated['status'] === 'dibatalkan' ? $validated['cancel_reason'] : null,
-        ]);
+        $order->load('partner:id,name,phone');
 
-        return back()->with('success', 'Status pesanan berhasil diperbarui.');
+        return Inertia::render('Customer/Orders/Show', [
+            'order' => $order,
+        ]);
     }
 
-    public function destroy(Order $order)
-{
-    // Hapus file bukti pembayaran fisik jika ada
-    if ($order->payment_receipt) {
-        Storage::disk('public')->delete(str_replace('/storage/', '', $order->payment_receipt));
+    public function success(Request $request, Order $order): Response
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+
+        return Inertia::render('Customer/Orders/Success', [
+            'orderId' => $order->id,
+        ]);
     }
 
-    $order->delete();
+    /**
+     * Halaman instruksi / pemrosesan pembayaran oleh customer
+     */
+    public function pembayaran(Request $request, Order $order): Response
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
 
-    return back()->with('success', 'Pesanan berhasil dihapus.');
-}
+        $setting = PaymentSetting::current();
+        $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
 
-public function bulkDestroy(Request $request)
-{
-    $validated = $request->validate([
-        'ids'   => ['required', 'array', 'min:1'],
-        'ids.*' => ['integer', 'exists:orders,id'],
-    ]);
+        return Inertia::render('Customer/Orders/Pembayaran', [
+            'order' => $order->only([
+                'id', 
+                'order_code', 
+                'item_name', 
+                'service_type',
+                'payment_method', 
+                'total_price', 
+                'status',
+                'created_at',
+            ]),
+            'qris_url' => $qrisUrl,
+        ]);
+    }
 
-    $orders = Order::whereIn('id', $validated['ids'])->get();
+    public function buktiPembayaran(Request $request, Order $order): Response
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
 
-    foreach ($orders as $order) {
-        if ($order->payment_receipt) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $order->payment_receipt));
+        $setting = PaymentSetting::current();
+        $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
+
+        return Inertia::render('Customer/Orders/BuktiPembayaran', [
+            'order' => $order->only([
+                'id', 
+                'order_code', 
+                'item_name', 
+                'service_type',
+                'payment_method', 
+                'total_price', 
+                'created_at',
+            ]),
+            'qris_url' => $qrisUrl,
+        ]);
+    }
+
+    public function uploadBukti(Request $request, Order $order)
+    {
+        // 1. Validasi file gambar
+        $request->validate([
+            'payment_receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        // 2. Simpan file gambar ke storage public
+        if ($request->hasFile('payment_receipt')) {
+            // Hapus bukti lama jika ada
+            if ($order->payment_receipt) {
+                Storage::disk('public')->delete($order->payment_receipt);
+            }
+
+            $path = $request->file('payment_receipt')->store('payment_proofs', 'public');
+
+            // 3. Update status pesanan & simpan path foto bukti ke database
+            $order->update([
+                'payment_receipt' => $path,
+                'status'          => 'diproses',
+            ]);
+
+            // 4. Beri tahu mitra bahwa bukti pembayaran sudah diunggah & menunggu verifikasi
+            if ($order->partner_id) {
+                Notifikasi::create([
+                    'user_id' => $order->partner_id,
+                    'order_id' => $order->id,
+                    'type' => 'pembayaran_diterima',
+                    'judul' => 'Bukti Pembayaran Diunggah',
+                    'pesan' => 'Customer telah mengunggah bukti pembayaran untuk pesanan '.$order->order_code.'. Mohon segera diverifikasi.',
+                ]);
+            }
         }
+
+        // 5. Kembali ke halaman detail pesanan dengan pesan sukses
+        return redirect()->route('customer.orders.show', $order->id)
+            ->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi.');
     }
-
-    $count = Order::whereIn('id', $validated['ids'])->delete();
-
-    return back()->with('success', "{$count} pesanan berhasil dihapus.");
-}
 }

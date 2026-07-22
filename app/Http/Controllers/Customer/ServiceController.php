@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\Service;
 use Illuminate\Http\Request;
@@ -11,6 +12,25 @@ use Inertia\Response;
 
 class ServiceController extends Controller
 {
+    /**
+     * Kirim notifikasi ke mitra bahwa ada pesanan baru masuk.
+     * Dipanggil setelah Order::create() di 3 titik pemesanan.
+     */
+    protected function notifikasiPesananBaru(Order $order): void
+    {
+        if (! $order->partner_id) {
+            return;
+        }
+
+        Notifikasi::create([
+            'user_id' => $order->partner_id,
+            'order_id' => $order->id,
+            'type' => 'transaksi_masuk',
+            'judul' => 'Pesanan Baru Masuk',
+            'pesan' => 'Ada pesanan baru dengan kode '.$order->order_code.' menunggu diproses.',
+        ]);
+    }
+
     /**
      * GET /app/services?kategori=kendaraan&jenis=mobil&search=Yogyakarta
      */
@@ -138,6 +158,8 @@ $order = Order::create([
     'service_type' => 'barang',// Menggunakan nilai bawaan/default
         ]);
 
+        $this->notifikasiPesananBaru($order);
+
         session()->forget('pesanan_barang');
 
         return redirect()->route('customer.orders.success', $order->id);
@@ -207,6 +229,8 @@ $order = Order::create([
             'payment_method' => 'default', // Menggunakan nilai bawaan/default
         ]);
 
+        $this->notifikasiPesananBaru($order);
+
         return redirect()->route('customer.orders.success', $order->id);
     }
 
@@ -273,6 +297,8 @@ $order = Order::create([
             'total_price' => $service->harga,
             'payment_method' => $data['payment_method'],
         ]);
+
+        $this->notifikasiPesananBaru($order);
 
         return redirect()->route('customer.orders.success', $order->id);
     }
