@@ -50,7 +50,19 @@ export default function BeritaIndex({ berita, filters }) {
     function handleSubmit(e) {
         e.preventDefault();
 
-        const options = { forceFormData: true, onSuccess: closeModal };
+        const options = {
+            forceFormData: true,
+            onSuccess: () => {
+                console.log('[Berita] submit SUKSES');
+                closeModal();
+            },
+            onError: (errors) => {
+                console.log('[Berita] submit GAGAL, errors:', errors);
+            },
+            onFinish: () => {
+                console.log('[Berita] submit selesai (finally)');
+            },
+        };
 
         if (editingItem) {
             router.post(
@@ -65,7 +77,16 @@ export default function BeritaIndex({ berita, filters }) {
 
     function handleDelete() {
         router.delete(`/admin/berita/${deleteTarget.id}`, {
-            onSuccess: () => setDeleteTarget(null),
+            onSuccess: () => {
+                console.log('[Berita] hapus SUKSES');
+                setDeleteTarget(null);
+            },
+            onError: (errors) => {
+                console.log('[Berita] hapus GAGAL, errors:', errors);
+            },
+            onFinish: () => {
+                console.log('[Berita] hapus selesai (finally)');
+            },
         });
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Berita;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -47,10 +48,12 @@ class BeritaController extends Controller
     {
         $validated = $this->validated($request);
 
+        // Jangan sentuh kolom foto sama sekali kalau tidak ada file baru diupload,
+        // supaya foto lama tidak ke-null-kan tanpa sengaja.
+        unset($validated['foto']);
+
         if ($request->hasFile('foto')) {
-            if ($berita->foto) {
-                Storage::disk('direct_public')->delete($berita->foto);
-            }
+            $this->deleteFotoLama($berita->foto);
             $validated['foto'] = $this->handleFoto($request);
         }
 
@@ -65,9 +68,7 @@ class BeritaController extends Controller
 
     public function destroy(Berita $berita): RedirectResponse
     {
-        if ($berita->foto) {
-            Storage::disk('direct_public')->delete($berita->foto);
-        }
+        $this->deleteFotoLama($berita->foto);
 
         $berita->delete();
 
@@ -93,5 +94,22 @@ class BeritaController extends Controller
         }
 
         return $request->file('foto')->store('berita', 'direct_public');
+    }
+
+    // Dibungkus try-catch: kalau disk/file bermasalah, jangan sampai bikin
+    // seluruh request 500 (yang berujung Inertia fallback jadi full reload).
+    // Edit/hapus data tetap jalan, cuma file lama mungkin nyangkut di storage.
+    protected function deleteFotoLama(?string $path): void
+    {
+        if (! $path) {
+            return;
+        }
+        
+
+        try {
+            Storage::disk('direct_public')->delete($path);
+        } catch (\Throwable $e) {
+            Log::warning('Gagal menghapus foto berita lama: ' . $e->getMessage(), ['path' => $path]);
+        }
     }
 }

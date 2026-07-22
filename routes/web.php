@@ -161,7 +161,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
     });
 
-    Route::resource('berita', AdminBeritaController::class)->except(['show', 'create', 'edit']);
+    Route::resource('berita', AdminBeritaController::class)
+        ->except(['show', 'create', 'edit'])
+        ->parameters(['berita' => 'berita']);
 
     Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
 
