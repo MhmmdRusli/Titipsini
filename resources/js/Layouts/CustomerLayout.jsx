@@ -51,9 +51,17 @@ export default function CustomerLayout({ children, title, backHref }) {
                                         onClick={() => setMenuOpen((v) => !v)}
                                         className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
                                     >
-                                        <div className="h-8 w-8 rounded-full bg-brand-amber-50 text-brand-amber-700 flex items-center justify-center text-xs font-semibold">
-                                            {(user?.name ?? 'P').charAt(0).toUpperCase()}
-                                        </div>
+                                        {user?.avatar ? (
+                                            <img
+                                                src={user.avatar}
+                                                alt={user.name}
+                                                className="h-8 w-8 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="h-8 w-8 rounded-full bg-brand-amber-50 text-brand-amber-700 flex items-center justify-center text-xs font-semibold">
+                                                {(user?.name ?? 'P').charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
                                         <ChevronDown
                                             size={14}
                                             className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`}
@@ -108,9 +116,8 @@ export default function CustomerLayout({ children, title, backHref }) {
                             <Link
                                 key={href}
                                 href={href}
-                                className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${
-                                    active ? 'text-brand-teal-700' : 'text-gray-500'
-                                }`}
+                                className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${active ? 'text-brand-teal-700' : 'text-gray-500'
+                                    }`}
                             >
                                 <Icon size={20} />
                                 {label}
