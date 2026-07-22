@@ -31,7 +31,10 @@ class ProfileController extends Controller
                 'address'        => $admin->address,
                 'peran'          => ucfirst($admin->role),
                 'wilayah'        => $admin->wilayah,
-                'foto_url'       => $admin->foto ? Storage::url($admin->foto) : null,
+                // 'direct_public' disk = disimpan langsung di public/avatars,
+                // supaya php artisan serve bisa nyajiin filenya tanpa lewat
+                // symlink storage (yang kena 403 di Windows sebelumnya).
+                'foto_url'       => $admin->foto ? Storage::disk('direct_public')->url($admin->foto) : null,
             ],
         ]);
     }
@@ -58,9 +61,9 @@ class ProfileController extends Controller
 
         if ($request->hasFile('foto')) {
             if ($admin->foto) {
-                Storage::delete($admin->foto);
+                Storage::disk('direct_public')->delete($admin->foto);
             }
-            $validated['foto'] = $request->file('foto')->store('avatars', 'public');
+            $validated['foto'] = $request->file('foto')->store('avatars', 'direct_public');
         }
 
         $admin->update($validated);
