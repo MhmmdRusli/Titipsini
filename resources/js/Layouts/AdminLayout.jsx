@@ -65,11 +65,10 @@ export default function AdminLayout({ children, title }) {
                                 <Link
                                     key={href}
                                     href={href}
-                                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                                        active
+                                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${active
                                             ? 'bg-brand-teal-700 text-white'
                                             : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                    }`}
+                                        }`}
                                 >
                                     <Icon size={18} />
                                     {label}
@@ -82,11 +81,10 @@ export default function AdminLayout({ children, title }) {
                                 <button
                                     type="button"
                                     onClick={() => setOpenMenu(isOpen ? null : label)}
-                                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                                        active && !isOpen
+                                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${active && !isOpen
                                             ? 'bg-brand-teal-700 text-white'
                                             : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                    }`}
+                                        }`}
                                 >
                                     <Icon size={18} />
                                     <span className="flex-1 text-left">{label}</span>
@@ -104,11 +102,10 @@ export default function AdminLayout({ children, title }) {
                                                 <Link
                                                     key={sub.href}
                                                     href={sub.href}
-                                                    className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                                                        subActive
+                                                    className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${subActive
                                                             ? 'text-brand-teal-400 font-medium'
                                                             : 'text-gray-400 hover:text-white'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {sub.label}
                                                 </Link>
@@ -138,9 +135,17 @@ export default function AdminLayout({ children, title }) {
                     <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
                     <div className="flex items-center gap-3 text-sm text-gray-600">
                         <span>{user?.name ?? 'Admin'}</span>
-                        <div className="h-8 w-8 rounded-full bg-brand-teal-100 text-brand-teal-700 flex items-center justify-center text-xs font-semibold">
-                            {(user?.name ?? 'A').charAt(0).toUpperCase()}
-                        </div>
+                        {user?.avatar ? (
+                            <img
+                                src={user.avatar}
+                                alt={user.name}
+                                className="h-8 w-8 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="h-8 w-8 rounded-full bg-brand-teal-100 text-brand-teal-700 flex items-center justify-center text-xs font-semibold">
+                                {(user?.name ?? 'A').charAt(0).toUpperCase()}
+                            </div>
+                        )}
                     </div>
                 </header>
                 <main className="flex-1 p-6">{children}</main>

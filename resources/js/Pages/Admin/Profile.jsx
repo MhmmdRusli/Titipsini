@@ -73,8 +73,8 @@ export default function Profile({ admin }) {
           {/* Kartu kiri: foto + identitas ringkas */}
           <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col items-center text-center">
             <div className="relative">
-                <img
-                src={preview ?? "/storage/avatars/anF3Zp3bp6oR6MlmcrpzjVkQ9LbwLbaq20PLq1W4.png"}
+              <img
+                src={preview ?? "https://api.dicebear.com/7.x/initials/svg?seed=" + encodeURIComponent(data.name || "Admin")}
                 alt={data.name}
                 className="w-32 h-32 rounded-full object-cover"
               />
@@ -269,9 +269,8 @@ export default function Profile({ admin }) {
 function InfoRow({ label, value, highlight, last }) {
   return (
     <div
-      className={`flex justify-between py-2 ${
-        !last ? "border-b border-gray-100" : ""
-      }`}
+      className={`flex justify-between py-2 ${!last ? "border-b border-gray-100" : ""
+        }`}
     >
       <span className="text-gray-600">{label}</span>
       <span className={highlight ? "text-brand-teal-700 font-semibold" : "text-gray-900 font-medium"}>
