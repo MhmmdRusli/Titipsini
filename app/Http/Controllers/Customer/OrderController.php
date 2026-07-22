@@ -12,35 +12,27 @@ use Inertia\Response;
 
 class OrderController extends Controller
 {
-    protected function statusesForTab(string $tab): array
-    {
-        return match ($tab) {
-            'selesai' => ['selesai'],
-            'dibatalkan' => ['dibatalkan'],
-            default => ['baru', 'diproses'],
-        };
-    }
+    
 
     public function index(Request $request): Response
-    {
-        $tab = $request->string('tab')->toString() ?: 'berjalan';
+{
+    $status = $request->string('status')->toString();
 
-        $orders = $request->user()
-            ->ordersAsCustomer()
-            ->with('partner:id,name')
-            ->whereIn('status', $this->statusesForTab($tab))
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+    $orders = $request->user()
+        ->ordersAsCustomer()
+        ->with('partner:id,name')
+        ->when($status, fn ($q) => $q->where('status', $status))
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-        return Inertia::render('Customer/Orders/Index', [
-            'orders' => $orders,
-            'filters' => [
-                'tab' => $tab,
-            ],
-        ]);
-    }
-
+    return Inertia::render('Customer/Orders/Index', [
+        'orders' => $orders,
+        'filters' => [
+            'status' => $status,
+        ],
+    ]);
+}
     public function show(Request $request, Order $order): Response
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
