@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Pencil, Package, Tag, Minus, Plus } from 'lucide-react';
 
@@ -17,7 +17,13 @@ function formatTanggal(value) {
 
 export default function Pemesanan({ customer, items: initialItems, detail }) {
     const [items, setItems] = useState(initialItems);
-    const [processing, setProcessing] = useState(false);
+
+    // Halaman ini tidak memakai CustomerLayout, jadi sinkronisasi dark mode
+    // dilakukan manual di sini juga (sama seperti di CustomerLayout.jsx).
+    useEffect(() => {
+        const isDark = typeof window !== 'undefined' && localStorage.getItem('titipsini_theme') === 'dark';
+        document.documentElement.classList.toggle('dark', isDark);
+    }, []);
 
     function updateQty(index, delta) {
         setItems((prev) =>
@@ -32,13 +38,13 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
     }
 
     return (
-        <div className="min-h-dvh bg-gray-200 sm:flex sm:items-center sm:justify-center sm:py-6">
+        <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">
             <Head title="Pemesanan" />
 
-            <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-gray-50 sm:h-[850px] sm:shadow-xl">
+            <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-gray-50 dark:bg-gray-900 sm:h-[850px] sm:shadow-xl">
                 {/* Header hijau tipis (pb-5) */}
                 <div
-                    className="shrink-0 bg-green-600 px-4 pb-5 text-white"
+                    className="shrink-0 bg-green-600 dark:bg-green-800 px-4 pb-5 text-white"
                     style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
                 >
                     <div className="flex items-center gap-3">
@@ -51,17 +57,17 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
 
                 <main className="flex-1 overflow-y-auto pb-32">
                     {/* Kartu putih dengan space kiri-kanan (mx-4) dan sudut rounded-3xl penuh */}
-                    <div className="mx-4 -mt-3 rounded-3xl bg-white px-4 pb-4 pt-5 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+                    <div className="mx-4 -mt-3 rounded-3xl bg-white dark:bg-gray-800 px-4 pb-4 pt-5 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
                         <div className="flex items-start justify-between">
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900">{customer.nama}</h2>
-                                <p className="mt-0.5 text-sm text-gray-500">{customer.telepon}</p>
-                                <p className="mt-1 text-sm leading-snug text-gray-500">{customer.alamat}</p>
+                                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{customer.nama}</h2>
+                                <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{customer.telepon}</p>
+                                <p className="mt-1 text-sm leading-snug text-gray-500 dark:text-gray-400">{customer.alamat}</p>
                             </div>
                             <div className="flex shrink-0 flex-col items-center gap-2">
                                 <button
                                     type="button"
-                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600"
+                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
                                 >
                                     <Pencil size={14} />
                                 </button>
@@ -71,14 +77,14 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
                             </div>
                         </div>
 
-                        <div className="my-5 border-t border-gray-100" />
+                        <div className="my-5 border-t border-gray-100 dark:border-gray-700" />
 
                         <div className="mb-2 flex items-center gap-2">
-                            <Tag size={16} className="text-green-600" />
-                            <h3 className="text-sm font-bold text-gray-900">Jenis Barang</h3>
+                            <Tag size={16} className="text-green-600 dark:text-green-400" />
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">Jenis Barang</h3>
                         </div>
 
-                        <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-2 pb-2 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                        <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-2 pb-2 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                             <span>Product</span>
                             <span>Price</span>
                             <span className="text-center">Qty</span>
@@ -86,25 +92,25 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
                         </div>
 
                         {items.length === 0 && (
-                            <p className="py-3 text-sm text-gray-400">Belum ada barang yang ditambahkan.</p>
+                            <p className="py-3 text-sm text-gray-400 dark:text-gray-500">Belum ada barang yang ditambahkan.</p>
                         )}
 
                         {items.map((item, index) => (
                             <div
                                 key={item.nama + index}
-                                className="grid grid-cols-[1.4fr_1fr_1fr_1fr] items-center gap-2 border-t border-gray-50 py-3"
+                                className="grid grid-cols-[1.4fr_1fr_1fr_1fr] items-center gap-2 border-t border-gray-50 dark:border-gray-700 py-3"
                             >
-                                <span className="text-sm font-medium text-gray-900">{item.nama}</span>
-                                <span className="text-xs text-gray-500">{formatRupiah(item.harga)}</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.nama}</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">{formatRupiah(item.harga)}</span>
                                 <div className="flex items-center justify-center gap-1.5">
                                     <button
                                         type="button"
                                         onClick={() => updateQty(index, -1)}
-                                        className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-100 text-gray-500"
+                                        className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300"
                                     >
                                         <Minus size={12} />
                                     </button>
-                                    <span className="w-4 text-center text-sm font-semibold text-gray-900">{item.qty}</span>
+                                    <span className="w-4 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">{item.qty}</span>
                                     <button
                                         type="button"
                                         onClick={() => updateQty(index, 1)}
@@ -113,36 +119,36 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
                                         <Plus size={12} />
                                     </button>
                                 </div>
-                                <span className="text-right text-sm font-bold text-gray-900">
+                                <span className="text-right text-sm font-bold text-gray-900 dark:text-gray-100">
                                     {formatRupiah(item.harga * item.qty)}
                                 </span>
                             </div>
                         ))}
 
-                        <div className="my-5 border-t border-gray-100" />
+                        <div className="my-5 border-t border-gray-100 dark:border-gray-700" />
 
-                        <h3 className="mb-3 text-sm font-bold text-gray-900">Detail Transaksi</h3>
+                        <h3 className="mb-3 text-sm font-bold text-gray-900 dark:text-gray-100">Detail Transaksi</h3>
                         <div className="space-y-2.5 text-sm">
                             <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Check In</span>
-                                <span className="font-medium text-gray-900">{formatTanggal(detail.checkIn)}</span>
+                                <span className="text-gray-500 dark:text-gray-400">Check In</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100">{formatTanggal(detail.checkIn)}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Check Out</span>
-                                <span className="font-medium text-gray-900">{formatTanggal(detail.checkOut)}</span>
+                                <span className="text-gray-500 dark:text-gray-400">Check Out</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100">{formatTanggal(detail.checkOut)}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Pick Up</span>
-                                <span className="font-medium text-gray-900">{detail.pickup ? 'Ya' : 'Tidak'}</span>
+                                <span className="text-gray-500 dark:text-gray-400">Pick Up</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100">{detail.pickup ? 'Ya' : 'Tidak'}</span>
                             </div>
                         </div>
 
-                        <div className="my-5 border-t border-gray-100" />
+                        <div className="my-5 border-t border-gray-100 dark:border-gray-700" />
 
-                        <h3 className="mb-3 text-sm font-bold text-gray-900">Rincian Pembayaran</h3>
+                        <h3 className="mb-3 text-sm font-bold text-gray-900 dark:text-gray-100">Rincian Pembayaran</h3>
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-500">Subtotal Paket</span>
-                            <span className="font-bold text-gray-900">{formatRupiah(subtotalPaket)}</span>
+                            <span className="text-gray-500 dark:text-gray-400">Subtotal Paket</span>
+                            <span className="font-bold text-gray-900 dark:text-gray-100">{formatRupiah(subtotalPaket)}</span>
                         </div>
                     </div>
                 </main>
@@ -152,13 +158,13 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
                     className="absolute inset-x-0 bottom-0 z-10 px-4 pb-4"
                     style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
                 >
-                    <div className="rounded-2xl border border-gray-100 bg-white px-4 pb-4 pt-3 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
+                    <div className="rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 pb-4 pt-3 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
                         <Link
                             href="/app/services/barang/metode-pembayaran"
                             className="flex items-center justify-between py-1"
                         >
-                            <span className="text-sm text-gray-500">Pembayaran</span>
-                            <span className="flex items-center gap-1 text-sm font-semibold text-green-600">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">Pembayaran</span>
+                            <span className="flex items-center gap-1 text-sm font-semibold text-green-600 dark:text-green-400">
                                 Pilih metode pembayaran
                                 <ArrowLeft size={14} className="rotate-180" />
                             </span>
