@@ -37,11 +37,11 @@ class OrderController extends Controller
         $orders->getCollection()->transform(function ($order) {
             return [
                 'id' => $order->id,
-                'order_number' => $order->order_number ?? ('TS-' . str_pad($order->id, 5, '0', STR_PAD_LEFT)),
+                'order_number' => $order->order_code,
                 'customer_name' => $order->customer->name ?? '-',
-                'address' => $order->pickup_address,
+                'address' => $order->pickup_address ?? $order->city,
                 'service_type' => $order->service_type,
-                'duration' => $order->duration,
+                'duration' => $this->hitungDurasi($order),
                 'status' => $order->status,
             ];
         });
@@ -68,10 +68,17 @@ class OrderController extends Controller
 
         $order->load('customer');
 
+        // Order lama (sebelum kolom subtotal/discount/pickup_fee diisi saat create)
+        // kemungkinan subtotal-nya masih 0 (bukan null, karena default kolomnya 0),
+        // jadi fallback berdasarkan nilai > 0, bukan pakai `??` yang tidak akan pernah kena.
+        $subtotal = $order->subtotal > 0 ? $order->subtotal : $order->total_price;
+        $discount = $order->discount ?? 0;
+        $pickupFee = $order->pickup_fee ?? 0;
+
         return Inertia::render('Mitra/Orders/Show', [
             'order' => [
                 'id' => $order->id,
-                'order_number' => $order->order_number ?? ('TS-' . str_pad($order->id, 5, '0', STR_PAD_LEFT)),
+                'order_number' => $order->order_code,
                 'status' => $order->status,
                 'cancel_reason' => $order->cancel_reason,
                 'service_type' => $order->service_type,
@@ -81,15 +88,33 @@ class OrderController extends Controller
                 ],
                 'pickup_address' => $order->pickup_address,
                 'dropoff_address' => $order->dropoff_address,
-                'item_description' => $order->item_description,
-                'duration' => $order->duration,
-                'pickup_status' => $order->pickup_status,
-                'subtotal' => (float) $order->subtotal,
-                'discount' => (float) $order->discount,
-                'pickup_fee' => (float) $order->pickup_fee,
-                'total' => (float) $order->total,
+                'item_description' => $order->item_name,
+                'duration' => $this->hitungDurasi($order),
+                // Dikirim sebagai label string, bukan boolean mentah — supaya tidak
+                // "hilang" saat dirender di React (JSX tidak menampilkan boolean false).
+                'pickup_status' => $order->is_pickup ? 'Dijemput oleh mitra' : 'Diantar sendiri oleh customer',
+                'subtotal' => (float) $subtotal,
+                'discount' => (float) $discount,
+                'pickup_fee' => (float) $pickupFee,
+                'total' => (float) $order->total_price,
                 'created_at' => optional($order->created_at)->format('d M Y, H:i'),
             ],
         ]);
+    }
+
+    /**
+     * Hitung durasi penitipan dari start_date - end_date (dalam hari).
+     */
+    private function hitungDurasi(Order $order): ?string
+    {
+        if (! $order->start_date || ! $order->end_date) {
+            return null;
+        }
+
+        $mulai = \Illuminate\Support\Carbon::parse($order->start_date);
+        $selesai = \Illuminate\Support\Carbon::parse($order->end_date);
+        $hari = $mulai->diffInDays($selesai) + 1;
+
+        return $hari.' hari';
     }
 }
