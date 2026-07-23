@@ -90,7 +90,7 @@ export default function ServicesIndex({ services, filters }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari kota atau kecamatan..."
-                        className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-teal-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
+                        className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
                     />
                 </form>
 
@@ -98,7 +98,7 @@ export default function ServicesIndex({ services, filters }) {
                     <button
                         type="button"
                         onClick={() => setModalOpen(true)}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-teal-600 px-3 py-1.5 text-xs font-semibold text-white"
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#15803d] px-3 py-1.5 text-xs font-semibold text-white dark:bg-[#22c55e]"
                     >
                         <ModalIcon size={13} />
                         {typeOptions.find((t) => t.value === selectedType)?.label}
@@ -115,7 +115,7 @@ export default function ServicesIndex({ services, filters }) {
                         <Link
                             key={service.id}
                             href={service.kategori === 'barang' ? `/app/services/barang/paket-pilihan?service_id=${service.id}` : `/app/services/${service.id}`}
-                            className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                            className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition hover:border-green-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-green-700"
                         >
                             <div className="h-24 w-full bg-gray-100 dark:bg-gray-700">
                                 {service.foto ? (
@@ -132,7 +132,7 @@ export default function ServicesIndex({ services, filters }) {
                                     <MapPin size={10} />
                                     Kecamatan {service.kecamatan}
                                 </p>
-                                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-brand-teal-50 px-2 py-0.5 text-[10px] font-medium text-brand-teal-700 dark:bg-brand-teal-900/40 dark:text-brand-teal-300">
+                                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
                                     <ModalIcon size={10} />
                                     {KATEGORI_LABEL[service.kategori]}
                                 </span>
@@ -164,8 +164,8 @@ export default function ServicesIndex({ services, filters }) {
                                     onClick={() => setSelectedType(type.value)}
                                     className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
                                         selectedType === type.value
-                                            ? 'border-brand-teal-600 bg-brand-teal-600 text-white'
-                                            : 'border-gray-200 text-gray-600 hover:border-brand-teal-300 dark:border-gray-600 dark:text-gray-300'
+                                            ? 'border-[#15803d] bg-[#15803d] text-white dark:border-[#22c55e] dark:bg-[#22c55e]'
+                                            : 'border-gray-200 text-gray-600 hover:border-green-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-green-600'
                                     }`}
                                 >
                                     {type.label}
@@ -177,7 +177,7 @@ export default function ServicesIndex({ services, filters }) {
                             type="button"
                             disabled={!selectedType}
                             onClick={confirmType}
-                            className="mt-6 w-full rounded-xl bg-brand-teal-600 py-3 text-sm font-bold text-white disabled:opacity-40"
+                            className="mt-6 w-full rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white transition hover:bg-green-700 disabled:opacity-40 dark:bg-[#22c55e] dark:hover:bg-green-600"
                         >
                             OK
                         </button>

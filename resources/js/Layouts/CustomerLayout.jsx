@@ -125,7 +125,7 @@ export default function CustomerLayout({ children, title, backHref }) {
                                 key={href}
                                 href={href}
                                 className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${
-                                    active ? 'text-brand-teal-700 dark:text-brand-teal-400' : 'text-gray-500 dark:text-gray-400'
+                                    active ? 'text-[#15803d] dark:text-[#4ade80]' : 'text-gray-500 dark:text-gray-400'
                                 }`}
                             >
                                 <Icon size={20} />

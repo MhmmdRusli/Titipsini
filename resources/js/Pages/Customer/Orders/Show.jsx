@@ -5,7 +5,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 const STATUS_STYLE = {
     baru: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300',
     diproses: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300',
-    selesai: 'bg-brand-teal-100 text-brand-teal-700 dark:bg-brand-teal-900/40 dark:text-brand-teal-300',
+    selesai: 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]',
     dibatalkan: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300',
 };
 
@@ -63,7 +63,7 @@ export default function OrderShow({ order }) {
                     </div>
 
                     <div className="mt-3 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-                        <Package size={15} className="text-brand-teal-600 dark:text-brand-teal-400" />
+                        <Package size={15} className="text-[#15803d] dark:text-[#4ade80]" />
                         {SERVICE_LABEL[order.service_type] ?? order.service_type}
                         {order.is_pickup && (
                             <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
@@ -93,7 +93,7 @@ export default function OrderShow({ order }) {
                                         <div className="flex flex-col items-center">
                                             <div
                                                 className={`h-3 w-3 rounded-full ${
-                                                    reached ? 'bg-brand-teal-600 dark:bg-brand-teal-400' : 'bg-gray-200 dark:bg-gray-700'
+                                                    reached ? 'bg-[#15803d] dark:bg-[#4ade80]' : 'bg-gray-200 dark:bg-gray-700'
                                                 }`}
                                             />
                                             <span
@@ -107,7 +107,7 @@ export default function OrderShow({ order }) {
                                         {i < STEPS.length - 1 && (
                                             <div
                                                 className={`mx-1 h-0.5 flex-1 ${
-                                                    i < currentStepIndex ? 'bg-brand-teal-600 dark:bg-brand-teal-400' : 'bg-gray-200 dark:bg-gray-700'
+                                                    i < currentStepIndex ? 'bg-[#15803d] dark:bg-[#4ade80]' : 'bg-gray-200 dark:bg-gray-700'
                                                 }`}
                                             />
                                         )}
@@ -163,7 +163,7 @@ export default function OrderShow({ order }) {
 
                 <Link
                     href="/app/orders"
-                    className="mt-5 block w-full rounded-xl border border-gray-200 py-2.5 text-center text-sm font-medium text-gray-600 dark:border-gray-700 dark:text-gray-300"
+                    className="mt-5 block w-full rounded-xl border border-green-200 bg-green-50 py-2.5 text-center text-sm font-bold text-[#15803d] hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/40 dark:text-[#4ade80] dark:hover:bg-green-900/50 transition"
                 >
                     Kembali ke Pesanan Saya
                 </Link>
