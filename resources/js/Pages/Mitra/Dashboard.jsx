@@ -129,7 +129,7 @@ export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesa
                     )}
                 </div>
 
-                {/* Jumlah Pesanan */}
+                {/* Jumlah Pesanan (Barang, Kendaraan, Bangunan, Pindahan) */}
                 <div className="mt-5">
                     <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Jumlah Pesanan</p>
                     <div className="grid grid-cols-2 gap-3">
@@ -145,6 +145,20 @@ export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesa
                             <p className="text-sm font-bold">Kendaraan</p>
                             <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
                                 {pesanan?.kendaraan ?? 0}
+                            </div>
+                        </div>
+                        {/* Card Bangunan */}
+                        <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
+                            <p className="text-sm font-bold">Bangunan</p>
+                            <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
+                                {pesanan?.bangunan ?? 0}
+                            </div>
+                        </div>
+                        {/* Card Pindahan */}
+                        <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
+                            <p className="text-sm font-bold">Pindahan</p>
+                            <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
+                                {pesanan?.pindahan ?? 0}
                             </div>
                         </div>
                     </div>
