@@ -6,6 +6,17 @@
       0 => 'Inertia\\ServiceProvider',
     ),
   ),
+  'jenssegers/agent' => 
+  array (
+    'aliases' => 
+    array (
+      'Agent' => 'Jenssegers\\Agent\\Facades\\Agent',
+    ),
+    'providers' => 
+    array (
+      0 => 'Jenssegers\\Agent\\AgentServiceProvider',
+    ),
+  ),
   'laravel/sail' => 
   array (
     'providers' => 
