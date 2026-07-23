@@ -7,6 +7,7 @@ use App\Models\PasswordHistory;
 use App\Models\PaymentSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -16,7 +17,7 @@ class PengaturanController extends Controller
     /**
      * GET /admin/pengaturan/keamanan
      */
-    public function keamanan()
+    public function keamanan(Request $request)
     {
         $admin = Auth::user();
 
@@ -26,7 +27,88 @@ class PengaturanController extends Controller
 
         return Inertia::render('Admin/Pengaturan/Keamanan', [
             'remainingChanges' => max(0, 2 - $changesLast24h),
+            'loginHistory' => $this->ambilRiwayatLogin($admin->id, $request->session()->getId()),
         ]);
+    }
+
+    /**
+     * Ambil daftar sesi login admin dari tabel `sessions` (butuh SESSION_DRIVER=database di .env).
+     * Kalau driver session bukan 'database', tabel ini nggak dipakai Laravel sama sekali,
+     * jadi hasilnya bakal selalu kosong - itu bukan bug, tapi konfigurasi.
+     */
+    private function ambilRiwayatLogin(int $userId, string $currentSessionId): array
+    {
+        if (config('session.driver') !== 'database') {
+            return [];
+        }
+
+        return DB::table('sessions')
+            ->where('user_id', $userId)
+            ->orderByDesc('last_activity')
+            ->get()
+            ->map(function ($session) use ($currentSessionId) {
+                [$device, $deviceType] = $this->parseUserAgent($session->user_agent);
+
+                return [
+                    'id' => $session->id,
+                    'device' => $device,
+                    'device_type' => $deviceType,
+                    'location' => $session->ip_address,
+                    'time' => \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)
+                        ->diffForHumans(),
+                    'current' => $session->id === $currentSessionId,
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Parsing user agent sederhana (browser + OS), tanpa dependency tambahan.
+     * Kalau butuh deteksi yang lebih akurat, bisa ganti pakai package
+     * seperti jenssegers/agent nanti.
+     */
+    private function parseUserAgent(?string $userAgent): array
+    {
+        $userAgent = $userAgent ?? '';
+
+        $isMobile = (bool) preg_match('/Mobile|Android|iPhone|iPad/i', $userAgent);
+
+        $browser = match (true) {
+            str_contains($userAgent, 'Edg/') => 'Edge',
+            str_contains($userAgent, 'Chrome/') => 'Chrome',
+            str_contains($userAgent, 'Firefox/') => 'Firefox',
+            str_contains($userAgent, 'Safari/') && ! str_contains($userAgent, 'Chrome') => 'Safari',
+            default => 'Browser',
+        };
+
+        $os = match (true) {
+            str_contains($userAgent, 'Windows') => 'Windows',
+            str_contains($userAgent, 'Mac OS') => 'macOS',
+            str_contains($userAgent, 'Android') => 'Android',
+            str_contains($userAgent, 'iPhone'), str_contains($userAgent, 'iPad') => 'iOS',
+            str_contains($userAgent, 'Linux') => 'Linux',
+            default => null,
+        };
+
+        $device = $os ? "{$browser} di {$os}" : $browser;
+
+        return [$device, $isMobile ? 'mobile' : 'desktop'];
+    }
+
+    /**
+     * DELETE /admin/pengaturan/keamanan/sessions/{sessionId}
+     * Paksa keluar dari satu sesi login (device lain).
+     */
+    public function destroySession(Request $request, string $sessionId)
+    {
+        DB::table('sessions')
+            ->where('user_id', Auth::id())
+            ->where('id', $sessionId)
+            ->where('id', '!=', $request->session()->getId()) // jaga-jaga: gak boleh hapus sesi sendiri lewat sini
+            ->delete();
+
+        return back()->with('success', 'Sesi berhasil dikeluarkan.');
     }
 
     /**

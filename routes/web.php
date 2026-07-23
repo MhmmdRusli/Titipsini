@@ -156,6 +156,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
         Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
+        Route::delete('keamanan/sessions/{sessionId}', [PengaturanController::class, 'destroySession'])->name('keamanan.sessions.destroy');
         Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
