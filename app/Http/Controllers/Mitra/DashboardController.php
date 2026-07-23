@@ -15,19 +15,38 @@ class DashboardController extends Controller
     {
         $partner = Auth::user();
 
+        // 1. Ambil pesanan aktif milik mitra ini
+        // Mengakomodasi variasi status pesanan di database
         $pesananAktifQuery = Order::where('partner_id', $partner->id)
-            ->whereNotIn('status', ['selesai', 'dibatalkan']);
+            ->whereNotIn('status', ['selesai', 'completed', 'dibatalkan', 'cancelled']);
 
-        $pesananBarang = (clone $pesananAktifQuery)->where('service_type', 'barang')->count();
-        $pesananKendaraan = (clone $pesananAktifQuery)->where('service_type', 'kendaraan')->count();
+        // Menyesuaikan pencarian service_type agar toleran terhadap variasi penulisan
+        $pesananBarang = (clone $pesananAktifQuery)
+            ->where(function($q) {
+                $q->where('service_type', 'barang')
+                  ->orWhere('service_type', 'titip_barang');
+            })->count();
 
-        // Ambil kategori layanan unik dari layanan aktif yang partner ini
-        // sudah tambahkan lewat "Kelola Layanan" (tabel services) - bukan
-        // dari kolom users.layanan_kategori yang gak pernah diisi.
+        $pesananKendaraan = (clone $pesananAktifQuery)
+            ->where(function($q) {
+                $q->where('service_type', 'kendaraan')
+                  ->orWhere('service_type', 'titip_kendaraan');
+            })->count();
+
+        // 2. Hitung Saldo Real-time jika kolom saldo di tabel users/partners masih 0
+        // (Mengakumulasi total harga dari pesanan yang sudah selesai)
+        $totalPendapatan = Order::where('partner_id', $partner->id)
+            ->whereIn('status', ['selesai', 'completed', 'success'])
+            ->sum('total_price'); // Sesuaikan nama kolom harga di tabel orders kamu (misal: total_harga / gross_amount)
+
+        $saldoTampil = $partner->saldo > 0 ? $partner->saldo : $totalPendapatan;
+
+        // 3. Ambil Kategori Layanan Aktif
         $layananKategori = $partner->services()
             ->where('is_active', true)
             ->distinct()
             ->pluck('kategori')
+            ->map(fn($item) => strtolower($item)) // Memastikan lowercase
             ->values()
             ->all();
 
@@ -35,12 +54,9 @@ class DashboardController extends Controller
             'partner' => [
                 'name' => $partner->name,
                 'foto' => $partner->foto ? Storage::url($partner->foto) : null,
-                // Nilai enum verification_status di project ini pakai Bahasa
-                // Indonesia ('terverifikasi'), bukan 'verified'. Sebelumnya
-                // salah bandingkan jadi banner verifikasi selalu muncul.
-                'is_verified' => $partner->verification_status === 'terverifikasi',
+                'is_verified' => in_array($partner->verification_status, ['terverifikasi', 'verified']),
             ],
-            'saldo' => $partner->saldo ?? 0,
+            'saldo' => $saldoTampil,
             'toko' => [
                 'buka' => (bool) $partner->toko_buka,
                 'jam_buka' => $partner->jam_buka ? substr($partner->jam_buka, 0, 5) : null,
