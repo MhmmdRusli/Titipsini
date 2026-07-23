@@ -89,6 +89,9 @@ class PartnerController extends Controller
             'rejection_reason' => in_array($validated['verification_status'], ['ditolak', 'ditangguhkan'])
                 ? $validated['rejection_reason']
                 : null,
+            'suspended_at' => $validated['verification_status'] === 'ditangguhkan'
+                ? now()
+                : null,
             'verified_at' => $validated['verification_status'] === 'terverifikasi'
                 ? now()
                 : $partner->verified_at,
@@ -98,4 +101,61 @@ class PartnerController extends Controller
             ->back()
             ->with('success', 'Status mitra berhasil diperbarui.');
     }
+
+    /**
+     * Memulihkan akun mitra yang ditangguhkan.
+     * PATCH /admin/partners/{partner}/restore
+     */
+    public function restore(User $partner): RedirectResponse
+{
+    abort_unless($partner->role === 'partner', 404);
+
+    $partner->update([
+        'suspended_at' => null,
+        'restoration_requested_at' => null,
+        'rejection_reason' => null,
+        'verification_status' => 'terverifikasi',
+    ]);
+
+    return redirect()
+        ->back()
+        ->with('success', 'Akun mitra berhasil dipulihkan.');
+}
+
+    /**
+     * Menampilkan halaman peringatan penangguhan untuk mitra yang login.
+     * GET /mitra/ditangguhkan
+     */
+    public function suspendedNotice(): Response|RedirectResponse
+{
+    $user = auth()->user();
+
+    if (!$user || $user->role !== 'partner' || !$user->suspended_at) {
+        return redirect('/mitra/dashboard');
+    }
+
+    return Inertia::render('Auth/SuspendedNotice', [
+        'reason' => $user->rejection_reason,
+        'alreadyRequested' => (bool) $user->restoration_requested_at,
+    ]);
+}
+
+    /**
+     * Menangani permintaan pemulihan akun dari mitra yang ditangguhkan.
+     * POST /mitra/ajukan-pemulihan
+     */
+    public function requestRestoration(Request $request): RedirectResponse
+{
+    $user = auth()->user();
+
+    if (!$user || $user->role !== 'partner') {
+        return redirect()->route('login');
+    }
+
+    if (! $user->restoration_requested_at) {
+        $user->update(['restoration_requested_at' => now()]);
+    }
+
+    return back()->with('success', 'Permintaan pemulihan akun berhasil dikirim ke administrator.');
+}
 }

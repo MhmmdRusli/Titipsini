@@ -20,7 +20,7 @@ const STATUS_LABEL = {
 
 export default function Show({ partner }) {
     const [reasonModal, setReasonModal] = useState(null); // 'ditolak' | 'ditangguhkan' | null
-    
+
     // Tentukan status tampilan awal berdasarkan apakah partner sedang disuspend atau tidak
     const isSuspended = Boolean(partner.suspended_at);
     const currentStatus = isSuspended ? 'ditangguhkan' : partner.verification_status;
@@ -31,19 +31,19 @@ export default function Show({ partner }) {
     });
 
     function submitStatus(status, reason = null) {
-        // Jika status yang dipilih adalah ditangguhkan, kirim request sesuai backend PartnerController
         const payloadStatus = status === 'ditangguhkan' ? 'ditangguhkan' : status;
-        
-        setData('verification_status', payloadStatus);
-        setData('rejection_reason', reason ?? '');
+
+        // Perbarui data form terlebih dahulu, lalu kirimkan patch
+        setData({
+            verification_status: payloadStatus,
+            rejection_reason: reason ?? '',
+        });
 
         patch(`/admin/partners/${partner.id}/status`, {
-            data: {
-                verification_status: payloadStatus,
-                rejection_reason: reason,
-            },
             preserveScroll: true,
-            onSuccess: () => setReasonModal(null),
+            onSuccess: () => {
+                setReasonModal(null);
+            },
         });
     }
 
@@ -77,9 +77,8 @@ export default function Show({ partner }) {
                         <h2 className="mt-4 text-lg font-semibold text-slate-900">{partner.name}</h2>
                         <p className="text-sm text-slate-500">ID Vendor #{partner.id}</p>
                         <span
-                            className={`mt-3 rounded-full px-3 py-1 text-xs font-medium ${
-                                STATUS_STYLE[currentStatus]
-                            }`}
+                            className={`mt-3 rounded-full px-3 py-1 text-xs font-medium ${STATUS_STYLE[currentStatus]
+                                }`}
                         >
                             {STATUS_LABEL[currentStatus]}
                         </span>
@@ -126,6 +125,12 @@ export default function Show({ partner }) {
                                 <dd className="mt-1 font-medium text-orange-600">{formatDate(partner.suspended_at)}</dd>
                             </div>
                         )}
+                        {partner.restoration_requested_at && (
+                            <div>
+                                <dt className="text-slate-500">Mengajukan Pemulihan</dt>
+                                <dd className="mt-1 font-medium text-teal-600">{formatDate(partner.restoration_requested_at)}</dd>
+                            </div>
+                        )}
                     </dl>
                 </div>
 
@@ -133,7 +138,7 @@ export default function Show({ partner }) {
                 <div className="rounded-xl border border-slate-200 bg-white p-6 lg:col-span-2">
                     <h3 className="text-base font-semibold text-slate-900">Tindakan Verifikasi</h3>
                     <p className="mt-1 text-sm text-slate-500">
-                        Ubah status akun vendor ini sesuai hasil peninjauan data legalitas.
+                        Ubah status akun vendor ini sesuai hasil peninjauan data legalitas atau pelanggaran.
                     </p>
 
                     <div className="mt-5 flex flex-wrap gap-3">
@@ -158,6 +163,18 @@ export default function Show({ partner }) {
                         >
                             Tangguhkan Akun
                         </button>
+
+                        {/* TOMBOL PEMULIHAN AKUN (Hanya tampil jika akun sedang ditangguhkan) */}
+                        {isSuspended && partner.restoration_requested_at && (
+                            <Link
+                                href={`/admin/partners/${partner.id}/restore`}
+                                method="patch"
+                                as="button"
+                                className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 transition"
+                            >
+                                Pulihkan Akun Mitra
+                            </Link>
+                        )}
                     </div>
 
                     {reasonModal && (

@@ -150,6 +150,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/partners', [AdminPartnerController::class, 'index'])->name('partners.index');
     Route::get('/partners/{partner}', [AdminPartnerController::class, 'show'])->name('partners.show');
     Route::patch('/partners/{partner}/status', [AdminPartnerController::class, 'updateStatus'])->name('partners.updateStatus');
+    
+    // Rute untuk memulihkan akun mitra yang ditangguhkan dari panel admin
+    Route::patch('/partners/{partner}/restore', [AdminPartnerController::class, 'restore'])->name('partners.restore');
 
     Route::get('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profil.update');
@@ -173,8 +176,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Rute Pesanan (Orders)
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
-    Route::delete('orders/bulk-delete', [OrderController::class, 'bulkDestroy'])->name('orders.bulkDestroy'); // <-- Bulk delete, HARUS di atas route destroy single di bawah
-    Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy'); // <-- Rute Hapus Pesanan (single)
+    Route::delete('orders/bulk-delete', [OrderController::class, 'bulkDestroy'])->name('orders.bulkDestroy');
+    Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/orders/{order}/lapor', [CustomerReportController::class, 'create'])->name('orders.lapor');
     Route::post('/orders/{order}/lapor', [CustomerReportController::class, 'store'])->name('orders.lapor.store');
 
@@ -201,7 +204,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 | Mitra routes -> /mitra/* (role: partner, sudah login)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->group(function () {
+Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra')->name('mitra.')->group(function () {
     Route::get('/dashboard', [MitraDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/notifikasi', [MitraNotifikasiController::class, 'index'])->name('notifikasi.index');
@@ -243,13 +246,22 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('mitra.')->gr
 
 /*
 |--------------------------------------------------------------------------
+| Rute Tambahan untuk Mitra Ditangguhkan (Suspended Notice & Pemulihan)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->prefix('mitra')->name('mitra.')->group(function () {
+    Route::get('/ditangguhkan', [AdminPartnerController::class, 'suspendedNotice'])->name('suspended.notice');
+    Route::post('/ajukan-pemulihan', [AdminPartnerController::class, 'requestRestoration'])->name('request.restoration');
+});
+
+/*
+|--------------------------------------------------------------------------
 | Customer routes -> /app/* (role: customer)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
 
-    // Services / Layanan
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
     Route::get('/services/barang/paket-pilihan', [ServiceController::class, 'pilihPaket'])->name('services.barang.pilihPaket');
     Route::get('/services/barang', [ServiceController::class, 'formBarang'])->name('services.barang.form');
@@ -265,11 +277,9 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
     Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('berita.show');
 
-    // Pesanan & Pembayaran
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
     
-    // Rute untuk Lapor Vendor oleh Customer (Diperbaiki agar sesuai dengan URL /app/orders/{order}/lapor)
     Route::get('/orders/{order}/lapor', [CustomerReportController::class, 'create'])->name('orders.lapor');
     Route::post('/orders/{order}/lapor', [CustomerReportController::class, 'store'])->name('orders.lapor.store');
 
@@ -278,11 +288,9 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/orders/{order}/bukti-pembayaran', [CustomerOrderController::class, 'buktiPembayaran'])->name('orders.buktiPembayaran');
     Route::post('/orders/{order}/upload-bukti', [CustomerOrderController::class, 'uploadBukti'])->name('orders.uploadBukti');
 
-    // Notifikasi
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::patch('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
 
-    // Profil & Pengaturan
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [CustomerProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
@@ -296,7 +304,6 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::put('/profile/keamanan/password', [SecurityController::class, 'updatePassword'])->name('profile.keamanan.password');
     Route::put('/profile/keamanan/pin', [SecurityController::class, 'updatePin'])->name('profile.keamanan.pin');
 
-    // Top Up Saldo
     Route::get('/saldo/topup', [TopUpController::class, 'create'])->name('topup.create');
     Route::post('/saldo/topup', [TopUpController::class, 'store'])->name('topup.store');
     Route::get('/saldo/topup/{topup}/instruksi', [TopUpController::class, 'instruksi'])->name('topup.instruksi');
@@ -306,14 +313,12 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/saldo/riwayat', [TopUpController::class, 'riwayat'])->name('topup.riwayat');
 });
 
-// Rute Lengkapi Data
 Route::middleware(['auth'])->prefix('lengkapi-data')->name('customer.lengkapi-data.')->group(function () {
     Route::get('/', [LengkapiDataController::class, 'intro'])->name('intro');
     Route::get('/form', [LengkapiDataController::class, 'form'])->name('form');
     Route::post('/', [LengkapiDataController::class, 'store'])->name('store');
 });
 
-// Wilayah & Pin
 Route::get('/api/wilayah/provinces', [WilayahController::class, 'provinces']);
 Route::get('/api/wilayah/regencies/{provinceId}', [WilayahController::class, 'regencies']);
 Route::get('/api/wilayah/districts/{regencyId}', [WilayahController::class, 'districts']);

@@ -43,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
     'rejection_reason',
     'suspended_at',
     'suspension_reason',
+    'restoration_requested_at',
 ];
 
     protected $hidden = [

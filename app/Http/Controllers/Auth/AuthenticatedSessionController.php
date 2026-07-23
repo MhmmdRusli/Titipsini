@@ -29,8 +29,10 @@ class AuthenticatedSessionController extends Controller
             ])->onlyInput('email');
         }
 
+        $user = $request->user();
+
         // Admin tidak boleh login lewat halaman ini, hanya lewat /admin/login
-        if ($request->user()->role === 'admin') {
+        if ($user->role === 'admin') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -38,6 +40,12 @@ class AuthenticatedSessionController extends Controller
             return back()->withErrors([
                 'email' => 'Akun admin harus login melalui halaman khusus admin.',
             ])->onlyInput('email');
+        }
+
+        // Cek jika akun partner sedang ditangguhkan
+        if ($user->role === 'partner' && $user->suspended_at) {
+            $request->session()->regenerate();
+            return redirect()->route('partner.suspended.notice');
         }
 
         $request->session()->regenerate();
