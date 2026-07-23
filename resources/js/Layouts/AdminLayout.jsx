@@ -31,7 +31,7 @@ const navItems = [
         icon: Settings,
         children: [
             { label: 'Keamanan', href: '/admin/pengaturan/keamanan' },
-            { label: 'QRIS', href: '/admin/pengaturan/qris' },
+            { label: 'No Rekening', href: '/admin/pengaturan/rekening' },
         ],
     },
 ];
@@ -50,12 +50,19 @@ export default function AdminLayout({ children, title }) {
 
     return (
         <div className="flex min-h-screen bg-gray-50">
-            <aside className="w-64 shrink-0 bg-brand-navy-900 text-gray-200 flex flex-col">
-                <div className="px-5 py-5 border-b border-white/10">
-                    <span className="font-mono text-xs tracking-widest text-brand-teal-400">TITIPSINI</span>
-                    <p className="text-sm font-semibold text-white">Admin Panel</p>
+            <aside className="w-64 shrink-0 bg-green-900 text-gray-200 flex flex-col">
+                <div className="px-5 py-6 border-b border-white/10 flex flex-col items-center text-center">
+                    <img
+                        src="/images/admin-titipsini.png"
+                        alt="Logo"
+                        className="h-28 w-auto object-contain mb-3 drop-shadow-md"
+                    />
+                    <span className="text-base font-bold tracking-tight text-white">
+                        Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
+                    </span>
+                    <span className="text-[11px] text-gray-300 font-medium mt-0.5">titipkan semua urusanmu disini</span>
                 </div>
-                <nav className="flex-1 px-3 py-4 space-y-1">
+                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                     {navItems.map(({ label, href, icon: Icon, children: subItems }) => {
                         const active = url.startsWith(href);
                         const hasChildren = !!subItems;
@@ -66,10 +73,11 @@ export default function AdminLayout({ children, title }) {
                                 <Link
                                     key={href}
                                     href={href}
-                                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${active
-                                            ? 'bg-brand-teal-700 text-white'
+                                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                                        active
+                                            ? 'bg-green-700 text-white font-medium shadow-sm'
                                             : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                        }`}
+                                    }`}
                                 >
                                     <Icon size={18} />
                                     {label}
@@ -82,10 +90,11 @@ export default function AdminLayout({ children, title }) {
                                 <button
                                     type="button"
                                     onClick={() => setOpenMenu(isOpen ? null : label)}
-                                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${active && !isOpen
-                                            ? 'bg-brand-teal-700 text-white'
+                                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                                        active && !isOpen
+                                            ? 'bg-green-700 text-white font-medium shadow-sm'
                                             : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                        }`}
+                                    }`}
                                 >
                                     <Icon size={18} />
                                     <span className="flex-1 text-left">{label}</span>
@@ -103,10 +112,11 @@ export default function AdminLayout({ children, title }) {
                                                 <Link
                                                     key={sub.href}
                                                     href={sub.href}
-                                                    className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${subActive
-                                                            ? 'text-brand-teal-400 font-medium'
-                                                            : 'text-gray-400 hover:text-white'
-                                                        }`}
+                                                    className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                                                        subActive
+                                                            ? 'text-white font-medium'
+                                                            : 'text-gray-300 hover:text-white'
+                                                    }`}
                                                 >
                                                     {sub.label}
                                                 </Link>
@@ -123,7 +133,7 @@ export default function AdminLayout({ children, title }) {
                         href="/logout"
                         method="post"
                         as="button"
-                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white"
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
                     >
                         <LogOut size={18} />
                         Keluar
@@ -143,7 +153,7 @@ export default function AdminLayout({ children, title }) {
                                 className="h-8 w-8 rounded-full object-cover"
                             />
                         ) : (
-                            <div className="h-8 w-8 rounded-full bg-brand-teal-100 text-brand-teal-700 flex items-center justify-center text-xs font-semibold">
+                            <div className="h-8 w-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs font-semibold">
                                 {(user?.name ?? 'A').charAt(0).toUpperCase()}
                             </div>
                         )}
