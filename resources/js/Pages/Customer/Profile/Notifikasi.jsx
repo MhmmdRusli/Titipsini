@@ -34,7 +34,7 @@ export default function NotifikasiSettings({ preferences }) {
             <Head title="Notifikasi" />
 
             <div className="px-4 py-3">
-                <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+                <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     {ITEMS.map((item, i) => (
                         <div
                             key={item.key}
@@ -49,13 +49,13 @@ export default function NotifikasiSettings({ preferences }) {
                             <button
                                 type="button"
                                 onClick={() => toggle(item.key)}
-                                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
                                     values[item.key] ? 'bg-[#15803d] dark:bg-[#22c55e]' : 'bg-gray-300 dark:bg-gray-700'
                                 }`}
                             >
                                 <span
-                                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                                        values[item.key] ? 'translate-x-5' : 'translate-x-0.5'
+                                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out ${
+                                        values[item.key] ? 'translate-x-6' : 'translate-x-0.5'
                                     }`}
                                 />
                             </button>

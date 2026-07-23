@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Package, Truck } from 'lucide-react';
+import { Package, MapPin } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const TABS = [
@@ -18,9 +18,9 @@ const STATUS_STYLE = {
 };
 
 const SERVICE_LABEL = {
-    barang: 'Barang',
-    kendaraan: 'Kendaraan',
-    bangunan: 'Bangunan',
+    barang: 'Titip Barang',
+    kendaraan: 'Titip Kendaraan',
+    bangunan: 'Titip Bangunan',
     pindahan: 'Pindahan',
 };
 
@@ -33,7 +33,7 @@ function formatRupiah(value) {
 }
 
 function formatTanggal(value) {
-    if (!value) return '';
+    if (!value) return '-';
     return new Date(value).toLocaleDateString('id-ID', {
         day: 'numeric',
         month: 'short',
@@ -52,87 +52,121 @@ export default function OrdersIndex({ orders, filters }) {
         <CustomerLayout title="Pesanan Saya">
             <Head title="Pesanan Saya" />
 
-            <div className="px-4 py-2">
-                {/* Tabs status - scroll horizontal */}
-                <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-                    {TABS.map((tab) => (
-                        <button
-                            key={tab.value}
-                            onClick={() => changeTab(tab.value)}
-                            className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition ${
-                                activeStatus === tab.value
-                                    ? 'bg-[#15803d] text-white dark:bg-[#22c55e]'
-                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+            <div className="pb-6">
+                {/* Header hijau melengkung khusus untuk tab status */}
+                <div className="bg-[#15803d] dark:bg-green-700 px-4 pt-3 pb-7 rounded-b-[32px] shadow-sm">
+                    {/* Tabs status - scroll horizontal */}
+                    <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none">
+                        {TABS.map((tab) => (
+                            <button
+                                key={tab.value}
+                                onClick={() => changeTab(tab.value)}
+                                className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition ${
+                                    activeStatus === tab.value
+                                        ? 'bg-white text-[#15803d] shadow-sm dark:bg-gray-900 dark:text-[#4ade80]'
+                                        : 'bg-white/20 text-white hover:bg-white/30'
+                                }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Daftar pesanan */}
-                <div className="mt-4 flex flex-col gap-3">
-                    {orders.data.length === 0 && (
-                        <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400 dark:border-gray-700 dark:text-gray-500">
-                            Belum ada pesanan untuk status ini.
-                        </div>
-                    )}
+                <div className="px-4 -mt-4">
+                    <div className="flex flex-col gap-3">
+                        {orders.data.length === 0 && (
+                            <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-400 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500">
+                                Belum ada pesanan untuk status ini.
+                            </div>
+                        )}
 
-                    {orders.data.map((order) => (
-                        <Link
-                            key={order.id}
-                            href={`/app/orders/${order.id}`}
-                            className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800"
-                        >
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
-                                        <Package size={16} />
+                        {orders.data.map((order) => (
+                            <Link
+                                key={order.id}
+                                href={`/app/orders/${order.id}`}
+                                className="group relative block rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm transition-all hover:border-green-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:hover:border-green-700"
+                            >
+                                {/* Atas: Ikon, Layanan, Lokasi & Status */}
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
+                                            <Package size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-gray-900 dark:text-gray-100">
+                                                {SERVICE_LABEL[order.service_type] ?? 'Titip Barang'}
+                                            </p>
+                                            <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
+                                                <MapPin size={10} />
+                                                {order.vendor_name ?? 'Lokasi Penitipan'}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">{order.order_code}</p>
-                                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
-                                            {SERVICE_LABEL[order.service_type] ?? order.service_type}
-                                            {order.is_pickup && <Truck size={11} className="text-[#15803d] dark:text-[#4ade80]" />}
-                                        </p>
+                                    <span
+                                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                                            STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300'
+                                        }`}
+                                    >
+                                        {order.status}
+                                    </span>
+                                </div>
+
+                                {/* Tengah: Tanggal & Durasi */}
+                                <div className="mt-2.5 flex items-center justify-between border-t border-gray-50 pt-2 text-[11px] dark:border-gray-700/60">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-gray-400 dark:text-gray-500">TANGGAL</span>
+                                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                                            {formatTanggal(order.created_at)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-gray-400 dark:text-gray-500">DURASI</span>
+                                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                                            {order.duration ?? '1 hari'}
+                                        </span>
                                     </div>
                                 </div>
-                                <span
-                                    className={`rounded-full px-2 py-1 text-[10px] font-medium capitalize ${
-                                        STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300'
-                                    }`}
-                                >
-                                    {order.status}
-                                </span>
-                            </div>
 
-                            <div className="mt-2 flex items-center justify-between border-t border-gray-50 pt-2 text-[11px] text-gray-500 dark:border-gray-700 dark:text-gray-400">
-                                <span>{formatTanggal(order.created_at)}</span>
-                                <span className="font-semibold text-gray-800 dark:text-gray-200">{formatRupiah(order.total_price)}</span>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
-
-                {orders.links && orders.links.length > 3 && (
-                    <div className="mt-4 flex items-center justify-center gap-1">
-                        {orders.links.map((link, i) => (
-                            <Link
-                                key={i}
-                                href={link.url ?? '#'}
-                                preserveScroll
-                                className={`rounded-md px-3 py-1.5 text-xs ${
-                                    link.active
-                                        ? 'bg-[#15803d] text-white dark:bg-[#22c55e]'
-                                        : link.url
-                                        ? 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                                        : 'text-gray-300 dark:text-gray-700'
-                                }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
+                                {/* Bawah: Total Pembayaran & Tombol Detail */}
+                                <div className="mt-2.5 flex items-center justify-between border-t border-gray-50 pt-2.5 dark:border-gray-700/60">
+                                    <div>
+                                        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                            Total Pembayaran
+                                        </p>
+                                        <p className="mt-0.5 text-xs font-extrabold text-gray-900 dark:text-gray-100">
+                                            {formatRupiah(order.total_price)}
+                                        </p>
+                                    </div>
+                                    <span className="flex items-center gap-0.5 text-xs font-bold text-[#15803d] transition group-hover:translate-x-0.5 dark:text-[#4ade80]">
+                                        Detail &gt;
+                                    </span>
+                                </div>
+                            </Link>
                         ))}
                     </div>
-                )}
+
+                    {orders.links && orders.links.length > 3 && (
+                        <div className="mt-5 flex items-center justify-center gap-1">
+                            {orders.links.map((link, i) => (
+                                <Link
+                                    key={i}
+                                    href={link.url ?? '#'}
+                                    preserveScroll
+                                    className={`rounded-md px-3 py-1.5 text-xs ${
+                                        link.active
+                                            ? 'bg-[#15803d] text-white dark:bg-[#22c55e]'
+                                            : link.url
+                                            ? 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                                            : 'text-gray-300 dark:text-gray-700'
+                                    }`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </CustomerLayout>
     );
