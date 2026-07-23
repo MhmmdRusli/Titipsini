@@ -53,15 +53,16 @@ export default function OrdersIndex({ orders, filters }) {
             <Head title="Pesanan Saya" />
 
             <div className="pb-6">
-                {/* Header hijau melengkung khusus untuk tab status */}
-                <div className="bg-[#15803d] dark:bg-green-700 px-4 pt-3 pb-7 rounded-b-[32px] shadow-sm">
+                {/* Header hijau melengkung dengan z-30 agar posisinya paling depan dan bisa diklik */}
+                <div className="relative z-30 bg-[#15803d] dark:bg-green-700 px-4 pt-3 pb-7 rounded-b-[32px] shadow-sm">
                     {/* Tabs status - scroll horizontal */}
                     <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none">
                         {TABS.map((tab) => (
                             <button
                                 key={tab.value}
+                                type="button"
                                 onClick={() => changeTab(tab.value)}
-                                className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition ${
+                                className={`relative z-40 shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition cursor-pointer ${
                                     activeStatus === tab.value
                                         ? 'bg-white text-[#15803d] shadow-sm dark:bg-gray-900 dark:text-[#4ade80]'
                                         : 'bg-white/20 text-white hover:bg-white/30'
@@ -73,8 +74,8 @@ export default function OrdersIndex({ orders, filters }) {
                     </div>
                 </div>
 
-                {/* Daftar pesanan */}
-                <div className="px-4 -mt-4">
+                {/* Daftar pesanan dengan jarak mt-3 agar tidak mepet */}
+                <div className="px-4 mt-3">
                     <div className="flex flex-col gap-3">
                         {orders.data.length === 0 && (
                             <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-6 text-center text-sm text-gray-400 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500">

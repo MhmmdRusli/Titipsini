@@ -13,31 +13,40 @@ use Inertia\Response;
 
 class OrderController extends Controller
 {
-    protected function statusesForTab(string $tab): array
+    protected function statusesForTab(string $status): array
     {
-        return match ($tab) {
+        return match ($status) {
+            'baru' => ['baru'],
+            'diproses' => ['diproses'],
             'selesai' => ['selesai'],
             'dibatalkan' => ['dibatalkan'],
-            default => ['baru', 'diproses'],
+            default => [], // Kosong atau 'semua' berarti ambil semua data
         };
     }
 
     public function index(Request $request): Response
     {
-        $tab = $request->string('tab')->toString() ?: 'berjalan';
+        // Tangkap parameter 'status' dari request
+        $status = $request->string('status')->toString();
 
-        $orders = $request->user()
+        $query = $request->user()
             ->ordersAsCustomer()
-            ->with('partner:id,name')
-            ->whereIn('status', $this->statusesForTab($tab))
-            ->latest()
+            ->with('partner:id,name');
+
+        // Filter berdasarkan status jika dipilih
+        $statuses = $this->statusesForTab($status);
+        if (!empty($statuses)) {
+            $query->whereIn('status', $statuses);
+        }
+
+        $orders = $query->latest()
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('Customer/Orders/Index', [
             'orders' => $orders,
             'filters' => [
-                'tab' => $tab,
+                'status' => $status,
             ],
         ]);
     }
