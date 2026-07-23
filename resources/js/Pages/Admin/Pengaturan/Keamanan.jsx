@@ -47,7 +47,7 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                 {/* ============ FORM GANTI KATA SANDI ============ */}
                 <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-6">
                     <div className="mb-6 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-teal-100 text-brand-teal-700">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-300 text-brand-green-700">
                             <ShieldCheck size={20} />
                         </div>
                         <div>
@@ -84,7 +84,7 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                                         value={data[name]}
                                         onChange={(e) => setData(name, e.target.value)}
                                         disabled={limitReached}
-                                        className={`block w-full rounded-lg border px-3 py-2 pr-10 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-teal-500 disabled:bg-gray-50 disabled:text-gray-400 ${
+                                        className={`block w-full rounded-lg border px-3 py-2 pr-10 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50 disabled:text-gray-400 ${
                                             errors[name] ? 'border-red-400' : 'border-gray-300'
                                         }`}
                                     />
@@ -107,12 +107,12 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                             <button
                                 type="submit"
                                 disabled={processing || limitReached}
-                                className="rounded-lg bg-brand-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-teal-800 disabled:opacity-50"
+                                className="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-green-800 disabled:opacity-50"
                             >
                                 Simpan kata sandi
                             </button>
                             {recentlySuccessful && (
-                                <span className="text-sm text-brand-teal-700">Kata sandi berhasil diperbarui</span>
+                                <span className="text-sm text-brand-green-700">Kata sandi berhasil diperbarui</span>
                             )}
                         </div>
                     </form>
@@ -121,7 +121,7 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                 {/* ============ RIWAYAT LOGIN ============ */}
                 <div className="rounded-xl border border-gray-200 bg-white p-6">
                     <div className="mb-5 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-teal-100 text-brand-teal-700">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-green-100 text-brand-green-700">
                             <Clock size={20} />
                         </div>
                         <div>
@@ -140,7 +140,7 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                                 <li
                                     key={session.id ?? idx}
                                     className={`rounded-lg border p-3 ${
-                                        session.current ? 'border-brand-teal-200 bg-brand-teal-50/50' : 'border-gray-100'
+                                        session.current ? 'border-green-200 bg-green-50/50' : 'border-gray-100'
                                     }`}
                                 >
                                     <div className="flex items-start justify-between gap-2">
@@ -152,7 +152,7 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                                                 <p className="text-sm font-medium text-gray-800">
                                                     {session.device ?? 'Perangkat tidak dikenal'}
                                                     {session.current && (
-                                                        <span className="ml-2 rounded-full bg-brand-teal-100 px-2 py-0.5 text-[10px] font-semibold text-brand-teal-700">
+                                                        <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
                                                             Sesi ini
                                                         </span>
                                                     )}
