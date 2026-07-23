@@ -9,14 +9,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('payment_method')->nullable()->after('total_price');
+            if (! Schema::hasColumn('orders', 'payment_method')) {
+                $table->string('payment_method')->nullable()->after('total_price');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('payment_method');
+            if (Schema::hasColumn('orders', 'payment_method')) {
+                $table->dropColumn('payment_method');
+            }
         });
     }
 };
