@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\PaymentSetting;
 use Illuminate\Http\Request;
@@ -12,27 +13,35 @@ use Inertia\Response;
 
 class OrderController extends Controller
 {
-    
+    protected function statusesForTab(string $tab): array
+    {
+        return match ($tab) {
+            'selesai' => ['selesai'],
+            'dibatalkan' => ['dibatalkan'],
+            default => ['baru', 'diproses'],
+        };
+    }
 
     public function index(Request $request): Response
-{
-    $status = $request->string('status')->toString();
+    {
+        $tab = $request->string('tab')->toString() ?: 'berjalan';
 
-    $orders = $request->user()
-        ->ordersAsCustomer()
-        ->with('partner:id,name')
-        ->when($status, fn ($q) => $q->where('status', $status))
-        ->latest()
-        ->paginate(10)
-        ->withQueryString();
+        $orders = $request->user()
+            ->ordersAsCustomer()
+            ->with('partner:id,name')
+            ->whereIn('status', $this->statusesForTab($tab))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
-    return Inertia::render('Customer/Orders/Index', [
-        'orders' => $orders,
-        'filters' => [
-            'status' => $status,
-        ],
-    ]);
-}
+        return Inertia::render('Customer/Orders/Index', [
+            'orders' => $orders,
+            'filters' => [
+                'tab' => $tab,
+            ],
+        ]);
+    }
+
     public function show(Request $request, Order $order): Response
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
@@ -120,9 +129,29 @@ class OrderController extends Controller
                 'payment_receipt' => $path,
                 'status'          => 'diproses',
             ]);
+
+            // 4. Beri tahu mitra bahwa bukti pembayaran sudah diunggah & menunggu verifikasi
+            if ($order->partner_id) {
+                Notifikasi::create([
+                    'user_id' => $order->partner_id,
+                    'order_id' => $order->id,
+                    'type' => 'pembayaran_diterima',
+                    'judul' => 'Bukti Pembayaran Diunggah',
+                    'pesan' => 'Customer telah mengunggah bukti pembayaran untuk pesanan '.$order->order_code.'. Mohon segera diverifikasi.',
+                ]);
+            }
+
+            // 5. Beri tahu customer sendiri sebagai konfirmasi bahwa bukti pembayarannya sudah diterima sistem
+            Notifikasi::create([
+                'user_id' => $order->customer_id,
+                'order_id' => $order->id,
+                'type' => 'pembayaran_diterima',
+                'judul' => 'Bukti Pembayaran Diterima',
+                'pesan' => 'Bukti pembayaran untuk pesanan '.$order->order_code.' berhasil diterima dan sedang menunggu verifikasi mitra.',
+            ]);
         }
 
-        // 4. Kembali ke halaman detail pesanan dengan pesan sukses
+        // 6. Kembali ke halaman detail pesanan dengan pesan sukses
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi.');
     }

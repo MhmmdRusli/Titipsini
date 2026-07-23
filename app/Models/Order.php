@@ -35,6 +35,7 @@ class Order extends Model
         'total',
         'payment_method',
         'payment_receipt',
+        'payment_verified_at',
     ];
 
     protected function casts(): array
@@ -46,6 +47,7 @@ class Order extends Model
             'discount' => 'decimal:2',
             'pickup_fee' => 'decimal:2',
             'total' => 'decimal:2',
+            'payment_verified_at' => 'datetime',
         ];
     }
 
