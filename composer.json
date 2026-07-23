@@ -4,10 +4,11 @@
     "description": "Titipsini.com Web App - Admin Dashboard & Customer Portal (Laravel + Inertia + React)",
     "require": {
         "php": "^8.2",
+        "inertiajs/inertia-laravel": "^1.0",
+        "jenssegers/agent": "^2.6",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "inertiajs/inertia-laravel": "^1.0",
         "tightenco/ziggy": "^2.4"
     },
     "require-dev": {

@@ -230,7 +230,7 @@ export default function Profile({ admin }) {
           <button
             type="submit"
             disabled={processing}
-            className="px-6 py-2 rounded-lg bg-brand-teal-700 text-white font-medium hover:bg-brand-teal-800 transition disabled:opacity-60"
+            className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-brand-teal-800 transition disabled:opacity-60"
           >
             Simpan
           </button>

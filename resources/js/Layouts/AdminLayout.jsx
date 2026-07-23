@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import {
     MapPin, LayoutDashboard, CircleUserRound, Users, Handshake,
-    Package, BarChart3, Settings, LogOut, ChevronDown, Wallet, HelpCircle, Newspaper,
+    Package, BarChart3, Settings, LogOut, ChevronDown, Wallet, Newspaper,
 } from 'lucide-react';
 
 const navItems = [
@@ -34,7 +34,6 @@ const navItems = [
             { label: 'QRIS', href: '/admin/pengaturan/qris' },
         ],
     },
-    { label: 'FAQ', href: '/admin/faq', icon: HelpCircle },
 ];
 
 export default function AdminLayout({ children, title }) {

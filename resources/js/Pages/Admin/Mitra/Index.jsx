@@ -64,7 +64,7 @@ export default function Index({ partners, filters }) {
                         onClick={() => applyFilters({ status: tab.key })}
                         className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
                             activeStatus === tab.key
-                                ? 'bg-teal-600 text-white'
+                                ? 'bg-green-600 text-white'
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                     >
@@ -80,11 +80,11 @@ export default function Index({ partners, filters }) {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Cari nama, email, atau nomor telepon..."
-                    className="w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    className="w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                 />
                 <button
                     type="submit"
-                    className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
+                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                 >
                     Cari
                 </button>
@@ -159,7 +159,7 @@ export default function Index({ partners, filters }) {
                                 preserveScroll
                                 className={`rounded-md px-3 py-1.5 text-sm ${
                                     link.active
-                                        ? 'bg-teal-600 text-white'
+                                        ? 'bg-green-600 text-white'
                                         : link.url
                                         ? 'bg-white text-slate-600 hover:bg-slate-100'
                                         : 'cursor-not-allowed text-slate-300'
