@@ -1,12 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import { Plus, History, Package, Building2, Car, Truck, ChevronRight, MapPin } from 'lucide-react';
+import { Plus, History, Package, Building2, Car, Truck, ChevronRight, MapPin, Clock } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const CATEGORIES = [
-    { key: 'barang', label: ' Barang', icon: Package, href: '/app/services?kategori=barang' },
-    { key: 'bangunan', label: ' Bangunan', icon: Building2, href: '/app/services?kategori=bangunan' },
-    { key: 'kendaraan', label: ' Kendaraan', icon: Car, href: '/app/services?kategori=kendaraan' },
-    { key: 'pindahan', label: ' Pindahan', icon: Truck, href: '/app/services?kategori=pindahan' },
+    { key: 'barang', label: 'Barang', icon: Package, href: '/app/services?kategori=barang' },
+    { key: 'bangunan', label: 'Bangunan', icon: Building2, href: '/app/services?kategori=bangunan' },
+    { key: 'kendaraan', label: 'Kendaraan', icon: Car, href: '/app/services?kategori=kendaraan' },
+    { key: 'pindahan', label: 'Pindahan', icon: Truck, href: '/app/services?kategori=pindahan' },
 ];
 
 function formatRupiah(value) {
@@ -36,8 +36,8 @@ function BoxIcon({ className }) {
 
 export default function Dashboard({ user, saldo = 10000, vendors = [], berita = [] }) {
     const displayBerita = berita.length > 0 ? berita : [
-        { id: 1, judul: 'Rilis. Buat Akun Lebih Muda...', published_at: null, foto: null },
-        { id: 2, judul: 'Terbaru yang me...', published_at: null, foto: null },
+        { id: 1, judul: 'Rilis. Buat Akun Lebih Mudah...', published_at: null, foto: null },
+        { id: 2, judul: 'Terbaru yang menarik di Titipsini...', published_at: null, foto: null },
         { id: 3, judul: 'Aplikasi Titipsini.Com terbaru Rilis, Buat...', published_at: null, foto: null },
     ];
 
@@ -45,7 +45,8 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
         <CustomerLayout>
             <Head title="Beranda" />
 
-            <div className="px-4 py-2">
+            {/* Diberi pb-6 yang pas agar jarak ke navbar bawah ideal dan tidak terlalu kosong */}
+            <div className="px-4 pt-2 pb-6">
                 {/* Greeting Section */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -60,7 +61,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     </div>
                 </div>
 
-                {/* Kartu Saldo Hijau - warnanya sudah cukup kontras, cuma perlu ring halus buat dark mode */}
+                {/* Kartu Saldo Hijau */}
                 <div className="mt-4 rounded-xl bg-green-600 dark:bg-green-700 p-4 text-white shadow-sm">
                     <div className="flex items-center justify-between text-xs font-medium text-green-100">
                         <span>Saldo Titip Saat Ini</span>
@@ -97,7 +98,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     </div>
                 </div>
 
-                {/* Banner Promo — tiket klaim penitipan */}
+                {/* Banner Promo */}
                 <div className="mt-5 relative flex h-[128px] rounded-2xl shadow-md">
                     <div
                         className="absolute inset-0 rounded-2xl bg-green-700 dark:bg-green-900"
@@ -184,6 +185,74 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                                 </div>
                             </Link>
                         ))}
+                    </div>
+                </div>
+
+                {/* Section Mitra & Lokasi Penitipan */}
+                <div className="mt-6">
+                    <div className="mb-3 flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Mitra & Lokasi Penitipan</p>
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500">Pilihan lokasi aman terdekat di wilayahmu</p>
+                        </div>
+                        <Link href="/app/services" className="flex items-center text-xs font-semibold text-green-600 dark:text-green-400">
+                            Lihat semua
+                        </Link>
+                    </div>
+
+                    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
+                                    <MapPin size={22} />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Titip Barang & Kendaraan Yogya</p>
+                                    <p className="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">Buka 24 Jam &middot; Keamanan Terjaga</p>
+                                </div>
+                            </div>
+                            <Link
+                                href="/app/services"
+                                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-gray-600 dark:bg-gray-700 dark:text-gray-300 transition hover:bg-gray-100"
+                            >
+                                <ChevronRight size={16} />
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Section Aktivitas Terakhir (Diubah jadi Card Simulasi/Interaktif agar tidak kosong) */}
+                <div className="mt-6">
+                    <div className="mb-3 flex items-center justify-between">
+                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Aktivitas Terakhir</p>
+                        <Link href="/app/orders" className="flex items-center text-xs font-semibold text-green-600 dark:text-green-400">
+                            Lihat semua
+                        </Link>
+                    </div>
+
+                    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                        <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                    <Clock size={18} />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Titip Barang Elektronik</p>
+                                        <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 uppercase">
+                                            Diproses
+                                        </span>
+                                    </div>
+                                    <p className="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">Durasi: 3 Hari &middot; Rp 45.000</p>
+                                </div>
+                            </div>
+                            <Link
+                                href="/app/orders"
+                                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-gray-600 dark:bg-gray-700 dark:text-gray-300 transition hover:bg-gray-100"
+                            >
+                                <ChevronRight size={16} />
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

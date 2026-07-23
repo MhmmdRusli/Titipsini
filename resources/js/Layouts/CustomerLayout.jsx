@@ -21,7 +21,6 @@ export default function CustomerLayout({ children, title, backHref }) {
 
     return (
         <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">
-            {/* Ubah overflow-hidden menjadi overflow-y-auto di sini agar kontainer utama yang bertindak sebagai area scroll */}
             <div className="relative mx-auto flex min-h-dvh w-full max-w-[430px] flex-col overflow-y-auto bg-gray-50 dark:bg-gray-900 sm:h-[850px] sm:shadow-xl">
                 <header className="sticky top-0 z-20 shrink-0 border-b border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95">
                     <div
@@ -100,8 +99,8 @@ export default function CustomerLayout({ children, title, backHref }) {
                     </div>
                 </header>
 
-                {/* Hapus flex-1 dan overflow-y-auto dari main agar mengikuti scroll utama container */}
-                <main className="flex-1 pb-32">
+                {/* Diubah menjadi pb-20 agar jarak bawah konten langsung pas di atas navbar */}
+                <main className="flex-1 pb-20">
                     {!backHref && title && (
                         <div className="px-4 pt-4">
                             <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h1>
@@ -110,7 +109,6 @@ export default function CustomerLayout({ children, title, backHref }) {
                     {children}
                 </main>
 
-                {/* Navbar bawah menggunakan fixed agar mengambang di atas konten saat discroll */}
                 <nav
                     className="fixed bottom-0 left-1/2 -translate-x-1/2 z-30 flex w-full max-w-[430px] justify-around border-t border-gray-200 bg-white/95 py-2 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95"
                     style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
