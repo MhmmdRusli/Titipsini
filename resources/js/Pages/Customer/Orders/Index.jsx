@@ -13,7 +13,7 @@ const TABS = [
 const STATUS_STYLE = {
     baru: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300',
     diproses: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300',
-    selesai: 'bg-brand-teal-100 text-brand-teal-700 dark:bg-brand-teal-900/40 dark:text-brand-teal-300',
+    selesai: 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]',
     dibatalkan: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300',
 };
 
@@ -61,7 +61,7 @@ export default function OrdersIndex({ orders, filters }) {
                             onClick={() => changeTab(tab.value)}
                             className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition ${
                                 activeStatus === tab.value
-                                    ? 'bg-brand-teal-700 text-white dark:bg-brand-teal-600'
+                                    ? 'bg-[#15803d] text-white dark:bg-[#22c55e]'
                                     : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
                             }`}
                         >
@@ -86,14 +86,14 @@ export default function OrdersIndex({ orders, filters }) {
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-2">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-teal-50 text-brand-teal-700 dark:bg-brand-teal-900/40 dark:text-brand-teal-300">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
                                         <Package size={16} />
                                     </div>
                                     <div>
                                         <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">{order.order_code}</p>
                                         <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
                                             {SERVICE_LABEL[order.service_type] ?? order.service_type}
-                                            {order.is_pickup && <Truck size={11} className="text-brand-teal-600 dark:text-brand-teal-400" />}
+                                            {order.is_pickup && <Truck size={11} className="text-[#15803d] dark:text-[#4ade80]" />}
                                         </p>
                                     </div>
                                 </div>
@@ -123,7 +123,7 @@ export default function OrdersIndex({ orders, filters }) {
                                 preserveScroll
                                 className={`rounded-md px-3 py-1.5 text-xs ${
                                     link.active
-                                        ? 'bg-brand-teal-700 text-white dark:bg-brand-teal-600'
+                                        ? 'bg-[#15803d] text-white dark:bg-[#22c55e]'
                                         : link.url
                                         ? 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                                         : 'text-gray-300 dark:text-gray-700'

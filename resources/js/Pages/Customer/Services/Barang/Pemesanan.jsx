@@ -17,9 +17,8 @@ function formatTanggal(value) {
 
 export default function Pemesanan({ customer, items: initialItems, detail }) {
     const [items, setItems] = useState(initialItems);
+    const [processing, setProcessing] = useState(false);
 
-    // Halaman ini tidak memakai CustomerLayout, jadi sinkronisasi dark mode
-    // dilakukan manual di sini juga (sama seperti di CustomerLayout.jsx).
     useEffect(() => {
         const isDark = typeof window !== 'undefined' && localStorage.getItem('titipsini_theme') === 'dark';
         document.documentElement.classList.toggle('dark', isDark);
@@ -34,7 +33,12 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
     const subtotalPaket = items.reduce((sum, item) => sum + item.harga * item.qty, 0);
 
     function handleKonfirmasi() {
-        router.visit('/app/services/barang/metode-pembayaran');
+        setProcessing(true);
+        router.post(
+            '/app/services/barang/konfirmasi',
+            { items },
+            { onFinish: () => setProcessing(false) }
+        );
     }
 
     return (
@@ -42,7 +46,6 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
             <Head title="Pemesanan" />
 
             <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-gray-50 dark:bg-gray-900 sm:h-[850px] sm:shadow-xl">
-                {/* Header hijau tipis (pb-5) */}
                 <div
                     className="shrink-0 bg-green-600 dark:bg-green-800 px-4 pb-5 text-white"
                     style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
@@ -56,7 +59,6 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
                 </div>
 
                 <main className="flex-1 overflow-y-auto pb-32">
-                    {/* Kartu putih dengan space kiri-kanan (mx-4) dan sudut rounded-3xl penuh */}
                     <div className="mx-4 -mt-3 rounded-3xl bg-white dark:bg-gray-800 px-4 pb-4 pt-5 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
                         <div className="flex items-start justify-between">
                             <div>
@@ -153,30 +155,25 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
                     </div>
                 </main>
 
-                {/* Footer bawah mengambang */}
                 <div
                     className="absolute inset-x-0 bottom-0 z-10 px-4 pb-4"
                     style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
                 >
                     <div className="rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 pb-4 pt-3 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
-                        <Link
-                            href="/app/services/barang/metode-pembayaran"
-                            className="flex items-center justify-between py-1"
-                        >
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Pembayaran</span>
-                            <span className="flex items-center gap-1 text-sm font-semibold text-green-600 dark:text-green-400">
-                                Pilih metode pembayaran
-                                <ArrowLeft size={14} className="rotate-180" />
+                        <div className="flex items-center justify-between py-1">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">Total Pembayaran</span>
+                            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                {formatRupiah(subtotalPaket)}
                             </span>
-                        </Link>
+                        </div>
 
                         <button
                             type="button"
                             onClick={handleKonfirmasi}
-                            disabled={items.length === 0}
+                            disabled={processing || items.length === 0}
                             className="mt-2 w-full rounded-full bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-50"
                         >
-                            Lanjut ke Pembayaran
+                            {processing ? 'Memproses...' : 'Lanjut ke Pembayaran'}
                         </button>
                     </div>
                 </div>
