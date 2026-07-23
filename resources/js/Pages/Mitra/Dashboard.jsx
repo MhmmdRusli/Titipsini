@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { History, AlertTriangle, Package, Car, Building2, Truck, ChevronRight, MapPin, Store } from 'lucide-react';
+import { History, AlertTriangle, Package, Car, Building2, Truck, ChevronRight, MapPin, Store, User, LogOut } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const LAYANAN_ICON = {
@@ -21,6 +22,8 @@ function formatRupiah(value) {
 }
 
 export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [], pesanan = {} }) {
+    const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
     return (
         <MitraLayout title="Beranda">
             <Head title="Beranda Mitra" />
@@ -41,21 +44,51 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                     </Link>
                 )}
 
-                {/* Profil Atas (Foto/Avatar & Nama) */}
-                <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                        {partner?.avatar ? (
-                            <img src={partner.avatar} alt={partner?.name} className="h-full w-full object-cover" />
-                        ) : (
-                            <div className="flex h-full w-full items-center justify-center text-gray-400 font-bold">
-                                {partner?.name?.charAt(0) ?? 'M'}
+                {/* Profil Atas (Foto/Avatar & Nama) - sekarang bisa diklik untuk buka popup */}
+                <div className="relative">
+                    <button
+                        type="button"
+                        onClick={() => setProfileMenuOpen((v) => !v)}
+                        className="flex items-center gap-3 text-left"
+                    >
+                        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                            {partner?.avatar ? (
+                                <img src={partner.avatar} alt={partner?.name} className="h-full w-full object-cover" />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center text-gray-400 font-bold">
+                                    {partner?.name?.charAt(0) ?? 'M'}
+                                </div>
+                            )}
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Hello 👋</p>
+                            <p className="text-base font-bold text-gray-900 dark:text-gray-100">{partner?.name ?? 'Riza Hidayat'}</p>
+                        </div>
+                    </button>
+
+                    {profileMenuOpen && (
+                        <>
+                            <div className="fixed inset-0 z-10" onClick={() => setProfileMenuOpen(false)} />
+                            <div className="absolute left-0 top-full z-20 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                                <Link
+                                    href="/mitra/profil"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
+                                >
+                                    <User size={15} />
+                                    Lihat Profil
+                                </Link>
+                                <Link
+                                    href="/logout"
+                                    method="post"
+                                    as="button"
+                                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                                >
+                                    <LogOut size={15} />
+                                    Keluar
+                                </Link>
                             </div>
-                        )}
-                    </div>
-                    <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Hello 👋</p>
-                        <p className="text-base font-bold text-gray-900 dark:text-gray-100">{partner?.name ?? 'Riza Hidayat'}</p>
-                    </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Status Vendor / Jam Operasional */}
@@ -133,28 +166,24 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                 <div>
                     <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Jumlah Pesanan</p>
                     <div className="grid grid-cols-2 gap-3">
-                        {/* Card Barang */}
                         <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
                             <p className="text-sm font-bold">Barang</p>
                             <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
                                 {pesanan?.barang ?? 0}
                             </div>
                         </div>
-                        {/* Card Kendaraan */}
                         <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
                             <p className="text-sm font-bold">Kendaraan</p>
                             <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
                                 {pesanan?.kendaraan ?? 0}
                             </div>
                         </div>
-                        {/* Card Bangunan */}
                         <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
                             <p className="text-sm font-bold">Bangunan</p>
                             <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
                                 {pesanan?.bangunan ?? 0}
                             </div>
                         </div>
-                        {/* Card Pindahan */}
                         <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
                             <p className="text-sm font-bold">Pindahan</p>
                             <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">

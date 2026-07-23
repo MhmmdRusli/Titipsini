@@ -29,9 +29,23 @@ class HandleInertiaRequests extends Middleware
                     // 'direct_public' disk = file disimpan langsung di public/avatars,
                     // bukan lewat symlink storage (yang kena 403 di php artisan serve
                     // pada Windows).
-                    'avatar' => $user->foto
-                        ? Storage::disk('direct_public')->url($user->foto)
-                        : ($user->avatar ? Storage::disk('direct_public')->url($user->avatar) : null),
+                    'avatar' => (function () use ($user) {
+                        $raw = $user->foto ?: $user->avatar;
+
+                        if (! $raw) {
+                            return null;
+                        }
+
+                        // Kalau nilainya sudah berupa path/URL lengkap (mis. '/storage/avatars/x.jpg',
+                        // hasil upload dari halaman Edit Profil customer), pakai apa adanya.
+                        if (str_starts_with($raw, '/') || str_starts_with($raw, 'http')) {
+                            return $raw;
+                        }
+
+                        // Kalau nilainya path relatif polos (mis. 'avatars/x.jpg'), baru resolve
+                        // lewat disk direct_public.
+                        return Storage::disk('direct_public')->url($raw);
+                        })(),
                 ] : null,
             ],
             'flash' => [

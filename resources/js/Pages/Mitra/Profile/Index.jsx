@@ -12,7 +12,9 @@ function MenuItem({ href, icon: Icon, label, method, as }) {
             as={as}
             className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm"
         >
-            <Icon size={18} className="text-green-600" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50">
+                <Icon size={16} className="text-green-600" />
+            </div>
             <span className="flex-1 text-sm font-medium text-gray-800">{label}</span>
             <ChevronRight size={16} className="text-gray-300" />
         </Link>
@@ -26,36 +28,32 @@ export default function ProfileIndex({ partner }) {
 
             <div className="space-y-3 px-4 py-3">
                 {/* Kartu identitas ringkas */}
-                <Link
-                    href="/mitra/profil/saya"
-                    className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
-                >
-                    <div className="relative h-12 w-12 shrink-0">
-                        {partner.avatar ? (
-                            <img src={partner.avatar} alt={partner.name} className="h-12 w-12 rounded-full object-cover" />
-                        ) : (
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-sm font-semibold text-green-700">
-                                {partner.name.charAt(0).toUpperCase()}
-                            </div>
-                        )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                            <p className="truncate text-sm font-semibold text-gray-900">{partner.name}</p>
-                            <Pencil size={12} className="shrink-0 text-gray-400" />
+                <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+                    <Link href="/mitra/profil/saya" className="relative flex items-center gap-3 p-4">
+                        <div className="h-12 w-12 shrink-0">
+                            {partner.avatar ? (
+                                <img src={partner.avatar} alt={partner.name} className="h-12 w-12 rounded-full object-cover" />
+                            ) : (
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-sm font-semibold text-green-700">
+                                    {partner.name.charAt(0).toUpperCase()}
+                                </div>
+                            )}
                         </div>
-                        <p className="truncate text-xs text-gray-500">{partner.email}</p>
-                        {partner.is_verified ? (
-                            <span className="mt-1 inline-block rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
-                                TERVERIFIKASI
-                            </span>
-                        ) : (
-                            <span className="mt-1 inline-block rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600">
-                                VERIFIKASI
-                            </span>
-                        )}
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-gray-900">{partner.name}</p>
+                            <p className="truncate text-xs text-gray-500">{partner.email}</p>
+                        </div>
+                        <Pencil size={14} className="absolute right-4 top-4 shrink-0 text-gray-400" />
+                    </Link>
+
+                    <div
+                        className={`py-2 text-center text-xs font-bold tracking-wide text-white ${
+                            partner.is_verified ? 'bg-green-600' : 'bg-red-500'
+                        }`}
+                    >
+                        {partner.is_verified ? 'TERVERIFIKASI' : 'VERIFIKASI'}
                     </div>
-                </Link>
+                </div>
 
                 <div className="space-y-2">
                     <MenuItem href="/mitra/alamat" icon={MapPin} label="Alamat" />

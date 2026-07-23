@@ -12,9 +12,6 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
-    /**
-     * Menu utama Profil (daftar link + badge verifikasi)
-     */
     public function index(): Response
     {
         $user = Auth::user();
@@ -23,15 +20,12 @@ class ProfileController extends Controller
             'partner' => [
                 'name' => $user->name,
                 'email' => $user->email,
-                'avatar' => $user->avatar ? Storage::url($user->avatar) : null,
+                'avatar' => $user->avatar ? Storage::disk('direct_public')->url($user->avatar) : null,
                 'is_verified' => $user->verification_status === 'terverifikasi',
             ],
         ]);
     }
 
-    /**
-     * Submenu "Profil Saya" - form edit data diri
-     */
     public function edit(): Response
     {
         $user = Auth::user();
@@ -44,8 +38,8 @@ class ProfileController extends Controller
                 'phone' => $user->phone,
                 'gender' => $user->gender,
                 'birth_date' => $user->birth_date?->format('Y-m-d'),
-                'avatar' => $user->avatar ? Storage::url($user->avatar) : null,
-                'cover_photo' => $user->cover_photo ? Storage::url($user->cover_photo) : null,
+                'avatar' => $user->avatar ? Storage::disk('direct_public')->url($user->avatar) : null,
+                'cover_photo' => $user->cover_photo ? Storage::disk('direct_public')->url($user->cover_photo) : null,
             ],
         ]);
     }
@@ -66,16 +60,16 @@ class ProfileController extends Controller
 
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
-                Storage::delete($user->avatar);
+                Storage::disk('direct_public')->delete($user->avatar);
             }
-            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'direct_public');
         }
 
         if ($request->hasFile('cover_photo')) {
             if ($user->cover_photo) {
-                Storage::delete($user->cover_photo);
+                Storage::disk('direct_public')->delete($user->cover_photo);
             }
-            $validated['cover_photo'] = $request->file('cover_photo')->store('covers', 'public');
+            $validated['cover_photo'] = $request->file('cover_photo')->store('covers', 'direct_public');
         }
 
         $user->update($validated);
