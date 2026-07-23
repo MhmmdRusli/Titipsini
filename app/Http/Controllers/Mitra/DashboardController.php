@@ -16,11 +16,9 @@ class DashboardController extends Controller
         $partner = Auth::user();
 
         // 1. Ambil pesanan aktif milik mitra ini
-        // Mengakomodasi variasi status pesanan di database
         $pesananAktifQuery = Order::where('partner_id', $partner->id)
             ->whereNotIn('status', ['selesai', 'completed', 'dibatalkan', 'cancelled']);
 
-        // Menyesuaikan pencarian service_type agar toleran terhadap variasi penulisan
         $pesananBarang = (clone $pesananAktifQuery)
             ->where(function($q) {
                 $q->where('service_type', 'barang')
@@ -34,10 +32,9 @@ class DashboardController extends Controller
             })->count();
 
         // 2. Hitung Saldo Real-time jika kolom saldo di tabel users/partners masih 0
-        // (Mengakumulasi total harga dari pesanan yang sudah selesai)
         $totalPendapatan = Order::where('partner_id', $partner->id)
             ->whereIn('status', ['selesai', 'completed', 'success'])
-            ->sum('total_price'); // Sesuaikan nama kolom harga di tabel orders kamu (misal: total_harga / gross_amount)
+            ->sum('total_price');
 
         $saldoTampil = $partner->saldo > 0 ? $partner->saldo : $totalPendapatan;
 
@@ -46,14 +43,15 @@ class DashboardController extends Controller
             ->where('is_active', true)
             ->distinct()
             ->pluck('kategori')
-            ->map(fn($item) => strtolower($item)) // Memastikan lowercase
+            ->map(fn($item) => strtolower($item))
             ->values()
             ->all();
 
         return Inertia::render('Mitra/Dashboard', [
             'partner' => [
                 'name' => $partner->name,
-                'foto' => $partner->foto ? Storage::url($partner->foto) : null,
+                // Diperbaiki dari 'foto' menjadi 'avatar' agar sinkron dengan database & halaman profil
+                'avatar' => $partner->avatar ? Storage::disk('direct_public')->url($partner->avatar) : null,
                 'is_verified' => in_array($partner->verification_status, ['terverifikasi', 'verified']),
             ],
             'saldo' => $saldoTampil,
