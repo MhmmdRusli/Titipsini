@@ -34,23 +34,23 @@ export default function NotifikasiSettings({ preferences }) {
             <Head title="Notifikasi" />
 
             <div className="px-4 py-3">
-                <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+                <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
                     {ITEMS.map((item, i) => (
                         <div
                             key={item.key}
                             className={`flex items-center justify-between px-4 py-3.5 ${
-                                i < ITEMS.length - 1 ? 'border-b border-gray-50' : ''
+                                i < ITEMS.length - 1 ? 'border-b border-gray-50 dark:border-gray-700/60' : ''
                             }`}
                         >
                             <div className="pr-3">
-                                <p className="text-sm font-medium text-gray-800">{item.label}</p>
-                                <p className="mt-0.5 text-xs text-gray-500">{item.description}</p>
+                                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{item.label}</p>
+                                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{item.description}</p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => toggle(item.key)}
                                 className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-                                    values[item.key] ? 'bg-green-600' : 'bg-gray-300'
+                                    values[item.key] ? 'bg-[#15803d] dark:bg-[#22c55e]' : 'bg-gray-300 dark:bg-gray-700'
                                 }`}
                             >
                                 <span

@@ -33,9 +33,9 @@ function PasswordSection() {
     }
 
     return (
-        <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-            <p className="flex items-center gap-2 text-sm font-bold text-gray-900">
-                <Lock size={16} className="text-green-600" />
+        <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
+            <p className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-gray-100">
+                <Lock size={16} className="text-[#15803d] dark:text-[#4ade80]" />
                 Ganti Password
             </p>
 
@@ -68,7 +68,7 @@ function PasswordSection() {
                 <button
                     type="submit"
                     disabled={processing}
-                    className="w-full rounded-xl bg-green-600 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+                    className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-2.5 text-sm font-semibold text-white transition disabled:opacity-60"
                 >
                     Simpan Password
                 </button>
@@ -95,7 +95,7 @@ function PinSection() {
     function pinInput(field, label) {
         return (
             <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">{label}</label>
+                <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">{label}</label>
                 <input
                     type="password"
                     inputMode="numeric"
@@ -103,10 +103,10 @@ function PinSection() {
                     value={data[field]}
                     onChange={(e) => setData(field, e.target.value.replace(/\D/g, ''))}
                     placeholder="••••••"
-                    className={`w-full rounded-lg border px-3 py-2.5 text-center text-lg tracking-[0.5em] focus:outline-none focus:ring-1 ${
+                    className={`w-full rounded-lg border bg-white dark:bg-gray-900 px-3 py-2.5 text-center text-lg tracking-[0.5em] text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-1 ${
                         errors[field]
                             ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                            : 'border-gray-200 focus:border-green-500 focus:ring-green-500'
+                            : 'border-gray-200 dark:border-gray-700 focus:border-[#15803d] focus:ring-[#15803d] dark:focus:border-[#22c55e] dark:focus:ring-[#22c55e]'
                     }`}
                 />
                 {errors[field] && <p className="mt-1 text-xs text-red-500">{errors[field]}</p>}
@@ -115,9 +115,9 @@ function PinSection() {
     }
 
     return (
-        <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-            <p className="flex items-center gap-2 text-sm font-bold text-gray-900">
-                <KeyRound size={16} className="text-green-600" />
+        <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
+            <p className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-gray-100">
+                <KeyRound size={16} className="text-[#15803d] dark:text-[#4ade80]" />
                 Ganti PIN
             </p>
 
@@ -129,7 +129,7 @@ function PinSection() {
                 <button
                     type="submit"
                     disabled={processing}
-                    className="w-full rounded-xl bg-green-600 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+                    className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-2.5 text-sm font-semibold text-white transition disabled:opacity-60"
                 >
                     Simpan PIN
                 </button>
@@ -141,22 +141,22 @@ function PinSection() {
 function PasswordField({ label, value, onChange, error, show, onToggleShow }) {
     return (
         <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">{label}</label>
+            <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">{label}</label>
             <div className="relative">
                 <input
                     type={show ? 'text' : 'password'}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className={`w-full rounded-lg border px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-1 ${
+                    className={`w-full rounded-lg border bg-white dark:bg-gray-900 px-3 py-2.5 pr-10 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-1 ${
                         error
                             ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                            : 'border-gray-200 focus:border-green-500 focus:ring-green-500'
+                            : 'border-gray-200 dark:border-gray-700 focus:border-[#15803d] focus:ring-[#15803d] dark:focus:border-[#22c55e] dark:focus:ring-[#22c55e]'
                     }`}
                 />
                 <button
                     type="button"
                     onClick={onToggleShow}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                     {show ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>

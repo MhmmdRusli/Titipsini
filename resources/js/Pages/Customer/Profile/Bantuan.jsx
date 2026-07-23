@@ -13,17 +13,17 @@ export default function Bantuan({ faq, kontak }) {
             <Head title="Pusat Bantuan" />
 
             <div className="px-4 py-3">
-                <h2 className="text-lg font-bold text-green-700">Ada yang bisa kami bantu?</h2>
-                <p className="mt-1 text-xs text-gray-500">
+                <h2 className="text-lg font-bold text-[#15803d] dark:text-[#4ade80]">Ada yang bisa kami bantu?</h2>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Cari jawaban untuk pertanyaan Anda atau hubungi tim dukungan kami.
                 </p>
 
-                <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                     Pertanyaan Umum
                 </p>
 
                 {faq.length === 0 && (
-                    <div className="rounded-xl border border-dashed border-gray-300 p-4 text-center text-xs text-gray-400">
+                    <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-700 p-4 text-center text-xs text-gray-400 dark:text-gray-500">
                         Belum ada FAQ.
                     </div>
                 )}
@@ -32,22 +32,22 @@ export default function Bantuan({ faq, kontak }) {
                     {faq.map((item) => {
                         const isOpen = openId === item.id;
                         return (
-                            <div key={item.id} className="rounded-xl border border-gray-100 bg-white shadow-sm">
+                            <div key={item.id} className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
                                 <button
                                     type="button"
                                     onClick={() => setOpenId(isOpen ? null : item.id)}
                                     className="flex w-full items-center justify-between px-4 py-3 text-left"
                                 >
-                                    <span className="text-sm font-medium text-gray-800">{item.pertanyaan}</span>
+                                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{item.pertanyaan}</span>
                                     <ChevronDown
                                         size={16}
-                                        className={`shrink-0 text-gray-400 transition-transform ${
+                                        className={`shrink-0 text-gray-400 dark:text-gray-500 transition-transform ${
                                             isOpen ? 'rotate-180' : ''
                                         }`}
                                     />
                                 </button>
                                 {isOpen && (
-                                    <p className="border-t border-gray-50 px-4 py-3 text-xs leading-relaxed text-gray-500">
+                                    <p className="border-t border-gray-50 dark:border-gray-700/60 px-4 py-3 text-xs leading-relaxed text-gray-500 dark:text-gray-300">
                                         {item.jawaban}
                                     </p>
                                 )}
@@ -56,13 +56,13 @@ export default function Bantuan({ faq, kontak }) {
                     })}
                 </div>
 
-                <p className="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-gray-400">Hubungi Kami</p>
+                <p className="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Hubungi Kami</p>
 
                 <a
                     href={waLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between rounded-xl bg-green-600 px-4 py-3 text-white shadow-sm"
+                    className="flex items-center justify-between rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 px-4 py-3 text-white shadow-sm transition"
                 >
                     <span className="flex items-center gap-2 text-sm font-semibold">
                         <MessageCircle size={18} />
@@ -72,15 +72,15 @@ export default function Bantuan({ faq, kontak }) {
                 </a>
 
                 <div className="mt-3 grid grid-cols-2 gap-3">
-                    <div className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
-                        <Mail size={16} className="text-gray-500" />
-                        <p className="mt-2 text-xs font-semibold text-gray-800">Email Support</p>
-                        <p className="mt-0.5 break-all text-[11px] text-gray-500">{kontak.email}</p>
+                    <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-sm">
+                        <Mail size={16} className="text-[#15803d] dark:text-[#4ade80]" />
+                        <p className="mt-2 text-xs font-semibold text-gray-800 dark:text-gray-100">Email Support</p>
+                        <p className="mt-0.5 break-all text-[11px] text-gray-500 dark:text-gray-400">{kontak.email}</p>
                     </div>
-                    <div className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
-                        <Phone size={16} className="text-gray-500" />
-                        <p className="mt-2 text-xs font-semibold text-gray-800">Call Center</p>
-                        <p className="mt-0.5 text-[11px] text-gray-500">{kontak.call_center}</p>
+                    <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-sm">
+                        <Phone size={16} className="text-[#15803d] dark:text-[#4ade80]" />
+                        <p className="mt-2 text-xs font-semibold text-gray-800 dark:text-gray-100">Call Center</p>
+                        <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{kontak.call_center}</p>
                     </div>
                 </div>
             </div>

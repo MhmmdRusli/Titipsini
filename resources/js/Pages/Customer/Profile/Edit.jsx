@@ -32,10 +32,10 @@ export default function ProfileEdit({ user }) {
     }
 
     function inputClass(hasError) {
-        return `w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-1 ${
+        return `w-full rounded-lg border bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-1 ${
             hasError
                 ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                : 'border-gray-200 focus:border-green-500 focus:ring-green-500'
+                : 'border-gray-200 dark:border-gray-700 focus:border-[#15803d] focus:ring-[#15803d] dark:focus:border-[#22c55e] dark:focus:ring-[#22c55e]'
         }`;
     }
 
@@ -48,14 +48,14 @@ export default function ProfileEdit({ user }) {
                     <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="relative flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-xl font-semibold text-green-700"
+                        className="relative flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50 text-xl font-semibold text-[#15803d] dark:text-[#4ade80]"
                     >
                         {preview ? (
                             <img src={preview} alt={data.name} className="h-20 w-20 rounded-full object-cover" />
                         ) : (
                             data.name.charAt(0).toUpperCase()
                         )}
-                        <span className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-green-600 text-white ring-2 ring-white">
+                        <span className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-[#15803d] dark:bg-[#22c55e] text-white ring-2 ring-white dark:ring-gray-800">
                             <Camera size={13} />
                         </span>
                     </button>
@@ -71,7 +71,7 @@ export default function ProfileEdit({ user }) {
 
                 <div className="mt-6 space-y-4">
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-gray-600">Nama Lengkap</label>
+                        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Nama Lengkap</label>
                         <input
                             type="text"
                             value={data.name}
@@ -82,19 +82,19 @@ export default function ProfileEdit({ user }) {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-gray-600">Jenis Kelamin</label>
+                        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Jenis Kelamin</label>
                         <div className="flex gap-6 pt-1">
                             {[
                                 { value: 'male', label: 'Laki-laki' },
                                 { value: 'female', label: 'Perempuan' },
                             ].map((option) => (
-                                <label key={option.value} className="flex items-center gap-2 text-sm text-gray-700">
+                                <label key={option.value} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                                     <input
                                         type="radio"
                                         name="gender"
                                         checked={data.gender === option.value}
                                         onChange={() => setData('gender', option.value)}
-                                        className="accent-green-600"
+                                        className="accent-[#15803d] dark:accent-[#22c55e]"
                                     />
                                     {option.label}
                                 </label>
@@ -104,7 +104,7 @@ export default function ProfileEdit({ user }) {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-gray-600">Nomor Telepon</label>
+                        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Nomor Telepon</label>
                         <input
                             type="tel"
                             value={data.phone}
@@ -115,7 +115,7 @@ export default function ProfileEdit({ user }) {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-gray-600">Alamat</label>
+                        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Alamat</label>
                         <textarea
                             rows={3}
                             value={data.address}
@@ -129,7 +129,7 @@ export default function ProfileEdit({ user }) {
                 <button
                     type="submit"
                     disabled={processing}
-                    className="mt-6 w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                    className="mt-6 w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3 text-sm font-semibold text-white transition disabled:opacity-60 shadow-sm"
                 >
                     Simpan Perubahan
                 </button>
