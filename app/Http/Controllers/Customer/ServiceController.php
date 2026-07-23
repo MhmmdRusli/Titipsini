@@ -41,24 +41,24 @@ class ServiceController extends Controller
         $search = $request->string('search')->toString();
 
         $services = Service::query()
-            ->where('is_active', true)
-            ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
-            ->when($jenis && $kategori === 'kendaraan', fn ($query) => $query->where('jenis_kendaraan', $jenis))
-            ->when($jenis && $kategori === 'bangunan', fn ($query) => $query->where('jenis_bangunan', $jenis))
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('kota', 'like', "%{$search}%")
-                        ->orWhere('kecamatan', 'like', "%{$search}%");
-                });
-            })
-            ->with('vendor:id,name')
-            ->orderBy('kota')
-            ->paginate(10)
-            ->withQueryString()
-            ->through(function ($service) {
-                $service->foto = $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null;
-                return $service;
-            });
+    ->where('is_active', true)
+    ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
+    ->when($jenis && $kategori === 'kendaraan', fn ($query) => $query->where('jenis_kendaraan', $jenis))
+    ->when($jenis && $kategori === 'bangunan', fn ($query) => $query->where('jenis_bangunan', $jenis))
+    ->when($search, function ($query) use ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('kota', 'like', "%{$search}%")
+                ->orWhere('kecamatan', 'like', "%{$search}%");
+        });
+    })
+    ->with('vendor:id,name')
+    ->orderBy('kota')
+    ->paginate(10)
+    ->withQueryString()
+    ->through(function ($service) {
+        $service->foto = $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null;
+        return $service;
+    });
 
         return Inertia::render('Customer/Services/Index', [
             'services' => $services,
@@ -71,36 +71,20 @@ class ServiceController extends Controller
     }
 
     public function pilihPaket(Request $request)
-    {
-        $serviceId = $request->query('service_id');
-
-        if (! $serviceId || ! Service::where('id', $serviceId)->exists()) {
-            return redirect()
-                ->route('customer.services.index', ['kategori' => 'barang'])
-                ->with('error', 'Pilih toko/vendor barang dulu sebelum melanjutkan.');
-        }
-
-        return Inertia::render('Customer/Services/PilihPaket', [
-            'hargaMulai' => 100000,
-            'serviceId' => $serviceId,
-        ]);
-    }
+{
+    return Inertia::render('Customer/Services/PilihPaket', [
+        'hargaMulai' => 100000,
+        'serviceId' => $request->query('service_id'),
+    ]);
+}
 
     public function formBarang(Request $request)
-    {
-        $serviceId = $request->query('service_id');
-
-        if (! $serviceId || ! Service::where('id', $serviceId)->exists()) {
-            return redirect()
-                ->route('customer.services.index', ['kategori' => 'barang'])
-                ->with('error', 'Pilih toko/vendor barang dulu sebelum melanjutkan.');
-        }
-
-        return Inertia::render('Customer/Services/Barang/Form', [
-            'hargaMulai' => 100000,
-            'serviceId' => $serviceId,
-        ]);
-    }
+{
+    return Inertia::render('Customer/Services/Barang/Form', [
+        'hargaMulai' => 100000,
+        'serviceId' => $request->query('service_id'),
+    ]);
+}
 
     public function simpanBarang(Request $request)
     {
@@ -109,7 +93,7 @@ class ServiceController extends Controller
             'pickup' => 'boolean',
             'tanggalMasuk' => 'required|date',
             'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
-            'service_id' => 'required|integer|exists:services,id',
+            'service_id' => 'nullable|integer|exists:services,id',
         ]);
 
         session(['pesanan_barang' => $data]);
@@ -165,21 +149,24 @@ class ServiceController extends Controller
 
         $total = $items->count() * 15000;
         $customer = auth()->user();
-        $service = Service::findOrFail($data['service_id']);
+$service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
 
-        $order = Order::create([
-            'order_code' => 'TS-'.strtoupper(uniqid()),
-            'customer_id' => $customer->id,
-            'partner_id' => $service->user_id,
-            'service_type' => 'barang',
-            'item_name' => $items->implode(', '),
-            'start_date' => $data['tanggalMasuk'],
-            'end_date' => $data['tanggalKeluar'],
-            'is_pickup' => (bool) ($data['pickup'] ?? false),
-            'city' => $service->kota,
-            'status' => 'baru',
-            'total_price' => $total,
-            'payment_method' => 'default',
+$order = Order::create([
+    'order_code' => 'TS-'.strtoupper(uniqid()),
+    'customer_id' => $customer->id,
+    'partner_id' => $service?->user_id,
+    'service_type' => 'barang',
+    'item_name' => $items->implode(', '),
+    'start_date' => $data['tanggalMasuk'],
+    'end_date' => $data['tanggalKeluar'],
+    'is_pickup' => (bool) ($data['pickup'] ?? false),
+    'city' => $service->kota ?? null,
+    'status' => 'baru',
+    'subtotal' => $total,
+    'discount' => 0,
+    'pickup_fee' => 0,
+    'total_price' => $total,
+    'payment_method' => 'default',
         ]);
 
         $this->notifikasiPesananBaru($order);
@@ -249,8 +236,11 @@ class ServiceController extends Controller
             'is_pickup' => false,
             'city' => $service->kota,
             'status' => 'baru',
+            'subtotal' => $service->harga,
+            'discount' => 0,
+            'pickup_fee' => 0,
             'total_price' => $service->harga,
-            'payment_method' => 'default',
+            'payment_method' => 'default', // Menggunakan nilai bawaan/default
         ]);
 
         $this->notifikasiPesananBaru($order);
@@ -318,6 +308,9 @@ class ServiceController extends Controller
             'is_pickup' => false,
             'city' => $service->kota,
             'status' => 'baru',
+            'subtotal' => $service->harga,
+            'discount' => 0,
+            'pickup_fee' => 0,
             'total_price' => $service->harga,
             'payment_method' => $data['payment_method'],
         ]);
