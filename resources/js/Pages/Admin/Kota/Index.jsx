@@ -95,7 +95,7 @@ export default function KotaIndex({ kota, filters }) {
 
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 rounded-lg bg-brand-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-teal-800 transition-colors"
+                    className="flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
                 >
                     <Plus size={16} />
                     Tambah Kota
@@ -140,7 +140,7 @@ export default function KotaIndex({ kota, filters }) {
                                 <td className="px-6 py-4">
                                     <span
                                         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${item.is_active
-                                            ? 'bg-brand-teal-100 text-brand-teal-700'
+                                            ? 'bg-green-400 text-gray'
                                             : 'bg-gray-100 text-gray-500'
                                             }`}
                                     >

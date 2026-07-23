@@ -100,13 +100,13 @@ export default function BeritaIndex({ berita, filters }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari judul berita..."
-                        className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
+                        className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                     />
                 </form>
 
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 rounded-lg bg-brand-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-teal-800"
+                    className="flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
                 >
                     <Plus size={16} />
                     Tambah Berita
@@ -168,7 +168,7 @@ export default function BeritaIndex({ berita, filters }) {
                                     <div className="flex items-center justify-end gap-1">
                                         <button
                                             onClick={() => openEditModal(item)}
-                                            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-teal-700"
+                                            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-green-700"
                                         >
                                             <Pencil size={15} />
                                         </button>
@@ -195,7 +195,7 @@ export default function BeritaIndex({ berita, filters }) {
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 className={`rounded-md px-3 py-1.5 text-xs ${
                                     link.active
-                                        ? 'bg-brand-teal-700 text-white'
+                                        ? 'bg-green-700 text-white'
                                         : link.url
                                         ? 'text-gray-500 hover:bg-gray-100'
                                         : 'text-gray-300 cursor-not-allowed'
@@ -225,7 +225,7 @@ export default function BeritaIndex({ berita, filters }) {
                                     type="text"
                                     value={data.judul}
                                     onChange={(e) => setData('judul', e.target.value)}
-                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
+                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                                     placeholder="Judul berita"
                                 />
                                 {errors.judul && <p className="mt-1 text-xs text-red-500">{errors.judul}</p>}
@@ -237,7 +237,7 @@ export default function BeritaIndex({ berita, filters }) {
                                     rows={5}
                                     value={data.konten}
                                     onChange={(e) => setData('konten', e.target.value)}
-                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
+                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                                     placeholder="Isi berita..."
                                 />
                                 {errors.konten && <p className="mt-1 text-xs text-red-500">{errors.konten}</p>}
@@ -262,7 +262,7 @@ export default function BeritaIndex({ berita, filters }) {
                                     type="button"
                                     onClick={() => setData('is_published', !data.is_published)}
                                     className={`relative h-6 w-11 rounded-full transition-colors ${
-                                        data.is_published ? 'bg-brand-teal-600' : 'bg-gray-300'
+                                        data.is_published ? 'bg-green-600' : 'bg-gray-300'
                                     }`}
                                 >
                                     <span
@@ -284,7 +284,7 @@ export default function BeritaIndex({ berita, filters }) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="rounded-lg bg-brand-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-teal-800 disabled:opacity-60"
+                                    className="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-60"
                                 >
                                     {editingItem ? 'Simpan Perubahan' : 'Tambah Berita'}
                                 </button>
