@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2 } from 'lucide-react';
+import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2, ChevronDown } from 'lucide-react';
 
 const SERVICE_TYPES = [
     { value: '', label: 'Semua Layanan' },
@@ -19,10 +19,11 @@ const STATUSES = [
     { value: 'dibatalkan', label: 'Dibatalkan' },
 ];
 
+// Status "baru" dikembalikan menggunakan warna biru
 const STATUS_STYLE = {
-    baru: 'bg-blue-50 text-blue-600',
+    baru: 'bg-blue-50 text-blue-700',
     diproses: 'bg-amber-50 text-amber-600',
-    selesai: 'bg-brand-teal-100 text-brand-teal-700',
+    selesai: 'bg-emerald-100 text-emerald-700',
     dibatalkan: 'bg-red-50 text-red-600',
 };
 
@@ -127,64 +128,45 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari kode pesanan / customer..."
-                        className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
+                        className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
                     />
                 </form>
 
-                <select
+                <CustomSelect
                     value={serviceType}
-                    onChange={(e) => {
-                        setServiceType(e.target.value);
-                        applyFilters({ service_type: e.target.value });
+                    options={SERVICE_TYPES}
+                    onChange={(val) => {
+                        setServiceType(val);
+                        applyFilters({ service_type: val });
                     }}
-                    className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
-                >
-                    {SERVICE_TYPES.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                        </option>
-                    ))}
-                </select>
+                />
 
-                <select
+                <CustomSelect
                     value={status}
-                    onChange={(e) => {
-                        setStatus(e.target.value);
-                        applyFilters({ status: e.target.value });
+                    options={STATUSES}
+                    onChange={(val) => {
+                        setStatus(val);
+                        applyFilters({ status: val });
                     }}
-                    className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
-                >
-                    {STATUSES.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                        </option>
-                    ))}
-                </select>
+                />
 
                 {cities.length > 0 && (
-                    <select
+                    <CustomSelect
                         value={city}
-                        onChange={(e) => {
-                            setCity(e.target.value);
-                            applyFilters({ city: e.target.value });
+                        options={[{ value: '', label: 'Semua Kota' }, ...cities.map((c) => ({ value: c, label: c }))]}
+                        onChange={(val) => {
+                            setCity(val);
+                            applyFilters({ city: val });
                         }}
-                        className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
-                    >
-                        <option value="">Semua Kota</option>
-                        {cities.map((c) => (
-                            <option key={c} value={c}>
-                                {c}
-                            </option>
-                        ))}
-                    </select>
+                    />
                 )}
 
                 <button
                     type="button"
                     onClick={toggleSelectMode}
-                    className={`ml-auto rounded-lg border px-3 py-2 text-sm font-medium ${
+                    className={`ml-auto rounded-lg border px-3 py-2 text-sm font-medium transition ${
                         selectMode
-                            ? 'border-brand-teal-600 bg-brand-teal-50 text-brand-teal-700'
+                            ? 'border-green-600 bg-green-50 text-green-700'
                             : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                     }`}
                 >
@@ -193,22 +175,22 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
             </div>
 
             {selectMode && selectedIds.length > 0 && (
-                <div className="mb-4 flex items-center justify-between rounded-xl border border-brand-teal-200 bg-brand-teal-50 px-4 py-3">
-                    <span className="text-sm font-medium text-brand-teal-800">
+                <div className="mb-4 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3">
+                    <span className="text-sm font-medium text-green-800">
                         {selectedIds.length} pesanan dipilih
                     </span>
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
                             onClick={() => setSelectedIds([])}
-                            className="rounded-lg px-3 py-1.5 text-xs text-gray-600 hover:bg-white"
+                            className="rounded-lg px-3 py-1.5 text-xs text-gray-600 hover:bg-white transition"
                         >
                             Batalkan Pilihan
                         </button>
                         <button
                             type="button"
                             onClick={() => setBulkDeleteConfirm(true)}
-                            className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                            className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 shadow-sm transition"
                         >
                             <Trash2 size={13} />
                             Hapus {selectedIds.length} Pesanan
@@ -217,7 +199,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                 </div>
             )}
 
-            <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+            <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -227,7 +209,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                         type="checkbox"
                                         checked={allOnPageSelected}
                                         onChange={toggleSelectAllOnPage}
-                                        className="rounded text-brand-teal-600 focus:ring-brand-teal-500"
+                                        className="rounded text-green-600 focus:ring-green-600"
                                     />
                                 </th>
                             )}
@@ -250,14 +232,14 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                             </tr>
                         )}
                         {orders.data.map((order) => (
-                            <tr key={order.id} className={`hover:bg-gray-50 ${selectedIds.includes(order.id) ? 'bg-brand-teal-50/50' : ''}`}>
+                            <tr key={order.id} className={`hover:bg-gray-50 ${selectedIds.includes(order.id) ? 'bg-green-50/50' : ''}`}>
                                 {selectMode && (
                                     <td className="px-4 py-4">
                                         <input
                                             type="checkbox"
                                             checked={selectedIds.includes(order.id)}
                                             onChange={() => toggleSelectOne(order.id)}
-                                            className="rounded text-brand-teal-600 focus:ring-brand-teal-500"
+                                            className="rounded text-green-600 focus:ring-green-600"
                                         />
                                     </td>
                                 )}
@@ -274,7 +256,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 <td className="px-6 py-4">
                                     <span className="inline-flex items-center gap-1 text-gray-600">
                                         {SERVICE_LABEL[order.service_type] ?? order.service_type}
-                                        {order.is_pickup && <Truck size={13} className="text-brand-teal-600" />}
+                                        {order.is_pickup && <Truck size={13} className="text-green-700" />}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-gray-600">{order.city}</td>
@@ -293,7 +275,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                         <button
                                             type="button"
                                             onClick={() => setSelectedOrder(order)}
-                                            className="inline-flex items-center gap-1 rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-teal-700"
+                                            className="inline-flex items-center gap-1 rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-green-700 transition"
                                             title="Detail Pesanan"
                                         >
                                             <Eye size={15} />
@@ -301,7 +283,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                         <button
                                             type="button"
                                             onClick={() => setDeleteTarget(order)}
-                                            className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
+                                            className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600 transition"
                                             title="Hapus Pesanan"
                                         >
                                             <Trash2 size={15} />
@@ -321,12 +303,12 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 href={link.url ?? '#'}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 preserveScroll
-                                className={`rounded-md px-3 py-1.5 text-xs ${
+                                className={`rounded-md px-3 py-1.5 text-xs transition ${
                                     link.active
-                                        ? 'bg-brand-teal-700 text-white'
+                                        ? 'bg-green-700 text-white shadow-sm'
                                         : link.url
-                                        ? 'text-gray-500 hover:bg-gray-100'
-                                        : 'text-gray-300 cursor-not-allowed'
+                                        ? 'text-gray-500 hover:bg-gray-100 border border-gray-200'
+                                        : 'text-gray-300 border border-gray-100 cursor-not-allowed'
                                 }`}
                             />
                         ))}
@@ -349,14 +331,14 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                             <button
                                 type="button"
                                 onClick={() => setDeleteTarget(null)}
-                                className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                                className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 transition"
                             >
                                 Batal
                             </button>
                             <button
                                 type="button"
                                 onClick={handleDelete}
-                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 shadow-sm transition"
                             >
                                 Hapus
                             </button>
@@ -379,7 +361,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 type="button"
                                 onClick={() => setBulkDeleteConfirm(false)}
                                 disabled={isBulkDeleting}
-                                className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-60"
+                                className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-60 transition"
                             >
                                 Batal
                             </button>
@@ -387,7 +369,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 type="button"
                                 onClick={handleBulkDelete}
                                 disabled={isBulkDeleting}
-                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60 shadow-sm transition"
                             >
                                 {isBulkDeleting ? 'Menghapus...' : 'Ya, Hapus Semua'}
                             </button>
@@ -396,6 +378,61 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                 </div>
             )}
         </AdminLayout>
+    );
+}
+
+function CustomSelect({ value, options, onChange }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    const selectedLabel = options.find((opt) => opt.value === value)?.label || options[0]?.label;
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative inline-block text-left" ref={dropdownRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="inline-flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 min-w-[140px]"
+            >
+                <span>{selectedLabel}</span>
+                <ChevronDown size={14} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute left-0 mt-1 z-50 w-full min-w-[160px] rounded-lg border border-gray-100 bg-white shadow-lg overflow-hidden py-1">
+                    {options.map((opt) => {
+                        const isSelected = opt.value === value;
+                        return (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => {
+                                    onChange(opt.value);
+                                    setIsOpen(false);
+                                }}
+                                className={`w-full text-left px-3 py-2 text-sm transition ${
+                                    isSelected
+                                        ? 'bg-green-700 text-white font-medium'
+                                        : 'text-gray-700 hover:bg-green-50 hover:text-green-800'
+                                }`}
+                            >
+                                {opt.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -463,7 +500,7 @@ function OrderDetailModal({ order, onClose }) {
                             {order.status}
                         </span>
                     </div>
-                    <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                    <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
                         <X size={18} />
                     </button>
                 </div>
@@ -488,7 +525,7 @@ function OrderDetailModal({ order, onClose }) {
                     <dd className="text-gray-900">{order.city}</dd>
 
                     <dt className="text-gray-500">Total Harga</dt>
-                    <dd className="text-gray-900 font-bold text-brand-teal-700">{formatRupiah(order.total_price)}</dd>
+                    <dd className="text-gray-900 font-bold text-green-700">{formatRupiah(order.total_price)}</dd>
 
                     {order.status === 'dibatalkan' && order.cancel_reason && (
                         <>
@@ -538,7 +575,7 @@ function OrderDetailModal({ order, onClose }) {
                                     type="text"
                                     value={data.cancel_reason}
                                     onChange={(e) => setData('cancel_reason', e.target.value)}
-                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
+                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
                                     placeholder="Contoh: Bukti pembayaran tidak valid"
                                 />
                                 {errors.cancel_reason && (
@@ -553,10 +590,10 @@ function OrderDetailModal({ order, onClose }) {
                                     type="button"
                                     disabled={isSubmitting}
                                     onClick={() => submitStatus(next)}
-                                    className={`rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60 ${
+                                    className={`rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60 shadow-sm transition ${
                                         next === 'dibatalkan'
                                             ? 'bg-red-600 hover:bg-red-700'
-                                            : 'bg-brand-teal-700 hover:bg-brand-teal-800'
+                                            : 'bg-green-700 hover:bg-green-800'
                                     }`}
                                 >
                                     {isSubmitting ? 'Memproses...' : actionLabel[next]}
@@ -580,7 +617,7 @@ function OrderDetailModal({ order, onClose }) {
                         />
                         <button
                             type="button"
-                            className="absolute -top-10 right-0 text-white hover:text-gray-300"
+                            className="absolute -top-10 right-0 text-white hover:text-gray-300 transition"
                             onClick={() => setPreviewImage(false)}
                         >
                             <X size={24} />

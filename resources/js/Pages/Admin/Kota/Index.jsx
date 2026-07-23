@@ -89,20 +89,20 @@ export default function KotaIndex({ kota, filters }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari nama kota..."
-                        className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
+                        className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
                     />
                 </form>
 
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
+                    className="flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 transition shadow-sm"
                 >
                     <Plus size={16} />
                     Tambah Kota
                 </button>
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+            <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b border-gray-100 bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -128,7 +128,7 @@ export default function KotaIndex({ kota, filters }) {
                                         {item.foto_url ? (
                                             <img src={item.foto_url} alt={item.nama} className="h-8 w-8 rounded-full object-cover" />
                                         ) : (
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-teal-50 text-brand-teal-600">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-700">
                                                 <MapPin size={15} />
                                             </div>
                                         )}
@@ -139,25 +139,28 @@ export default function KotaIndex({ kota, filters }) {
                                 <td className="px-6 py-4 text-gray-600">{item.jumlah_vendor ?? 0}</td>
                                 <td className="px-6 py-4">
                                     <span
-                                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${item.is_active
-                                            ? 'bg-green-400 text-gray'
-                                            : 'bg-gray-100 text-gray-500'
-                                            }`}
+                                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                                            item.is_active
+                                                ? 'bg-emerald-100 text-emerald-700'
+                                                : 'bg-gray-100 text-gray-500'
+                                        }`}
                                     >
                                         {item.is_active ? 'Aktif' : 'Nonaktif'}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 text-right">
                                     <div className="flex items-center justify-end gap-1">
                                         <button
                                             onClick={() => openEditModal(item)}
-                                            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-teal-700"
+                                            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-green-700 transition"
+                                            title="Edit Kota"
                                         >
                                             <Pencil size={15} />
                                         </button>
                                         <button
                                             onClick={() => setDeleteTarget(item)}
-                                            className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
+                                            className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600 transition"
+                                            title="Hapus Kota"
                                         >
                                             <Trash2 size={15} />
                                         </button>
@@ -176,12 +179,13 @@ export default function KotaIndex({ kota, filters }) {
                                 href={link.url ?? '#'}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 preserveScroll
-                                className={`rounded-md px-3 py-1.5 text-xs ${link.active
-                                    ? 'bg-brand-teal-700 text-white'
-                                    : link.url
-                                        ? 'text-gray-500 hover:bg-gray-100'
-                                        : 'text-gray-300 cursor-not-allowed'
-                                    }`}
+                                className={`rounded-md px-3 py-1.5 text-xs transition ${
+                                    link.active
+                                        ? 'bg-green-700 text-white shadow-sm'
+                                        : link.url
+                                        ? 'text-gray-500 hover:bg-gray-100 border border-gray-200'
+                                        : 'text-gray-300 border border-gray-100 cursor-not-allowed'
+                                }`}
                             />
                         ))}
                     </div>
@@ -191,11 +195,11 @@ export default function KotaIndex({ kota, filters }) {
             {modalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
                     <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-                        <div className="mb-4 flex items-center justify-between">
+                        <div className="mb-4 flex items-center justify-between border-b pb-3">
                             <h2 className="text-base font-semibold text-gray-900">
                                 {editingKota ? 'Edit Kota' : 'Tambah Kota'}
                             </h2>
-                            <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                            <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition">
                                 <X size={18} />
                             </button>
                         </div>
@@ -205,7 +209,7 @@ export default function KotaIndex({ kota, filters }) {
                                 <label className="mb-1.5 block text-xs font-medium text-gray-600">Foto / Ikon Kota</label>
                                 <label
                                     htmlFor="foto-kota"
-                                    className="flex h-28 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 bg-gray-50"
+                                    className="flex h-28 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 transition"
                                 >
                                     {fotoPreview ? (
                                         <img src={fotoPreview} alt="Preview" className="h-full w-full object-cover" />
@@ -216,13 +220,14 @@ export default function KotaIndex({ kota, filters }) {
                                 </label>
                                 {errors.foto && <p className="mt-1 text-xs text-red-500">{errors.foto}</p>}
                             </div>
+
                             <div>
                                 <label className="mb-1 block text-xs font-medium text-gray-600">Nama Kota</label>
                                 <input
                                     type="text"
                                     value={data.nama}
                                     onChange={(e) => setData('nama', e.target.value)}
-                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
+                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
                                     placeholder="Contoh: Bandung"
                                 />
                                 {errors.nama && <p className="mt-1 text-xs text-red-500">{errors.nama}</p>}
@@ -234,7 +239,7 @@ export default function KotaIndex({ kota, filters }) {
                                     type="text"
                                     value={data.provinsi}
                                     onChange={(e) => setData('provinsi', e.target.value)}
-                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-brand-teal-500 focus:outline-none focus:ring-1 focus:ring-brand-teal-500"
+                                    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
                                     placeholder="Contoh: Jawa Barat"
                                 />
                                 {errors.provinsi && <p className="mt-1 text-xs text-red-500">{errors.provinsi}</p>}
@@ -245,28 +250,30 @@ export default function KotaIndex({ kota, filters }) {
                                 <button
                                     type="button"
                                     onClick={() => setData('is_active', !data.is_active)}
-                                    className={`relative h-6 w-11 rounded-full transition-colors ${data.is_active ? 'bg-brand-teal-600' : 'bg-gray-300'
-                                        }`}
+                                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                        data.is_active ? 'bg-green-600' : 'bg-gray-300'
+                                    }`}
                                 >
                                     <span
-                                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${data.is_active ? 'translate-x-5' : 'translate-x-0.5'
-                                            }`}
+                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                                            data.is_active ? 'translate-x-5' : 'translate-x-0'
+                                        }`}
                                     />
                                 </button>
                             </div>
 
-                            <div className="flex justify-end gap-2 pt-2">
+                            <div className="flex justify-end gap-2 pt-2 border-t">
                                 <button
                                     type="button"
                                     onClick={closeModal}
-                                    className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                                    className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 transition"
                                 >
                                     Batal
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="rounded-lg bg-brand-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-teal-800 disabled:opacity-60"
+                                    className="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-60 shadow-sm transition"
                                 >
                                     {editingKota ? 'Simpan Perubahan' : 'Tambah Kota'}
                                 </button>
@@ -286,13 +293,13 @@ export default function KotaIndex({ kota, filters }) {
                         <div className="mt-5 flex justify-end gap-2">
                             <button
                                 onClick={() => setDeleteTarget(null)}
-                                className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                                className="rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 transition"
                             >
                                 Batal
                             </button>
                             <button
                                 onClick={handleDelete}
-                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 shadow-sm transition"
                             >
                                 Hapus
                             </button>

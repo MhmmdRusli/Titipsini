@@ -39,11 +39,6 @@ function formatRupiah(value) {
     }).format(value ?? 0);
 }
 
-// Expected props from PenggunaController@show:
-//   user: { id, name, email, phone, gender, tanggal_lahir, foto, address,
-//           provinsi, kecamatan, wilayah, city, verification_status,
-//           rejection_reason, created_at,
-//           orders_as_customer: [{ id, order_code, service_type, status, total_price, created_at }] }
 export default function Show({ user }) {
     return (
         <AdminLayout title="Detail Pengguna">
@@ -51,16 +46,16 @@ export default function Show({ user }) {
 
             <Link
                 href={route('admin.pengguna.index')}
-                className="mb-4 inline-flex items-center text-sm font-medium text-teal-600 hover:text-teal-700"
+                className="mb-4 inline-flex items-center text-sm font-medium text-green-700 hover:text-green-800"
             >
                 ← Kembali ke daftar pengguna
             </Link>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Profile card */}
-                <div className="rounded-xl border border-slate-200 bg-white p-6 lg:col-span-1">
+                <div className="rounded-xl border border-slate-200 bg-white p-6 lg:col-span-1 shadow-sm">
                     <div className="flex flex-col items-center text-center">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-teal-100 text-2xl font-semibold text-teal-700">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50 text-2xl font-semibold text-green-700 border border-green-100 overflow-hidden">
                             {user.foto ? (
                                 <img src={user.foto} alt={user.name} className="h-20 w-20 rounded-full object-cover" />
                             ) : (
@@ -117,7 +112,7 @@ export default function Show({ user }) {
                 </div>
 
                 {/* Order history */}
-                <div className="rounded-xl border border-slate-200 bg-white lg:col-span-2">
+                <div className="rounded-xl border border-slate-200 bg-white lg:col-span-2 shadow-sm overflow-hidden">
                     <div className="border-b border-slate-100 px-6 py-4">
                         <h3 className="text-sm font-semibold text-slate-800">Riwayat Pesanan</h3>
                     </div>
