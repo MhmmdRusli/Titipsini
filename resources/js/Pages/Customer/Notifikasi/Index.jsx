@@ -3,10 +3,10 @@ import { CheckCircle2, Wallet, BellRing, CheckSquare } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const TYPE_CONFIG = {
-    penitipan_berhasil: { icon: CheckCircle2, bg: 'bg-green-50', color: 'text-green-600' },
-    pembayaran_diterima: { icon: Wallet, bg: 'bg-green-50', color: 'text-green-600' },
-    penitipan_hampir_berakhir: { icon: BellRing, bg: 'bg-red-50', color: 'text-red-500' },
-    penitipan_selesai: { icon: CheckSquare, bg: 'bg-gray-100', color: 'text-gray-500' },
+    penitipan_berhasil: { icon: CheckCircle2, bg: 'bg-green-50 dark:bg-green-950/40', color: 'text-green-600 dark:text-green-400' },
+    pembayaran_diterima: { icon: Wallet, bg: 'bg-green-50 dark:bg-green-950/40', color: 'text-green-600 dark:text-green-400' },
+    penitipan_hampir_berakhir: { icon: BellRing, bg: 'bg-red-50 dark:bg-red-950/40', color: 'text-red-500 dark:text-red-400' },
+    penitipan_selesai: { icon: CheckSquare, bg: 'bg-gray-100 dark:bg-gray-800', color: 'text-gray-500 dark:text-gray-400' },
 };
 
 function relativeTime(value) {
@@ -18,7 +18,7 @@ function relativeTime(value) {
     if (diffMin < 60) return `${diffMin} menit lalu`;
     const diffHour = Math.floor(diffMin / 60);
     if (diffHour < 24) return `${diffHour} jam lalu`;
-    return null; // di luar hari ini -> dikelompokkan lewat groupLabel, bukan relative time
+    return null; 
 }
 
 function groupLabel(value) {
@@ -28,7 +28,7 @@ function groupLabel(value) {
 
     const diffDays = Math.round((startOfDay(now) - startOfDay(date)) / 86400000);
 
-    if (diffDays === 0) return null; // hari ini -> tidak ada divider, sesuai mockup
+    if (diffDays === 0) return null; 
     if (diffDays === 1) return 'KEMARIN';
 
     return date
@@ -37,7 +37,7 @@ function groupLabel(value) {
 }
 
 export default function NotifikasiIndex({ notifikasi }) {
-    let lastGroup = undefined; // beda dari null supaya grup "hari ini" pertama tetap dicek
+    let lastGroup = undefined;
 
     function handleClick(item) {
         if (!item.read_at) {
@@ -51,12 +51,12 @@ export default function NotifikasiIndex({ notifikasi }) {
 
             <div className="px-4 py-3">
                 {notifikasi.length === 0 && (
-                    <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400">
+                    <div className="rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-6 text-center text-sm text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 shadow-sm">
                         Belum ada notifikasi.
                     </div>
                 )}
 
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-2.5">
                     {notifikasi.map((item) => {
                         const config = TYPE_CONFIG[item.type] ?? TYPE_CONFIG.penitipan_selesai;
                         const Icon = config.icon;
@@ -71,28 +71,29 @@ export default function NotifikasiIndex({ notifikasi }) {
                             <div key={item.id}>
                                 {showDivider && label && (
                                     <div className="my-3 flex justify-center">
-                                        <span className="rounded-full bg-gray-100 px-3 py-1 text-[10px] font-semibold tracking-wide text-gray-400">
+                                        <span className="rounded-full bg-gray-200 dark:bg-gray-800 px-3 py-1 text-[10px] font-semibold tracking-wide text-gray-500 dark:text-gray-400">
                                             {label}
                                         </span>
                                     </div>
                                 )}
+                                {/* Setiap item dibungkus card kotak dengan border dan shadow tipis */}
                                 <button
                                     type="button"
                                     onClick={() => handleClick(item)}
-                                    className="flex w-full items-start gap-3 rounded-xl px-2 py-3 text-left"
+                                    className="flex w-full items-start gap-3 rounded-2xl border border-gray-100 bg-white p-3.5 text-left shadow-sm transition hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700/50"
                                 >
                                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${config.bg}`}>
                                         <Icon size={18} className={config.color} />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">{item.judul}</p>
-                                        <p className="mt-0.5 text-xs text-gray-500">{item.pesan}</p>
-                                        <p className="mt-1 text-[10px] uppercase tracking-wide text-gray-400">
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{item.judul}</p>
+                                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{item.pesan}</p>
+                                        <p className="mt-1.5 text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">
                                             {timestamp}
                                         </p>
                                     </div>
                                     {!item.read_at && (
-                                        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-green-600" />
+                                        <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-green-600 dark:bg-green-500" />
                                     )}
                                 </button>
                             </div>
