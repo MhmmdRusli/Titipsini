@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Package, Car, Building2, Truck, MapPin, ClipboardList, TrendingUp, Store, HelpCircle } from 'lucide-react';
+import { Package, Car, Building2, Truck, MapPin, ClipboardList } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const TABS = [
@@ -49,42 +49,7 @@ export default function Index({ orders, counts, filters }) {
                 </div>
             </div>
 
-            <div className="px-4 py-4 space-y-4">
-
-                {/* MENU PINTASAN (Menutup ruang kosong di bawah header) */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
-                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Menu Pintasan</p>
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                        <Link href={route('mitra.orders.index')} className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
-                                <ClipboardList size={20} />
-                            </div>
-                            <span className="text-[11px] font-medium text-gray-600 dark:text-gray-300">Pesanan</span>
-                        </Link>
-                        
-                        <Link href="#" className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
-                                <TrendingUp size={20} />
-                            </div>
-                            <span className="text-[11px] font-medium text-gray-600 dark:text-gray-300">Statistik</span>
-                        </Link>
-
-                        <Link href="#" className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
-                                <Store size={20} />
-                            </div>
-                            <span className="text-[11px] font-medium text-gray-600 dark:text-gray-300">Profil Toko</span>
-                        </Link>
-
-                        <Link href="#" className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400">
-                                <HelpCircle size={20} />
-                            </div>
-                            <span className="text-[11px] font-medium text-gray-600 dark:text-gray-300">Bantuan</span>
-                        </Link>
-                    </div>
-                </div>
-
+            <div className="px-4 py-4">
                 {/* Tabs status */}
                 <div className="flex gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800 shadow-sm">
                     {TABS.map((t) => (
@@ -103,7 +68,7 @@ export default function Index({ orders, counts, filters }) {
                 </div>
 
                 {/* Filter kategori */}
-                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
                     {KATEGORI.map((k) => (
                         <button
                             key={k.label ?? 'semua'}
@@ -121,7 +86,7 @@ export default function Index({ orders, counts, filters }) {
                 </div>
 
                 {/* List pesanan */}
-                <div className="space-y-3">
+                <div className="mt-4 space-y-3">
                     {orders.data.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center text-sm text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 shadow-sm">
                             Belum ada pesanan di kategori ini.
