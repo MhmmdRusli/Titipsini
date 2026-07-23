@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Mitra;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notifikasi;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -98,8 +100,34 @@ class OrderController extends Controller
                 'pickup_fee' => (float) $pickupFee,
                 'total' => (float) $order->total_price,
                 'created_at' => optional($order->created_at)->format('d M Y, H:i'),
+                'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
+                'payment_verified_at' => optional($order->payment_verified_at)->format('d M Y, H:i'),
             ],
         ]);
+    }
+
+    /**
+     * Mitra memverifikasi bukti pembayaran yang diunggah customer.
+     * PATCH /mitra/pesanan/{order}/verifikasi-pembayaran
+     */
+    public function verifikasiPembayaran(Order $order)
+    {
+        abort_unless($order->partner_id === Auth::id(), 403);
+        abort_unless($order->payment_receipt, 422, 'Belum ada bukti pembayaran yang diunggah untuk pesanan ini.');
+
+        if (! $order->payment_verified_at) {
+            $order->update(['payment_verified_at' => now()]);
+
+            Notifikasi::create([
+                'user_id' => $order->customer_id,
+                'order_id' => $order->id,
+                'type' => 'pembayaran_diterima',
+                'judul' => 'Pembayaran Terverifikasi',
+                'pesan' => 'Mitra telah memverifikasi pembayaran untuk pesanan '.$order->order_code.'. Pesanan kamu sedang diproses.',
+            ]);
+        }
+
+        return back()->with('success', 'Pembayaran berhasil diverifikasi.');
     }
 
     /**
