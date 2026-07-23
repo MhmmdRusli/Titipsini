@@ -57,7 +57,7 @@ export default function PilihPaket({ hargaMulai = 100000, serviceId }) {
                     </Link>
 
                     <Link
-                        href="/app/services/barang"
+                        href={`/app/services/barang?service_id=${serviceId ?? ''}`}
                         className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-green-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-green-600"
                     >
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400">

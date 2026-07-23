@@ -78,7 +78,7 @@ export default function Index({ orders, counts, filters }) {
                             return (
                                 <Link
                                     key={order.id}
-                                    href={route('partner.orders.show', order.id)}
+                                    href={route('mitra.orders.show', order.id)}
                                     className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
                                 >
                                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600">

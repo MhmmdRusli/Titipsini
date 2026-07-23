@@ -21,7 +21,7 @@ export default function Show({ order }) {
             <Head title={`Rincian Order - ${order.order_number}`} />
 
             <div className="px-4 py-4">
-                <Link href={route('partner.orders.index')} className="mb-3 flex items-center gap-1.5 text-sm text-gray-500">
+                <Link href={route('mitra.orders.index')} className="mb-3 flex items-center gap-1.5 text-sm text-gray-500">
                     <ArrowLeft size={16} />
                     Kembali ke Pesanan
                 </Link>

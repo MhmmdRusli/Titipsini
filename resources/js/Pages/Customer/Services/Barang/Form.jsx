@@ -10,7 +10,7 @@ const BENEFITS = [
     'Konsultasi & Support',
 ];
 
-export default function FormBarang({ hargaMulai = 100000 }) {
+export default function FormBarang({ hargaMulai = 100000, serviceId }) {
     const formattedHarga = new Intl.NumberFormat('id-ID').format(hargaMulai);
 
     const [form, setForm] = useState({
@@ -18,6 +18,7 @@ export default function FormBarang({ hargaMulai = 100000 }) {
         pickup: false,
         tanggalMasuk: '',
         tanggalKeluar: '',
+        service_id: serviceId ?? '',
     });
 
     function update(field, value) {
@@ -56,6 +57,12 @@ export default function FormBarang({ hargaMulai = 100000 }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+                    {/* service_id dibawa dari query string (?service_id=...) sewaktu
+                        customer memilih vendor/toko barang di halaman list layanan.
+                        Wajib ada - kalau kosong, backend akan menolak & redirect
+                        balik ke halaman pilih vendor. */}
+                    <input type="hidden" value={form.service_id} readOnly />
+
                     <div>
                         <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Barang</label>
                         <input

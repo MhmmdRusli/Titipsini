@@ -28,6 +28,8 @@ export default function Show({ service }) {
         }
         setError('');
         setProcessing(true);
+        // service.id sudah tersedia dari props (route model binding di controller),
+        // jadi selalu ikut terkirim dengan benar di URL ini.
         router.post(
             `/app/services/${service.id}/pesan`,
             { tanggalMasuk, tanggalKeluar },
