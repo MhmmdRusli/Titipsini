@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { History, AlertTriangle, Package, Car, Building2, Truck, ChevronRight, Clock } from 'lucide-react';
+import { History, AlertTriangle, Package, Car, Building2, Truck, ChevronRight, MapPin, Store } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const LAYANAN_ICON = {
@@ -20,17 +20,17 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
-export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesanan }) {
+export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [], pesanan = {} }) {
     return (
         <MitraLayout title="Beranda">
             <Head title="Beranda Mitra" />
 
-            <div className="px-4 py-4 pb-8">
+            <div className="px-4 py-4 pb-8 space-y-4">
                 {/* Banner verifikasi KTP - hanya muncul kalau belum verified */}
                 {!partner?.is_verified && (
                     <Link
                         href="/mitra/legalitas"
-                        className="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-3.5 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/40"
+                        className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-3.5 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/40"
                     >
                         <AlertTriangle size={20} className="shrink-0 text-red-600 dark:text-red-400" />
                         <div className="min-w-0 flex-1">
@@ -45,7 +45,7 @@ export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesa
                 <div className="flex items-center gap-3">
                     <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                         {partner?.avatar ? (
-                            <img src={partner.avatar} alt={partner.name} className="h-full w-full object-cover" />
+                            <img src={partner.avatar} alt={partner?.name} className="h-full w-full object-cover" />
                         ) : (
                             <div className="flex h-full w-full items-center justify-center text-gray-400 font-bold">
                                 {partner?.name?.charAt(0) ?? 'M'}
@@ -59,7 +59,7 @@ export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesa
                 </div>
 
                 {/* Status Vendor / Jam Operasional */}
-                <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                <div className="text-xs text-gray-500 dark:text-gray-400">
                     <p className="font-semibold text-gray-700 dark:text-gray-300">Status Vendor</p>
                     <p className="mt-0.5">
                         {toko?.buka ? 'Buka' : 'Tutup'} : {toko?.jam_buka && toko?.jam_tutup ? `${toko.jam_buka} - ${toko.jam_tutup}` : '08.00-20.00'}
@@ -67,7 +67,7 @@ export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesa
                 </div>
 
                 {/* Kartu Saldo (Full Hijau) */}
-                <div className="mt-4 rounded-2xl bg-[#15803d] dark:bg-green-700 p-4 text-white shadow-sm relative overflow-hidden">
+                <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-4 text-white shadow-sm relative overflow-hidden">
                     <div className="flex items-start justify-between">
                         <div>
                             <p className="text-xs font-medium text-white/80">Saldo Kamu Saat Ini</p>
@@ -84,7 +84,7 @@ export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesa
                 </div>
 
                 {/* Layanan Vendors dengan Tombol Kelola di Kanan & Bisa Diklik */}
-                <div className="mt-5">
+                <div>
                     <div className="mb-2 flex items-center justify-between">
                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Layanan Vendors</p>
                         <Link
@@ -96,7 +96,7 @@ export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesa
                         </Link>
                     </div>
 
-                    {layanan.length === 0 ? (
+                    {!Array.isArray(layanan) || layanan.length === 0 ? (
                         <div className="grid grid-cols-4 gap-2">
                             {['barang', 'kendaraan', 'bangunan', 'pindahan'].map((key) => {
                                 const Icon = LAYANAN_ICON[key] ?? Package;
@@ -130,7 +130,7 @@ export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesa
                 </div>
 
                 {/* Jumlah Pesanan (Barang, Kendaraan, Bangunan, Pindahan) */}
-                <div className="mt-5">
+                <div>
                     <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Jumlah Pesanan</p>
                     <div className="grid grid-cols-2 gap-3">
                         {/* Card Barang */}
@@ -163,6 +163,25 @@ export default function Dashboard({ partner, saldo = 0, toko, layanan = [], pesa
                         </div>
                     </div>
                 </div>
+
+                {/* Card Informasi Toko/Lokasi di Bawah (Aman dari Error) */}
+                <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
+                            <Store size={20} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-gray-900 dark:text-gray-100 truncate">
+                                {toko?.nama ?? 'Titipsini Partner Outlet'}
+                            </p>
+                            <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                <MapPin size={12} className="shrink-0 text-gray-400" />
+                                {toko?.alamat ?? 'Alamat lokasi mitra belum diatur'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </MitraLayout>
     );
