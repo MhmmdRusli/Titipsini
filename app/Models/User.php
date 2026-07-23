@@ -41,6 +41,8 @@ class User extends Authenticatable implements MustVerifyEmail
     'layanan_kategori',
     'verification_status',
     'rejection_reason',
+    'suspended_at',
+    'suspension_reason',
 ];
 
     protected $hidden = [

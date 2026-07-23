@@ -20,18 +20,26 @@ const STATUS_LABEL = {
 
 export default function Show({ partner }) {
     const [reasonModal, setReasonModal] = useState(null); // 'ditolak' | 'ditangguhkan' | null
+    
+    // Tentukan status tampilan awal berdasarkan apakah partner sedang disuspend atau tidak
+    const isSuspended = Boolean(partner.suspended_at);
+    const currentStatus = isSuspended ? 'ditangguhkan' : partner.verification_status;
+
     const { data, setData, patch, processing } = useForm({
-        verification_status: partner.verification_status,
+        verification_status: currentStatus,
         rejection_reason: partner.rejection_reason ?? '',
     });
 
     function submitStatus(status, reason = null) {
-        setData('verification_status', status);
+        // Jika status yang dipilih adalah ditangguhkan, kirim request sesuai backend PartnerController
+        const payloadStatus = status === 'ditangguhkan' ? 'ditangguhkan' : status;
+        
+        setData('verification_status', payloadStatus);
         setData('rejection_reason', reason ?? '');
 
         patch(`/admin/partners/${partner.id}/status`, {
             data: {
-                verification_status: status,
+                verification_status: payloadStatus,
                 rejection_reason: reason,
             },
             preserveScroll: true,
@@ -70,10 +78,10 @@ export default function Show({ partner }) {
                         <p className="text-sm text-slate-500">ID Vendor #{partner.id}</p>
                         <span
                             className={`mt-3 rounded-full px-3 py-1 text-xs font-medium ${
-                                STATUS_STYLE[partner.verification_status]
+                                STATUS_STYLE[currentStatus]
                             }`}
                         >
-                            {STATUS_LABEL[partner.verification_status]}
+                            {STATUS_LABEL[currentStatus]}
                         </span>
                     </div>
 
@@ -112,6 +120,12 @@ export default function Show({ partner }) {
                                 <dd className="mt-1 font-medium text-red-600">{partner.rejection_reason}</dd>
                             </div>
                         )}
+                        {partner.suspended_at && (
+                            <div>
+                                <dt className="text-slate-500">Ditangguhkan Sejak</dt>
+                                <dd className="mt-1 font-medium text-orange-600">{formatDate(partner.suspended_at)}</dd>
+                            </div>
+                        )}
                     </dl>
                 </div>
 
@@ -124,7 +138,7 @@ export default function Show({ partner }) {
 
                     <div className="mt-5 flex flex-wrap gap-3">
                         <button
-                            disabled={processing || partner.verification_status === 'terverifikasi'}
+                            disabled={processing || currentStatus === 'terverifikasi'}
                             onClick={() => submitStatus('terverifikasi')}
                             className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                         >
@@ -138,7 +152,7 @@ export default function Show({ partner }) {
                             Tolak
                         </button>
                         <button
-                            disabled={processing || partner.verification_status === 'ditangguhkan'}
+                            disabled={processing || currentStatus === 'ditangguhkan'}
                             onClick={() => setReasonModal('ditangguhkan')}
                             className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
                         >

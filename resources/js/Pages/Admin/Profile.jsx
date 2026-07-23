@@ -5,17 +5,6 @@ import AdminLayout from "@/Layouts/AdminLayout";
 
 /**
  * Halaman "Ubah Profil" — Admin
- *
- * Route (contoh):
- *   Route::get('/admin/profil/ubah', [ProfileController::class, 'edit'])->name('admin.profile.edit');
- *   Route::put('/admin/profil', [ProfileController::class, 'update'])->name('admin.profile.update');
- *
- * Props yang diharapkan dari controller (lihat ProfileController::edit di bawah):
- *   admin: {
- *     id_admin, name, email, phone, tanggal_lahir, gender,
- *     provinsi, city, kecamatan, address,
- *     peran, wilayah, foto_url
- *   }
  */
 export default function Profile({ admin }) {
   const { data, setData, post, processing, errors, clearErrors, reset, transform } = useForm({
@@ -65,25 +54,25 @@ export default function Profile({ admin }) {
   return (
     <AdminLayout title="Ubah Profil">
       <p className="text-sm text-gray-400 mb-6">
-        Profil <span className="mx-1">›</span> Ubah Profil
+        Profil <span className="mx-1 text-green-700 font-bold">•</span> Ubah Profil
       </p>
 
       <form onSubmit={handleSubmit} autoComplete="off">
         <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
           {/* Kartu kiri: foto + identitas ringkas */}
-          <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col items-center text-center">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col items-center text-center">
             <div className="relative">
               <img
                 src={preview ?? "https://api.dicebear.com/7.x/initials/svg?seed=" + encodeURIComponent(data.name || "Admin")}
                 alt={data.name}
-                className="w-32 h-32 rounded-full object-cover"
+                className="w-32 h-32 rounded-full object-cover ring-4 ring-green-50 shadow-sm"
               />
               <label
                 htmlFor="foto"
-                className="absolute bottom-1 right-1 bg-white rounded-full p-1.5 shadow cursor-pointer border border-gray-200"
+                className="absolute bottom-1 right-1 bg-green-900 text-white rounded-full p-2 shadow-md cursor-pointer hover:bg-green-800 transition border-2 border-white"
                 title="Ganti foto"
               >
-                <Pencil size={14} className="text-gray-600" />
+                <Pencil size={14} />
                 <input
                   id="foto"
                   type="file"
@@ -106,8 +95,8 @@ export default function Profile({ admin }) {
           </div>
 
           {/* Kartu kanan: biodata form */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="font-semibold text-gray-800 mb-4">Biodata admin</h3>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 className="font-semibold text-gray-800 mb-4 border-b border-gray-100 pb-3">Biodata admin</h3>
 
             <div className="text-sm divide-y divide-gray-100">
               <FieldRow label="Nama lengkap" error={errors.name}>
@@ -223,14 +212,14 @@ export default function Profile({ admin }) {
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition"
+            className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 transition"
           >
             Batal
           </button>
           <button
             type="submit"
             disabled={processing}
-            className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-brand-teal-800 transition disabled:opacity-60"
+            className="px-6 py-2.5 rounded-lg bg-green-900 text-white font-medium hover:bg-green-800 transition shadow-sm disabled:opacity-60 flex items-center gap-2"
           >
             Simpan
           </button>
@@ -253,8 +242,8 @@ export default function Profile({ admin }) {
           border-color: #9ca3af; /* gray-400 */
         }
         .field-input:focus {
-          border-color: #0f766e; /* brand-teal-700 */
-          box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+          border-color: #14532d; /* green-900 */
+          box-shadow: 0 0 0 3px rgba(20, 83, 45, 0.15);
         }
         .field-input:disabled {
           background: #f3f4f6;
@@ -269,11 +258,10 @@ export default function Profile({ admin }) {
 function InfoRow({ label, value, highlight, last }) {
   return (
     <div
-      className={`flex justify-between py-2 ${!last ? "border-b border-gray-100" : ""
-        }`}
+      className={`flex justify-between py-2.5 ${!last ? "border-b border-gray-100" : ""}`}
     >
       <span className="text-gray-600">{label}</span>
-      <span className={highlight ? "text-brand-teal-700 font-semibold" : "text-gray-900 font-medium"}>
+      <span className={highlight ? "text-green-800 font-semibold" : "text-gray-900 font-medium"}>
         {value}
       </span>
     </div>

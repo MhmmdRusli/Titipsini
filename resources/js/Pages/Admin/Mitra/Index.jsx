@@ -113,33 +113,38 @@ export default function Index({ partners, filters }) {
                                 </td>
                             </tr>
                         )}
-                        {partners.data.map((partner) => (
-                            <tr key={partner.id} className="hover:bg-slate-50">
-                                <td className="px-4 py-3 text-slate-500">#{partner.id}</td>
-                                <td className="px-4 py-3 font-medium text-slate-800">{partner.name}</td>
-                                <td className="px-4 py-3 text-slate-600">{partner.phone ?? '-'}</td>
-                                <td className="px-4 py-3 text-slate-600">{partner.email}</td>
-                                <td className="px-4 py-3 text-slate-600">{partner.city ?? '-'}</td>
-                                <td className="px-4 py-3 text-slate-600">{formatDate(partner.created_at)}</td>
-                                <td className="px-4 py-3">
-                                    <span
-                                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                                            STATUS_STYLE[partner.verification_status]
-                                        }`}
-                                    >
-                                        {STATUS_LABEL[partner.verification_status]}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3 text-right">
-                                    <Link
-                                        href={`/admin/partners/${partner.id}`}
-                                        className="text-sm font-medium text-teal-600 hover:text-teal-700"
-                                    >
-                                        Detail
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
+                        {partners.data.map((partner) => {
+                            // Tentukan status aktual (prioritaskan suspended_at jika ada)
+                            const displayStatus = partner.suspended_at ? 'ditangguhkan' : partner.verification_status;
+
+                            return (
+                                <tr key={partner.id} className="hover:bg-slate-50">
+                                    <td className="px-4 py-3 text-slate-500">#{partner.id}</td>
+                                    <td className="px-4 py-3 font-medium text-slate-800">{partner.name}</td>
+                                    <td className="px-4 py-3 text-slate-600">{partner.phone ?? '-'}</td>
+                                    <td className="px-4 py-3 text-slate-600">{partner.email}</td>
+                                    <td className="px-4 py-3 text-slate-600">{partner.city ?? '-'}</td>
+                                    <td className="px-4 py-3 text-slate-600">{formatDate(partner.created_at)}</td>
+                                    <td className="px-4 py-3">
+                                        <span
+                                            className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                                                STATUS_STYLE[displayStatus] || 'bg-slate-100 text-slate-600'
+                                            }`}
+                                        >
+                                            {STATUS_LABEL[displayStatus] || displayStatus}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        <Link
+                                            href={`/admin/partners/${partner.id}`}
+                                            className="text-sm font-medium text-teal-600 hover:text-teal-700"
+                                        >
+                                            Detail
+                                        </Link>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>

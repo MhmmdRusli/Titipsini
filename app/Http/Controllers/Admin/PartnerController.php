@@ -29,7 +29,14 @@ class PartnerController extends Controller
         $partners = User::query()
             ->where('role', 'partner')
             ->when($request->filled('status'), function ($query) use ($request) {
-                $query->where('verification_status', $request->status);
+                if ($request->status === 'ditangguhkan') {
+                    // Filter berdasarkan kolom suspended_at
+                    $query->whereNotNull('suspended_at');
+                } else {
+                    // Filter standar berdasarkan verification_status untuk tab lainnya
+                    $query->where('verification_status', $request->status)
+                          ->whereNull('suspended_at');
+                }
             })
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->search;
@@ -39,7 +46,8 @@ class PartnerController extends Controller
                         ->orWhere('phone', 'like', "%{$search}%");
                 });
             })
-            ->select(['id', 'name', 'phone', 'email', 'city', 'verification_status', 'created_at'])
+            // Tambahkan 'suspended_at' ke dalam select agar terbaca oleh frontend
+            ->select(['id', 'name', 'phone', 'email', 'city', 'verification_status', 'suspended_at', 'created_at'])
             ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->withQueryString();
@@ -90,4 +98,4 @@ class PartnerController extends Controller
             ->back()
             ->with('success', 'Status mitra berhasil diperbarui.');
     }
-}   
+}

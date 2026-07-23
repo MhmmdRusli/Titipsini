@@ -49,6 +49,7 @@ use App\Http\Controllers\Mitra\Auth\EmailVerificationNotificationController as M
 use App\Http\Controllers\Mitra\Auth\VerifyEmailController as MitraVerifyEmailController;
 use App\Http\Controllers\Admin\TopupVerifikasiController;
 use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
+use App\Http\Controllers\Customer\ReportController as CustomerReportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -174,6 +175,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::delete('orders/bulk-delete', [OrderController::class, 'bulkDestroy'])->name('orders.bulkDestroy'); // <-- Bulk delete, HARUS di atas route destroy single di bawah
     Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy'); // <-- Rute Hapus Pesanan (single)
+    Route::get('/orders/{order}/lapor', [CustomerReportController::class, 'create'])->name('orders.lapor');
+    Route::post('/orders/{order}/lapor', [CustomerReportController::class, 'store'])->name('orders.lapor.store');
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
@@ -265,6 +268,11 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     // Pesanan & Pembayaran
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+    
+    // Rute untuk Lapor Vendor oleh Customer (Diperbaiki agar sesuai dengan URL /app/orders/{order}/lapor)
+    Route::get('/orders/{order}/lapor', [CustomerReportController::class, 'create'])->name('orders.lapor');
+    Route::post('/orders/{order}/lapor', [CustomerReportController::class, 'store'])->name('orders.lapor.store');
+
     Route::get('/orders/{order}/sukses', [CustomerOrderController::class, 'success'])->name('orders.success');
     Route::get('/orders/{order}/pembayaran', [CustomerOrderController::class, 'pembayaran'])->name('orders.pembayaran');
     Route::get('/orders/{order}/bukti-pembayaran', [CustomerOrderController::class, 'buktiPembayaran'])->name('orders.buktiPembayaran');
