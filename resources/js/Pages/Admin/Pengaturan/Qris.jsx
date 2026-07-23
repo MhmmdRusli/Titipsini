@@ -66,7 +66,7 @@ export default function Qris() {
             <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
                 <div className="rounded-xl border border-gray-200 bg-white p-6">
                     <div className="mb-6 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-teal-100 text-brand-teal-700">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 text-green-700">
                             <QrCode size={20} />
                         </div>
                         <div>
@@ -105,7 +105,7 @@ export default function Qris() {
                                         <button
                                             type="button"
                                             onClick={() => fileInput.current?.click()}
-                                            className="font-medium text-brand-teal-700 hover:underline"
+                                            className="font-medium text-green-700 hover:underline"
                                         >
                                             pilih file
                                         </button>
@@ -139,12 +139,12 @@ export default function Qris() {
                             <button
                                 type="submit"
                                 disabled={processing || !data.qris_image}
-                                className="rounded-lg bg-brand-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-teal-800 disabled:opacity-50"
+                                className="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-50"
                             >
                                 Simpan QRIS
                             </button>
                             {recentlySuccessful && (
-                                <span className="text-sm text-brand-teal-700">QRIS berhasil disimpan</span>
+                                <span className="text-sm text-green-700">QRIS berhasil disimpan</span>
                             )}
                         </div>
                     </form>
