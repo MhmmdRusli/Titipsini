@@ -166,6 +166,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->parameters(['berita' => 'berita']);
 
     Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
+    Route::resource('faq', \App\Http\Controllers\Admin\FaqController::class)->except(['show', 'create', 'edit']);
 
     // Rute Pesanan (Orders)
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
