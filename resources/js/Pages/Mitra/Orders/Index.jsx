@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Package, Car, Building2, MapPin, Clock, ChevronRight } from 'lucide-react';
+import { Package, Car, Building2, MapPin, Clock, ChevronRight, ClipboardList } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const TABS = [
@@ -19,7 +19,7 @@ const SERVICE_ICON = { barang: Package, kendaraan: Car, bangunan: Building2 };
 
 function goTo(tab, kategori) {
     router.get(
-        route('partner.orders.index'),
+        route('mitra.orders.index'),
         { tab, kategori: kategori ?? undefined },
         { preserveState: true, preserveScroll: true, replace: true }
     );
@@ -27,20 +27,29 @@ function goTo(tab, kategori) {
 
 export default function Index({ orders, counts, filters }) {
     return (
-        <MitraLayout title="Pesanan">
-            <Head title="Pesanan" />
+        <MitraLayout title="">
+            <Head title="Pesanan Mitra" />
+
+            {/* Header Hijau Melengkung */}
+            <div className="bg-[#15803d] dark:bg-green-700 px-4 pt-3 pb-6 rounded-b-[32px] shadow-sm">
+                <div className="flex items-center justify-between">
+                    <h1 className="flex items-center gap-1.5 text-base font-bold text-white">
+                        Daftar Pesanan <ClipboardList size={18} />
+                    </h1>
+                </div>
+            </div>
 
             <div className="px-4 py-4">
                 {/* Tabs status */}
-                <div className="flex gap-1 rounded-xl bg-gray-100 p-1">
+                <div className="flex gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-gray-800 shadow-sm">
                     {TABS.map((t) => (
                         <button
                             key={t.key}
                             onClick={() => goTo(t.key, filters.kategori)}
-                            className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
+                            className={`flex-1 rounded-xl py-2 text-xs font-semibold transition ${
                                 filters.tab === t.key
-                                    ? 'bg-white text-green-700 shadow-sm'
-                                    : 'text-gray-500'
+                                    ? 'bg-white text-[#15803d] shadow-sm dark:bg-gray-700 dark:text-[#4ade80]'
+                                    : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
                             }`}
                         >
                             {t.label} ({counts[t.key] ?? 0})
@@ -49,15 +58,15 @@ export default function Index({ orders, counts, filters }) {
                 </div>
 
                 {/* Filter kategori */}
-                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
                     {KATEGORI.map((k) => (
                         <button
-                            key={k.label}
+                            key={k.label ?? 'semua'}
                             onClick={() => goTo(filters.tab, k.key)}
-                            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${
+                            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
                                 filters.kategori === k.key
-                                    ? 'border-green-600 bg-green-50 text-green-700'
-                                    : 'border-gray-200 text-gray-500'
+                                    ? 'border-[#15803d] bg-green-50 text-[#15803d] dark:border-green-700 dark:bg-green-950/40 dark:text-[#4ade80]'
+                                    : 'border-gray-200 text-gray-500 bg-white dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400'
                             }`}
                         >
                             {k.icon && <k.icon size={13} />}
@@ -69,7 +78,7 @@ export default function Index({ orders, counts, filters }) {
                 {/* List pesanan */}
                 <div className="mt-4 space-y-3">
                     {orders.data.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center text-sm text-gray-400">
+                        <div className="rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center text-sm text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 shadow-sm">
                             Belum ada pesanan di kategori ini.
                         </div>
                     ) : (
@@ -79,41 +88,43 @@ export default function Index({ orders, counts, filters }) {
                                 <Link
                                     key={order.id}
                                     href={route('mitra.orders.show', order.id)}
-                                    className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+                                    className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700/50"
                                 >
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600">
-                                        <Icon size={18} />
+                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
+                                        <Icon size={20} strokeWidth={1.75} />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">{order.order_number}</p>
-                                        <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-gray-500">
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{order.order_number}</p>
+                                        <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-gray-500 dark:text-gray-400">
                                             <MapPin size={12} className="shrink-0" />
                                             {order.address ?? '-'}
                                         </p>
-                                        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                                        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                                             <Clock size={12} className="shrink-0" />
                                             {order.duration ?? '-'}
                                         </p>
                                     </div>
-                                    <ChevronRight size={16} className="shrink-0 text-gray-300" />
+                                    <ChevronRight size={16} className="shrink-0 text-gray-300 dark:text-gray-600" />
                                 </Link>
                             );
                         })
                     )}
                 </div>
 
-                {/* Pagination sederhana */}
+                {/* Pagination */}
                 {orders.links?.length > 3 && (
-                    <div className="mt-4 flex flex-wrap justify-center gap-1">
+                    <div className="mt-5 flex flex-wrap justify-center gap-1">
                         {orders.links.map((link, i) => (
                             <button
                                 key={i}
                                 disabled={!link.url}
                                 onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
-                                className={`rounded-lg px-3 py-1.5 text-xs ${
-                                    link.active ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500'
-                                } ${!link.url ? 'opacity-40' : ''}`}
+                                className={`rounded-xl px-3 py-1.5 text-xs font-medium transition ${
+                                    link.active
+                                        ? 'bg-[#15803d] text-white dark:bg-green-700'
+                                        : 'bg-white text-gray-600 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300'
+                                } ${!link.url ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-80'}`}
                             />
                         ))}
                     </div>
