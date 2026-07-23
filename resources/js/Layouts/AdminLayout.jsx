@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import {
     MapPin, LayoutDashboard, CircleUserRound, Users, Handshake,
     Package, BarChart3, Settings, LogOut, ChevronDown, Wallet, Newspaper,
+    Clock, Calendar, Sun, Cloud, CloudRain, CloudFog, CloudLightning, CloudSnow,
 } from 'lucide-react';
 
 const navItems = [
@@ -36,9 +37,70 @@ const navItems = [
     },
 ];
 
+// Koordinat default: Yogyakarta (kota contoh yang dipakai di seluruh aplikasi).
+// Ganti 2 angka ini kalau mau kota lain.
+const WEATHER_LAT = -7.7956;
+const WEATHER_LON = 110.3695;
+
+// Pemetaan kode cuaca WMO (dipakai Open-Meteo) ke label & ikon Bahasa Indonesia
+function weatherFromCode(code) {
+    if (code === 0) return { label: 'Cerah', Icon: Sun };
+    if ([1, 2, 3].includes(code)) return { label: 'Berawan', Icon: Cloud };
+    if ([45, 48].includes(code)) return { label: 'Berkabut', Icon: CloudFog };
+    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { label: 'Hujan', Icon: CloudRain };
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return { label: 'Bersalju', Icon: CloudSnow };
+    if ([95, 96, 99].includes(code)) return { label: 'Badai Petir', Icon: CloudLightning };
+    return { label: 'Cerah Berawan', Icon: Cloud };
+}
+
+function useJamTanggal() {
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const tanggal = now
+        .toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    return { jam, tanggal };
+}
+
+function useCuaca() {
+    const [cuaca, setCuaca] = useState(null);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current_weather=true`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (!cancelled && data?.current_weather) {
+                    setCuaca({
+                        suhu: Math.round(data.current_weather.temperature),
+                        ...weatherFromCode(data.current_weather.weathercode),
+                    });
+                }
+            })
+            .catch(() => {
+                // Diamkan saja kalau gagal fetch (misal offline) — jam & tanggal tetap tampil
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    return cuaca;
+}
+
 export default function AdminLayout({ children, title }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
+    const { jam, tanggal } = useJamTanggal();
+    const cuaca = useCuaca();
 
     // Auto-expand a parent item if the current URL is inside one of its children
     const [openMenu, setOpenMenu] = useState(() => {
@@ -143,7 +205,25 @@ export default function AdminLayout({ children, title }) {
 
             <div className="flex-1 flex flex-col min-w-0">
                 <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
-                    <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+                    <div>
+                        <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+                        <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                            <span className="flex items-center gap-1">
+                                <Calendar size={13} className="text-gray-400" />
+                                {tanggal}
+                            </span>
+                            <span className="flex items-center gap-1 tabular-nums">
+                                <Clock size={13} className="text-gray-400" />
+                                {jam}
+                            </span>
+                            {cuaca && (
+                                <span className="flex items-center gap-1">
+                                    <cuaca.Icon size={13} className="text-gray-400" />
+                                    {cuaca.label}, {cuaca.suhu}&deg;C
+                                </span>
+                            )}
+                        </div>
+                    </div>
                     <div className="flex items-center gap-3 text-sm text-gray-600">
                         <span>{user?.name ?? 'Admin'}</span>
                         {user?.avatar ? (
