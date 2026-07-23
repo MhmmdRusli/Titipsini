@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { PackageCheck, FileText, ShieldCheck, ChevronRight } from 'lucide-react';
+import { FileText, ShieldCheck, ChevronRight } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 export default function Tentang({ version }) {
@@ -9,8 +9,12 @@ export default function Tentang({ version }) {
 
             <div className="px-4 py-6">
                 <div className="flex flex-col items-center text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#15803d] dark:bg-[#22c55e] text-white shadow-sm">
-                        <PackageCheck size={28} />
+                    <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                        <img 
+                            src="/images/logo-titipsini.png" 
+                            alt="Logo Titipsini" 
+                            className="h-full w-full object-cover" 
+                        />
                     </div>
                     <h2 className="mt-3 text-base font-bold text-gray-900 dark:text-gray-100">Titipsini.Com</h2>
                     <p className="text-xs text-gray-400 dark:text-gray-500">Versi {version}</p>

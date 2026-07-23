@@ -82,13 +82,13 @@ export default function FormBarang({ hargaMulai = 100000, serviceId }) {
                         <button
                             type="button"
                             onClick={() => update('pickup', !form.pickup)}
-                            className={`relative h-6 w-11 shrink-0 rounded-full transition ${
-                                form.pickup ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                                form.pickup ? 'bg-[#15803d] dark:bg-[#22c55e]' : 'bg-gray-200 dark:bg-gray-700'
                             }`}
                         >
                             <span
-                                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                                    form.pickup ? 'translate-x-5' : 'translate-x-0.5'
+                                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out ${
+                                    form.pickup ? 'translate-x-6' : 'translate-x-0.5'
                                 }`}
                             />
                         </button>
@@ -120,7 +120,7 @@ export default function FormBarang({ hargaMulai = 100000, serviceId }) {
 
                     <button
                         type="submit"
-                        className="w-full rounded-xl bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98]"
+                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98]"
                     >
                         Lanjutkan
                     </button>

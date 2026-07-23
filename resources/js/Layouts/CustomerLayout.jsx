@@ -9,17 +9,11 @@ const navItems = [
     { label: 'Profil', href: '/app/profile', icon: User },
 ];
 
-// Tambahan prop:
-// - backHref: kalau diisi, header berubah jadi "< Judul" (dipakai untuk sub-halaman
-//   seperti /app/services), bukan header logo + avatar biasa.
 export default function CustomerLayout({ children, title, backHref }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
     const [menuOpen, setMenuOpen] = useState(false);
 
-    // Sinkronkan class 'dark' di <html> setiap kali layout ini dimuat (tiap
-    // pindah halaman), bukan cuma pas toggle di halaman Profil diklik.
-    // Jadi preferensi dark mode tetap konsisten di halaman manapun.
     useEffect(() => {
         const isDark = typeof window !== 'undefined' && localStorage.getItem('titipsini_theme') === 'dark';
         document.documentElement.classList.toggle('dark', isDark);
@@ -27,8 +21,8 @@ export default function CustomerLayout({ children, title, backHref }) {
 
     return (
         <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">
-            <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-gray-50 dark:bg-gray-900 sm:h-[850px] sm:shadow-xl">
-                <header className="z-10 shrink-0 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+            <div className="relative mx-auto flex min-h-dvh w-full max-w-[430px] flex-col overflow-y-auto bg-gray-50 dark:bg-gray-900 sm:h-[850px] sm:shadow-xl">
+                <header className="sticky top-0 z-20 shrink-0 border-b border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95">
                     <div
                         className="flex items-center gap-3 px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
@@ -105,7 +99,8 @@ export default function CustomerLayout({ children, title, backHref }) {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto pb-20">
+                {/* Diubah menjadi pb-20 agar jarak bawah konten langsung pas di atas navbar */}
+                <main className="flex-1 pb-20">
                     {!backHref && title && (
                         <div className="px-4 pt-4">
                             <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h1>
@@ -115,7 +110,7 @@ export default function CustomerLayout({ children, title, backHref }) {
                 </main>
 
                 <nav
-                    className="absolute inset-x-0 bottom-0 z-10 flex justify-around border-t border-gray-200 bg-white py-2 dark:border-gray-800 dark:bg-gray-900"
+                    className="fixed bottom-0 left-1/2 -translate-x-1/2 z-30 flex w-full max-w-[430px] justify-around border-t border-gray-200 bg-white/95 py-2 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95"
                     style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
                 >
                     {navItems.map(({ label, href, icon: Icon }) => {
