@@ -76,14 +76,15 @@ export default function NotifikasiIndex({ notifikasi }) {
                                         </span>
                                     </div>
                                 )}
-                                {/* Setiap item dibungkus card kotak dengan border dan shadow tipis */}
+                                
                                 <button
                                     type="button"
                                     onClick={() => handleClick(item)}
                                     className="flex w-full items-start gap-3 rounded-2xl border border-gray-100 bg-white p-3.5 text-left shadow-sm transition hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700/50"
                                 >
-                                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${config.bg}`}>
-                                        <Icon size={18} className={config.color} />
+                                    {/* Kotak ikon diubah menjadi rounded-2xl agar sesuai dengan gaya card di bawahnya */}
+                                    <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${config.bg}`}>
+                                        <Icon size={20} className={config.color} />
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{item.judul}</p>
