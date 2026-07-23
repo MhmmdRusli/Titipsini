@@ -58,7 +58,7 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'phone' => ['required', 'string', 'max:20', 'unique:users,phone,'.$user->id],
-            'gender' => ['required', 'in:L,P'],
+            'gender' => ['required', 'in:male,female,L,P'],
             'birth_date' => ['required', 'date'],
             'avatar' => ['nullable', 'image', 'max:2048'],
             'cover_photo' => ['nullable', 'image', 'max:4096'],

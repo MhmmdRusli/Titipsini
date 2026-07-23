@@ -102,14 +102,16 @@ export default function ProfileEdit({ partner }) {
                     />
                 </div>
 
+                {/* Radio Button Gender Disesuaikan ke male & female */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
                     <div className="mt-1 flex gap-4">
                         <label className="flex items-center gap-1.5 text-sm text-gray-700">
                             <input
                                 type="radio"
-                                checked={data.gender === 'L'}
-                                onChange={() => setData('gender', 'L')}
+                                name="gender"
+                                checked={data.gender === 'male'}
+                                onChange={() => setData('gender', 'male')}
                                 className="text-green-600 focus:ring-green-500"
                             />
                             Pria
@@ -117,8 +119,9 @@ export default function ProfileEdit({ partner }) {
                         <label className="flex items-center gap-1.5 text-sm text-gray-700">
                             <input
                                 type="radio"
-                                checked={data.gender === 'P'}
-                                onChange={() => setData('gender', 'P')}
+                                name="gender"
+                                checked={data.gender === 'female'}
+                                onChange={() => setData('gender', 'female')}
                                 className="text-green-600 focus:ring-green-500"
                             />
                             Wanita
