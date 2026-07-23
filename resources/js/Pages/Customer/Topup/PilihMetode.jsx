@@ -59,15 +59,15 @@ export default function PilihMetode() {
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 px-4 py-4">
                 <div>
-                    <p className="mb-2 text-sm font-semibold text-gray-900">Pilih Metode Pembayaran</p>
+                    <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Pilih Metode Pembayaran</p>
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             type="button"
                             onClick={() => selectMetode('transfer_bank')}
-                            className={`flex flex-col items-center gap-2 rounded-xl border py-4 text-sm font-medium ${
+                            className={`flex flex-col items-center gap-2 rounded-xl border py-4 text-sm font-medium transition ${
                                 data.metode_pembayaran === 'transfer_bank'
-                                    ? 'border-green-600 bg-green-50 text-green-700'
-                                    : 'border-gray-200 text-gray-600'
+                                    ? 'border-[#15803d] bg-green-50 dark:bg-green-950/40 text-[#15803d] dark:text-[#4ade80] dark:border-[#22c55e]'
+                                    : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                             }`}
                         >
                             <Building2 size={20} />
@@ -76,10 +76,10 @@ export default function PilihMetode() {
                         <button
                             type="button"
                             onClick={() => selectMetode('e_wallet')}
-                            className={`flex flex-col items-center gap-2 rounded-xl border py-4 text-sm font-medium ${
+                            className={`flex flex-col items-center gap-2 rounded-xl border py-4 text-sm font-medium transition ${
                                 data.metode_pembayaran === 'e_wallet'
-                                    ? 'border-green-600 bg-green-50 text-green-700'
-                                    : 'border-gray-200 text-gray-600'
+                                    ? 'border-[#15803d] bg-green-50 dark:bg-green-950/40 text-[#15803d] dark:text-[#4ade80] dark:border-[#22c55e]'
+                                    : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                             }`}
                         >
                             <Wallet size={20} />
@@ -93,13 +93,13 @@ export default function PilihMetode() {
 
                 {data.metode_pembayaran && (
                     <div>
-                        <label className="mb-1.5 block text-xs font-medium text-gray-600">
+                        <label className="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">
                             Pilih {data.metode_pembayaran === 'transfer_bank' ? 'Bank' : 'E-Wallet'}
                         </label>
                         <select
                             value={data.channel}
                             onChange={(e) => setData('channel', e.target.value)}
-                            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-gray-800 dark:text-gray-100 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:focus:border-[#22c55e] dark:focus:ring-[#22c55e]"
                         >
                             <option value="">Pilih salah satu</option>
                             {channels.map((c) => (
@@ -113,11 +113,11 @@ export default function PilihMetode() {
                 )}
 
                 <div>
-                    <p className="mb-2 text-sm font-semibold text-gray-900">Nominal Top Up</p>
+                    <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Nominal Top Up</p>
                     <button
                         type="button"
                         onClick={openNumpad}
-                        className="w-full rounded-xl border border-gray-200 bg-white py-4 text-center text-2xl font-bold text-gray-900"
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-4 text-center text-2xl font-bold text-gray-900 dark:text-gray-100 shadow-sm transition hover:border-gray-300 dark:hover:border-gray-600"
                     >
                         {formatRupiah(data.nominal)}
                     </button>
@@ -129,10 +129,10 @@ export default function PilihMetode() {
                                 key={n}
                                 type="button"
                                 onClick={() => setData('nominal', n)}
-                                className={`rounded-lg border py-2.5 text-sm font-medium ${
+                                className={`rounded-lg border py-2.5 text-sm font-medium transition ${
                                     data.nominal === n
-                                        ? 'border-green-600 bg-green-50 text-green-700'
-                                        : 'border-gray-200 text-gray-600'
+                                        ? 'border-[#15803d] bg-green-50 dark:bg-green-950/40 text-[#15803d] dark:text-[#4ade80] dark:border-[#22c55e]'
+                                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                                 }`}
                             >
                                 {formatRupiah(n)}
@@ -144,7 +144,7 @@ export default function PilihMetode() {
                 <button
                     type="submit"
                     disabled={processing || !data.metode_pembayaran || !data.channel || !data.nominal}
-                    className="mt-2 w-full rounded-xl bg-green-600 py-3.5 text-sm font-bold text-white disabled:opacity-40"
+                    className="mt-2 w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-40"
                 >
                     Lanjutkan
                 </button>
@@ -152,20 +152,20 @@ export default function PilihMetode() {
 
             {/* Numpad modal - input nominal manual */}
             {numpadOpen && (
-                <div className="absolute inset-0 z-20 flex items-end bg-black/40">
-                    <div className="w-full rounded-t-2xl bg-white p-5 pb-8">
+                <div className="absolute inset-0 z-20 flex items-end bg-black/50 backdrop-blur-xs">
+                    <div className="w-full rounded-t-2xl bg-white dark:bg-gray-800 p-5 pb-8 shadow-2xl">
                         <div className="mb-3 flex items-center justify-between">
-                            <h2 className="text-base font-bold text-gray-900">Nominal Top Up</h2>
-                            <button onClick={() => setNumpadOpen(false)} className="text-gray-400 hover:text-gray-600">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Nominal Top Up</h2>
+                            <button onClick={() => setNumpadOpen(false)} className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition">
                                 <X size={18} />
                             </button>
                         </div>
 
-                        <p className="text-center text-xs text-gray-500">Masukkan Jumlah Top Up</p>
-                        <p className="mt-1 text-center text-3xl font-bold text-gray-900">
+                        <p className="text-center text-xs text-gray-500 dark:text-gray-400">Masukkan Jumlah Top Up</p>
+                        <p className="mt-1 text-center text-3xl font-bold text-gray-900 dark:text-gray-100">
                             {formatRupiah(parseInt(numpadValue || '0', 10))}
                         </p>
-                        <p className="mt-1 text-center text-[11px] text-green-600">Min. Rp 10.000</p>
+                        <p className="mt-1 text-center text-[11px] text-[#15803d] dark:text-[#4ade80]">Min. Rp 10.000</p>
 
                         <div className="mt-5 grid grid-cols-3 gap-2">
                             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'back'].map((key, i) => (
@@ -174,7 +174,7 @@ export default function PilihMetode() {
                                     type="button"
                                     disabled={key === ''}
                                     onClick={() => key && pressDigit(key)}
-                                    className="rounded-lg py-3.5 text-lg font-semibold text-gray-800 hover:bg-gray-100 disabled:opacity-0"
+                                    className="rounded-lg py-3.5 text-lg font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition disabled:opacity-0"
                                 >
                                     {key === 'back' ? '⌫' : key}
                                 </button>
@@ -185,7 +185,7 @@ export default function PilihMetode() {
                             type="button"
                             onClick={confirmNumpad}
                             disabled={parseInt(numpadValue || '0', 10) < 10000}
-                            className="mt-4 w-full rounded-xl bg-green-600 py-3 text-sm font-bold text-white disabled:opacity-40"
+                            className="mt-4 w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3 text-sm font-bold text-white shadow-sm transition disabled:opacity-40"
                         >
                             Lanjutkan
                         </button>
