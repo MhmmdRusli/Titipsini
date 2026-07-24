@@ -10,7 +10,9 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID').format(value ?? 0);
 }
 
-export default function PenarikanCreate({ saldo, rekening }) {
+export default function PenarikanCreate({ saldo = 0, rekening }) {
+    const saldoNum = Number(saldo || 0);
+
     const [step, setStep] = useState('jumlah'); // 'jumlah' | 'pin'
     const [jumlah, setJumlah] = useState('');
     const [pin, setPin] = useState('');
@@ -18,7 +20,7 @@ export default function PenarikanCreate({ saldo, rekening }) {
     const [error, setError] = useState('');
 
     const jumlahNumber = Number(jumlah) || 0;
-    const isValidJumlah = jumlahNumber >= 100000 && jumlahNumber <= saldo && !!rekening;
+    const isValidJumlah = jumlahNumber >= 100000 && jumlahNumber <= saldoNum && !!rekening;
 
     function pickPreset(value) {
         setJumlah(String(value));
@@ -51,8 +53,10 @@ export default function PenarikanCreate({ saldo, rekening }) {
     function submit(finalPin) {
         setProcessing(true);
         setError('');
+        
+        // Sesuaikan endpoint ini dengan route web.php Anda (misal: /mitra/penarikan)
         router.post(
-            '/mitra/pendapatan/penarikan',
+            '/mitra/penarikan',
             { jumlah: jumlahNumber, pin: finalPin },
             {
                 onError: (errors) => {
@@ -87,8 +91,9 @@ export default function PenarikanCreate({ saldo, rekening }) {
                             {Array.from({ length: PIN_LENGTH }).map((_, i) => (
                                 <span
                                     key={i}
-                                    className={`h-3 w-3 rounded-full border-2 ${i < pin.length ? 'border-green-600 bg-green-600' : 'border-gray-300 bg-transparent'
-                                        }`}
+                                    className={`h-3 w-3 rounded-full border-2 ${
+                                        i < pin.length ? 'border-green-600 bg-green-600' : 'border-gray-300 bg-transparent'
+                                    }`}
                                 />
                             ))}
                         </div>
@@ -148,7 +153,7 @@ export default function PenarikanCreate({ saldo, rekening }) {
                 {/* Saldo aktif */}
                 <div className="rounded-xl bg-green-50 px-4 py-3">
                     <p className="text-[11px] text-green-700">Saldo aktif</p>
-                    <p className="text-lg font-extrabold text-green-800">Rp{formatRupiah(saldo)}</p>
+                    <p className="text-lg font-extrabold text-green-800">Rp{formatRupiah(saldoNum)}</p>
                 </div>
 
                 {/* Nominal cepat */}
@@ -159,10 +164,11 @@ export default function PenarikanCreate({ saldo, rekening }) {
                             key={value}
                             type="button"
                             onClick={() => pickPreset(value)}
-                            className={`rounded-xl border py-2.5 text-xs font-semibold transition ${jumlahNumber === value
+                            className={`rounded-xl border py-2.5 text-xs font-semibold transition ${
+                                jumlahNumber === value
                                     ? 'border-green-600 bg-green-600 text-white'
                                     : 'border-gray-200 bg-white text-gray-700'
-                                }`}
+                            }`}
                         >
                             Rp{formatRupiah(value)}
                         </button>
@@ -185,7 +191,7 @@ export default function PenarikanCreate({ saldo, rekening }) {
                 {jumlahNumber > 0 && jumlahNumber < 100000 && (
                     <p className="mt-1.5 text-xs text-red-500">Minimal penarikan Rp100.000.</p>
                 )}
-                {jumlahNumber > saldo && (
+                {jumlahNumber > saldoNum && (
                     <p className="mt-1.5 text-xs text-red-500">Saldo kamu tidak mencukupi.</p>
                 )}
 

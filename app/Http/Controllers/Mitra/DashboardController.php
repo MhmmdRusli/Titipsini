@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mitra;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Penarikan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -20,13 +21,13 @@ class DashboardController extends Controller
             ->whereNotIn('status', ['selesai', 'completed', 'dibatalkan', 'cancelled']);
 
         $pesananBarang = (clone $pesananAktifQuery)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('service_type', 'barang')
                   ->orWhere('service_type', 'titip_barang');
             })->count();
 
         $pesananKendaraan = (clone $pesananAktifQuery)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('service_type', 'kendaraan')
                   ->orWhere('service_type', 'titip_kendaraan');
             })->count();
@@ -39,18 +40,26 @@ class DashboardController extends Controller
             ->whereIn('status', ['selesai', 'completed', 'success'])
             ->sum('total_price');
 
-        // Ambil nilai kotor (dari kolom saldo user atau hasil kalkulasi pesanan)
+        // Nilai kotor (menggunakan saldo user jika ada, atau kalkulasi pesanan)
         $grossBalance = $partner->saldo > 0 ? $partner->saldo : $totalPendapatanKotor;
 
-        // Potong komisi 10% -> (430.000 * 90%) = 387.000
-        $saldoTampil = $grossBalance * ((100 - $persenKomisi) / 100);
+        // Potong komisi 10%
+        $saldoBersih = $grossBalance * ((100 - $persenKomisi) / 100);
+
+        // Kurangi dengan total penarikan yang pernah/sedang dilakukan (selain yang ditolak)
+        $totalPenarikan = Penarikan::where('user_id', $partner->id)
+            ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal'])
+            ->sum('jumlah');    
+
+        // Hasil akhir saldo yang akan ditampilkan di Beranda
+        $saldoTampil = $partner->saldoMitra();
 
         // 3. Ambil Kategori Layanan Aktif
         $layananKategori = $partner->services()
             ->where('is_active', true)
             ->distinct()
             ->pluck('kategori')
-            ->map(fn($item) => strtolower($item))
+            ->map(fn ($item) => strtolower($item))
             ->values()
             ->all();
 

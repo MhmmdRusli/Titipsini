@@ -27,10 +27,14 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['required', 'string', 'max:20', 'unique:users,phone'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'pin' => ['required', 'digits:6', 'confirmed'],
         ], [
             'email.unique' => 'Email ini sudah terdaftar. Coba masuk atau gunakan email lain.',
             'phone.unique' => 'Nomor telepon ini sudah terdaftar. Coba masuk atau gunakan nomor lain.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+            'pin.required' => 'PIN wajib diisi.',
+            'pin.digits' => 'PIN harus terdiri dari 6 angka.',
+            'pin.confirmed' => 'Konfirmasi PIN tidak cocok.',
         ]);
 
         $user = User::create([
@@ -38,6 +42,7 @@ class RegisteredUserController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'],
             'password' => Hash::make($validated['password']),
+            'pin' => Hash::make($validated['pin']),
             'role' => 'partner',
         ]);
 

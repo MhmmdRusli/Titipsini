@@ -31,6 +31,12 @@ class PenarikanController extends Controller
 
     /**
      * Baru di sini saldo mitra benar-benar dipotong dan mutasi dicatat.
+     *
+     * PENTING: saldo mitra TIDAK disimpan di kolom `users.saldo` (kolom itu
+     * dipakai untuk saldo top-up Customer). Saldo mitra selalu dihitung
+     * dinamis lewat User::saldoMitra() — dari total pesanan selesai
+     * dikurangi komisi platform, dikurangi total penarikan yang belum ditolak.
+     * Jangan pernah balik ke `$user->saldo` untuk konteks mitra.
      */
     public function approve(Penarikan $penarikan): RedirectResponse
     {
@@ -38,15 +44,28 @@ class PenarikanController extends Controller
 
         DB::transaction(function () use ($penarikan) {
             $user = $penarikan->user;
+            $user->refresh();
 
-            abort_if($user->saldo < $penarikan->jumlah, 422, 'Saldo mitra tidak mencukupi lagi.');
+            $jumlahPenarikan = (int) preg_replace('/[^0-9]/', '', (string) $penarikan->jumlah);
 
-            $user->decrement('saldo', $penarikan->jumlah);
+            // Hitung saldo mitra secara dinamis (sama persis dengan logika
+            // yang dipakai di Mitra\PenarikanController & Mitra\DashboardController)
+            $saldoUser = $user->saldoMitra();
+
+            if ($saldoUser < $jumlahPenarikan) {
+                abort(422, "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoUser, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")");
+            }
+
+            // TIDAK decrement kolom `saldo` di sini. Saldo dinamis otomatis
+            // "berkurang" begitu status Penarikan bukan 'ditolak' — termasuk
+            // saat masih 'pending', jadi begitu penarikan diajukan, saldo
+            // yang tampil di Dashboard Mitra sudah otomatis terpotong.
+            // Baris `decrement('saldo', ...)` LAMA sengaja dihapus.
 
             SaldoMutasi::create([
                 'user_id' => $user->id,
                 'type' => 'penarikan',
-                'jumlah' => $penarikan->jumlah,
+                'jumlah' => $jumlahPenarikan,
                 'deskripsi' => 'Penarikan ke '.$penarikan->nama_bank.' •••• '.substr($penarikan->nomor_rekening, -4),
                 'reference_type' => Penarikan::class,
                 'reference_id' => $penarikan->id,

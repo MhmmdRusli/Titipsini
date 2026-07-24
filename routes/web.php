@@ -1,55 +1,55 @@
 <?php
 
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
-use App\Http\Controllers\Admin\Auth\PasswordResetLinkController as AdminPasswordResetLinkController;
 use App\Http\Controllers\Admin\Auth\NewPasswordController as AdminNewPasswordController;
-use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
-use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
-use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
-use App\Http\Controllers\Admin\PengaturanController;
+use App\Http\Controllers\Admin\Auth\PasswordResetLinkController as AdminPasswordResetLinkController;
+use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
+use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\ReportController;
-use App\Http\Controllers\Customer\LengkapiDataController;
-use App\Http\Controllers\WilayahController;
-use App\Http\Controllers\Customer\PinController;
+use App\Http\Controllers\Admin\TopupVerifikasiController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Customer\ServiceController;
-use App\Http\Controllers\Customer\TopUpController;
-use App\Http\Controllers\Mitra\OnboardingController as MitraOnboardingController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Customer\BantuanController;
 use App\Http\Controllers\Customer\BeritaController;
+use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\Customer\LengkapiDataController;
 use App\Http\Controllers\Customer\NotifikasiController;
 use App\Http\Controllers\Customer\NotificationSettingController;
-use App\Http\Controllers\Customer\TentangController;
-use App\Http\Controllers\Customer\BantuanController;
+use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
+use App\Http\Controllers\Customer\PinController;
+use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
+use App\Http\Controllers\Customer\ReportController as CustomerReportController;
 use App\Http\Controllers\Customer\SecurityController;
-use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
-use App\Http\Controllers\Mitra\OrderController as MitraOrderController;
-use App\Http\Controllers\Mitra\NotifikasiController as MitraNotifikasiController;
-use App\Http\Controllers\Mitra\ProfileController as MitraProfileController;
-use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
+use App\Http\Controllers\Customer\ServiceController;
+use App\Http\Controllers\Customer\TentangController;
+use App\Http\Controllers\Customer\TopUpController;
 use App\Http\Controllers\Mitra\AlamatController;
+use App\Http\Controllers\Mitra\Auth\AuthenticatedSessionController as MitraAuthenticatedSessionController;
+use App\Http\Controllers\Mitra\Auth\EmailVerificationNotificationController as MitraEmailVerificationNotificationController;
+use App\Http\Controllers\Mitra\Auth\EmailVerificationPromptController as MitraEmailVerificationPromptController;
+use App\Http\Controllers\Mitra\Auth\NewPasswordController as MitraNewPasswordController;
+use App\Http\Controllers\Mitra\Auth\PasswordResetLinkController as MitraPasswordResetLinkController;
+use App\Http\Controllers\Mitra\Auth\RegisteredUserController as MitraRegisteredUserController;
+use App\Http\Controllers\Mitra\Auth\VerifyEmailController as MitraVerifyEmailController;
+use App\Http\Controllers\Mitra\BantuanController as MitraBantuanController;
+use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
 use App\Http\Controllers\Mitra\JamOperasionalController;
-use App\Http\Controllers\Mitra\RekeningController;
-use App\Http\Controllers\Mitra\PenarikanController;
 use App\Http\Controllers\Mitra\KeamananController;
 use App\Http\Controllers\Mitra\KebijakanPrivasiController;
-use App\Http\Controllers\Mitra\BantuanController as MitraBantuanController;
-use App\Http\Controllers\Mitra\Auth\RegisteredUserController as MitraRegisteredUserController;
-use App\Http\Controllers\Mitra\Auth\AuthenticatedSessionController as MitraAuthenticatedSessionController;
-use App\Http\Controllers\Mitra\Auth\PasswordResetLinkController as MitraPasswordResetLinkController;
-use App\Http\Controllers\Mitra\Auth\NewPasswordController as MitraNewPasswordController;
-use App\Http\Controllers\Mitra\Auth\EmailVerificationPromptController as MitraEmailVerificationPromptController;
-use App\Http\Controllers\Mitra\Auth\EmailVerificationNotificationController as MitraEmailVerificationNotificationController;
-use App\Http\Controllers\Mitra\Auth\VerifyEmailController as MitraVerifyEmailController;
-use App\Http\Controllers\Admin\TopupVerifikasiController;
-use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
-use App\Http\Controllers\Customer\ReportController as CustomerReportController;
+use App\Http\Controllers\Mitra\NotifikasiController as MitraNotifikasiController;
+use App\Http\Controllers\Mitra\OnboardingController as MitraOnboardingController;
+use App\Http\Controllers\Mitra\OrderController as MitraOrderController;
+use App\Http\Controllers\Mitra\PenarikanController;
+use App\Http\Controllers\Mitra\ProfileController as MitraProfileController;
+use App\Http\Controllers\Mitra\RekeningController;
+use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
+use App\Http\Controllers\WilayahController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -151,23 +151,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/partners/{partner}', [AdminPartnerController::class, 'show'])->name('partners.show');
     Route::patch('/partners/{partner}/status', [AdminPartnerController::class, 'updateStatus'])->name('partners.updateStatus');
 
-    // Rute untuk memulihkan akun mitra yang ditangguhkan dari panel admin
     Route::patch('/partners/{partner}/restore', [AdminPartnerController::class, 'restore'])->name('partners.restore');
-
-    // Bulk delete mitra - dipindah ke dalam grup ini (sebelumnya berdiri sendiri
-    // tanpa proteksi auth/role, dan pakai PartnerController::class tanpa alias
-    // sehingga class-nya tidak ketemu). Path juga diperbaiki (tanpa /admin di
-    // depan karena prefix 'admin' sudah otomatis dari grup ini).
     Route::post('/partners/bulk-destroy', [AdminPartnerController::class, 'bulkDestroy'])->name('partners.bulkDestroy');
 
     Route::get('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profil.update');
 
-    // Route Langsung /admin/komisi
     Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
     Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
 
-    // Pengaturan Admin
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
         Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
@@ -176,7 +168,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
 
-        // Pengaturan Komisi /admin/pengaturan/komisi
         Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
         Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
     });
@@ -188,7 +179,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
     Route::resource('faq', \App\Http\Controllers\Admin\FaqController::class)->except(['show', 'create', 'edit']);
 
-    // Rute Pesanan (Orders)
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::delete('orders/bulk-delete', [OrderController::class, 'bulkDestroy'])->name('orders.bulkDestroy');
@@ -205,7 +195,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('{report}/penangguhan', [ReportController::class, 'penangguhan'])->name('penangguhan');
     });
 
-    // Verifikasi Top Up manual
     Route::prefix('topup')->name('topup.')->group(function () {
         Route::get('/', [TopupVerifikasiController::class, 'index'])->name('index');
         Route::get('/{topup}', [TopupVerifikasiController::class, 'show'])->name('show');
@@ -213,7 +202,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/{topup}/reject', [TopupVerifikasiController::class, 'reject'])->name('reject');
     });
 
-    // Pendapatan Platform
     Route::get('pendapatan', [\App\Http\Controllers\Admin\PendapatanController::class, 'index'])->name('pendapatan.index');
     Route::prefix('penarikan')->name('penarikan.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\PenarikanController::class, 'index'])->name('index');
@@ -221,8 +209,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/{penarikan}/reject', [\App\Http\Controllers\Admin\PenarikanController::class, 'reject'])->name('reject');
     });
 });
-
-    
 
 /*
 |--------------------------------------------------------------------------
@@ -254,13 +240,21 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::get('/rekening', [RekeningController::class, 'edit'])->name('rekening.edit');
     Route::put('/rekening', [RekeningController::class, 'update'])->name('rekening.update');
 
+    // Route Penarikan Dana Mitra (diperbarui agar tidak 404)
     Route::get('/pendapatan/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');
     Route::get('/pendapatan/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
+    Route::get('/penarikan/tarik', [PenarikanController::class, 'create']); // alias GET
+    
     Route::post('/pendapatan/penarikan', [PenarikanController::class, 'store'])->name('penarikan.store');
+    Route::post('/penarikan', [PenarikanController::class, 'store']); // alias POST
+    
     Route::get('/pendapatan/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
+    Route::get('/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses']); // alias Sukses
 
     Route::get('/keamanan', [KeamananController::class, 'edit'])->name('keamanan.edit');
     Route::put('/keamanan', [KeamananController::class, 'update'])->name('keamanan.update');
+    Route::put('/keamanan/pin', [KeamananController::class, 'updatePin'])->name('keamanan.pin.update');
+    Route::put('/keamanan/pin/lupa', [KeamananController::class, 'lupaPin'])->name('keamanan.pin.lupa');
 
     Route::get('/kebijakan-privasi', [KebijakanPrivasiController::class, 'index'])->name('kebijakan-privasi.index');
 

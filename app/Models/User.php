@@ -114,5 +114,19 @@ public function topups(): HasMany
 {
     return $this->hasMany(Topup::class);
 }
+public function saldoMitra(): int
+{
+    $totalKotor = \App\Models\Order::where('partner_id', $this->id)
+        ->whereIn('status', ['selesai', 'completed', 'success'])
+        ->sum('total_price');
+
+    $saldoBersih = $totalKotor * 0.9; // komisi platform 10%
+
+    $totalPenarikan = \App\Models\Penarikan::where('user_id', $this->id)
+        ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal'])
+        ->sum('jumlah');
+
+    return (int) max(0, $saldoBersih - $totalPenarikan);
+}
 
 }
