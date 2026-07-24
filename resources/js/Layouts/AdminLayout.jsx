@@ -32,7 +32,6 @@ const navItems = [
         icon: Settings,
         children: [
             { label: 'Keamanan', href: '/admin/pengaturan/keamanan' },
-            { label: 'No Rekening', href: '/admin/pengaturan/rekening' },
             { label: 'Komisi', href: '/admin/pengaturan/komisi' },
             { label: 'Qris', href: '/admin/pengaturan/qris' },
         ],
