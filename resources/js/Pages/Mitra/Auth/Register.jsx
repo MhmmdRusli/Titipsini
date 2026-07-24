@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Eye, EyeOff, Handshake } from 'lucide-react';
+import { Eye, EyeOff, Handshake, Lock } from 'lucide-react';
 
 export default function Register() {
     const { data, setData, post, processing, errors } = useForm({
@@ -9,6 +9,8 @@ export default function Register() {
         phone: '',
         password: '',
         password_confirmation: '',
+        pin: '',
+        pin_confirmation: '',
     });
 
     const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +19,10 @@ export default function Register() {
     const submit = (e) => {
         e.preventDefault();
         post(route('mitra.register.store'));
+    };
+
+    const onPinChange = (field) => (e) => {
+        setData(field, e.target.value.replace(/\D/g, '').slice(0, 6));
     };
 
     return (
@@ -144,6 +150,58 @@ export default function Register() {
                         </div>
                         {errors.password_confirmation && (
                             <p className="mt-1 text-xs text-red-600">{errors.password_confirmation}</p>
+                        )}
+                    </div>
+
+                    <div className="border-t border-dashed border-gray-200 pt-4">
+                        <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
+                            <Lock size={14} className="text-green-600" />
+                            PIN Keamanan
+                        </p>
+                        <p className="mt-0.5 text-xs text-gray-500">
+                            PIN 6 digit ini dipakai untuk verifikasi penarikan saldo nanti. Jangan bagikan ke siapapun.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label htmlFor="pin" className="mb-1 block text-sm font-medium text-gray-700">
+                            PIN (6 digit)
+                        </label>
+                        <input
+                            id="pin"
+                            type="password"
+                            inputMode="numeric"
+                            maxLength={6}
+                            autoComplete="new-password"
+                            value={data.pin}
+                            onChange={onPinChange('pin')}
+                            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;"
+                            className={`block w-full rounded-lg border px-3 py-2.5 text-center text-lg tracking-[0.5em] text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                                errors.pin ? 'border-red-400' : 'border-gray-300'
+                            }`}
+                        />
+                        {errors.pin && <p className="mt-1 text-xs text-red-600">{errors.pin}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="pin_confirmation" className="mb-1 block text-sm font-medium text-gray-700">
+                            Konfirmasi PIN
+                        </label>
+                        <input
+                            id="pin_confirmation"
+                            type="password"
+                            inputMode="numeric"
+                            maxLength={6}
+                            autoComplete="new-password"
+                            value={data.pin_confirmation}
+                            onChange={onPinChange('pin_confirmation')}
+                            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;"
+                            className={`block w-full rounded-lg border px-3 py-2.5 text-center text-lg tracking-[0.5em] text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                                errors.pin_confirmation ? 'border-red-400' : 'border-gray-300'
+                            }`}
+                        />
+                        {errors.pin_confirmation && (
+                            <p className="mt-1 text-xs text-red-600">{errors.pin_confirmation}</p>
                         )}
                     </div>
 
