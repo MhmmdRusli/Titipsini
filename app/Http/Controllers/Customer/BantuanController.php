@@ -20,9 +20,9 @@ class BantuanController extends Controller
             // TODO: pindahkan ke tabel pengaturan/config kalau nanti admin
             // perlu bisa mengubah kontak ini tanpa deploy ulang kode.
             'kontak' => [
-                'whatsapp' => '628123456789',
+                'whatsapp' => '6285643333061',
                 'email' => 'support@titipsini.com',
-                'call_center' => '+62 21-2345678',
+                'call_center' => '+62 856-4333-3061',
             ],
         ]);
     }

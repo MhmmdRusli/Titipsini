@@ -3,9 +3,6 @@ import { useForm } from "@inertiajs/react";
 import { Pencil } from "lucide-react";
 import AdminLayout from "@/Layouts/AdminLayout";
 
-/**
- * Halaman "Ubah Profil" — Admin
- */
 export default function Profile({ admin }) {
   const { data, setData, post, processing, errors, clearErrors, reset, transform } = useForm({
     name: admin.name ?? "",
@@ -52,24 +49,21 @@ export default function Profile({ admin }) {
   }
 
   return (
-    <AdminLayout title="Ubah Profil">
-      <p className="text-sm text-gray-400 mb-6">
-        Profil <span className="mx-1 text-green-700 font-bold">•</span> Ubah Profil
-      </p>
-
+    <AdminLayout title="Informasi Akun">
       <form onSubmit={handleSubmit} autoComplete="off">
-        <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
-          {/* Kartu kiri: foto + identitas ringkas */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col items-center text-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
+          
+          {/* Kartu Kiri: Foto & Ringkasan */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-6 flex flex-col items-center text-center">
             <div className="relative">
               <img
                 src={preview ?? "https://api.dicebear.com/7.x/initials/svg?seed=" + encodeURIComponent(data.name || "Admin")}
                 alt={data.name}
-                className="w-32 h-32 rounded-full object-cover ring-4 ring-green-50 shadow-sm"
+                className="w-28 h-28 rounded-2xl object-cover border border-gray-200 shadow-sm"
               />
               <label
                 htmlFor="foto"
-                className="absolute bottom-1 right-1 bg-green-900 text-white rounded-full p-2 shadow-md cursor-pointer hover:bg-green-800 transition border-2 border-white"
+                className="absolute -bottom-2 -right-2 bg-green-700 text-white rounded-xl p-2 shadow-md cursor-pointer hover:bg-green-800 transition border-2 border-white"
                 title="Ganti foto"
               >
                 <Pencil size={14} />
@@ -83,23 +77,27 @@ export default function Profile({ admin }) {
               </label>
             </div>
 
-            <h2 className="mt-4 text-lg font-semibold text-gray-800">
-              {data.name}
+            <h2 className="mt-4 text-sm font-semibold text-gray-900 line-clamp-1">
+              {data.name || "Administrator"}
             </h2>
+            <p className="text-xs text-gray-400 mt-0.5">{data.email || "email@domain.com"}</p>
 
-            <div className="w-full mt-6 text-left text-sm">
-              <InfoRow label="Id admin" value={admin.id_admin} />
-              <InfoRow label="Peran akun" value={admin.peran ?? "Admin"} highlight />
+            <div className="w-full mt-6 pt-5 border-t border-gray-100 text-xs space-y-3">
+              <InfoRow label="ID Admin" value={admin.id_admin} />
+              <InfoRow label="Peran Akun" value={admin.peran ?? "Admin"} highlight />
               <InfoRow label="Wilayah" value={admin.wilayah} highlight last />
             </div>
           </div>
 
-          {/* Kartu kanan: biodata form */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="font-semibold text-gray-800 mb-4 border-b border-gray-100 pb-3">Biodata admin</h3>
+          {/* Kartu Kanan: Form Biodata */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-6 lg:p-8">
+            <div className="mb-6 pb-4 border-b border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-900">Biodata Administrator</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Pastikan data pribadi yang Anda masukkan sudah benar.</p>
+            </div>
 
-            <div className="text-sm divide-y divide-gray-100">
-              <FieldRow label="Nama lengkap" error={errors.name}>
+            <div className="space-y-4">
+              <FieldRow label="Nama Lengkap" error={errors.name}>
                 <input
                   type="text"
                   value={data.name}
@@ -111,7 +109,7 @@ export default function Profile({ admin }) {
                 />
               </FieldRow>
 
-              <FieldRow label="Email" error={errors.email}>
+              <FieldRow label="Alamat Email" error={errors.email}>
                 <input
                   type="email"
                   value={data.email}
@@ -123,7 +121,7 @@ export default function Profile({ admin }) {
                 />
               </FieldRow>
 
-              <FieldRow label="Nomor telepon" error={errors.phone}>
+              <FieldRow label="Nomor Telepon" error={errors.phone}>
                 <input
                   type="text"
                   value={data.phone}
@@ -135,7 +133,7 @@ export default function Profile({ admin }) {
                 />
               </FieldRow>
 
-              <FieldRow label="Tanggal lahir" error={errors.tanggal_lahir}>
+              <FieldRow label="Tanggal Lahir" error={errors.tanggal_lahir}>
                 <input
                   type="date"
                   value={data.tanggal_lahir}
@@ -144,13 +142,13 @@ export default function Profile({ admin }) {
                 />
               </FieldRow>
 
-              <FieldRow label="Jenis kelamin" error={errors.gender}>
+              <FieldRow label="Jenis Kelamin" error={errors.gender}>
                 <select
                   value={data.gender}
                   onChange={(e) => updateField("gender", e.target.value)}
                   className="field-input"
                 >
-                  <option value="">Pilih</option>
+                  <option value="">Pilih Jenis Kelamin</option>
                   <option value="male">Laki-laki</option>
                   <option value="female">Perempuan</option>
                 </select>
@@ -168,7 +166,7 @@ export default function Profile({ admin }) {
                 />
               </FieldRow>
 
-              <FieldRow label="Kabupaten/kota" error={errors.city}>
+              <FieldRow label="Kabupaten / Kota" error={errors.city}>
                 <input
                   type="text"
                   value={data.city}
@@ -192,9 +190,9 @@ export default function Profile({ admin }) {
                 />
               </FieldRow>
 
-              <FieldRow label="Alamat lengkap" error={errors.address} last>
+              <FieldRow label="Alamat Lengkap" error={errors.address} last>
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={data.address}
                   onChange={(e) => updateField("address", e.target.value)}
                   className="field-input resize-none"
@@ -207,21 +205,21 @@ export default function Profile({ admin }) {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3 mt-6">
+        {/* Action Buttons */}
+        <div className="flex items-center justify-end gap-3 mt-6">
           <button
             type="button"
             onClick={handleCancel}
-            className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 transition"
+            className="rounded-xl px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition"
           >
             Batal
           </button>
           <button
             type="submit"
             disabled={processing}
-            className="px-6 py-2.5 rounded-lg bg-green-900 text-white font-medium hover:bg-green-800 transition shadow-sm disabled:opacity-60 flex items-center gap-2"
+            className="rounded-xl bg-green-700 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 disabled:opacity-60 shadow-sm transition select-none"
           >
-            Simpan
+            Simpan Perubahan
           </button>
         </div>
       </form>
@@ -230,24 +228,26 @@ export default function Profile({ admin }) {
         .field-input {
           width: 100%;
           text-align: left;
-          border: 1px solid #d1d5db; /* gray-300 */
-          border-radius: 0.5rem;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.75rem;
           padding: 0.5rem 0.75rem;
           background: #ffffff;
-          color: #111827; /* gray-900 */
+          font-size: 0.75rem;
+          color: #1f2937;
           outline: none;
-          transition: border-color 0.15s, box-shadow 0.15s;
+          transition: all 0.15s ease;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
         .field-input:hover {
-          border-color: #9ca3af; /* gray-400 */
+          border-color: #d1d5db;
         }
         .field-input:focus {
-          border-color: #14532d; /* green-900 */
-          box-shadow: 0 0 0 3px rgba(20, 83, 45, 0.15);
+          border-color: #15803d;
+          box-shadow: 0 0 0 1px #15803d;
         }
         .field-input:disabled {
-          background: #f3f4f6;
-          color: #6b7280;
+          background: #f9fafb;
+          color: #9ca3af;
           cursor: not-allowed;
         }
       `}</style>
@@ -257,27 +257,24 @@ export default function Profile({ admin }) {
 
 function InfoRow({ label, value, highlight, last }) {
   return (
-    <div
-      className={`flex justify-between py-2.5 ${!last ? "border-b border-gray-100" : ""}`}
-    >
-      <span className="text-gray-600">{label}</span>
-      <span className={highlight ? "text-green-800 font-semibold" : "text-gray-900 font-medium"}>
-        {value}
+    <div className={`flex items-center justify-between pb-2.5 ${!last ? "border-b border-gray-100" : ""}`}>
+      <span className="text-gray-500 font-medium">{label}</span>
+      <span className={highlight ? "rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[10px] font-semibold text-emerald-700" : "text-gray-800 font-semibold"}>
+        {value ?? "-"}
       </span>
     </div>
   );
 }
 
-function FieldRow({ label, children, error }) {
+function FieldRow({ label, children, error, last }) {
   return (
-    <div className="flex items-start gap-3 py-3">
-      <span className="text-gray-600 font-medium pt-2 w-36 shrink-0">
+    <div className={`grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-2 sm:gap-4 items-start ${!last ? "pb-4 border-b border-gray-100" : ""}`}>
+      <label className="text-xs font-semibold text-gray-700 pt-2">
         {label}
-      </span>
-      <span className="text-gray-400 pt-2">:</span>
-      <div className="flex-1 flex flex-col">
+      </label>
+      <div className="flex flex-col">
         {children}
-        {error && <span className="text-xs text-red-500 mt-1">{error}</span>}
+        {error && <span className="text-[11px] text-red-600 mt-1 font-medium">{error}</span>}
       </div>
     </div>
   );

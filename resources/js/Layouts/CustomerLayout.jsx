@@ -21,8 +21,11 @@ export default function CustomerLayout({ children, title, backHref }) {
 
     return (
         <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">
-            <div className="relative mx-auto flex min-h-dvh w-full max-w-[430px] flex-col overflow-y-auto bg-gray-50 dark:bg-gray-900 sm:h-[850px] sm:shadow-xl">
-                <header className="sticky top-0 z-20 shrink-0 border-b border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95">
+            {/* Ubah overflow-y-auto menjadi overflow-x-hidden / overflow-visible agar popup tidak terpotong container */}
+            <div className="relative mx-auto flex min-h-dvh w-full max-w-[430px] flex-col overflow-x-hidden bg-gray-50 dark:bg-gray-900 sm:h-[850px] sm:overflow-y-auto sm:shadow-xl">
+                
+                {/* Naikkan z-index header menjadi z-40 agar selalu di atas konten */}
+                <header className="sticky top-0 z-40 shrink-0 border-b border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95">
                     <div
                         className="flex items-center gap-3 px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
@@ -72,8 +75,9 @@ export default function CustomerLayout({ children, title, backHref }) {
 
                                     {menuOpen && (
                                         <>
-                                            <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                                            <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                                            <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                                            {/* Naikkan z-index dropdown menjadi z-50 */}
+                                            <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
                                                 <Link
                                                     href="/app/profile"
                                                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -99,8 +103,7 @@ export default function CustomerLayout({ children, title, backHref }) {
                     </div>
                 </header>
 
-                {/* Diubah menjadi pb-20 agar jarak bawah konten langsung pas di atas navbar */}
-                <main className="flex-1 pb-20">
+                <main className="flex-1 pb-20 relative z-0">
                     {!backHref && title && (
                         <div className="px-4 pt-4">
                             <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h1>
