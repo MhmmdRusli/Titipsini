@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { Building2, Copy, Check, ChevronDown, Upload, X } from 'lucide-react';
+import { Building2, Copy, Check, ChevronDown, Upload, X, QrCode } from 'lucide-react';
 
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(
@@ -165,11 +165,33 @@ export default function Instruksi({ topup }) {
                     </div>
                 </div>
 
+                {/* Bagian QRIS Pembayaran */}
+                <div className="mt-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm text-center">
+                    <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                        <QrCode size={18} className="text-[#15803d] dark:text-[#4ade80]" />
+                        <span>Scan QRIS untuk Membayar</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                        Scan QR di bawah ini menggunakan aplikasi e-wallet atau m-banking apa saja.
+                    </p>
+                    
+                    <div className="inline-block p-3 bg-white rounded-xl border border-gray-200 shadow-inner">
+                        <img 
+                            src="/images/qris-admin.png" 
+                            alt="QRIS Pembayaran" 
+                            className="w-48 h-48 mx-auto object-contain rounded-md" 
+                        />
+                    </div>
+                    <p className="mt-2 text-[11px] text-gray-400">
+                        Nominal pembayaran sudah otomatis / sesuaikan dengan total tagihan.
+                    </p>
+                </div>
+
                 {/* Upload bukti transfer */}
                 <div className="mt-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
                     <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Unggah Bukti Pembayaran</p>
                     <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        Setelah transfer selesai, unggah screenshot bukti pembayaran. Tim kami akan
+                        Setelah transfer atau scan QRIS selesai, unggah screenshot bukti pembayaran. Tim kami akan
                         memverifikasi dalam waktu kurang dari 10 menit.
                     </p>
 
