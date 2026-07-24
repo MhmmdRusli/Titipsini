@@ -5,19 +5,19 @@ import AdminLayout from "@/Layouts/AdminLayout";
 
 export default function Profile({ admin }) {
   const { data, setData, post, processing, errors, clearErrors, reset, transform } = useForm({
-    name: admin.name ?? "",
-    email: admin.email ?? "",
-    phone: admin.phone ?? "",
-    tanggal_lahir: admin.tanggal_lahir ?? "",
-    gender: admin.gender ?? "",
-    provinsi: admin.provinsi ?? "",
-    city: admin.city ?? "",
-    kecamatan: admin.kecamatan ?? "",
-    address: admin.address ?? "",
+    name: admin?.name ?? "",
+    email: admin?.email ?? "",
+    phone: admin?.phone ?? "",
+    tanggal_lahir: admin?.tanggal_lahir ?? "",
+    gender: admin?.gender ?? "",
+    provinsi: admin?.provinsi ?? "",
+    city: admin?.city ?? "",
+    kecamatan: admin?.kecamatan ?? "",
+    address: admin?.address ?? "",
     foto: null,
   });
 
-  const [preview, setPreview] = useState(admin.foto_url ?? null);
+  const [preview, setPreview] = useState(admin?.foto_url ?? null);
 
   function updateField(field, value) {
     setData(field, value);
@@ -45,7 +45,7 @@ export default function Profile({ admin }) {
 
   function handleCancel() {
     reset();
-    setPreview(admin.foto_url ?? null);
+    setPreview(admin?.foto_url ?? null);
   }
 
   return (
@@ -54,16 +54,16 @@ export default function Profile({ admin }) {
         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
           
           {/* Kartu Kiri: Foto & Ringkasan */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-6 flex flex-col items-center text-center">
+          <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-800 p-6 flex flex-col items-center text-center transition-colors">
             <div className="relative">
               <img
                 src={preview ?? "https://api.dicebear.com/7.x/initials/svg?seed=" + encodeURIComponent(data.name || "Admin")}
                 alt={data.name}
-                className="w-28 h-28 rounded-2xl object-cover border border-gray-200 shadow-sm"
+                className="w-28 h-28 rounded-2xl object-cover border border-gray-200 dark:border-gray-700 shadow-sm"
               />
               <label
                 htmlFor="foto"
-                className="absolute -bottom-2 -right-2 bg-green-700 text-white rounded-xl p-2 shadow-md cursor-pointer hover:bg-green-800 transition border-2 border-white"
+                className="absolute -bottom-2 -right-2 bg-green-700 dark:bg-emerald-600 text-white rounded-xl p-2 shadow-md cursor-pointer hover:bg-green-800 dark:hover:bg-emerald-500 transition border-2 border-white dark:border-gray-900"
                 title="Ganti foto"
               >
                 <Pencil size={14} />
@@ -77,23 +77,23 @@ export default function Profile({ admin }) {
               </label>
             </div>
 
-            <h2 className="mt-4 text-sm font-semibold text-gray-900 line-clamp-1">
+            <h2 className="mt-4 text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">
               {data.name || "Administrator"}
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">{data.email || "email@domain.com"}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{data.email || "email@domain.com"}</p>
 
-            <div className="w-full mt-6 pt-5 border-t border-gray-100 text-xs space-y-3">
-              <InfoRow label="ID Admin" value={admin.id_admin} />
-              <InfoRow label="Peran Akun" value={admin.peran ?? "Admin"} highlight />
-              <InfoRow label="Wilayah" value={admin.wilayah} highlight last />
+            <div className="w-full mt-6 pt-5 border-t border-gray-100 dark:border-gray-800 text-xs space-y-3">
+              <InfoRow label="ID Admin" value={admin?.id_admin} />
+              <InfoRow label="Peran Akun" value={admin?.peran ?? "Admin"} highlight />
+              <InfoRow label="Wilayah" value={admin?.wilayah} highlight last />
             </div>
           </div>
 
           {/* Kartu Kanan: Form Biodata */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-6 lg:p-8">
-            <div className="mb-6 pb-4 border-b border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900">Biodata Administrator</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Pastikan data pribadi yang Anda masukkan sudah benar.</p>
+          <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-800 p-6 lg:p-8 transition-colors">
+            <div className="mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Biodata Administrator</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pastikan data pribadi yang Anda masukkan sudah benar.</p>
             </div>
 
             <div className="space-y-4">
@@ -138,7 +138,7 @@ export default function Profile({ admin }) {
                   type="date"
                   value={data.tanggal_lahir}
                   onChange={(e) => updateField("tanggal_lahir", e.target.value)}
-                  className="field-input"
+                  className="field-input dark:[color-scheme:dark]"
                 />
               </FieldRow>
 
@@ -210,14 +210,14 @@ export default function Profile({ admin }) {
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded-xl px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition"
+            className="rounded-xl px-4 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           >
             Batal
           </button>
           <button
             type="submit"
             disabled={processing}
-            className="rounded-xl bg-green-700 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 disabled:opacity-60 shadow-sm transition select-none"
+            className="rounded-xl bg-green-700 dark:bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-emerald-500 disabled:opacity-60 shadow-sm transition select-none"
           >
             Simpan Perubahan
           </button>
@@ -250,6 +250,24 @@ export default function Profile({ admin }) {
           color: #9ca3af;
           cursor: not-allowed;
         }
+
+        /* Support Dark Mode pada style kustom */
+        .dark .field-input {
+          border-color: #1f293d;
+          background: #1f293d;
+          color: #f3f4f6;
+        }
+        .dark .field-input:hover {
+          border-color: #374151;
+        }
+        .dark .field-input:focus {
+          border-color: #059669;
+          box-shadow: 0 0 0 1px #059669;
+        }
+        .dark .field-input:disabled {
+          background: #111827;
+          color: #6b7280;
+        }
       `}</style>
     </AdminLayout>
   );
@@ -257,9 +275,9 @@ export default function Profile({ admin }) {
 
 function InfoRow({ label, value, highlight, last }) {
   return (
-    <div className={`flex items-center justify-between pb-2.5 ${!last ? "border-b border-gray-100" : ""}`}>
-      <span className="text-gray-500 font-medium">{label}</span>
-      <span className={highlight ? "rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[10px] font-semibold text-emerald-700" : "text-gray-800 font-semibold"}>
+    <div className={`flex items-center justify-between pb-2.5 ${!last ? "border-b border-gray-100 dark:border-gray-800" : ""}`}>
+      <span className="text-gray-500 dark:text-gray-400 font-medium">{label}</span>
+      <span className={highlight ? "rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400" : "text-gray-800 dark:text-gray-200 font-semibold"}>
         {value ?? "-"}
       </span>
     </div>
@@ -268,13 +286,13 @@ function InfoRow({ label, value, highlight, last }) {
 
 function FieldRow({ label, children, error, last }) {
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-2 sm:gap-4 items-start ${!last ? "pb-4 border-b border-gray-100" : ""}`}>
-      <label className="text-xs font-semibold text-gray-700 pt-2">
+    <div className={`grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-2 sm:gap-4 items-start ${!last ? "pb-4 border-b border-gray-100 dark:border-gray-800" : ""}`}>
+      <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 pt-2">
         {label}
       </label>
       <div className="flex flex-col">
         {children}
-        {error && <span className="text-[11px] text-red-600 mt-1 font-medium">{error}</span>}
+        {error && <span className="text-[11px] text-red-600 dark:text-red-400 mt-1 font-medium">{error}</span>}
       </div>
     </div>
   );
