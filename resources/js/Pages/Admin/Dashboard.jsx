@@ -84,7 +84,7 @@ export default function Dashboard({
                             Admin Control Center
                         </span>
                         <h1 className="mt-2 text-2xl font-extrabold tracking-tight">
-                            {adminName ? `Halo, ${adminName} 👋` : 'Dashboard Titipsini.com'}
+                            {adminName ? `Halo, ${adminName} ` : 'Dashboard Titipsini.com'}
                         </h1>
                         <p className="mt-1 text-xs text-green-100/80">
                             Pantau performa vendor, pesanan aktif, dan statistik layanan dari seluruh wilayah.
