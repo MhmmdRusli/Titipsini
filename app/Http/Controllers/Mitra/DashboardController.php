@@ -56,6 +56,8 @@ class DashboardController extends Controller
             ],
             'saldo' => $saldoTampil,
             'toko' => [
+                'nama' => $partner->nama_usaha ?? $partner->name,
+                'alamat' => $partner->address,
                 'buka' => (bool) $partner->toko_buka,
                 'jam_buka' => $partner->jam_buka ? substr($partner->jam_buka, 0, 5) : null,
                 'jam_tutup' => $partner->jam_tutup ? substr($partner->jam_tutup, 0, 5) : null,
