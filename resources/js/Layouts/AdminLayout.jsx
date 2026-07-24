@@ -32,17 +32,14 @@ const navItems = [
         icon: Settings,
         children: [
             { label: 'Keamanan', href: '/admin/pengaturan/keamanan' },
-            { label: 'No Rekening', href: '/admin/pengaturan/rekening' },
+            { label: 'Qris', href: '/admin/pengaturan/qris' },
         ],
     },
 ];
 
-// Koordinat default: Yogyakarta (kota contoh yang dipakai di seluruh aplikasi).
-// Ganti 2 angka ini kalau mau kota lain.
 const WEATHER_LAT = -7.7956;
 const WEATHER_LON = 110.3695;
 
-// Pemetaan kode cuaca WMO (dipakai Open-Meteo) ke label & ikon Bahasa Indonesia
 function weatherFromCode(code) {
     if (code === 0) return { label: 'Cerah', Icon: Sun };
     if ([1, 2, 3].includes(code)) return { label: 'Berawan', Icon: Cloud };
@@ -84,9 +81,7 @@ function useCuaca() {
                     });
                 }
             })
-            .catch(() => {
-                // Diamkan saja kalau gagal fetch (misal offline) — jam & tanggal tetap tampil
-            });
+            .catch(() => {});
 
         return () => {
             cancelled = true;
@@ -97,12 +92,12 @@ function useCuaca() {
 }
 
 export default function AdminLayout({ children, title }) {
-    const { url, props } = usePage();
+    const { url } = usePage();
+    const { props } = usePage();
     const user = props.auth?.user;
     const { jam, tanggal } = useJamTanggal();
     const cuaca = useCuaca();
 
-    // Auto-expand a parent item if the current URL is inside one of its children
     const [openMenu, setOpenMenu] = useState(() => {
         const active = navItems.find(
             (item) => item.children && item.children.some((c) => url.startsWith(c.href))
@@ -111,9 +106,10 @@ export default function AdminLayout({ children, title }) {
     });
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
-            <aside className="w-64 shrink-0 bg-green-900 text-gray-200 flex flex-col">
-                <div className="px-5 py-6 border-b border-white/10 flex flex-col items-center text-center">
+        <div className="flex h-screen bg-gray-50/50 overflow-hidden">
+            {/* Sidebar */}
+            <aside className="w-64 shrink-0 bg-gradient-to-b from-green-900 via-emerald-900 to-green-950 text-gray-200 flex flex-col border-r border-green-800/40 shadow-sm h-full">
+                <div className="px-5 py-6 border-b border-white/10 flex flex-col items-center text-center shrink-0">
                     <img
                         src="/images/admin-titipsini.png"
                         alt="Logo"
@@ -124,7 +120,8 @@ export default function AdminLayout({ children, title }) {
                     </span>
                     <span className="text-[11px] text-gray-300 font-medium mt-0.5">titipkan semua urusanmu disini</span>
                 </div>
-                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+
+                <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
                     {navItems.map(({ label, href, icon: Icon, children: subItems }) => {
                         const active = url.startsWith(href);
                         const hasChildren = !!subItems;
@@ -135,13 +132,13 @@ export default function AdminLayout({ children, title }) {
                                 <Link
                                     key={href}
                                     href={href}
-                                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                                    className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all ${
                                         active
-                                            ? 'bg-green-700 text-white font-medium shadow-sm'
+                                            ? 'bg-green-700 text-white shadow-sm ring-1 ring-green-600/50'
                                             : 'text-gray-300 hover:bg-white/5 hover:text-white'
                                     }`}
                                 >
-                                    <Icon size={18} />
+                                    <Icon size={16} className={active ? 'text-amber-300' : 'text-gray-400'} />
                                     {label}
                                 </Link>
                             );
@@ -152,17 +149,17 @@ export default function AdminLayout({ children, title }) {
                                 <button
                                     type="button"
                                     onClick={() => setOpenMenu(isOpen ? null : label)}
-                                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                                    className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all ${
                                         active && !isOpen
-                                            ? 'bg-green-700 text-white font-medium shadow-sm'
+                                            ? 'bg-green-700 text-white shadow-sm ring-1 ring-green-600/50'
                                             : 'text-gray-300 hover:bg-white/5 hover:text-white'
                                     }`}
                                 >
-                                    <Icon size={18} />
+                                    <Icon size={16} className={active && !isOpen ? 'text-amber-300' : 'text-gray-400'} />
                                     <span className="flex-1 text-left">{label}</span>
                                     <ChevronDown
-                                        size={16}
-                                        className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                                        size={14}
+                                        className={`transition-transform text-gray-400 ${isOpen ? 'rotate-180 text-white' : ''}`}
                                     />
                                 </button>
 
@@ -174,10 +171,10 @@ export default function AdminLayout({ children, title }) {
                                                 <Link
                                                     key={sub.href}
                                                     href={sub.href}
-                                                    className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                                                    className={`block rounded-lg px-3 py-2 text-xs transition-colors ${
                                                         subActive
-                                                            ? 'text-white font-medium'
-                                                            : 'text-gray-300 hover:text-white'
+                                                            ? 'font-bold text-amber-300 bg-white/5'
+                                                            : 'text-gray-300 hover:text-white hover:bg-white/5'
                                                     }`}
                                                 >
                                                     {sub.label}
@@ -190,56 +187,59 @@ export default function AdminLayout({ children, title }) {
                         );
                     })}
                 </nav>
-                <div className="border-t border-white/10 px-3 py-4">
+
+                <div className="border-t border-white/10 px-3 py-4 shrink-0">
                     <Link
                         href="/logout"
                         method="post"
                         as="button"
-                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                        className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium text-red-200 hover:bg-red-500/10 hover:text-red-100 transition-colors"
                     >
-                        <LogOut size={18} />
+                        <LogOut size={16} />
                         Keluar
                     </Link>
                 </div>
             </aside>
 
-            <div className="flex-1 flex flex-col min-w-0">
-                <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
+            {/* Area Kanan */}
+            <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto overflow-x-hidden relative">
+                <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 shadow-sm shrink-0 sticky top-0 z-30">
                     <div>
-                        <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+                        <h1 className="text-base font-extrabold tracking-tight text-gray-900">{title}</h1>
                         <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                                <Calendar size={13} className="text-gray-400" />
+                            <span className="flex items-center gap-1.5">
+                                <Calendar size={13} className="text-green-600" />
                                 {tanggal}
                             </span>
-                            <span className="flex items-center gap-1 tabular-nums">
-                                <Clock size={13} className="text-gray-400" />
+                            <span className="flex items-center gap-1.5 tabular-nums">
+                                <Clock size={13} className="text-green-600" />
                                 {jam}
                             </span>
                             {cuaca && (
-                                <span className="flex items-center gap-1">
-                                    <cuaca.Icon size={13} className="text-gray-400" />
+                                <span className="flex items-center gap-1.5 font-medium text-gray-700">
+                                    <cuaca.Icon size={13} className="text-amber-500" />
                                     {cuaca.label}, {cuaca.suhu}&deg;C
                                 </span>
                             )}
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <span>{user?.name ?? 'Admin'}</span>
+                    <div className="flex items-center gap-3 text-sm text-gray-700">
+                        <span className="text-xs font-semibold">{user?.name ?? 'Admin'}</span>
                         {user?.avatar ? (
                             <img
                                 src={user.avatar}
                                 alt={user.name}
-                                className="h-8 w-8 rounded-full object-cover"
+                                className="h-9 w-9 rounded-xl object-cover"
                             />
                         ) : (
-                            <div className="h-8 w-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center text-xs font-semibold">
+                            <div className="h-9 w-9 rounded-xl bg-green-100 text-green-700 flex items-center justify-center text-xs font-bold">
                                 {(user?.name ?? 'A').charAt(0).toUpperCase()}
                             </div>
                         )}
                     </div>
                 </header>
-                <main className="flex-1 p-6">{children}</main>
+
+                <main className="flex-1 p-6 relative z-10">{children}</main>
             </div>
         </div>
     );
