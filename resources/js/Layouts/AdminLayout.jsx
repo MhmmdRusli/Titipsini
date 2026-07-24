@@ -82,7 +82,7 @@ function useCuaca() {
                 }
             })
             .catch(() => {
-                // Diamkan saja jika fetch gagal (misal offline)
+                // Diamkan jika fetch gagal
             });
 
         return () => {
@@ -189,12 +189,13 @@ export default function AdminLayout({ children, title }) {
                     })}
                 </nav>
 
+                {/* Tombol Keluar */}
                 <div className="border-t border-white/10 px-3 py-4 shrink-0">
                     <Link
                         href="/logout"
                         method="post"
                         as="button"
-                        className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium text-red-200 hover:bg-red-500/10 hover:text-red-100 transition-colors"
+                        className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold bg-red-600/20 text-red-400 border border-red-500/50 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm"
                     >
                         <LogOut size={16} />
                         Keluar
@@ -204,7 +205,8 @@ export default function AdminLayout({ children, title }) {
 
             {/* Area Kanan */}
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto overflow-x-hidden relative">
-                <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 shadow-sm shrink-0 sticky top-0 z-30">
+                {/* Header dengan Efek Blur (Glassmorphism) */}
+                <header className="flex items-center justify-between border-b border-gray-200/80 bg-white/70 backdrop-blur-md px-6 py-4 shadow-sm shrink-0 sticky top-0 z-30 transition-all">
                     <div>
                         <h1 className="text-base font-extrabold tracking-tight text-gray-900">{title}</h1>
                         <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
@@ -244,4 +246,4 @@ export default function AdminLayout({ children, title }) {
             </div>
         </div>
     );
-}
+}   
