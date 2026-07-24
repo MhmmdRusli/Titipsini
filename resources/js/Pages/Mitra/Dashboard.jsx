@@ -108,8 +108,9 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                     </p>
                 </div>
 
-                {/* Kartu Saldo (Full Hijau) */}
-                <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-4 text-white shadow-sm relative overflow-hidden">
+                {/* Kartu Saldo (Full Hijau) - warna disamakan dengan hijau
+                    di sisi Customer (green-600 / dark:green-700) */}
+                <div className="rounded-2xl bg-green-600 dark:bg-green-700 p-4 text-white shadow-sm relative overflow-hidden">
                     <div className="flex items-start justify-between">
                         <div>
                             <p className="text-xs font-medium text-white/80">Saldo Kamu Saat Ini</p>
@@ -131,7 +132,7 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Layanan Vendors</p>
                         <Link
                             href="/mitra/layanan"
-                            className="flex items-center gap-0.5 text-xs font-bold text-[#15803d] hover:underline dark:text-[#4ade80]"
+                            className="flex items-center gap-0.5 text-xs font-bold text-green-600 hover:underline dark:text-[#4ade80]"
                         >
                             Kelola
                             <ChevronRight size={14} />
@@ -146,9 +147,9 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                                     <Link
                                         key={key}
                                         href="/mitra/layanan"
-                                        className="flex flex-col items-center justify-center rounded-2xl border border-[#15803d]/40 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-green-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
+                                        className="flex flex-col items-center justify-center rounded-2xl border border-black-600/40 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-black-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
                                     >
-                                        <Icon size={22} className="text-[#15803d] dark:text-[#4ade80]" strokeWidth={1.75} />
+                                        <Icon size={22} className="text-green-600 dark:text-[#4ade80]" strokeWidth={1.75} />
                                     </Link>
                                 );
                             })}
@@ -161,9 +162,9 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                                     <Link
                                         key={key}
                                         href="/mitra/layanan"
-                                        className="flex flex-col items-center justify-center rounded-2xl border border-[#15803d]/40 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-green-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
+                                        className="flex flex-col items-center justify-center rounded-2xl border border-black-600/40 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-black-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
                                     >
-                                        <Icon size={22} className="text-[#15803d] dark:text-[#4ade80]" strokeWidth={1.75} />
+                                        <Icon size={22} className="text-green-600 dark:text-[#4ade80]" strokeWidth={1.75} />
                                     </Link>
                                 );
                             })}
@@ -171,17 +172,13 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                     )}
                 </div>
 
-                {/* Jumlah Pesanan (Barang, Kendaraan, Bangunan, Pindahan) -
-                    full hijau, tanpa kotak putih di dalam. Angka rata kiri
-                    dengan unit "pesanan" di sampingnya, watermark ikon besar
-                    transparan di pojok kanan bawah. */}
                 <div>
                     <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Jumlah Pesanan</p>
                     <div className="grid grid-cols-2 gap-3">
                         {PESANAN_CARDS.map(({ key, label, icon: Icon }) => (
                             <div
                                 key={key}
-                                className="relative overflow-hidden rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm"
+                                className="relative overflow-hidden rounded-2xl bg-green-600 dark:bg-green-700 p-3.5 text-white shadow-sm"
                             >
                                 <Icon
                                     size={110}
@@ -201,7 +198,7 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                 {/* Card Informasi Toko/Lokasi di Bawah (Aman dari Error) */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-[#4ade80]">
                             <Store size={20} />
                         </div>
                         <div className="min-w-0 flex-1">
