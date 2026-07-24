@@ -1,5 +1,6 @@
+import { useState, useRef, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { Plus, History, Package, Building2, Car, Truck, ChevronRight, ChevronDown, MapPin, Clock } from 'lucide-react';
+import { Plus, History, Package, Building2, Car, Truck, ChevronRight, ChevronDown, MapPin, Clock, Search } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const CATEGORIES = [
@@ -24,7 +25,6 @@ function formatTanggal(value) {
     });
 }
 
-// Sapaan dinamis berdasarkan jam di device user
 function getGreeting() {
     const hour = new Date().getHours();
     if (hour >= 4 && hour < 11) return 'Selamat Pagi';
@@ -44,6 +44,22 @@ function BoxIcon({ className }) {
 }
 
 export default function Dashboard({ user, saldo = 10000, vendors = [], berita = [] }) {
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [selectedWilayah, setSelectedWilayah] = useState(user?.wilayah ?? 'Daerah Istimewa Yogyakarta');
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const displayBerita = berita.length > 0 ? berita : [
         { id: 1, judul: 'Rilis. Buat Akun Lebih Mudah...', published_at: null, foto: null },
         { id: 2, judul: 'Terbaru yang menarik di Titipsini...', published_at: null, foto: null },
@@ -52,11 +68,49 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
 
     const firstName = (user?.name ?? 'Riza Hidayat').split(' ')[0];
 
+    // Daftar Wilayah Utama / Kota-Kota Besar Seluruh Indonesia
+    const daftarWilayahIndonesia = [
+        // JAWA & DIY
+        'Daerah Istimewa Yogyakarta', 'Kota Yogyakarta', 'Kab. Sleman', 'Kab. Bantul', 'Kab. Kulon Progo', 'Kab. Gunungkidul',
+        'DKI Jakarta', 'Kota Jakarta Pusat', 'Kota Jakarta Selatan', 'Kota Jakarta Barat', 'Kota Jakarta Timur', 'Kota Jakarta Utara',
+        'Jawa Barat', 'Kota Bandung', 'Kab. Bandung', 'Kota Bekasi', 'Kab. Bekasi', 'Kota Depok', 'Kota Bogor', 'Kota Cimahi',
+        'Jawa Tengah', 'Kota Semarang', 'Kota Surakarta (Solo)', 'Kab. Klaten', 'Kab. Banyumas', 'Kota Salatiga',
+        'Jawa Timur', 'Kota Surabaya', 'Kota Malang', 'Kab. Malang', 'Kota Sidoarjo', 'Kab. Gresik', 'Kota Kediri',
+        'Banten', 'Kota Tangerang', 'Kota Tangerang Selatan', 'Kab. Tangerang', 'Kota Serang',
+
+        // SUMATERA
+        'Sumatera Utara', 'Kota Medan', 'Kab. Deli Serdang', 'Kota Pematangsiantar',
+        'Sumatera Barat', 'Kota Padang', 'Kota Bukittinggi',
+        'Riau', 'Kota Pekanbaru', 'Kota Dumai',
+        'Sumatera Selatan', 'Kota Palembang', 'Kota Lubuklinggau',
+        'Lampung', 'Kota Bandar Lampung', 'Kota Metro',
+        'Aceh', 'Kota Banda Aceh', 'Kota Lhokseumawe',
+
+        // KALIMANTAN
+        'Kalimantan Timur', 'Kota Samarinda', 'Kota Balikpapan', 'IKN Nusantara',
+        'Kalimantan Selatan', 'Kota Banjarmasin', 'Kota Banjarbaru',
+        'Kalimantan Barat', 'Kota Pontianak', 'Kota Singkawang',
+
+        // SULAWESI & BALI / NUSA TENGGARA
+        'Bali', 'Kota Denpasar', 'Kab. Badung', 'Kab. Gianyar',
+        'Sulawesi Selatan', 'Kota Makassar', 'Kota Palopo',
+        'Sulawesi Utara', 'Kota Manado', 'Kota Bitung',
+        'Nusa Tenggara Barat (NTB)', 'Kota Mataram', 'Kota Bima',
+        'Nusa Tenggara Timur (NTT)', 'Kota Kupang',
+
+        // PAPUA & MALUKU
+        'Papua', 'Kota Jayapura',
+        'Maluku', 'Kota Ambon',
+    ];
+
+    const filteredWilayah = daftarWilayahIndonesia.filter((wilayah) =>
+        wilayah.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <CustomerLayout>
             <Head title="Beranda" />
 
-            {/* Diberi pb-6 yang pas agar jarak ke navbar bawah ideal dan tidak terlalu kosong */}
             <div className="px-4 pt-2 pb-6">
                 {/* Greeting Section */}
                 <div className="flex items-center justify-between">
@@ -64,14 +118,66 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                         <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
                             {getGreeting()}, {firstName} <span className="text-xl">👋</span>
                         </h2>
-                        <button
-                            type="button"
-                            className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-500 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
-                        >
-                            <MapPin size={11} className="text-gray-400 dark:text-gray-500" />
-                            {user?.wilayah ?? 'Daerah Istimewa Yogyakarta'}
-                            <ChevronDown size={11} className="text-gray-400 dark:text-gray-500" />
-                        </button>
+                        
+                        {/* Wrapper Dropdown */}
+                        <div className="relative mt-1.5 inline-block" ref={dropdownRef}>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsDropdownOpen(!isDropdownOpen);
+                                    setSearchQuery('');
+                                }}
+                                className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-500 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 cursor-pointer"
+                            >
+                                <MapPin size={11} className="text-gray-400 dark:text-gray-500" />
+                                <span className="max-w-[180px] truncate">{selectedWilayah}</span>
+                                <ChevronDown size={11} className={`text-gray-400 dark:text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {/* Menu Dropdown All Indonesia */}
+                            {isDropdownOpen && (
+                                <div className="absolute left-0 mt-1.5 w-64 rounded-xl bg-white dark:bg-gray-800 p-2 shadow-xl border border-gray-100 dark:border-gray-700 z-50">
+                                    
+                                    {/* Kolom Pencarian */}
+                                    <div className="mb-2 relative">
+                                        <Search size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Cari kota / provinsi..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 pl-8 pr-3 py-1.5 text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                            autoFocus
+                                        />
+                                    </div>
+
+                                    {/* Daftar Pilihan */}
+                                    <div className="space-y-0.5 max-h-60 overflow-y-auto pr-1">
+                                        {filteredWilayah.length > 0 ? (
+                                            filteredWilayah.map((wilayah, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => {
+                                                        setSelectedWilayah(wilayah);
+                                                        setIsDropdownOpen(false);
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between cursor-pointer ${
+                                                        selectedWilayah === wilayah 
+                                                            ? 'bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400 font-bold' 
+                                                            : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
+                                                    }`}
+                                                >
+                                                    <span className="truncate">{wilayah}</span>
+                                                    {selectedWilayah === wilayah && <MapPin size={12} className="shrink-0 text-green-600 dark:text-green-400" />}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <p className="py-3 text-center text-xs text-gray-400">Wilayah tidak ditemukan</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -112,9 +218,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     </div>
                 </div>
 
-                {/* Banner Promo - warna dasar disamakan dengan card Top Up
-                    (green-600 / dark:green-700), desain tiket & layout aslinya
-                    tetap dipertahankan sesuai permintaan. */}
+                {/* Banner Promo */}
                 <div className="mt-5 relative flex h-[128px] rounded-2xl shadow-md">
                     <div
                         className="absolute inset-0 rounded-2xl bg-green-600 dark:bg-green-700"
@@ -237,13 +341,12 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     </div>
                 </div>
 
-                {/* Section Aktivitas Terakhir (Diubah jadi Card Simulasi/Interaktif agar tidak kosong) */}
+                {/* Section Aktivitas Terakhir */}
                 <div className="mt-6">
                     <div className="mb-3 flex items-center justify-between">
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Aktivitas Terakhir</p>
                         <Link href="/app/orders" className="flex items-center text-xs font-semibold text-green-600 dark:text-green-400">
-                            Lihat semua
-                        </Link>
+                            Lihat semua</Link>
                     </div>
 
                     <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
