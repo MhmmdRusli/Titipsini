@@ -3,8 +3,8 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     MapPin, LayoutDashboard, CircleUserRound, Users, Handshake,
     Package, BarChart3, Settings, LogOut, ChevronDown, Wallet, Newspaper,
-    Clock, Calendar, Sun, Cloud, CloudRain, CloudFog, CloudLightning, CloudSnow,
-    Moon,
+    HelpCircle, Clock, Calendar, Sun, Cloud, CloudRain, CloudFog, CloudLightning,
+    CloudSnow, Moon,
 } from 'lucide-react';
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
     { label: 'Customer', href: '/admin/pengguna', icon: Users },
     { label: 'Vendor', href: '/admin/partners', icon: Handshake },
     { label: 'Berita', href: '/admin/berita', icon: Newspaper },
+    { label: 'FAQ', href: '/admin/faq', icon: HelpCircle },
     { label: 'Top Up', href: '/admin/topup', icon: Wallet },
     {
         label: 'Pesanan',
@@ -135,6 +136,9 @@ export default function AdminLayout({ children, title }) {
                 .dark main .text-gray-900,
                 .dark main .text-gray-800,
                 .dark main .text-gray-700 {
+                    color: #f3f4f6 !important;
+                }
+                .dark main .text-[#111827] {
                     color: #f3f4f6 !important;
                 }
                 .dark main .text-gray-500,
