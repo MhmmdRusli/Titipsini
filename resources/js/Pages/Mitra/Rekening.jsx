@@ -19,12 +19,11 @@ export default function Rekening({ rekening }) {
             <Head title="Rekening Bank" />
 
             <div className="flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-3">
-                <Link href="/mitra/profil" className="text-gray-500 hover:text-gray-700">
+                <button type="button" onClick={() => window.history.back()} className="text-gray-500 hover:text-gray-700">
                     <ChevronLeft size={20} />
-                </Link>
-                <h1 className="text-base font-semibold text-gray-900">Rekening Bank</h1>
+                </button>
+                <h1 className="text-base font-semibold text-gray-900">Tarik Saldo</h1>
             </div>
-
             <div className="px-4 py-4">
                 <div className="mb-4 flex items-center gap-3 rounded-xl border border-green-100 bg-green-50 p-3.5">
                     <Landmark size={18} className="shrink-0 text-green-700" />
@@ -62,9 +61,8 @@ function Field({ label, value, onChange, error, placeholder, inputMode }) {
                     placeholder={placeholder}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className={`w-full rounded-lg text-sm pr-8 ${
-                        error ? 'border-red-500' : 'border-gray-300 focus:border-green-500 focus:ring-green-500'
-                    }`}
+                    className={`w-full rounded-lg text-sm pr-8 ${error ? 'border-red-500' : 'border-gray-300 focus:border-green-500 focus:ring-green-500'
+                        }`}
                 />
                 <Pencil size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-300" />
             </div>

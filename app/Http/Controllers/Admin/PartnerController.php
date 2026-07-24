@@ -107,55 +107,90 @@ class PartnerController extends Controller
      * PATCH /admin/partners/{partner}/restore
      */
     public function restore(User $partner): RedirectResponse
-{
-    abort_unless($partner->role === 'partner', 404);
+    {
+        abort_unless($partner->role === 'partner', 404);
 
-    $partner->update([
-        'suspended_at' => null,
-        'restoration_requested_at' => null,
-        'rejection_reason' => null,
-        'verification_status' => 'terverifikasi',
-    ]);
+        $partner->update([
+            'suspended_at' => null,
+            'restoration_requested_at' => null,
+            'rejection_reason' => null,
+            'verification_status' => 'terverifikasi',
+        ]);
 
-    return redirect()
-        ->back()
-        ->with('success', 'Akun mitra berhasil dipulihkan.');
-}
+        return redirect()
+            ->back()
+            ->with('success', 'Akun mitra berhasil dipulihkan.');
+    }
+
+    /**
+     * Menghapus satu data mitra.
+     * DELETE /admin/partners/{partner}
+     */
+    public function destroy(User $partner): RedirectResponse
+    {
+        abort_unless($partner->role === 'partner', 404);
+
+        $partner->delete();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Data mitra berhasil dihapus.');
+    }
+
+    /**
+     * Menghapus banyak data mitra sekaligus (Bulk Delete).
+     * POST /admin/partners/bulk-destroy
+     */
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        User::where('role', 'partner')
+            ->whereIn('id', $request->ids)
+            ->delete();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Data mitra terpilih berhasil dihapus.');
+    }
 
     /**
      * Menampilkan halaman peringatan penangguhan untuk mitra yang login.
      * GET /mitra/ditangguhkan
      */
     public function suspendedNotice(): Response|RedirectResponse
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    if (!$user || $user->role !== 'partner' || !$user->suspended_at) {
-        return redirect('/mitra/dashboard');
+        if (!$user || $user->role !== 'partner' || !$user->suspended_at) {
+            return redirect('/mitra/dashboard');
+        }
+
+        return Inertia::render('Auth/SuspendedNotice', [
+            'reason' => $user->rejection_reason,
+            'alreadyRequested' => (bool) $user->restoration_requested_at,
+        ]);
     }
-
-    return Inertia::render('Auth/SuspendedNotice', [
-        'reason' => $user->rejection_reason,
-        'alreadyRequested' => (bool) $user->restoration_requested_at,
-    ]);
-}
 
     /**
      * Menangani permintaan pemulihan akun dari mitra yang ditangguhkan.
      * POST /mitra/ajukan-pemulihan
      */
     public function requestRestoration(Request $request): RedirectResponse
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    if (!$user || $user->role !== 'partner') {
-        return redirect()->route('login');
+        if (!$user || $user->role !== 'partner') {
+            return redirect()->route('login');
+        }
+
+        if (! $user->restoration_requested_at) {
+            $user->update(['restoration_requested_at' => now()]);
+        }
+
+        return back()->with('success', 'Permintaan pemulihan akun berhasil dikirim ke administrator.');
     }
-
-    if (! $user->restoration_requested_at) {
-        $user->update(['restoration_requested_at' => now()]);
-    }
-
-    return back()->with('success', 'Permintaan pemulihan akun berhasil dikirim ke administrator.');
-}
 }

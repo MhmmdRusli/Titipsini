@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { History, AlertTriangle, Package, Car, Building2, Truck, ChevronRight, MapPin, User, LogOut, BadgeCheck, Clock } from 'lucide-react';
+import { History, AlertTriangle, Package, Car, Building2, Truck, ChevronRight, MapPin, User, LogOut, BadgeCheck, Clock, ArrowDownToLine } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const LAYANAN_ICON = {
@@ -92,29 +92,25 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                     {/* Status buka/tutup - sekarang jadi link ke pengaturan jam operasional */}
                     <Link
                         href="/mitra/layanan/jam-operasional"
-                        className={`mt-3 flex items-center justify-between rounded-lg px-3 py-2 transition ${
-                            toko?.buka
+                        className={`mt-3 flex items-center justify-between rounded-lg px-3 py-2 transition ${toko?.buka
                                 ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40'
                                 : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40'
-                        }`}
+                            }`}
                     >
                         <div className="flex items-center gap-1.5">
                             <span
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                    toko?.buka ? 'bg-green-700 dark:bg-green-400' : 'bg-red-700 dark:bg-red-400'
-                                }`}
+                                className={`h-1.5 w-1.5 rounded-full ${toko?.buka ? 'bg-green-700 dark:bg-green-400' : 'bg-red-700 dark:bg-red-400'
+                                    }`}
                             />
                             <span
-                                className={`text-xs font-semibold ${
-                                    toko?.buka ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'
-                                }`}
+                                className={`text-xs font-semibold ${toko?.buka ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'
+                                    }`}
                             >
                                 {toko?.buka ? 'Buka' : 'Tutup'}
                             </span>
                             <span
-                                className={`text-xs ${
-                                    toko?.buka ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
-                                }`}
+                                className={`text-xs ${toko?.buka ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
+                                    }`}
                             >
                                 {toko?.jam_buka && toko?.jam_tutup ? `${toko.jam_buka} - ${toko.jam_tutup}` : '08.00 - 20.00'}
                             </span>
@@ -154,13 +150,22 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                             <p className="text-xs font-medium text-white/80">Saldo Kamu Saat Ini</p>
                             <p className="mt-1 text-2xl font-extrabold tracking-tight">{formatRupiah(saldo)}</p>
                         </div>
-                        <Link
-                            href="/mitra/pendapatan/riwayat"
-                            className="flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white hover:bg-white/30 transition"
-                        >
-                            <History size={12} />
-                            Riwayat
-                        </Link>
+                        <div className="flex flex-col items-end gap-1.5">
+                            <Link
+                                href="/mitra/pendapatan/riwayat"
+                                className="flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white hover:bg-white/30 transition"
+                            >
+                                <History size={12} />
+                                Riwayat
+                            </Link>
+                            <Link
+                                href="/mitra/pendapatan/penarikan/tarik"
+                                className="flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-bold text-green-700 hover:bg-white/90 transition"
+                            >
+                                <ArrowDownToLine size={12} />
+                                Tarik Saldo
+                            </Link>
+                        </div>
                     </div>
                 </div>
 

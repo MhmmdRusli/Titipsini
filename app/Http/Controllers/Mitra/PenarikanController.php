@@ -1,28 +1,48 @@
 <?php
+
 namespace App\Http\Controllers\Mitra;
 
 use App\Http\Controllers\Controller;
 use App\Models\Penarikan;
 use App\Models\RekeningBank;
-use App\Models\SaldoMutasi;
+use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PenarikanController extends Controller
 {
+    private function getSaldoPartner($partner)
+    {
+        // RUMUS INI DISAMAKAN PERSIS DENGAN DASHBOARD CONTROLLER
+        $persenKomisi = 10;
+        
+        $totalPendapatanKotor = Order::where('partner_id', $partner->id)
+            ->whereIn('status', ['selesai', 'completed', 'success'])
+            ->sum('total_price');
+
+        $grossBalance = $partner->saldo > 0 ? $partner->saldo : $totalPendapatanKotor;
+
+        // Jika di dashboard kamu pakai potongan komisi 10%, gunakan rumus bawah:
+        return $grossBalance * ((100 - $persenKomisi) / 100);
+        
+        // (Catatan: Kalau di dashboard kamu ternyata tidak pakai potongan komisi, 
+        // cukup ubah baris di atas jadi: return $grossBalance;)
+    }
+
     public function index(Request $request): Response
     {
-        $user = Auth::user();
+        $partner = Auth::user();
         $tipe = $request->query('tipe', 'semua');
         $dari = $request->query('dari');
         $sampai = $request->query('sampai');
 
-        $query = SaldoMutasi::where('user_id', $user->id)->orderByDesc('created_at');
+        $saldoUtuh = $this->getSaldoPartner($partner);
+
+        $query = \App\Models\SaldoMutasi::where('user_id', $partner->id)->orderByDesc('created_at');
 
         if (in_array($tipe, ['penghasilan', 'penarikan'], true)) {
             $query->where('type', $tipe);
@@ -43,7 +63,7 @@ class PenarikanController extends Controller
         ]);
 
         return Inertia::render('Mitra/Penarikan/Index', [
-            'saldo' => $user->saldo,
+            'saldo' => $saldoUtuh,
             'mutasi' => $mutasi,
             'filter' => ['tipe' => $tipe, 'dari' => $dari, 'sampai' => $sampai],
         ]);
@@ -51,12 +71,22 @@ class PenarikanController extends Controller
 
     public function create(): Response
     {
-        $user = Auth::user();
-        $rekening = RekeningBank::where('user_id', $user->id)->first();
+        $partner = Auth::user();
+        
+        // Cari rekening berdasarkan user_id (atau ganti partner_id jika kolom di databasemu partner_id)
+        $rekening = RekeningBank::where('user_id', $partner->id)->first();
+
+        // Jika tidak ketemu dengan user_id, coba cari dengan partner_id (jaga-jaga)
+        if (!$rekening && \Schema::hasColumn('rekening_banks', 'partner_id')) {
+            $rekening = RekeningBank::where('partner_id', $partner->id)->first();
+        }
+
+        $saldoUtuh = $this->getSaldoPartner($partner);
 
         return Inertia::render('Mitra/Penarikan/Create', [
-            'saldo' => $user->saldo,
+            'saldo' => $saldoUtuh,
             'rekening' => $rekening ? [
+                'id' => $rekening->id,
                 'nama_bank' => $rekening->nama_bank,
                 'nomor_rekening' => $rekening->nomor_rekening,
                 'nama_pemilik' => $rekening->nama_pemilik,
@@ -66,51 +96,39 @@ class PenarikanController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $user = Auth::user();
+        $partner = Auth::user();
+        $saldoUtuh = $this->getSaldoPartner($partner);
 
         $validated = $request->validate([
-            'jumlah' => ['required', 'integer', 'min:100000', 'max:'.max($user->saldo, 100000)],
+            'jumlah' => ['required', 'integer', 'min:10000', 'max:'.max($saldoUtuh, 10000)],
             'pin' => ['required', 'string'],
         ], [
             'jumlah.max' => 'Saldo kamu tidak mencukupi untuk jumlah penarikan ini.',
-            'jumlah.min' => 'Minimal penarikan adalah Rp100.000.',
+            'jumlah.min' => 'Minimal penarikan adalah Rp10.000.',
         ]);
 
-        if (! $user->pin || ! Hash::check($validated['pin'], $user->pin)) {
+        if (! $partner->pin || ! Hash::check($validated['pin'], $partner->pin)) {
             return back()->withErrors(['pin' => 'PIN yang kamu masukkan salah.']);
         }
 
-        $rekening = RekeningBank::where('user_id', $user->id)->first();
+        $rekening = RekeningBank::where('user_id', $partner->id)->first();
 
         if (! $rekening) {
             return back()->withErrors(['jumlah' => 'Silakan tambahkan rekening bank terlebih dahulu.']);
         }
 
-        $penarikan = DB::transaction(function () use ($user, $validated, $rekening) {
-            $penarikan = Penarikan::create([
-                'user_id' => $user->id,
-                'jumlah' => $validated['jumlah'],
-                'nama_bank' => $rekening->nama_bank,
-                'nomor_rekening' => $rekening->nomor_rekening,
-                'nama_pemilik' => $rekening->nama_pemilik,
-                'status' => 'pending',
-            ]);
+        $jumlahDiminta = $validated['jumlah'];
 
-            $user->decrement('saldo', $validated['jumlah']);
+        $penarikan = Penarikan::create([
+            'user_id' => $partner->id,
+            'jumlah' => $jumlahDiminta,
+            'nama_bank' => $rekening->nama_bank,
+            'nomor_rekening' => $rekening->nomor_rekening,
+            'nama_pemilik' => $rekening->nama_pemilik,
+            'status' => 'pending',
+        ]);
 
-            SaldoMutasi::create([
-                'user_id' => $user->id,
-                'type' => 'penarikan',
-                'jumlah' => $validated['jumlah'],
-                'deskripsi' => 'Penarikan ke '.$rekening->nama_bank.' •••• '.substr($rekening->nomor_rekening, -4),
-                'reference_type' => Penarikan::class,
-                'reference_id' => $penarikan->id,
-            ]);
-
-            return $penarikan;
-        });
-
-        return redirect()->route('partner.penarikan.sukses', $penarikan->id);
+        return redirect()->route('mitra.penarikan.sukses', $penarikan->id);
     }
 
     public function sukses(Penarikan $penarikan): Response

@@ -150,9 +150,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/partners', [AdminPartnerController::class, 'index'])->name('partners.index');
     Route::get('/partners/{partner}', [AdminPartnerController::class, 'show'])->name('partners.show');
     Route::patch('/partners/{partner}/status', [AdminPartnerController::class, 'updateStatus'])->name('partners.updateStatus');
-    
+
     // Rute untuk memulihkan akun mitra yang ditangguhkan dari panel admin
     Route::patch('/partners/{partner}/restore', [AdminPartnerController::class, 'restore'])->name('partners.restore');
+
+    // Bulk delete mitra - dipindah ke dalam grup ini (sebelumnya berdiri sendiri
+    // tanpa proteksi auth/role, dan pakai PartnerController::class tanpa alias
+    // sehingga class-nya tidak ketemu). Path juga diperbaiki (tanpa /admin di
+    // depan karena prefix 'admin' sudah otomatis dari grup ini).
+    Route::post('/partners/bulk-destroy', [AdminPartnerController::class, 'bulkDestroy'])->name('partners.bulkDestroy');
 
     Route::get('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profil.update');
@@ -169,7 +175,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
-        
+
         // Pengaturan Komisi /admin/pengaturan/komisi
         Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
         Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
@@ -209,7 +215,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Pendapatan Platform
     Route::get('pendapatan', [\App\Http\Controllers\Admin\PendapatanController::class, 'index'])->name('pendapatan.index');
+    Route::prefix('penarikan')->name('penarikan.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\PenarikanController::class, 'index'])->name('index');
+        Route::post('/{penarikan}/approve', [\App\Http\Controllers\Admin\PenarikanController::class, 'approve'])->name('approve');
+        Route::post('/{penarikan}/reject', [\App\Http\Controllers\Admin\PenarikanController::class, 'reject'])->name('reject');
+    });
 });
+
+    
 
 /*
 |--------------------------------------------------------------------------
@@ -293,7 +306,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
 
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
-    
+
     Route::get('/orders/{order}/lapor', [CustomerReportController::class, 'create'])->name('orders.lapor');
     Route::post('/orders/{order}/lapor', [CustomerReportController::class, 'store'])->name('orders.lapor.store');
 

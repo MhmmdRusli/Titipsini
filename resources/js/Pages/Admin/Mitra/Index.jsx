@@ -1,7 +1,7 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Search, Handshake, ChevronRight } from 'lucide-react';
+import { Search, Handshake, ChevronRight, Trash2, AlertTriangle, X, CheckCircle2 } from 'lucide-react';
 
 const TABS = [
     { key: '', label: 'Semua' },
@@ -29,7 +29,15 @@ const STATUS_LABEL = {
 };
 
 export default function Index({ partners, filters }) {
+    const { flash } = usePage().props;
     const [search, setSearch] = useState(filters?.search ?? '');
+
+    // State untuk mode pilih banyak
+    const [isBulkMode, setIsBulkMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState([]);
+
+    const [deletingPartner, setDeletingPartner] = useState(null);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
     const activeStatus = filters?.status ?? '';
 
     function applyFilters(next) {
@@ -45,6 +53,67 @@ export default function Index({ partners, filters }) {
         applyFilters({ search });
     }
 
+    // Toggle mode pilih banyak
+    function toggleSelectMode() {
+        setIsBulkMode((v) => !v);
+        setSelectedIds([]);
+    }
+
+    // Fungsi untuk Hapus Centang / Batal Pilih (Hanya mengosongkan item yang dipilih, mode tetap aktif)
+    function handleCancelSelection() {
+        setSelectedIds([]);
+    }
+
+    // Pilih / Batal Pilih Semua di Halaman Ini
+    function handleSelectAll(e) {
+        if (e.target.checked) {
+            const allIds = partners.data.map((p) => p.id);
+            setSelectedIds(allIds);
+        } else {
+            setSelectedIds([]);
+        }
+    }
+
+    // Pilih satu baris checkbox
+    function handleSelectOne(id) {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter((item) => item !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    }
+
+    // Hapus Single
+    function handleDeleteConfirm() {
+        if (!deletingPartner) return;
+
+        router.delete(`/admin/partners/${deletingPartner.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setDeletingPartner(null);
+                setSelectedIds(selectedIds.filter((id) => id !== deletingPartner.id));
+            },
+        });
+    }
+
+    // Hapus Banyak (Bulk Delete)
+    function handleBulkDeleteConfirm() {
+        if (selectedIds.length === 0) return;
+
+        router.post(
+            '/admin/partners/bulk-destroy',
+            { ids: selectedIds },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSelectedIds([]);
+                    setIsBulkDeleting(false);
+                    setIsBulkMode(false); // Keluar dari mode bulk setelah sukses menghapus
+                },
+            }
+        );
+    }
+
     function formatDate(value) {
         return new Date(value).toLocaleDateString('id-ID', {
             day: '2-digit',
@@ -53,134 +122,302 @@ export default function Index({ partners, filters }) {
         });
     }
 
+    const isAllSelected = partners.data.length > 0 && partners.data.every((p) => selectedIds.includes(p.id));
+
     return (
         <AdminLayout title="Mitra">
             <Head title="Kelola Mitra" />
 
-            {/* Tabs filter status */}
-            <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4 select-none">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => applyFilters({ status: tab.key })}
-                        className={`rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 shadow-sm ${
-                            activeStatus === tab.key
-                                ? 'bg-green-700 text-white shadow-green-700/20'
-                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                        }`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
+            <div className="space-y-6">
+                {/* Notifikasi Berhasil (Flash Message) */}
+                {flash?.success && (
+                    <div className="rounded-2xl border border-green-200 bg-green-50 p-4 flex items-center gap-3 text-green-900 shadow-sm transition-all">
+                        <CheckCircle2 size={20} className="text-green-600 shrink-0" />
+                        <div className="text-xs font-medium">
+                            {flash.success}
+                        </div>
+                    </div>
+                )}
 
-            {/* Search bar */}
-            <form onSubmit={handleSearchSubmit} className="mt-5 flex gap-2.5 max-w-md">
-                <div className="relative flex-1">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
-                        <Search size={16} />
-                    </span>
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Cari nama, email, atau nomor telepon..."
-                        className="w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 py-2 text-xs text-gray-800 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 shadow-sm"
-                    />
+                {/* Tabs filter status */}
+                <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4 select-none">
+                    {TABS.map((tab) => (
+                        <button
+                            key={tab.key}
+                            onClick={() => applyFilters({ status: tab.key })}
+                            className={`rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 shadow-sm ${activeStatus === tab.key
+                                    ? 'bg-green-700 text-white shadow-green-700/20'
+                                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
-                <button
-                    type="submit"
-                    className="rounded-xl bg-green-700 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 shadow-sm transition-all select-none"
-                >
-                    Cari
-                </button>
-            </form>
 
-            {/* Tabel */}
-            <div className="mt-5 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                <table className="w-full text-left text-xs">
-                    <thead className="bg-gray-50/70 text-[11px] uppercase tracking-wider text-gray-500 border-b border-gray-200 select-none">
-                        <tr>
-                            <th className="px-4 py-3 font-bold">ID Vendor</th>
-                            <th className="px-4 py-3 font-bold">Nama Mitra</th>
-                            <th className="px-4 py-3 font-bold">No. Telepon</th>
-                            <th className="px-4 py-3 font-bold">Email</th>
-                            <th className="px-4 py-3 font-bold">Kota</th>
-                            <th className="px-4 py-3 font-bold">Tanggal Bergabung</th>
-                            <th className="px-4 py-3 font-bold">Status</th>
-                            <th className="px-4 py-3 font-bold text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {partners.data.length === 0 && (
+                {/* Search & Tombol Pilih Banyak */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <form onSubmit={handleSearchSubmit} className="flex gap-2.5 max-w-md flex-1">
+                        <div className="relative flex-1">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                                <Search size={16} />
+                            </span>
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Cari nama, email, atau nomor telepon..."
+                                className="w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 py-2 text-xs text-gray-800 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 shadow-sm"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="rounded-xl bg-green-700 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 shadow-sm transition-all select-none"
+                        >
+                            Cari
+                        </button>
+                    </form>
+
+                    {partners.data.length > 0 && (
+                        <button
+                            type="button"
+                            onClick={toggleSelectMode}
+                            className={`ml-auto rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all ${isBulkMode
+                                    ? 'border-green-600 bg-green-50 text-green-700'
+                                    : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                                }`}
+                        >
+                            {isBulkMode ? 'Batal Pilih' : 'Pilih Banyak'}
+                        </button>
+                    )}
+                </div>
+
+                {/* Bar info jumlah terpilih - sama persis polanya dengan halaman Pesanan */}
+                {isBulkMode && selectedIds.length > 0 && (
+                    <div className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm">
+                        <span className="text-xs font-semibold text-green-800">
+                            {selectedIds.length} mitra dipilih
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedIds([])}
+                                className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-white"
+                            >
+                                Batalkan Pilihan
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsBulkDeleting(true)}
+                                className="flex items-center gap-1.5 rounded-xl bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700"
+                            >
+                                <Trash2 size={13} />
+                                Hapus {selectedIds.length} Mitra
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tabel */}
+                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full text-left text-xs">
+                        <thead className="bg-gray-50/70 text-[11px] uppercase tracking-wider text-gray-500 border-b border-gray-200 select-none">
                             <tr>
-                                <td colSpan={8} className="px-4 py-12 text-center text-gray-400 select-none">
-                                    <div className="flex flex-col items-center justify-center">
-                                        <Handshake size={32} className="text-gray-300 mb-2" />
-                                        <p className="text-sm font-medium text-gray-500">Belum ada mitra untuk filter ini.</p>
-                                    </div>
-                                </td>
+                                {isBulkMode && (
+                                    <th className="px-4 py-3 w-10 text-center animate-fade-in">
+                                        <input
+                                            type="checkbox"
+                                            checked={isAllSelected}
+                                            onChange={handleSelectAll}
+                                            className="rounded border-gray-300 text-green-700 focus:ring-green-600"
+                                        />
+                                    </th>
+                                )}
+                                <th className="px-4 py-3 font-bold">ID Vendor</th>
+                                <th className="px-4 py-3 font-bold">Nama Mitra</th>
+                                <th className="px-4 py-3 font-bold">No. Telepon</th>
+                                <th className="px-4 py-3 font-bold">Email</th>
+                                <th className="px-4 py-3 font-bold">Kota</th>
+                                <th className="px-4 py-3 font-bold">Tanggal Bergabung</th>
+                                <th className="px-4 py-3 font-bold">Status</th>
+                                <th className="px-4 py-3 font-bold text-right">Aksi</th>
                             </tr>
-                        )}
-                        {partners.data.map((partner) => {
-                            const displayStatus = partner.suspended_at ? 'ditangguhkan' : partner.verification_status;
-
-                            return (
-                                <tr key={partner.id} className="hover:bg-gray-50/60 transition-colors">
-                                    <td className="px-4 py-3.5 text-gray-500 font-mono">#{partner.id}</td>
-                                    <td className="px-4 py-3.5 font-semibold text-gray-900">{partner.name}</td>
-                                    <td className="px-4 py-3.5 text-gray-600">{partner.phone ?? '-'}</td>
-                                    <td className="px-4 py-3.5 text-gray-600">{partner.email}</td>
-                                    <td className="px-4 py-3.5 text-gray-600">{partner.city ?? '-'}</td>
-                                    <td className="px-4 py-3.5 text-gray-500">{formatDate(partner.created_at)}</td>
-                                    <td className="px-4 py-3.5 select-none">
-                                        <span
-                                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                                                STATUS_STYLE[displayStatus] || 'bg-slate-100 text-slate-700'
-                                            }`}
-                                        >
-                                            {STATUS_LABEL[displayStatus] || displayStatus}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3.5 text-right select-none">
-                                        <Link
-                                            href={`/admin/partners/${partner.id}`}
-                                            className="inline-flex items-center gap-1 text-xs font-bold text-green-700 hover:text-green-800 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 transition-colors"
-                                        >
-                                            Detail
-                                            <ChevronRight size={14} />
-                                        </Link>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {partners.data.length === 0 && (
+                                <tr>
+                                    <td colSpan={isBulkMode ? 9 : 8} className="px-4 py-12 text-center text-gray-400 select-none">
+                                        <div className="flex flex-col items-center justify-center">
+                                            <Handshake size={32} className="text-gray-300 mb-2" />
+                                            <p className="text-sm font-medium text-gray-500">Belum ada mitra untuk filter ini.</p>
+                                        </div>
                                     </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                            )}
+                            {partners.data.map((partner) => {
+                                const displayStatus = partner.suspended_at ? 'ditangguhkan' : partner.verification_status;
+                                const isChecked = selectedIds.includes(partner.id);
+
+                                return (
+                                    <tr key={partner.id} className={`hover:bg-gray-50/60 transition-colors ${isChecked ? 'bg-green-50/30' : ''}`}>
+                                        {isBulkMode && (
+                                            <td className="px-4 py-3.5 text-center animate-fade-in">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isChecked}
+                                                    onChange={() => handleSelectOne(partner.id)}
+                                                    className="rounded border-gray-300 text-green-700 focus:ring-green-600"
+                                                />
+                                            </td>
+                                        )}
+                                        <td className="px-4 py-3.5 text-gray-500 font-mono">#{partner.id}</td>
+                                        <td className="px-4 py-3.5 font-semibold text-gray-900">{partner.name}</td>
+                                        <td className="px-4 py-3.5 text-gray-600">{partner.phone ?? '-'}</td>
+                                        <td className="px-4 py-3.5 text-gray-600">{partner.email}</td>
+                                        <td className="px-4 py-3.5 text-gray-600">{partner.city ?? '-'}</td>
+                                        <td className="px-4 py-3.5 text-gray-500">{formatDate(partner.created_at)}</td>
+                                        <td className="px-4 py-3.5 select-none">
+                                            <span
+                                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_STYLE[displayStatus] || 'bg-slate-100 text-slate-700'
+                                                    }`}
+                                            >
+                                                {STATUS_LABEL[displayStatus] || displayStatus}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3.5 text-right select-none">
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                <Link
+                                                    href={`/admin/partners/${partner.id}`}
+                                                    className="inline-flex items-center gap-1 text-xs font-bold text-green-700 hover:text-green-800 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 transition-colors"
+                                                >
+                                                    Detail
+                                                    <ChevronRight size={14} />
+                                                </Link>
+                                                <button
+                                                    onClick={() => setDeletingPartner(partner)}
+                                                    className="inline-flex items-center text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 p-1.5 rounded-lg border border-red-200 transition-colors"
+                                                    title="Hapus Mitra"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                {partners.data.length > 0 && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 select-none">
+                        <p className="text-xs text-gray-500">
+                            Menampilkan <span className="font-semibold text-gray-700">{partners.from}</span> sampai <span className="font-semibold text-gray-700">{partners.to}</span> dari <span className="font-semibold text-gray-700">{partners.total}</span> data
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {partners.links.map((link, i) => (
+                                <Link
+                                    key={i}
+                                    href={link.url ?? '#'}
+                                    preserveState
+                                    preserveScroll
+                                    className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${link.active
+                                            ? 'bg-green-700 text-white shadow-sm'
+                                            : link.url
+                                                ? 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                                                : 'cursor-not-allowed text-gray-300 border border-gray-100 bg-gray-50/50'
+                                        }`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Pagination */}
-            {partners.data.length > 0 && (
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 select-none">
-                    <p className="text-xs text-gray-500">
-                        Menampilkan <span className="font-semibold text-gray-700">{partners.from}</span> sampai <span className="font-semibold text-gray-700">{partners.to}</span> dari <span className="font-semibold text-gray-700">{partners.total}</span> data
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                        {partners.links.map((link, i) => (
-                            <Link
-                                key={i}
-                                href={link.url ?? '#'}
-                                preserveState
-                                preserveScroll
-                                className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
-                                    link.active
-                                        ? 'bg-green-700 text-white shadow-sm'
-                                        : link.url
-                                        ? 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                                        : 'cursor-not-allowed text-gray-300 border border-gray-100 bg-gray-50/50'
-                                }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        ))}
+            {/* Modal Konfirmasi Hapus Satuan */}
+            {deletingPartner && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-gray-100 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                                <AlertTriangle size={20} />
+                            </div>
+                            <button
+                                onClick={() => setDeletingPartner(null)}
+                                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div>
+                            <h3 className="text-base font-bold text-gray-900">Hapus Akun Mitra</h3>
+                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                                Apakah Anda yakin ingin menghapus mitra <span className="font-semibold text-gray-800">{deletingPartner.name}</span>? Tindakan ini permanen.
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2.5 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setDeletingPartner(null)}
+                                className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDeleteConfirm}
+                                className="rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 shadow-sm transition-colors"
+                            >
+                                Ya, Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Konfirmasi Bulk Delete */}
+            {isBulkDeleting && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-gray-100 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                                <AlertTriangle size={20} />
+                            </div>
+                            <button
+                                onClick={() => setIsBulkDeleting(false)}
+                                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div>
+                            <h3 className="text-base font-bold text-gray-900">Hapus {selectedIds.length} Akun Mitra?</h3>
+                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                                Apakah Anda yakin ingin menghapus seluruh mitra yang dipilih secara permanen? Data yang dihapus tidak dapat dikembalikan.
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2.5 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setIsBulkDeleting(false)}
+                                className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleBulkDeleteConfirm}
+                                className="rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 shadow-sm transition-colors"
+                            >
+                                Ya, Hapus Semua
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

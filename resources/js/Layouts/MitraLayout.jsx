@@ -19,8 +19,9 @@ function Toast({ type, message, onClose }) {
 
     return (
         <div
-            className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 shadow-lg ${isSuccess ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
-                }`}
+            className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 shadow-lg ${
+                isSuccess ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+            }`}
         >
             {isSuccess ? (
                 <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-green-600" />
@@ -88,13 +89,18 @@ export default function MitraLayout({ children, title }) {
                     style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
                 >
                     {navItems.map(({ label, href, icon: Icon }) => {
-                        const active = url.startsWith(href);
+                        // Memperbaiki logika active agar tidak bentrok dengan rute lain (seperti /mitra/profil)
+                        const active = href === '/mitra/dashboard' 
+                            ? url === '/mitra/dashboard' 
+                            : url === href || url.startsWith(href + '/');
+
                         return (
                             <Link
                                 key={href}
                                 href={href}
-                                className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${active ? 'text-green-600' : 'text-gray-500'
-                                    }`}
+                                className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${
+                                    active ? 'text-green-600' : 'text-gray-500'
+                                }`}
                             >
                                 <Icon size={20} />
                                 {label}

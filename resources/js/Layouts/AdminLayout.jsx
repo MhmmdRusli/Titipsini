@@ -14,6 +14,7 @@ const navItems = [
     { label: 'Vendor', href: '/admin/partners', icon: Handshake },
     { label: 'Berita', href: '/admin/berita', icon: Newspaper },
     { label: 'Top Up', href: '/admin/topup', icon: Wallet },
+    { label: 'Penarikan', href: '/admin/penarikan', icon: Wallet },
     {
         label: 'Pesanan',
         href: '/admin/orders',
