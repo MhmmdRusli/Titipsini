@@ -160,6 +160,17 @@ class OrderController extends Controller
             'cancel_reason' => ['required_if:status,dibatalkan', 'nullable', 'string', 'max:255'],
         ]);
 
+        // Pesanan hanya boleh dikonfirmasi (diproses/selesai) kalau bukti
+        // pembayaran sudah diupload customer. Pengecualian: pembatalan tetap
+        // boleh dilakukan kapan saja meski belum ada bukti bayar.
+        $butuhBuktiBayar = in_array($validated['status'], ['diproses', 'selesai']);
+
+        if ($butuhBuktiBayar && ! $order->payment_receipt) {
+            return back()->withErrors([
+                'status' => 'Pesanan belum bisa dikonfirmasi karena bukti pembayaran belum diunggah customer.',
+            ]);
+        }
+
         $statusSebelumnya = $order->status;
 
         $order->update([
