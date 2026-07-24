@@ -64,14 +64,15 @@ export default function Qris() {
     return (
         <AdminLayout title="QRIS">
             <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                {/* KARTU KIRI: FORM UNGGAH QRIS */}
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-[#111827] transition-colors">
                     <div className="mb-6 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-700">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-700 dark:bg-green-950/60 dark:border dark:border-green-800/50 dark:text-green-400">
                             <QrCode size={20} />
                         </div>
                         <div>
-                            <h2 className="text-sm font-bold text-gray-900">Gambar QRIS</h2>
-                            <p className="text-xs text-gray-500">Unggah gambar QRIS statis yang akan ditampilkan ke customer saat pembayaran.</p>
+                            <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Gambar QRIS</h2>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Unggah gambar QRIS statis yang akan ditampilkan ke customer saat pembayaran.</p>
                         </div>
                     </div>
 
@@ -79,19 +80,19 @@ export default function Qris() {
                         <div
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={onDrop}
-                            className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 p-8 text-center"
+                            className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-[#1f293d]/30 p-8 text-center transition-colors"
                         >
                             {preview ? (
                                 <div className="relative">
                                     <img
                                         src={preview}
                                         alt="Pratinjau QRIS"
-                                        className="mx-auto h-64 w-64 rounded-xl border border-gray-200 object-contain"
+                                        className="mx-auto h-64 w-64 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 object-contain p-2"
                                     />
                                     <button
                                         type="button"
                                         onClick={handleRemoveImage}
-                                        className="absolute -right-2 -top-2 rounded-full border border-gray-100 bg-white p-1.5 text-red-600 shadow-md transition hover:bg-red-50"
+                                        className="absolute -right-2 -top-2 rounded-full border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-1.5 text-red-600 dark:text-red-400 shadow-md transition hover:bg-red-50 dark:hover:bg-red-950/50"
                                         title="Hapus QRIS"
                                     >
                                         <Trash2 size={16} />
@@ -99,18 +100,18 @@ export default function Qris() {
                                 </div>
                             ) : (
                                 <>
-                                    <UploadCloud size={32} className="mb-2 text-gray-400" />
-                                    <p className="text-sm text-gray-600">
+                                    <UploadCloud size={32} className="mb-2 text-gray-400 dark:text-gray-500" />
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">
                                         Seret gambar ke sini, atau{' '}
                                         <button
                                             type="button"
                                             onClick={() => fileInput.current?.click()}
-                                            className="font-semibold text-green-700 hover:underline"
+                                            className="font-semibold text-green-700 dark:text-green-400 hover:underline"
                                         >
                                             pilih file
                                         </button>
                                     </p>
-                                    <p className="mt-1 text-xs text-gray-400">PNG atau JPG, maksimal 2MB</p>
+                                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">PNG atau JPG, maksimal 2MB</p>
                                 </>
                             )}
                             <input
@@ -122,14 +123,14 @@ export default function Qris() {
                             />
                         </div>
                         {errors.qris_image && (
-                            <p className="text-xs text-red-600">{errors.qris_image}</p>
+                            <p className="text-xs text-red-600 dark:text-red-400">{errors.qris_image}</p>
                         )}
 
                         {!preview && (
                             <button
                                 type="button"
                                 onClick={() => fileInput.current?.click()}
-                                className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                                className="rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 shadow-sm transition hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
                                 Pilih gambar
                             </button>
@@ -139,12 +140,12 @@ export default function Qris() {
                             <button
                                 type="submit"
                                 disabled={processing || !data.qris_image}
-                                className="rounded-xl bg-green-700 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:opacity-50"
+                                className="rounded-xl bg-green-700 dark:bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 dark:hover:bg-emerald-500 disabled:opacity-50"
                             >
                                 Simpan QRIS
                             </button>
                             {recentlySuccessful && (
-                                <span className="flex items-center gap-1 text-xs font-medium text-green-700">
+                                <span className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-emerald-400">
                                     <CheckCircle2 size={14} />
                                     QRIS berhasil disimpan
                                 </span>
@@ -153,44 +154,46 @@ export default function Qris() {
                     </form>
                 </div>
 
-                {/* Kolom kanan: tips + catatan keamanan, biar sepadan sama tinggi card kiri */}
+                {/* KARTU KANAN: TIPS & KEAMANAN */}
                 <div className="flex flex-col gap-6">
-                    <div className="flex-1 rounded-2xl border border-amber-100 bg-amber-50/60 p-6 shadow-sm">
+                    {/* CARD TIPS PENGGUNAAN */}
+                    <div className="flex-1 rounded-2xl border border-amber-100 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20 p-6 shadow-sm transition-colors">
                         <div className="mb-4 flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
                                 <Lightbulb size={20} />
                             </div>
                             <div>
-                                <h2 className="text-sm font-bold text-gray-900">Tips Penggunaan QRIS</h2>
-                                <p className="text-xs text-gray-500">Beberapa hal yang perlu diperhatikan sebelum mengunggah.</p>
+                                <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Tips Penggunaan QRIS</h2>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Beberapa hal yang perlu diperhatikan sebelum mengunggah.</p>
                             </div>
                         </div>
 
                         <ul className="space-y-3.5">
                             {TIPS.map((tip, i) => (
-                                <li key={i} className="flex items-start gap-2.5 text-xs text-gray-700">
-                                    <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-amber-500" />
+                                <li key={i} className="flex items-start gap-2.5 text-xs text-gray-700 dark:text-gray-300">
+                                    <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-amber-500 dark:text-amber-400" />
                                     <span>{tip}</span>
                                 </li>
                             ))}
                         </ul>
                     </div>
 
-                    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                    {/* CARD PRATINJAU DILIHAT CUSTOMER */}
+                    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-[#111827] transition-colors">
                         <div className="mb-3 flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
                                 <Smartphone size={20} />
                             </div>
                             <div>
-                                <h2 className="text-sm font-bold text-gray-900">Yang Dilihat Customer</h2>
-                                <p className="text-xs text-gray-500">
+                                <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Yang Dilihat Customer</h2>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
                                     Gambar ini muncul di halaman pembayaran, sebagai satu-satunya opsi QRIS untuk semua transaksi.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-2.5 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3 text-xs text-gray-600">
-                            <ShieldAlert size={15} className="mt-0.5 shrink-0 text-gray-400" />
+                        <div className="flex items-start gap-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-[#1f293d]/50 px-3.5 py-3 text-xs text-gray-600 dark:text-gray-300 transition-colors">
+                            <ShieldAlert size={15} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
                             Karena berlaku untuk semua transaksi, pastikan QRIS ini benar-benar aktif dan terverifikasi sebelum disimpan — kesalahan di sini berdampak ke seluruh pembayaran QRIS platform.
                         </div>
                     </div>

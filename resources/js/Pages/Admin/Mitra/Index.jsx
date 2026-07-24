@@ -13,11 +13,11 @@ const TABS = [
 ];
 
 const STATUS_STYLE = {
-    pendaftar: 'bg-slate-100 text-slate-700 border border-slate-200',
-    verifikasi_akun: 'bg-amber-50 text-amber-700 border border-amber-200',
-    terverifikasi: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-    ditolak: 'bg-red-50 text-red-700 border border-red-200',
-    ditangguhkan: 'bg-orange-50 text-orange-700 border border-orange-200',
+    pendaftar: 'bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-900/60 dark:text-slate-300 dark:border-slate-800',
+    verifikasi_akun: 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800/50',
+    terverifikasi: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/50',
+    ditolak: 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/60 dark:text-red-400 dark:border-red-800/50',
+    ditangguhkan: 'bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/60 dark:text-orange-400 dark:border-orange-800/50',
 };
 
 const STATUS_LABEL = {
@@ -56,11 +56,6 @@ export default function Index({ partners, filters }) {
     // Toggle mode pilih banyak
     function toggleSelectMode() {
         setIsBulkMode((v) => !v);
-        setSelectedIds([]);
-    }
-
-    // Fungsi untuk Hapus Centang / Batal Pilih (Hanya mengosongkan item yang dipilih, mode tetap aktif)
-    function handleCancelSelection() {
         setSelectedIds([]);
     }
 
@@ -127,12 +122,11 @@ export default function Index({ partners, filters }) {
     return (
         <AdminLayout title="Mitra">
             <Head title="Kelola Mitra" />
-
             <div className="space-y-6">
                 {/* Notifikasi Berhasil (Flash Message) */}
                 {flash?.success && (
-                    <div className="rounded-2xl border border-green-200 bg-green-50 p-4 flex items-center gap-3 text-green-900 shadow-sm transition-all">
-                        <CheckCircle2 size={20} className="text-green-600 shrink-0" />
+                    <div className="rounded-2xl border border-green-200 bg-green-50 p-4 flex items-center gap-3 text-green-900 shadow-sm transition-all dark:border-emerald-800/50 dark:bg-emerald-950/60 dark:text-emerald-300">
+                        <CheckCircle2 size={20} className="text-green-600 dark:text-emerald-400 shrink-0" />
                         <div className="text-xs font-medium">
                             {flash.success}
                         </div>
@@ -140,15 +134,16 @@ export default function Index({ partners, filters }) {
                 )}
 
                 {/* Tabs filter status */}
-                <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4 select-none">
+                <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800 pb-4 select-none">
                     {TABS.map((tab) => (
                         <button
                             key={tab.key}
                             onClick={() => applyFilters({ status: tab.key })}
-                            className={`rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 shadow-sm ${activeStatus === tab.key
-                                    ? 'bg-green-700 text-white shadow-green-700/20'
-                                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                                }`}
+                            className={`rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 shadow-sm ${
+                                activeStatus === tab.key
+                                    ? 'bg-green-700 text-white shadow-green-700/20 dark:bg-emerald-600'
+                                    : 'bg-white dark:bg-[#111827] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800'
+                            }`}
                         >
                             {tab.label}
                         </button>
@@ -159,7 +154,7 @@ export default function Index({ partners, filters }) {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <form onSubmit={handleSearchSubmit} className="flex gap-2.5 max-w-md flex-1">
                         <div className="relative flex-1">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500 pointer-events-none">
                                 <Search size={16} />
                             </span>
                             <input
@@ -167,12 +162,12 @@ export default function Index({ partners, filters }) {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Cari nama, email, atau nomor telepon..."
-                                className="w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 py-2 text-xs text-gray-800 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 shadow-sm"
+                                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] pl-9 pr-3 py-2 text-xs text-gray-800 dark:text-gray-200 focus:border-green-600 dark:focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-green-600 dark:focus:ring-emerald-500 shadow-sm"
                             />
                         </div>
                         <button
                             type="submit"
-                            className="rounded-xl bg-green-700 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 shadow-sm transition-all select-none"
+                            className="rounded-xl bg-green-700 dark:bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-emerald-500 shadow-sm transition-all select-none"
                         >
                             Cari
                         </button>
@@ -182,27 +177,28 @@ export default function Index({ partners, filters }) {
                         <button
                             type="button"
                             onClick={toggleSelectMode}
-                            className={`ml-auto rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all ${isBulkMode
-                                    ? 'border-green-600 bg-green-50 text-green-700'
-                                    : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                                }`}
+                            className={`rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all ${
+                                isBulkMode
+                                    ? 'border-green-600 bg-green-50 text-green-700 dark:border-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400'
+                                    : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
                         >
                             {isBulkMode ? 'Batal Pilih' : 'Pilih Banyak'}
                         </button>
                     )}
                 </div>
 
-                {/* Bar info jumlah terpilih - sama persis polanya dengan halaman Pesanan */}
+                {/* Bar info jumlah terpilih */}
                 {isBulkMode && selectedIds.length > 0 && (
-                    <div className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm">
-                        <span className="text-xs font-semibold text-green-800">
+                    <div className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm dark:border-emerald-800/50 dark:bg-emerald-950/60">
+                        <span className="text-xs font-semibold text-green-800 dark:text-emerald-300">
                             {selectedIds.length} mitra dipilih
                         </span>
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
                                 onClick={() => setSelectedIds([])}
-                                className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-white"
+                                className="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 transition hover:bg-white dark:hover:bg-gray-800"
                             >
                                 Batalkan Pilihan
                             </button>
@@ -219,17 +215,17 @@ export default function Index({ partners, filters }) {
                 )}
 
                 {/* Tabel */}
-                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] shadow-sm transition-colors">
                     <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50/70 text-[11px] uppercase tracking-wider text-gray-500 border-b border-gray-200 select-none">
+                        <thead className="bg-gray-50/70 dark:bg-gray-900/50 text-[11px] uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800 select-none">
                             <tr>
                                 {isBulkMode && (
-                                    <th className="px-4 py-3 w-10 text-center animate-fade-in">
+                                    <th className="px-4 py-3 w-10 text-center">
                                         <input
                                             type="checkbox"
                                             checked={isAllSelected}
                                             onChange={handleSelectAll}
-                                            className="rounded border-gray-300 text-green-700 focus:ring-green-600"
+                                            className="rounded border-gray-300 text-green-700 focus:ring-green-600 dark:border-gray-700 dark:bg-gray-800"
                                         />
                                     </th>
                                 )}
@@ -243,13 +239,13 @@ export default function Index({ partners, filters }) {
                                 <th className="px-4 py-3 font-bold text-right">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {partners.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={isBulkMode ? 9 : 8} className="px-4 py-12 text-center text-gray-400 select-none">
+                                    <td colSpan={isBulkMode ? 9 : 8} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500 select-none">
                                         <div className="flex flex-col items-center justify-center">
-                                            <Handshake size={32} className="text-gray-300 mb-2" />
-                                            <p className="text-sm font-medium text-gray-500">Belum ada mitra untuk filter ini.</p>
+                                            <Handshake size={32} className="text-gray-300 dark:text-gray-600 mb-2" />
+                                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Belum ada mitra untuk filter ini.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -259,27 +255,28 @@ export default function Index({ partners, filters }) {
                                 const isChecked = selectedIds.includes(partner.id);
 
                                 return (
-                                    <tr key={partner.id} className={`hover:bg-gray-50/60 transition-colors ${isChecked ? 'bg-green-50/30' : ''}`}>
+                                    <tr key={partner.id} className={`hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors ${isChecked ? 'bg-green-50/30 dark:bg-emerald-950/20' : ''}`}>
                                         {isBulkMode && (
-                                            <td className="px-4 py-3.5 text-center animate-fade-in">
+                                            <td className="px-4 py-3.5 text-center">
                                                 <input
                                                     type="checkbox"
                                                     checked={isChecked}
                                                     onChange={() => handleSelectOne(partner.id)}
-                                                    className="rounded border-gray-300 text-green-700 focus:ring-green-600"
+                                                    className="rounded border-gray-300 text-green-700 focus:ring-green-600 dark:border-gray-700 dark:bg-gray-800"
                                                 />
                                             </td>
                                         )}
-                                        <td className="px-4 py-3.5 text-gray-500 font-mono">#{partner.id}</td>
-                                        <td className="px-4 py-3.5 font-semibold text-gray-900">{partner.name}</td>
-                                        <td className="px-4 py-3.5 text-gray-600">{partner.phone ?? '-'}</td>
-                                        <td className="px-4 py-3.5 text-gray-600">{partner.email}</td>
-                                        <td className="px-4 py-3.5 text-gray-600">{partner.city ?? '-'}</td>
-                                        <td className="px-4 py-3.5 text-gray-500">{formatDate(partner.created_at)}</td>
+                                        <td className="px-4 py-3.5 text-gray-500 dark:text-gray-400 font-mono">#{partner.id}</td>
+                                        <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-gray-100">{partner.name}</td>
+                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{partner.phone ?? '-'}</td>
+                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{partner.email}</td>
+                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{partner.city ?? '-'}</td>
+                                        <td className="px-4 py-3.5 text-gray-500 dark:text-gray-400">{formatDate(partner.created_at)}</td>
                                         <td className="px-4 py-3.5 select-none">
                                             <span
-                                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_STYLE[displayStatus] || 'bg-slate-100 text-slate-700'
-                                                    }`}
+                                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                                                    STATUS_STYLE[displayStatus] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                                                }`}
                                             >
                                                 {STATUS_LABEL[displayStatus] || displayStatus}
                                             </span>
@@ -288,14 +285,14 @@ export default function Index({ partners, filters }) {
                                             <div className="flex items-center justify-end gap-1.5">
                                                 <Link
                                                     href={`/admin/partners/${partner.id}`}
-                                                    className="inline-flex items-center gap-1 text-xs font-bold text-green-700 hover:text-green-800 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 transition-colors"
+                                                    className="inline-flex items-center gap-1 text-xs font-bold text-green-700 dark:text-emerald-400 hover:text-green-800 dark:hover:text-emerald-300 bg-green-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-lg border border-green-200 dark:border-emerald-800/50 transition-colors"
                                                 >
                                                     Detail
                                                     <ChevronRight size={14} />
                                                 </Link>
                                                 <button
                                                     onClick={() => setDeletingPartner(partner)}
-                                                    className="inline-flex items-center text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 p-1.5 rounded-lg border border-red-200 transition-colors"
+                                                    className="inline-flex items-center text-xs font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-950/60 p-1.5 rounded-lg border border-red-200 dark:border-red-800/50 transition-colors"
                                                     title="Hapus Mitra"
                                                 >
                                                     <Trash2 size={14} />
@@ -312,8 +309,8 @@ export default function Index({ partners, filters }) {
                 {/* Pagination */}
                 {partners.data.length > 0 && (
                     <div className="flex flex-wrap items-center justify-between gap-3 select-none">
-                        <p className="text-xs text-gray-500">
-                            Menampilkan <span className="font-semibold text-gray-700">{partners.from}</span> sampai <span className="font-semibold text-gray-700">{partners.to}</span> dari <span className="font-semibold text-gray-700">{partners.total}</span> data
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Menampilkan <span className="font-semibold text-gray-700 dark:text-gray-200">{partners.from}</span> sampai <span className="font-semibold text-gray-700 dark:text-gray-200">{partners.to}</span> dari <span className="font-semibold text-gray-700 dark:text-gray-200">{partners.total}</span> data
                         </p>
                         <div className="flex flex-wrap gap-1.5">
                             {partners.links.map((link, i) => (
@@ -322,12 +319,13 @@ export default function Index({ partners, filters }) {
                                     href={link.url ?? '#'}
                                     preserveState
                                     preserveScroll
-                                    className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${link.active
-                                            ? 'bg-green-700 text-white shadow-sm'
+                                    className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
+                                        link.active
+                                            ? 'bg-green-700 dark:bg-emerald-600 text-white shadow-sm'
                                             : link.url
-                                                ? 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                                                : 'cursor-not-allowed text-gray-300 border border-gray-100 bg-gray-50/50'
-                                        }`}
+                                                ? 'bg-white dark:bg-[#111827] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800'
+                                                : 'cursor-not-allowed text-gray-300 dark:text-gray-600 border border-gray-100 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-900/30'
+                                    }`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />
                             ))}
@@ -335,27 +333,27 @@ export default function Index({ partners, filters }) {
                     </div>
                 )}
             </div>
-
+            
             {/* Modal Konfirmasi Hapus Satuan */}
             {deletingPartner && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-gray-100 space-y-4">
+                    <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[#111827] p-6 shadow-xl border border-gray-100 dark:border-gray-800 space-y-4">
                         <div className="flex items-center justify-between">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400">
                                 <AlertTriangle size={20} />
                             </div>
                             <button
                                 onClick={() => setDeletingPartner(null)}
-                                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                             >
                                 <X size={18} />
                             </button>
                         </div>
 
                         <div>
-                            <h3 className="text-base font-bold text-gray-900">Hapus Akun Mitra</h3>
-                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                                Apakah Anda yakin ingin menghapus mitra <span className="font-semibold text-gray-800">{deletingPartner.name}</span>? Tindakan ini permanen.
+                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Hapus Akun Mitra</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                                Apakah Anda yakin ingin menghapus mitra <span className="font-semibold text-gray-800 dark:text-gray-200">{deletingPartner.name}</span>? Tindakan ini permanen.
                             </p>
                         </div>
 
@@ -363,7 +361,7 @@ export default function Index({ partners, filters }) {
                             <button
                                 type="button"
                                 onClick={() => setDeletingPartner(null)}
-                                className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                             >
                                 Batal
                             </button>
@@ -382,22 +380,22 @@ export default function Index({ partners, filters }) {
             {/* Modal Konfirmasi Bulk Delete */}
             {isBulkDeleting && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-gray-100 space-y-4">
+                    <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[#111827] p-6 shadow-xl border border-gray-100 dark:border-gray-800 space-y-4">
                         <div className="flex items-center justify-between">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400">
                                 <AlertTriangle size={20} />
                             </div>
                             <button
                                 onClick={() => setIsBulkDeleting(false)}
-                                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                             >
                                 <X size={18} />
                             </button>
                         </div>
 
                         <div>
-                            <h3 className="text-base font-bold text-gray-900">Hapus {selectedIds.length} Akun Mitra?</h3>
-                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Hapus {selectedIds.length} Akun Mitra?</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                                 Apakah Anda yakin ingin menghapus seluruh mitra yang dipilih secara permanen? Data yang dihapus tidak dapat dikembalikan.
                             </p>
                         </div>
@@ -406,7 +404,7 @@ export default function Index({ partners, filters }) {
                             <button
                                 type="button"
                                 onClick={() => setIsBulkDeleting(false)}
-                                className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                             >
                                 Batal
                             </button>
