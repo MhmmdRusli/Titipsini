@@ -19,6 +19,7 @@ class DashboardController extends Controller
             'period' => ['nullable', 'in:all,month,quarter,year'],
         ]);
 
+        // $data otomatis memuat 'totalKomisiAdmin' dan 'persenKomisi' dari Service
         $data = $this->dashboardService->getDashboardData($filters);
 
         return Inertia::render('Admin/Dashboard', [

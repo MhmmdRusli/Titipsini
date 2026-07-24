@@ -9,6 +9,21 @@ use Illuminate\Support\Carbon;
 
 class OrderRepository implements OrderRepositoryInterface
 {
+    /**
+     * Menghitung total pendapatan kotor dari pesanan
+     */
+    public function getTotalRevenue(array $filters = []): float
+    {
+        $query = $this->applyFilters(Order::query(), $filters);
+
+        // ⚠️ PENTING: Filter status transaksi yang sah/selesai.
+        // Sesuaikan string status di bawah sesuai enum/string di database kamu (misal: 'completed', 'selesai', 'paid', 'success')
+        $query->whereIn('status', ['completed', 'selesai', 'success', 'paid']);
+
+        // ⚠️ Sesuaikan nama 'total_price' dengan kolom harga di tabel 'orders' kamu
+        return (float) $query->sum('total_price');
+    }
+
     public function countByStatus(array $filters, array $statuses = []): int
     {
         $query = $this->applyFilters(Order::query(), $filters);

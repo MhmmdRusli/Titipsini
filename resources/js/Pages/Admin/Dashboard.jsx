@@ -5,7 +5,7 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, Legend,
 } from 'recharts';
-import { Package, Users, Handshake, Activity, Box, Car, Building2, Bike, MapPin, Calendar, Sparkles, ChevronDown } from 'lucide-react';
+import { Package, Users, Handshake, Activity, Box, Car, Building2, Bike, MapPin, Calendar, Sparkles, ChevronDown, Wallet } from 'lucide-react';
 
 // Palette warna disesuaikan dengan ciri khas hijau & kuning Titipsini.com
 const PIE_COLORS = ['#15803d', '#fbbf24', '#0d9488', '#16a34a'];
@@ -33,7 +33,7 @@ function StatCard({ label, value, icon: Icon, accent, borderAccent }) {
                     <Icon size={20} />
                 </div>
             </div>
-            <p className="relative mt-4 select-none text-3xl font-extrabold tracking-tight text-gray-900">{value}</p>
+            <p className="relative mt-4 select-none text-2xl font-extrabold tracking-tight text-gray-900">{value}</p>
         </div>
     );
 }
@@ -66,11 +66,18 @@ export default function Dashboard({
         { key: 'pickup', label: 'Layanan Antar-Jemput', icon: Bike, color: 'text-emerald-600 bg-emerald-50' },
     ];
 
+    // Format nilai Rupiah untuk Komisi
+    const formattedKomisi = new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+    }).format(summary?.totalKomisiAdmin || 0);
+
     return (
         <AdminLayout title="Dashboard">
             <Head title="Dashboard Admin" />
 
-            {/* Banner Selamat Datang - overflow-hidden dipindah ke elemen anak dekoratif agar dropdown filter tidak terpotong */}
+            {/* Banner Selamat Datang */}
             <div className="relative mb-6 rounded-2xl bg-gradient-to-r from-green-700 via-emerald-700 to-green-800 p-6 text-white shadow-md select-none">
                 <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
                     <div className="absolute -right-10 -top-16 h-56 w-56 rounded-full bg-amber-400/10" />
@@ -91,7 +98,7 @@ export default function Dashboard({
                         </p>
                     </div>
 
-                    {/* Filter Section di dalam Banner / Area Kontrol */}
+                    {/* Filter Section */}
                     <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-white/15 bg-white/10 p-2 backdrop-blur-md z-30">
                         <BannerFilterDropdown
                             icon={MapPin}
@@ -118,8 +125,17 @@ export default function Dashboard({
                 </div>
             </div>
 
-            {/* Statistik Kartu Utama */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Statistik Kartu Utama (Grid 5 Kolom) */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                {/* Kartu Komisi Platform */}
+                <StatCard
+                    label={`Komisi Platform (${summary?.persenKomisi ?? 10}%)`}
+                    value={formattedKomisi}
+                    icon={Wallet}
+                    accent="bg-emerald-100 text-emerald-700"
+                    borderAccent="border-l-2 border-l-emerald-600"
+                />
+
                 <StatCard
                     label="Total Pesanan"
                     value={summary.totalOrders}
@@ -138,8 +154,8 @@ export default function Dashboard({
                     label="Total Vendor"
                     value={summary.totalVendors}
                     icon={Handshake}
-                    accent="bg-emerald-100 text-emerald-800"
-                    borderAccent="border-l-2 border-l-emerald-600"
+                    accent="bg-teal-100 text-teal-800"
+                    borderAccent="border-l-2 border-l-teal-600"
                 />
                 <StatCard
                     label="Layanan Aktif Berjalan"
