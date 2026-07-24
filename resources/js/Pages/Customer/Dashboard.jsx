@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Plus, History, Package, Building2, Car, Truck, ChevronRight, MapPin, Clock } from 'lucide-react';
+import { Plus, History, Package, Building2, Car, Truck, ChevronRight, ChevronDown, MapPin, Clock } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const CATEGORIES = [
@@ -24,6 +24,15 @@ function formatTanggal(value) {
     });
 }
 
+// Sapaan dinamis berdasarkan jam di device user
+function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 4 && hour < 11) return 'Selamat Pagi';
+    if (hour >= 11 && hour < 15) return 'Selamat Siang';
+    if (hour >= 15 && hour < 19) return 'Selamat Sore';
+    return 'Selamat Malam';
+}
+
 function BoxIcon({ className }) {
     return (
         <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -41,6 +50,8 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
         { id: 3, judul: 'Aplikasi Titipsini.Com terbaru Rilis, Buat...', published_at: null, foto: null },
     ];
 
+    const firstName = (user?.name ?? 'Riza Hidayat').split(' ')[0];
+
     return (
         <CustomerLayout>
             <Head title="Beranda" />
@@ -50,14 +61,17 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                 {/* Greeting Section */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1">
-                            Hello <span className="text-xl">👋</span>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                            {getGreeting()}, {firstName} <span className="text-xl">👋</span>
                         </h2>
-                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-[-2px]">{user?.name ?? 'Riza Hidayat'}</p>
-                        <p className="mt-0.5 flex items-center gap-0.5 text-[11px] text-gray-400 dark:text-gray-500">
-                            <MapPin size={11} className="text-gray-300 dark:text-gray-600" />
+                        <button
+                            type="button"
+                            className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-500 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+                        >
+                            <MapPin size={11} className="text-gray-400 dark:text-gray-500" />
                             {user?.wilayah ?? 'Daerah Istimewa Yogyakarta'}
-                        </p>
+                            <ChevronDown size={11} className="text-gray-400 dark:text-gray-500" />
+                        </button>
                     </div>
                 </div>
 
