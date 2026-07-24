@@ -17,6 +17,15 @@ const LAYANAN_LABEL = {
     pindahan: 'Layanan Pindahan',
 };
 
+// Konfigurasi tiap card "Jumlah Pesanan" - dipisah biar gampang nambah
+// kategori baru tanpa duplikasi JSX.
+const PESANAN_CARDS = [
+    { key: 'barang', label: 'Barang', icon: Package },
+    { key: 'kendaraan', label: 'Kendaraan', icon: Car },
+    { key: 'bangunan', label: 'Bangunan', icon: Building2 },
+    { key: 'pindahan', label: 'Pindahan', icon: Truck },
+];
+
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
 }
@@ -162,34 +171,30 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                     )}
                 </div>
 
-                {/* Jumlah Pesanan (Barang, Kendaraan, Bangunan, Pindahan) */}
+                {/* Jumlah Pesanan (Barang, Kendaraan, Bangunan, Pindahan) -
+                    full hijau, tanpa kotak putih di dalam. Angka rata kiri
+                    dengan unit "pesanan" di sampingnya, watermark ikon besar
+                    transparan di pojok kanan bawah. */}
                 <div>
                     <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Jumlah Pesanan</p>
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
-                            <p className="text-sm font-bold">Barang</p>
-                            <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
-                                {pesanan?.barang ?? 0}
+                        {PESANAN_CARDS.map(({ key, label, icon: Icon }) => (
+                            <div
+                                key={key}
+                                className="relative overflow-hidden rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm"
+                            >
+                                <Icon
+                                    size={110}
+                                    strokeWidth={1.5}
+                                    className="pointer-events-none absolute -bottom-5 -right-5 rotate-[-8deg] text-white opacity-15"
+                                />
+                                <p className="relative text-sm font-bold">{label}</p>
+                                <div className="relative mt-3 flex items-baseline gap-1">
+                                    <span className="text-3xl font-extrabold leading-none">{pesanan?.[key] ?? 0}</span>
+                                    <span className="text-xs font-medium text-white/80">pesanan</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
-                            <p className="text-sm font-bold">Kendaraan</p>
-                            <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
-                                {pesanan?.kendaraan ?? 0}
-                            </div>
-                        </div>
-                        <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
-                            <p className="text-sm font-bold">Bangunan</p>
-                            <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
-                                {pesanan?.bangunan ?? 0}
-                            </div>
-                        </div>
-                        <div className="rounded-2xl bg-[#15803d] dark:bg-green-700 p-3.5 text-white shadow-sm flex flex-col justify-between">
-                            <p className="text-sm font-bold">Pindahan</p>
-                            <div className="mt-3 rounded-xl bg-white py-3 text-center text-gray-900 shadow-inner font-extrabold text-xl">
-                                {pesanan?.pindahan ?? 0}
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
 
