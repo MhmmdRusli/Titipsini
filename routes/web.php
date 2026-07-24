@@ -242,6 +242,8 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::get('/bantuan', [MitraBantuanController::class, 'index'])->name('bantuan.index');
 
     Route::patch('/pesanan/{order}/verifikasi-pembayaran', [MitraOrderController::class, 'verifikasiPembayaran'])->name('orders.verifikasiPembayaran');
+
+    Route::get('/pendapatan/riwayat', [\App\Http\Controllers\Mitra\PendapatanController::class, 'riwayat'])->name('pendapatan.riwayat');
 });
 
 /*
