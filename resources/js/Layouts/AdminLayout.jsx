@@ -33,12 +33,12 @@ const navItems = [
         children: [
             { label: 'Keamanan', href: '/admin/pengaturan/keamanan' },
             { label: 'No Rekening', href: '/admin/pengaturan/rekening' },
+            { label: 'Komisi', href: '/admin/pengaturan/komisi' }, // <--- Menambahkan Navigasi Komisi
         ],
     },
 ];
 
 // Koordinat default: Yogyakarta (kota contoh yang dipakai di seluruh aplikasi).
-// Ganti 2 angka ini kalau mau kota lain.
 const WEATHER_LAT = -7.7956;
 const WEATHER_LON = 110.3695;
 
@@ -85,7 +85,7 @@ function useCuaca() {
                 }
             })
             .catch(() => {
-                // Diamkan saja kalau gagal fetch (misal offline) — jam & tanggal tetap tampil
+                // Diamkan saja kalau gagal fetch (misal offline)
             });
 
         return () => {

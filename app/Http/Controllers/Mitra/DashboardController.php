@@ -31,12 +31,19 @@ class DashboardController extends Controller
                   ->orWhere('service_type', 'titip_kendaraan');
             })->count();
 
-        // 2. Hitung Saldo Real-time jika kolom saldo di tabel users/partners masih 0
-        $totalPendapatan = Order::where('partner_id', $partner->id)
+        // 2. Persentase Komisi Platform (10%)
+        $persenKomisi = 10;
+
+        // Hitung total pendapatan kotor dari pesanan selesai
+        $totalPendapatanKotor = Order::where('partner_id', $partner->id)
             ->whereIn('status', ['selesai', 'completed', 'success'])
             ->sum('total_price');
 
-        $saldoTampil = $partner->saldo > 0 ? $partner->saldo : $totalPendapatan;
+        // Ambil nilai kotor (dari kolom saldo user atau hasil kalkulasi pesanan)
+        $grossBalance = $partner->saldo > 0 ? $partner->saldo : $totalPendapatanKotor;
+
+        // Potong komisi 10% -> (430.000 * 90%) = 387.000
+        $saldoTampil = $grossBalance * ((100 - $persenKomisi) / 100);
 
         // 3. Ambil Kategori Layanan Aktif
         $layananKategori = $partner->services()
@@ -50,7 +57,6 @@ class DashboardController extends Controller
         return Inertia::render('Mitra/Dashboard', [
             'partner' => [
                 'name' => $partner->name,
-                // Diperbaiki dari 'foto' menjadi 'avatar' agar sinkron dengan database & halaman profil
                 'avatar' => $partner->avatar ? Storage::disk('direct_public')->url($partner->avatar) : null,
                 'is_verified' => in_array($partner->verification_status, ['terverifikasi', 'verified']),
             ],

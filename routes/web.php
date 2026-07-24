@@ -157,6 +157,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profil.update');
 
+    // Route Langsung /admin/komisi
+    Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
+    Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
+
+    // Pengaturan Admin
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
         Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
@@ -164,6 +169,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
+        
+        // Pengaturan Komisi /admin/pengaturan/komisi
+        Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
+        Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
     });
 
     Route::resource('berita', AdminBeritaController::class)
@@ -197,6 +206,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/{topup}/approve', [TopupVerifikasiController::class, 'approve'])->name('approve');
         Route::post('/{topup}/reject', [TopupVerifikasiController::class, 'reject'])->name('reject');
     });
+
+    // Pendapatan Platform
+    Route::get('pendapatan', [\App\Http\Controllers\Admin\PendapatanController::class, 'index'])->name('pendapatan.index');
 });
 
 /*

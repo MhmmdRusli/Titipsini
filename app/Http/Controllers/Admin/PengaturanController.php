@@ -183,7 +183,7 @@ class PengaturanController extends Controller
 
         $setting = PaymentSetting::current();
 
-        if ($setting->qris_image) {
+        if ($setting && $setting->qris_image) {
             Storage::delete($setting->qris_image);
         }
 
@@ -213,5 +213,43 @@ class PengaturanController extends Controller
         return redirect()
             ->route('admin.pengaturan.qris')
             ->with('success', 'QRIS berhasil dihapus.');
+    }
+
+    /**
+     * GET /admin/pengaturan/komisi
+     */
+    public function komisi()
+    {
+        $setting = PaymentSetting::current();
+
+        return Inertia::render('Admin/Pengaturan/Komisi', [
+            'commission_rate' => $setting ? $setting->commission_rate : 0,
+            'app_fee'         => $setting ? $setting->app_fee : 0,
+        ]);
+    }
+
+    /**
+     * POST /admin/pengaturan/komisi
+     */
+    public function updateKomisi(Request $request)
+    {
+        $validated = $request->validate([
+            'commission_rate' => ['required', 'numeric', 'min:0', 'max:100'],
+            'app_fee'         => ['required', 'numeric', 'min:0'],
+        ], [], [
+            'commission_rate' => 'persentase komisi',
+            'app_fee'         => 'biaya aplikasi',
+        ]);
+
+        $setting = PaymentSetting::current();
+
+        $setting->update([
+            'commission_rate' => $validated['commission_rate'],
+            'app_fee'         => $validated['app_fee'],
+        ]);
+
+        return redirect()
+            ->route('admin.pengaturan.komisi')
+            ->with('success', 'Pengaturan komisi berhasil diperbarui.');
     }
 }

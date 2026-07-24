@@ -109,10 +109,16 @@ class ServiceController extends Controller
             return redirect()->route('customer.services.barang.pilihPaket');
         }
 
+        // Harga per item diambil dari vendor (Service->harga) yang dipilih customer,
+        // bukan angka tetap di kode. Fallback 100000 hanya kalau service_id kosong
+        // (customer belum sempat memilih vendor tertentu).
+        $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
+        $hargaPerItem = $service ? (float) $service->harga : 100000;
+
         $items = collect(explode(',', $data['namaBarang']))
             ->map(fn ($nama) => trim($nama))
             ->filter()
-            ->map(fn ($nama) => ['nama' => $nama, 'harga' => 15000, 'qty' => 1])
+            ->map(fn ($nama) => ['nama' => $nama, 'harga' => $hargaPerItem, 'qty' => 1])
             ->values();
 
         $customer = auth()->user();
@@ -143,24 +149,34 @@ class ServiceController extends Controller
             return redirect()->route('customer.services.barang.pilihPaket');
         }
 
-        $items = collect(explode(',', $data['namaBarang']))
-            ->map(fn ($nama) => trim($nama))
-            ->filter();
+        // Cuma percaya nama & qty dari request. Harga SELALU diambil ulang dari data
+        // vendor di server (bukan dari request), supaya customer tidak bisa mengubah
+        // harga sendiri lewat request yang dimanipulasi.
+        $validated = $request->validate([
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.nama' => ['required', 'string'],
+            'items.*.qty' => ['required', 'integer', 'min:1'],
+        ]);
 
-        $total = $items->count() * 15000;
         $customer = auth()->user();
-$service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
+        $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
+        $hargaPerItem = $service ? (float) $service->harga : 100000;
+
+        $items = collect($validated['items']);
+        $totalQty = $items->sum('qty');
+        $total = $totalQty * $hargaPerItem;
+        $itemNames = $items->map(fn ($item) => $item['nama'].' x'.$item['qty'])->implode(', ');
 
 $order = Order::create([
     'order_code' => 'TS-'.strtoupper(uniqid()),
     'customer_id' => $customer->id,
     'partner_id' => $service?->user_id,
     'service_type' => 'barang',
-    'item_name' => $items->implode(', '),
+    'item_name' => $itemNames,
     'start_date' => $data['tanggalMasuk'],
     'end_date' => $data['tanggalKeluar'],
     'is_pickup' => (bool) ($data['pickup'] ?? false),
-    'city' => $service->kota ?? null,
+    'city' => $service->kota ?? $customer->city ?? '-',
     'status' => 'baru',
     'subtotal' => $total,
     'discount' => 0,
@@ -264,7 +280,7 @@ $order = Order::create([
             ->map(fn ($nama) => trim($nama))
             ->filter();
 
-        $total = $items->count() * 15000;
+        $total = $items->count() * 100000;
 
         return Inertia::render('Customer/Services/Barang/MetodePembayaran', [
             'total' => $total,
