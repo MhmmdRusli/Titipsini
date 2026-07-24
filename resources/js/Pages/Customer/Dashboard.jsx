@@ -98,10 +98,12 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     </div>
                 </div>
 
-                {/* Banner Promo */}
+                {/* Banner Promo - warna dasar disamakan dengan card Top Up
+                    (green-600 / dark:green-700), desain tiket & layout aslinya
+                    tetap dipertahankan sesuai permintaan. */}
                 <div className="mt-5 relative flex h-[128px] rounded-2xl shadow-md">
                     <div
-                        className="absolute inset-0 rounded-2xl bg-green-700 dark:bg-green-900"
+                        className="absolute inset-0 rounded-2xl bg-green-600 dark:bg-green-700"
                         style={{
                             backgroundImage:
                                 'repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 10px)',
@@ -110,26 +112,26 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
 
                     <div className="relative z-10 flex flex-1 flex-col justify-between p-4">
                         <div>
-                            <p className="font-mono text-[10px] tracking-[0.2em] text-green-200">
+                            <p className="font-mono text-[10px] tracking-[0.2em] text-green-100">
                                 TIKET-PROMO &middot; BULAN INI
                             </p>
                             <div className="mt-1 flex items-baseline gap-1">
                                 <span className="text-[13px] font-semibold text-green-100">Cashback</span>
                                 <span className="text-4xl font-black italic leading-none text-amber-300">30%</span>
                             </div>
-                            <p className="mt-1 text-[10px] text-green-200">
+                            <p className="mt-1 text-[10px] text-green-100">
                                 untuk penitipan Barang, Bangunan & Kendaraan
                             </p>
                         </div>
-                        <p className="font-mono text-[9px] text-green-300">Berlaku s.d. akhir bulan &middot; S&amp;K berlaku</p>
+                        <p className="font-mono text-[9px] text-green-200">Berlaku s.d. akhir bulan &middot; S&amp;K berlaku</p>
                     </div>
 
                     <div className="relative z-10 flex w-16 shrink-0 flex-col items-center justify-between py-3">
-                        <div className="absolute inset-y-2 left-0 border-l-2 border-dashed border-green-400/50" />
+                        <div className="absolute inset-y-2 left-0 border-l-2 border-dashed border-green-300/50" />
                         <div className="absolute -left-2 -top-2 h-4 w-4 rounded-full bg-gray-50 dark:bg-gray-900" />
                         <div className="absolute -bottom-2 -left-2 h-4 w-4 rounded-full bg-gray-50 dark:bg-gray-900" />
 
-                        <BoxIcon className="h-6 w-6 text-green-200" />
+                        <BoxIcon className="h-6 w-6 text-green-100" />
                         <span
                             className="font-mono text-[10px] font-bold tracking-wider text-green-100"
                             style={{ writingMode: 'vertical-rl' }}
