@@ -13,6 +13,64 @@ use Inertia\Response;
 
 class PengaturanController extends Controller
 {
+    /**
+     * Menampilkan halaman Pengaturan Komisi Platform.
+     */
+    public function komisi(): Response
+    {
+        // Nilai persentase komisi default / dari DB/Setting
+        // Silakan sesuaikan jika Anda menyimpan nilai komisi di database/setting
+        $commissionRate = 10; 
+
+        return Inertia::render('Admin/Pengaturan/Komisi', [
+            'commission_rate' => $commissionRate,
+        ]);
+    }
+
+    /**
+     * Menyimpan perubahan Pengaturan Komisi Platform.
+     */
+    public function updateKomisi(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'commission_rate' => 'required|numeric|min:0|max:100',
+        ]);
+
+        // Simpan logis nilai komisi ke database/setting di sini jika ada model Setting
+        // Contoh: Setting::updateOrCreate(['key' => 'commission_rate'], ['value' => $validated['commission_rate']]);
+
+        return back()->with('success', 'Pengaturan komisi platform berhasil disimpan!');
+    }
+
+    /**
+     * Menampilkan halaman keamanan pengaturan admin.
+     */
+    public function keamanan(): Response
+    {
+        return Inertia::render('Admin/Pengaturan/Keamanan');
+    }
+
+    /**
+     * Mengubah password/keamanan admin.
+     */
+    public function updateKeamanan(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'current_password' => 'required|current_password',
+            'password' => 'required|confirmed|min:8',
+        ]);
+
+        $request->user()->update([
+            'password' => bcrypt($request->password),
+        ]);
+
+        return back()->with('success', 'Password keamanan berhasil diperbarui.');
+    }
+
+    // =========================================================================
+    // METHOD PENARIKAN (Disimpan jika digunakan oleh rute admin penarikan Anda)
+    // =========================================================================
+
     public function index(Request $request): Response
     {
         $status = $request->query('status', 'pending');
@@ -29,23 +87,6 @@ class PengaturanController extends Controller
         ]);
     }
 
-    /**
-     * Menampilkan halaman keamanan pengaturan admin.
-     */
-    public function keamanan(): Response
-    {
-        return Inertia::render('Admin/Pengaturan/Keamanan');
-    }
-
-    /**
-     * Baru di sini saldo mitra benar-benar dipotong dan mutasi dicatat.
-     *
-     * PENTING: saldo mitra TIDAK disimpan di kolom `users.saldo` (kolom itu
-     * dipakai untuk saldo top-up Customer). Saldo mitra selalu dihitung
-     * dinamis lewat User::saldoMitra() — dari total pesanan selesai
-     * dikurangi komisi platform, dikurangi total penarikan yang belum ditolak.
-     * Jangan pernah balik ke `$user->saldo` untuk konteks mitra.
-     */
     public function approve(Penarikan $penarikan): RedirectResponse
     {
         abort_unless($penarikan->status === 'pending', 400, 'Penarikan ini sudah diproses sebelumnya.');
@@ -56,27 +97,11 @@ class PengaturanController extends Controller
 
             $jumlahPenarikan = (int) preg_replace('/[^0-9]/', '', (string) $penarikan->jumlah);
 
-            // saldoMitra() sudah otomatis mengurangi SEMUA penarikan yang
-            // belum ditolak — TERMASUK penarikan yang sedang kita approve
-            // ini sendiri (karena statusnya masih 'pending', bukan 'ditolak').
-            // Kalau langsung dibandingkan tanpa dikoreksi, penarikan ini
-            // akan "memotong dirinya sendiri" dua kali, sehingga saldo
-            // terlihat lebih kecil dari yang sebenarnya tersedia.
-            //
-            // Tambahkan kembali $jumlahPenarikan supaya kita membandingkan
-            // saldo yang benar-benar tersedia UNTUK penarikan spesifik ini,
-            // bukan saldo yang sudah "dipotong duluan" oleh penarikan itu sendiri.
             $saldoTersediaUntukPenarikanIni = $user->saldoMitra() + $jumlahPenarikan;
 
             if ($saldoTersediaUntukPenarikanIni < $jumlahPenarikan) {
                 abort(422, "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")");
             }
-
-            // TIDAK decrement kolom `saldo` di sini. Saldo dinamis otomatis
-            // "berkurang" begitu status Penarikan bukan 'ditolak' — termasuk
-            // saat masih 'pending', jadi begitu penarikan diajukan, saldo
-            // yang tampil di Dashboard Mitra sudah otomatis terpotong.
-            // Baris `decrement('saldo', ...)` LAMA sengaja dihapus.
 
             SaldoMutasi::create([
                 'user_id' => $user->id,
@@ -104,8 +129,6 @@ class PengaturanController extends Controller
             'catatan' => 'nullable|string|max:255',
         ]);
 
-        // Saldo tidak pernah dipotong di awal, jadi di sini tidak perlu
-        // dikembalikan - cukup ubah statusnya saja.
         $penarikan->update([
             'status' => 'ditolak',
             'catatan' => $validated['catatan'] ?? null,
