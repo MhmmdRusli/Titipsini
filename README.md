@@ -1,4 +1,4 @@
-Apip blender
+Apip blender Rusli Alpard
 
 # 🏷️ Titipsini Web App
 
