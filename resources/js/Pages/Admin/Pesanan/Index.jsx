@@ -167,11 +167,10 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                 <button
                     type="button"
                     onClick={toggleSelectMode}
-                    className={`ml-auto rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all ${
-                        selectMode
-                            ? 'border-green-600 bg-green-50 text-green-700'
-                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                    }`}
+                    className={`ml-auto rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all ${selectMode
+                        ? 'border-green-600 bg-green-50 text-green-700'
+                        : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
                 >
                     {selectMode ? 'Batal Pilih' : 'Pilih Banyak'}
                 </button>
@@ -243,9 +242,8 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                         {orders.data.map((order) => (
                             <tr
                                 key={order.id}
-                                className={`transition-colors hover:bg-gray-50/60 ${
-                                    selectedIds.includes(order.id) ? 'bg-green-50/50' : ''
-                                }`}
+                                className={`transition-colors hover:bg-gray-50/60 ${selectedIds.includes(order.id) ? 'bg-green-50/50' : ''
+                                    }`}
                             >
                                 {selectMode && (
                                     <td className="px-4 py-3.5">
@@ -277,9 +275,8 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 <td className="px-4 py-3.5 text-gray-600">{formatRupiah(order.total_price)}</td>
                                 <td className="px-4 py-3.5 select-none">
                                     <span
-                                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
-                                            STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700'
-                                        }`}
+                                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700'
+                                            }`}
                                     >
                                         {order.status}
                                     </span>
@@ -325,13 +322,12 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 href={link.url ?? '#'}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 preserveScroll
-                                className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
-                                    link.active
-                                        ? 'bg-green-700 text-white shadow-sm'
-                                        : link.url
+                                className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${link.active
+                                    ? 'bg-green-700 text-white shadow-sm'
+                                    : link.url
                                         ? 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                                         : 'cursor-not-allowed border border-gray-100 bg-gray-50/50 text-gray-300'
-                                }`}
+                                    }`}
                             />
                         ))}
                     </div>
@@ -442,11 +438,10 @@ function CustomSelect({ value, options, onChange }) {
                                     onChange(opt.value);
                                     setIsOpen(false);
                                 }}
-                                className={`w-full px-3 py-2 text-left text-xs transition ${
-                                    isSelected
-                                        ? 'bg-green-700 font-medium text-white'
-                                        : 'text-gray-700 hover:bg-green-50 hover:text-green-800'
-                                }`}
+                                className={`w-full px-3 py-2 text-left text-xs transition ${isSelected
+                                    ? 'bg-green-700 font-medium text-white'
+                                    : 'text-gray-700 hover:bg-green-50 hover:text-green-800'
+                                    }`}
                             >
                                 {opt.label}
                             </button>
@@ -465,6 +460,7 @@ function OrderDetailModal({ order, onClose }) {
         cancel_reason: order.cancel_reason ?? '',
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [statusError, setStatusError] = useState(null);
 
     const nextActions = {
         baru: ['diproses', 'dibatalkan'],
@@ -486,6 +482,7 @@ function OrderDetailModal({ order, onClose }) {
         }
 
         setIsSubmitting(true);
+        setStatusError(null);
 
         router.patch(
             `/admin/orders/${order.id}/status`,
@@ -502,7 +499,7 @@ function OrderDetailModal({ order, onClose }) {
                 },
                 onError: (err) => {
                     setIsSubmitting(false);
-                    console.error('Gagal memperbarui status:', err);
+                    setStatusError(err.status ?? 'Gagal memperbarui status pesanan.');
                 },
             }
         );
@@ -515,9 +512,8 @@ function OrderDetailModal({ order, onClose }) {
                     <div>
                         <h2 className="text-base font-semibold text-gray-900">{order.order_code}</h2>
                         <span
-                            className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
-                                STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700'
-                            }`}
+                            className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700'
+                                }`}
                         >
                             {order.status}
                         </span>
@@ -586,6 +582,11 @@ function OrderDetailModal({ order, onClose }) {
 
                 {nextActions.length > 0 && (
                     <div className="mt-5 border-t border-gray-100 pt-4">
+                        {statusError && (
+                            <div className="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+                                {statusError}
+                            </div>
+                        )}
                         {nextActions.includes('dibatalkan') && (
                             <div className="mb-3">
                                 <label className="mb-1 block text-xs font-medium text-gray-600">
@@ -610,11 +611,10 @@ function OrderDetailModal({ order, onClose }) {
                                     type="button"
                                     disabled={isSubmitting}
                                     onClick={() => submitStatus(next)}
-                                    className={`rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition disabled:opacity-60 ${
-                                        next === 'dibatalkan'
-                                            ? 'bg-red-600 hover:bg-red-700'
-                                            : 'bg-green-700 hover:bg-green-800'
-                                    }`}
+                                    className={`rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition disabled:opacity-60 ${next === 'dibatalkan'
+                                        ? 'bg-red-600 hover:bg-red-700'
+                                        : 'bg-green-700 hover:bg-green-800'
+                                        }`}
                                 >
                                     {isSubmitting ? 'Memproses...' : actionLabel[next]}
                                 </button>

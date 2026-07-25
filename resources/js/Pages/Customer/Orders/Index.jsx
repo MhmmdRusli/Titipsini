@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Package, MapPin, Truck, Building2, Car } from 'lucide-react';
+import { Package, MapPin, Truck, Building2, Car, CreditCard } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const TABS = [
@@ -77,11 +77,10 @@ export default function OrdersIndex({ orders, filters }) {
                                 key={tab.value}
                                 type="button"
                                 onClick={() => changeTab(tab.value)}
-                                className={`relative z-40 shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition cursor-pointer ${
-                                    activeStatus === tab.value
-                                        ? 'bg-white text-[#15803d] shadow-sm dark:bg-gray-900 dark:text-[#4ade80]'
-                                        : 'bg-white/20 text-white hover:bg-white/30'
-                                }`}
+                                className={`relative z-40 shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition cursor-pointer ${activeStatus === tab.value
+                                    ? 'bg-white text-[#15803d] shadow-sm dark:bg-gray-900 dark:text-[#4ade80]'
+                                    : 'bg-white/20 text-white hover:bg-white/30'
+                                    }`}
                             >
                                 {tab.label}
                             </button>
@@ -125,11 +124,12 @@ export default function OrdersIndex({ orders, filters }) {
                                             </div>
                                         </div>
                                         <span
-                                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                                                STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300'
-                                            }`}
+                                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${order.status === 'baru'
+                                                ? 'bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-300 animate-pulse'
+                                                : STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300'
+                                                }`}
                                         >
-                                            {order.status}
+                                            {order.status === 'baru' ? 'Perlu Bayar' : order.status}
                                         </span>
                                     </div>
 
@@ -175,13 +175,12 @@ export default function OrdersIndex({ orders, filters }) {
                                     key={i}
                                     href={link.url ?? '#'}
                                     preserveScroll
-                                    className={`rounded-md px-3 py-1.5 text-xs ${
-                                        link.active
-                                            ? 'bg-[#15803d] text-white dark:bg-[#22c55e]'
-                                            : link.url
+                                    className={`rounded-md px-3 py-1.5 text-xs ${link.active
+                                        ? 'bg-[#15803d] text-white dark:bg-[#22c55e]'
+                                        : link.url
                                             ? 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                                             : 'text-gray-300 dark:text-gray-700'
-                                    }`}
+                                        }`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />
                             ))}
