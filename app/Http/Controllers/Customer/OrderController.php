@@ -9,6 +9,7 @@ use App\Models\PaymentSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
 
 class OrderController extends Controller
@@ -61,6 +62,30 @@ class OrderController extends Controller
             'order' => $order,
         ]);
     }
+
+    public function cancel(Request $request, Order $order): RedirectResponse
+{
+    abort_unless($order->customer_id === $request->user()->id, 403);
+
+    abort_unless(
+        $order->status === 'baru',
+        400,
+        'Pesanan ini sudah diproses dan tidak bisa dibatalkan lagi.'
+    );
+
+    $validated = $request->validate([
+        'cancel_reason' => 'required|string|max:255',
+    ], [
+        'cancel_reason.required' => 'Alasan pembatalan wajib diisi.',
+    ]);
+
+    $order->update([
+        'status' => 'dibatalkan',
+        'cancel_reason' => $validated['cancel_reason'],
+    ]);
+
+    return back()->with('success', 'Pesanan berhasil dibatalkan.');
+}
 
     public function success(Request $request, Order $order): Response
     {
@@ -164,4 +189,6 @@ class OrderController extends Controller
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi.');
     }
+
+    
 }
