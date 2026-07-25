@@ -3,9 +3,9 @@ import { Link, router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Plus, Pencil, Trash2, Search, X, MapPin } from 'lucide-react';
 
-// Expected props from the Laravel controller (Kota\index()):
-//   kota: { data: [{ id, nama, provinsi, is_active, jumlah_vendor }], links: [...] }  <- paginated
-//   filters: { search: '' }
+// Expected props:
+// kota: { data: [{ id, nama, provinsi, is_active, jumlah_vendor, foto_url }], links: [...] }
+// filters: { search: '' }
 export default function KotaIndex({ kota, filters }) {
     const [search, setSearch] = useState(filters?.search ?? '');
     const [modalOpen, setModalOpen] = useState(false);
@@ -13,7 +13,7 @@ export default function KotaIndex({ kota, filters }) {
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [fotoPreview, setFotoPreview] = useState(null);
 
-    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         nama: '',
         provinsi: '',
         is_active: true,
@@ -29,15 +29,16 @@ export default function KotaIndex({ kota, filters }) {
         reset();
         clearErrors();
         setEditingKota(null);
+        setFotoPreview(null);
         setModalOpen(true);
     }
 
     function openEditModal(item) {
         setEditingKota(item);
         setData({
-            nama: item.nama,
-            provinsi: item.provinsi,
-            is_active: item.is_active,
+            nama: item.nama ?? '',
+            provinsi: item.provinsi ?? '',
+            is_active: Boolean(item.is_active),
             foto: null,
         });
         setFotoPreview(item.foto_url ?? null);
@@ -56,16 +57,25 @@ export default function KotaIndex({ kota, filters }) {
     function handleSubmit(e) {
         e.preventDefault();
         if (editingKota) {
-            router.post(`/admin/kota/${editingKota.id}`, { ...data, _method: 'put' }, {
+            // Gunakan method spoofing dengan post untuk mengirim file pada update/PUT
+            post(`/admin/kota/${editingKota.id}`, {
+                data: {
+                    ...data,
+                    _method: 'put',
+                },
                 forceFormData: true,
                 onSuccess: closeModal,
             });
         } else {
-            post('/admin/kota', { forceFormData: true, onSuccess: closeModal });
+            post('/admin/kota', {
+                forceFormData: true,
+                onSuccess: closeModal,
+            });
         }
     }
 
     function handleDelete() {
+        if (!deleteTarget) return;
         router.delete(`/admin/kota/${deleteTarget.id}`, {
             onSuccess: () => setDeleteTarget(null),
         });
@@ -94,6 +104,7 @@ export default function KotaIndex({ kota, filters }) {
                 </form>
 
                 <button
+                    type="button"
                     onClick={openCreateModal}
                     className="flex items-center gap-2 rounded-xl bg-green-700 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 transition shadow-sm select-none"
                 >
@@ -114,19 +125,23 @@ export default function KotaIndex({ kota, filters }) {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {kota.data.length === 0 && (
+                        {(!kota?.data || kota.data.length === 0) && (
                             <tr>
                                 <td colSpan={5} className="px-6 py-10 text-center text-gray-400 text-xs">
                                     Belum ada data kota.
                                 </td>
                             </tr>
                         )}
-                        {kota.data.map((item) => (
+                        {kota?.data?.map((item) => (
                             <tr key={item.id} className="hover:bg-gray-50/60 transition-colors">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-2.5 font-medium text-gray-800 text-xs">
                                         {item.foto_url ? (
-                                            <img src={item.foto_url} alt={item.nama} className="h-8 w-8 rounded-lg object-cover border border-gray-200 shadow-sm" />
+                                            <img
+                                                src={item.foto_url}
+                                                alt={item.nama}
+                                                className="h-8 w-8 rounded-lg object-cover border border-gray-200 shadow-sm"
+                                            />
                                         ) : (
                                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 border border-emerald-200 text-green-700 shadow-sm">
                                                 <MapPin size={15} />
@@ -151,6 +166,7 @@ export default function KotaIndex({ kota, filters }) {
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex items-center justify-end gap-1">
                                         <button
+                                            type="button"
                                             onClick={() => openEditModal(item)}
                                             className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-green-700 transition"
                                             title="Edit Kota"
@@ -158,6 +174,7 @@ export default function KotaIndex({ kota, filters }) {
                                             <Pencil size={15} />
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={() => setDeleteTarget(item)}
                                             className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition"
                                             title="Hapus Kota"
@@ -171,7 +188,7 @@ export default function KotaIndex({ kota, filters }) {
                     </tbody>
                 </table>
 
-                {kota.links && kota.links.length > 3 && (
+                {kota?.links && kota.links.length > 3 && (
                     <div className="flex items-center justify-end gap-1 border-t border-gray-200 px-6 py-3 bg-gray-50/50">
                         {kota.links.map((link, i) => (
                             <Link
@@ -199,7 +216,7 @@ export default function KotaIndex({ kota, filters }) {
                             <h2 className="text-sm font-semibold text-gray-900">
                                 {editingKota ? 'Edit Kota' : 'Tambah Kota'}
                             </h2>
-                            <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition">
+                            <button type="button" onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition">
                                 <X size={18} />
                             </button>
                         </div>
@@ -292,12 +309,14 @@ export default function KotaIndex({ kota, filters }) {
                         </p>
                         <div className="mt-5 flex justify-end gap-2">
                             <button
+                                type="button"
                                 onClick={() => setDeleteTarget(null)}
                                 className="rounded-xl px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition"
                             >
                                 Batal
                             </button>
                             <button
+                                type="button"
                                 onClick={handleDelete}
                                 className="rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 shadow-sm transition select-none"
                             >
