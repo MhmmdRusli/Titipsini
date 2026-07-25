@@ -21,7 +21,7 @@ export default function PenarikanIndex({ saldo, mutasi = [], filter = {} }) {
 
     const applyFilter = (nextTipe = tipe, nextDari = dari, nextSampai = sampai) => {
         router.get(
-            '/mitra/pendapatan/penarikan',
+            route('mitra.penarikan.index'),
             { tipe: nextTipe, dari: nextDari || undefined, sampai: nextSampai || undefined },
             { preserveScroll: true, preserveState: true }
         );
@@ -45,7 +45,7 @@ export default function PenarikanIndex({ saldo, mutasi = [], filter = {} }) {
                 </div>
                 <p className="mt-1 text-2xl font-bold">{formatRupiah(saldo)}</p>
                 <Link
-                    href="/mitra/pendapatan/penarikan/tarik"
+                    href={route('mitra.penarikan.create')}
                     className="mt-3 inline-block rounded-lg bg-white px-4 py-2 text-xs font-semibold text-green-700"
                 >
                     Tarik Saldo

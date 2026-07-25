@@ -35,7 +35,7 @@ export default function ProfileIndex({ partner }) {
                                 <img src={partner.avatar} alt={partner.name} className="h-12 w-12 rounded-full object-cover ring-2 ring-gray-100" />
                             ) : (
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-sm font-semibold text-green-700">
-                                    {partner.name.charAt(0).toUpperCase()}
+                                    {partner.name?.charAt(0).toUpperCase()}
                                 </div>
                             )}
                         </div>
@@ -68,7 +68,7 @@ export default function ProfileIndex({ partner }) {
                             </div>
                         </div>
 
-                        <Link href="/mitra/profil/saya" className="absolute right-0 top-0 p-1 text-gray-400 hover:text-gray-600">
+                        <Link href={route('mitra.profil.edit')} className="absolute right-0 top-0 p-1 text-gray-400 hover:text-gray-600">
                             <Pencil size={15} />
                         </Link>
                     </div>
@@ -76,14 +76,14 @@ export default function ProfileIndex({ partner }) {
 
                 {/* Menu Navigasi */}
                 <div className="space-y-2">
-                    <MenuItem href="/mitra/alamat" icon={MapPin} label="Alamat" />
-                    <MenuItem href="/mitra/layanan/jam-operasional" icon={Clock} label="Jam Operasional" />
-                    <MenuItem href="/mitra/rekening" icon={CreditCard} label="Rekening Bank" />
-                    <MenuItem href="/mitra/pendapatan/penarikan" icon={Wallet} label="Penarikan" />
-                    <MenuItem href="/mitra/keamanan" icon={Lock} label="Keamanan" />
-                    <MenuItem href="/mitra/kebijakan-privasi" icon={ShieldCheck} label="Kebijakan Privasi" />
-                    <MenuItem href="/mitra/bantuan" icon={HelpCircle} label="Pusat Bantuan" />
-                    <MenuItem href="/logout" method="post" as="button" icon={LogOut} label="Keluar" />
+                    <MenuItem href={route('mitra.alamat.edit')} icon={MapPin} label="Alamat" />
+                    <MenuItem href={route('mitra.jam-operasional.edit')} icon={Clock} label="Jam Operasional" />
+                    <MenuItem href={route('mitra.rekening.edit')} icon={CreditCard} label="Rekening Bank" />
+                    <MenuItem href={route('mitra.penarikan.index')} icon={Wallet} label="Penarikan" />
+                    <MenuItem href={route('mitra.keamanan.edit')} icon={Lock} label="Keamanan" />
+                    <MenuItem href={route('mitra.kebijakan-privasi.index')} icon={ShieldCheck} label="Kebijakan Privasi" />
+                    <MenuItem href={route('mitra.bantuan.index')} icon={HelpCircle} label="Pusat Bantuan" />
+                    <MenuItem href={route('logout')} method="post" as="button" icon={LogOut} label="Keluar" />
                 </div>
             </div>
         </MitraLayout>

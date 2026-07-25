@@ -191,3 +191,4 @@ export default function OrdersIndex({ orders, filters }) {
         </CustomerLayout>
     );
 }
+

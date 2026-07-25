@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Package, Truck, MapPin, User, Phone, CreditCard } from 'lucide-react';
+import { Package, Truck, MapPin, User, Phone, CreditCard, ArrowLeft } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const STATUS_STYLE = {
@@ -42,20 +42,32 @@ export default function OrderShow({ order }) {
     const currentStepIndex = STEPS.indexOf(order.status);
 
     return (
-        <CustomerLayout title="Detail Pesanan" backHref="/app/orders">
+        <CustomerLayout>
             <Head title={order.order_code} />
 
-            <div className="px-4 py-3">
+            <div className="mx-auto max-w-lg px-4 py-8">
+                {/* Header dengan Tombol Back */}
+                <div className="mb-6 flex items-center gap-3">
+                    <Link 
+                        href="/app/orders" 
+                        className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition"
+                    >
+                        <ArrowLeft size={20} />
+                    </Link>
+                    <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">Detail Pesanan</h1>
+                </div>
+
                 {/* Header ringkasan */}
-                <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <div className="flex items-start justify-between">
                         <div>
                             <p className="text-xs text-gray-400">Kode Pesanan</p>
                             <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{order.order_code}</p>
                         </div>
                         <span
-                            className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300'
-                                }`}
+                            className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                                STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300'
+                            }`}
                         >
                             {order.status}
                         </span>
@@ -81,7 +93,7 @@ export default function OrderShow({ order }) {
                 {order.status === 'baru' && (
                     <Link
                         href={`/app/orders/${order.id}/pembayaran`}
-                        className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white shadow-sm hover:bg-[#166534] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] transition"
+                        className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white shadow-sm hover:bg-[#166534] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] transition"
                     >
                         <CreditCard size={16} />
                         Bayar Sekarang
@@ -90,8 +102,8 @@ export default function OrderShow({ order }) {
 
                 {/* Timeline status */}
                 {!isCancelled && (
-                    <div className="mt-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    <div className="mt-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                        <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-gray-400">
                             Status Pesanan
                         </p>
                         <div className="flex items-center">
@@ -101,20 +113,23 @@ export default function OrderShow({ order }) {
                                     <div key={step} className="flex flex-1 items-center last:flex-none">
                                         <div className="flex flex-col items-center">
                                             <div
-                                                className={`h-3 w-3 rounded-full ${reached ? 'bg-[#15803d] dark:bg-[#4ade80]' : 'bg-gray-200 dark:bg-gray-700'
-                                                    }`}
+                                                className={`h-3 w-3 rounded-full ${
+                                                    reached ? 'bg-[#15803d] dark:bg-[#4ade80]' : 'bg-gray-200 dark:bg-gray-700'
+                                                }`}
                                             />
                                             <span
-                                                className={`mt-1.5 text-[10px] capitalize ${reached ? 'font-medium text-gray-800 dark:text-gray-200' : 'text-gray-400 dark:text-gray-600'
-                                                    }`}
+                                                className={`mt-1.5 text-[10px] capitalize ${
+                                                    reached ? 'font-medium text-gray-800 dark:text-gray-200' : 'text-gray-400 dark:text-gray-600'
+                                                }`}
                                             >
                                                 {step}
                                             </span>
                                         </div>
                                         {i < STEPS.length - 1 && (
                                             <div
-                                                className={`mx-1 h-0.5 flex-1 ${i < currentStepIndex ? 'bg-[#15803d] dark:bg-[#4ade80]' : 'bg-gray-200 dark:bg-gray-700'
-                                                    }`}
+                                                className={`mx-1 h-0.5 flex-1 ${
+                                                    i < currentStepIndex ? 'bg-[#15803d] dark:bg-[#4ade80]' : 'bg-gray-200 dark:bg-gray-700'
+                                                }`}
                                             />
                                         )}
                                     </div>
@@ -125,7 +140,7 @@ export default function OrderShow({ order }) {
                 )}
 
                 {isCancelled && order.cancel_reason && (
-                    <div className="mt-3 rounded-xl border border-red-100 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/30">
+                    <div className="mt-5 rounded-2xl border border-red-100 bg-red-50 p-6 dark:border-red-900 dark:bg-red-950/30">
                         <p className="text-xs font-semibold text-red-700 dark:text-red-400">Alasan Pembatalan</p>
                         <p className="mt-1 text-sm text-red-600 dark:text-red-300">{order.cancel_reason}</p>
                     </div>
@@ -133,8 +148,8 @@ export default function OrderShow({ order }) {
 
                 {/* Info vendor */}
                 {order.partner && (
-                    <div className="mt-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Vendor</p>
+                    <div className="mt-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Vendor</p>
                         <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
                             <User size={15} className="text-gray-400 dark:text-gray-500" />
                             {order.partner.name}
@@ -148,7 +163,7 @@ export default function OrderShow({ order }) {
 
                         <Link
                             href={`/app/orders/${order.id}/lapor`}
-                            className="mt-3 block w-full rounded-lg border border-red-100 bg-red-50 py-2 text-center text-xs font-semibold text-red-600 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-900/40 transition"
+                            className="mt-4 block w-full rounded-xl border border-red-100 bg-red-50 py-2.5 text-center text-xs font-semibold text-red-600 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-900/40 transition"
                         >
                             Laporkan Vendor
                         </Link>
@@ -156,14 +171,14 @@ export default function OrderShow({ order }) {
                 )}
 
                 {!order.partner && (
-                    <div className="mt-3 rounded-xl border border-dashed border-gray-200 p-4 text-center text-xs text-gray-400 dark:border-gray-700 dark:text-gray-500">
+                    <div className="mt-5 rounded-2xl border border-dashed border-gray-200 p-6 text-center text-xs text-gray-400 dark:border-gray-800 dark:text-gray-500">
                         Vendor belum ditugaskan untuk pesanan ini.
                     </div>
                 )}
 
                 {/* Rincian pembayaran */}
-                <div className="mt-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Pembayaran</p>
+                <div className="mt-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Pembayaran</p>
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600 dark:text-gray-300">Total Harga</span>
                         <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{formatRupiah(order.total_price)}</span>
@@ -176,7 +191,7 @@ export default function OrderShow({ order }) {
 
                 <Link
                     href="/app/orders"
-                    className="mt-5 block w-full rounded-xl border border-green-200 bg-green-50 py-2.5 text-center text-sm font-bold text-[#15803d] hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/40 dark:text-[#4ade80] dark:hover:bg-green-900/50 transition"
+                    className="mt-5 block w-full rounded-xl border border-green-200 bg-green-50 py-3 text-center text-sm font-bold text-[#15803d] hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/40 dark:text-[#4ade80] dark:hover:bg-green-900/50 transition"
                 >
                     Kembali ke Pesanan Saya
                 </Link>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Penarikan;
 use App\Models\RekeningBank;
+use App\Models\SaldoMutasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -89,6 +90,63 @@ class PenarikanController extends Controller
             'saldo' => $user->saldoMitra(),
             'mutasi' => $mutasi,
             'filter' => ['tipe' => $tipe, 'dari' => $dari, 'sampai' => $sampai],
+        ]);
+    }
+
+        public function index(Request $request): Response
+    {
+        $user = Auth::user();
+        $tipe = $request->string('tipe')->toString() ?: 'semua';
+        $dari = $request->string('dari')->toString();
+        $sampai = $request->string('sampai')->toString();
+
+        $penghasilan = collect();
+        if ($tipe === 'semua' || $tipe === 'penghasilan') {
+            $penghasilan = SaldoMutasi::where('user_id', $user->id)
+                ->where('type', 'penghasilan')
+                ->when($dari, fn ($q) => $q->whereDate('created_at', '>=', $dari))
+                ->when($sampai, fn ($q) => $q->whereDate('created_at', '<=', $sampai))
+                ->get()
+                ->map(fn ($m) => [
+                    'id' => 'penghasilan-'.$m->id,
+                    'type' => 'penghasilan',
+                    'deskripsi' => $m->deskripsi,
+                    'jumlah' => (int) $m->jumlah,
+                    'tanggal' => $m->created_at->translatedFormat('d M Y, H:i'),
+                    'created_at' => $m->created_at,
+                ]);
+        }
+
+        $penarikan = collect();
+        if ($tipe === 'semua' || $tipe === 'penarikan') {
+            $penarikan = Penarikan::where('user_id', $user->id)
+                ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal'])
+                ->when($dari, fn ($q) => $q->whereDate('created_at', '>=', $dari))
+                ->when($sampai, fn ($q) => $q->whereDate('created_at', '<=', $sampai))
+                ->get()
+                ->map(fn ($p) => [
+                    'id' => 'penarikan-'.$p->id,
+                    'type' => 'penarikan',
+                    'deskripsi' => 'Penarikan ke '.$p->nama_bank.' - '.$p->nomor_rekening,
+                    'jumlah' => (int) $p->jumlah,
+                    'tanggal' => $p->created_at->translatedFormat('d M Y, H:i'),
+                    'created_at' => $p->created_at,
+                ]);
+        }
+
+        $mutasi = $penghasilan->concat($penarikan)
+            ->sortByDesc('created_at')
+            ->values()
+            ->map(fn ($m) => collect($m)->except('created_at')->all());
+
+        return Inertia::render('Mitra/Penarikan/Index', [
+            'saldo' => $user->saldoMitra(),
+            'mutasi' => $mutasi,
+            'filter' => [
+                'tipe' => $tipe,
+                'dari' => $dari,
+                'sampai' => $sampai,
+            ],
         ]);
     }
 

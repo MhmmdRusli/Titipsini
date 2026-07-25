@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { ShieldCheck, Building2 } from 'lucide-react';
+import { ShieldCheck, Building2, Calendar, AlertCircle, Loader2 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const BENEFITS = [
@@ -28,8 +28,6 @@ export default function Show({ service }) {
         }
         setError('');
         setProcessing(true);
-        // service.id sudah tersedia dari props (route model binding di controller),
-        // jadi selalu ikut terkirim dengan benar di URL ini.
         router.post(
             `/app/services/${service.id}/pesan`,
             { tanggalMasuk, tanggalKeluar },
@@ -42,6 +40,7 @@ export default function Show({ service }) {
             <Head title="Detail Layanan" />
 
             <div className="px-4 py-3">
+                {/* Banner Hero Gradasi (Gaya Asli) */}
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#15803d] to-emerald-600 dark:from-green-700 dark:to-emerald-800 p-5 text-white shadow-md">
                     <div className="absolute right-4 top-4 rounded-xl bg-white/15 p-2">
                         <Building2 size={20} />
@@ -63,6 +62,7 @@ export default function Show({ service }) {
                     </ul>
                 </div>
 
+                {/* Form Utama */}
                 <form onSubmit={handleSubmit} className="mt-5 space-y-4">
                     <div>
                         <label className="text-sm font-bold text-gray-900 dark:text-gray-100">
@@ -75,25 +75,40 @@ export default function Show({ service }) {
 
                     <div>
                         <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Tanggal masuk</label>
-                        <input
-                            type="date"
-                            value={tanggalMasuk}
-                            onChange={(e) => setTanggalMasuk(e.target.value)}
-                            className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:focus:ring-[#22c55e]"
-                        />
+                        <div className="relative mt-2">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                                <Calendar size={18} />
+                            </span>
+                            <input
+                                type="date"
+                                value={tanggalMasuk}
+                                onChange={(e) => setTanggalMasuk(e.target.value)}
+                                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 pl-11 text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:focus:ring-[#22c55e]"
+                            />
+                        </div>
                     </div>
 
                     <div>
                         <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Tanggal keluar</label>
-                        <input
-                            type="date"
-                            value={tanggalKeluar}
-                            onChange={(e) => setTanggalKeluar(e.target.value)}
-                            className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:focus:ring-[#22c55e]"
-                        />
+                        <div className="relative mt-2">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                                <Calendar size={18} />
+                            </span>
+                            <input
+                                type="date"
+                                value={tanggalKeluar}
+                                onChange={(e) => setTanggalKeluar(e.target.value)}
+                                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 pl-11 text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:focus:ring-[#22c55e]"
+                            />
+                        </div>
                     </div>
 
-                    {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+                    {error && (
+                        <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
+                            <AlertCircle size={14} className="shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
 
                     <p className="text-[11px] text-red-500 dark:text-red-400">
                         *Jika menitipkan {service.kategori === 'kendaraan' ? 'kendaraan' : 'bangunan'} melebihi batas
@@ -103,9 +118,16 @@ export default function Show({ service }) {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-50"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-50"
                     >
-                        {processing ? 'Memproses...' : 'Lanjutkan Pembayaran'}
+                        {processing ? (
+                            <>
+                                <Loader2 size={16} className="animate-spin" />
+                                <span>Memproses...</span>
+                            </>
+                        ) : (
+                            <span>Lanjutkan Pembayaran</span>
+                        )}
                     </button>
                 </form>
             </div>
