@@ -14,16 +14,12 @@ class PendapatanPlatform extends Model
 
     // Kolom yang boleh diisi
     protected $fillable = [
-        'order_id',
-        'partner_id',
-        'gross_amount',
-        'commission_rate',
-        'commission_fee',
-        'app_service_fee',
-        'net_revenue',
-        'partner_earnings',
-        'status',
-    ];
+    'order_id',
+    'partner_id',
+    'total_transaksi',
+    'komisi_persen',
+    'jumlah_komisi',
+];
 
     /**
      * Relasi ke Order

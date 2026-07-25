@@ -52,10 +52,11 @@ class PenarikanController extends Controller
             // yang dipakai di Mitra\PenarikanController & Mitra\DashboardController)
             $saldoUser = $user->saldoMitra();
 
-            if ($saldoUser < $jumlahPenarikan) {
-                abort(422, "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoUser, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")");
-            }
+            $saldoTersediaUntukPenarikanIni = $user->saldoMitra() + $jumlahPenarikan;
 
+   if ($saldoTersediaUntukPenarikanIni < $jumlahPenarikan) {
+       abort(422, "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")");
+   }
             // TIDAK decrement kolom `saldo` di sini. Saldo dinamis otomatis
             // "berkurang" begitu status Penarikan bukan 'ditolak' — termasuk
             // saat masih 'pending', jadi begitu penarikan diajukan, saldo

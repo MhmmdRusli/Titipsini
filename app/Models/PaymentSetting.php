@@ -23,6 +23,9 @@ class PaymentSetting extends Model
      */
     public static function current(): self
     {
-        return static::firstOrCreate([]);
+        return static::firstOrCreate([], [
+            'komisi_persen' => 0,
+        ]);
     }
+    
 }

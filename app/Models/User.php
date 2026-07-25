@@ -16,35 +16,35 @@ class User extends Authenticatable implements MustVerifyEmail
      * role: admin | customer | partner
      */
     protected $fillable = [
-    'name',
-    'username',
-    'email',
-    'password',
-    'pin',
-    'avatar',
-    'cover_photo',
-    'foto',
-    'gender',
-    'birth_date',
-    'tanggal_lahir',
-    'address',
-    'role',
-    'phone',
-    'city',
-    'provinsi',
-    'kecamatan',
-    'wilayah',
-    'postal_code',
-    'toko_buka',
-    'jam_buka',
-    'jam_tutup',
-    'layanan_kategori',
-    'verification_status',
-    'rejection_reason',
-    'suspended_at',
-    'suspension_reason',
-    'restoration_requested_at',
-];
+        'name',
+        'username',
+        'email',
+        'password',
+        'pin',
+        'avatar',
+        'cover_photo',
+        'foto',
+        'gender',
+        'birth_date',
+        'tanggal_lahir',
+        'address',
+        'role',
+        'phone',
+        'city',
+        'provinsi',
+        'kecamatan',
+        'wilayah',
+        'postal_code',
+        'toko_buka',
+        'jam_buka',
+        'jam_tutup',
+        'layanan_kategori',
+        'verification_status',
+        'rejection_reason',
+        'suspended_at',
+        'suspension_reason',
+        'restoration_requested_at',
+    ];
 
     protected $hidden = [
         'password',
@@ -95,7 +95,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Order::class, 'customer_id');
     }
 
-    public function notifikasi(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function notifikasi(): HasMany
     {
         return $this->hasMany(\App\Models\Notifikasi::class);
     }
@@ -110,23 +110,39 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Service::class);
     }
      
-public function topups(): HasMany
+    public function topups(): HasMany
+    {
+        return $this->hasMany(Topup::class);
+    }
+
+    /**
+     * Menghitung sisa saldo bersih mitra yang siap ditarik/cair
+     */
+    public function saldoMitra(): int
 {
-    return $this->hasMany(Topup::class);
-}
-public function saldoMitra(): int
-{
+    // 1. Total Pendapatan Kotor dari Order Selesai
     $totalKotor = \App\Models\Order::where('partner_id', $this->id)
         ->whereIn('status', ['selesai', 'completed', 'success'])
         ->sum('total_price');
 
-    $saldoBersih = $totalKotor * 0.9; // komisi platform 10%
+    // 2. Ambil Persentase Komisi dari PaymentSetting
+    $paymentSetting = \App\Models\PaymentSetting::first();
+    
+    $komisiPersen = $paymentSetting->komisi_persen 
+        ?? $paymentSetting->persen_komisi 
+        ?? $paymentSetting->platform_fee 
+        ?? 0;
 
+    // 3. Hitung Hak Saldo Bersih Mitra
+    $persentaseMitra = max(0, (100 - $komisiPersen) / 100);
+    $saldoBersih = $totalKotor * $persentaseMitra;
+
+    // 4. Hitung Total Penarikan (Hanya menggunakan user_id)
     $totalPenarikan = \App\Models\Penarikan::where('user_id', $this->id)
         ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal'])
         ->sum('jumlah');
 
+    // 5. Kembalikan Sisa Saldo Bersih
     return (int) max(0, $saldoBersih - $totalPenarikan);
 }
-
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,21 +15,29 @@ use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
-    public function create(): Response
+    /**
+     * Tampilkan halaman pendaftaran.
+     * Jika user sudah login, arahkan ke beranda alih-alih melempar error 403.
+     */
+    public function create(): Response|RedirectResponse
     {
+        if (Auth::check()) {
+            return redirect()->route('beranda'); // Atau ganti dengan route dashboard kamu
+        }
+
         return Inertia::render('Auth/Daftar');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        // `name` isn't collected until the "Data Diri" step, but the column
-        // is likely NOT NULL — using the email's local part as a placeholder
-        // until the user fills in their real name next.
+        // Catatan: Jika pada model User kamu sudah menetapkan cast 'password' => 'hashed',
+        // Hash::make() di sini bisa langsung diganti dengan $validated['password'] 
+        // agar tidak terjadi double hashing.
         $user = User::create([
             'name' => Str::before($validated['email'], '@'),
             'email' => $validated['email'],

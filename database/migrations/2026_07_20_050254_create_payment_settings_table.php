@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('payment_settings', function (Blueprint $table) {
             $table->id();
             $table->string('qris_image')->nullable();
+            $table->decimal('komisi_persen', 5, 2)->default(0); // 👈 Tambahkan baris ini
             $table->timestamps();
         });
     }

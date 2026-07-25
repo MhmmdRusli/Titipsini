@@ -3,252 +3,107 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\PasswordHistory;
-use App\Models\PaymentSetting;
+use App\Models\Penarikan;
+use App\Models\SaldoMutasi;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class PengaturanController extends Controller
 {
-    /**
-     * GET /admin/pengaturan/keamanan
-     */
-    public function keamanan(Request $request)
+    public function index(Request $request): Response
     {
-        $admin = Auth::user();
+        $status = $request->query('status', 'pending');
 
-        $changesLast24h = PasswordHistory::where('user_id', $admin->id)
-            ->where('changed_at', '>=', now()->subDay())
-            ->count();
+        $penarikan = Penarikan::with('user:id,name,email')
+            ->when($status !== 'semua', fn ($q) => $q->where('status', $status))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
-        return Inertia::render('Admin/Pengaturan/Keamanan', [
-            'remainingChanges' => max(0, 2 - $changesLast24h),
-            'loginHistory' => $this->ambilRiwayatLogin($admin->id, $request->session()->getId()),
+        return Inertia::render('Admin/Penarikan/Index', [
+            'penarikan' => $penarikan,
+            'filter' => ['status' => $status],
         ]);
     }
 
     /**
-     * Ambil daftar sesi login admin dari tabel `sessions` (butuh SESSION_DRIVER=database di .env).
-     * Kalau driver session bukan 'database', tabel ini nggak dipakai Laravel sama sekali,
-     * jadi hasilnya bakal selalu kosong - itu bukan bug, tapi konfigurasi.
+     * Baru di sini saldo mitra benar-benar dipotong dan mutasi dicatat.
+     *
+     * PENTING: saldo mitra TIDAK disimpan di kolom `users.saldo` (kolom itu
+     * dipakai untuk saldo top-up Customer). Saldo mitra selalu dihitung
+     * dinamis lewat User::saldoMitra() — dari total pesanan selesai
+     * dikurangi komisi platform, dikurangi total penarikan yang belum ditolak.
+     * Jangan pernah balik ke `$user->saldo` untuk konteks mitra.
      */
-    private function ambilRiwayatLogin(int $userId, string $currentSessionId): array
+    public function approve(Penarikan $penarikan): RedirectResponse
     {
-        if (config('session.driver') !== 'database') {
-            return [];
-        }
+        abort_unless($penarikan->status === 'pending', 400, 'Penarikan ini sudah diproses sebelumnya.');
 
-        return DB::table('sessions')
-            ->where('user_id', $userId)
-            ->orderByDesc('last_activity')
-            ->get()
-            ->map(function ($session) use ($currentSessionId) {
-                [$device, $deviceType] = $this->parseUserAgent($session->user_agent);
+        DB::transaction(function () use ($penarikan) {
+            $user = $penarikan->user;
+            $user->refresh();
 
-                return [
-                    'id' => $session->id,
-                    'device' => $device,
-                    'device_type' => $deviceType,
-                    'location' => $session->ip_address,
-                    'time' => \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)
-                        ->diffForHumans(),
-                    'current' => $session->id === $currentSessionId,
-                ];
-            })
-            ->values()
-            ->all();
-    }
+            $jumlahPenarikan = (int) preg_replace('/[^0-9]/', '', (string) $penarikan->jumlah);
 
-    /**
-     * Parsing user agent sederhana (browser + OS), tanpa dependency tambahan.
-     * Kalau butuh deteksi yang lebih akurat, bisa ganti pakai package
-     * seperti jenssegers/agent nanti.
-     */
-    private function parseUserAgent(?string $userAgent): array
-    {
-        $userAgent = $userAgent ?? '';
+            // saldoMitra() sudah otomatis mengurangi SEMUA penarikan yang
+            // belum ditolak — TERMASUK penarikan yang sedang kita approve
+            // ini sendiri (karena statusnya masih 'pending', bukan 'ditolak').
+            // Kalau langsung dibandingkan tanpa dikoreksi, penarikan ini
+            // akan "memotong dirinya sendiri" dua kali, sehingga saldo
+            // terlihat lebih kecil dari yang sebenarnya tersedia.
+            //
+            // Tambahkan kembali $jumlahPenarikan supaya kita membandingkan
+            // saldo yang benar-benar tersedia UNTUK penarikan spesifik ini,
+            // bukan saldo yang sudah "dipotong duluan" oleh penarikan itu sendiri.
+            $saldoTersediaUntukPenarikanIni = $user->saldoMitra() + $jumlahPenarikan;
 
-        $isMobile = (bool) preg_match('/Mobile|Android|iPhone|iPad/i', $userAgent);
+            if ($saldoTersediaUntukPenarikanIni < $jumlahPenarikan) {
+                abort(422, "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")");
+            }
 
-        $browser = match (true) {
-            str_contains($userAgent, 'Edg/') => 'Edge',
-            str_contains($userAgent, 'Chrome/') => 'Chrome',
-            str_contains($userAgent, 'Firefox/') => 'Firefox',
-            str_contains($userAgent, 'Safari/') && ! str_contains($userAgent, 'Chrome') => 'Safari',
-            default => 'Browser',
-        };
+            // TIDAK decrement kolom `saldo` di sini. Saldo dinamis otomatis
+            // "berkurang" begitu status Penarikan bukan 'ditolak' — termasuk
+            // saat masih 'pending', jadi begitu penarikan diajukan, saldo
+            // yang tampil di Dashboard Mitra sudah otomatis terpotong.
+            // Baris `decrement('saldo', ...)` LAMA sengaja dihapus.
 
-        $os = match (true) {
-            str_contains($userAgent, 'Windows') => 'Windows',
-            str_contains($userAgent, 'Mac OS') => 'macOS',
-            str_contains($userAgent, 'Android') => 'Android',
-            str_contains($userAgent, 'iPhone'), str_contains($userAgent, 'iPad') => 'iOS',
-            str_contains($userAgent, 'Linux') => 'Linux',
-            default => null,
-        };
-
-        $device = $os ? "{$browser} di {$os}" : $browser;
-
-        return [$device, $isMobile ? 'mobile' : 'desktop'];
-    }
-
-    /**
-     * DELETE /admin/pengaturan/keamanan/sessions/{sessionId}
-     * Paksa keluar dari satu sesi login (device lain).
-     */
-    public function destroySession(Request $request, string $sessionId)
-    {
-        DB::table('sessions')
-            ->where('user_id', Auth::id())
-            ->where('id', $sessionId)
-            ->where('id', '!=', $request->session()->getId()) // jaga-jaga: gak boleh hapus sesi sendiri lewat sini
-            ->delete();
-
-        return back()->with('success', 'Sesi berhasil dikeluarkan.');
-    }
-
-    /**
-     * PUT /admin/pengaturan/keamanan
-     */
-    public function updateKeamanan(Request $request)
-    {
-        $admin = Auth::user();
-
-        $changesLast24h = PasswordHistory::where('user_id', $admin->id)
-            ->where('changed_at', '>=', now()->subDay())
-            ->count();
-
-        if ($changesLast24h >= 2) {
-            return back()->withErrors([
-                'kata_sandi_lama' => 'Anda hanya dapat mengubah kata sandi maksimal 2 kali dalam 24 jam.',
+            SaldoMutasi::create([
+                'user_id' => $user->id,
+                'type' => 'penarikan',
+                'jumlah' => $jumlahPenarikan,
+                'deskripsi' => 'Penarikan ke '.$penarikan->nama_bank.' •••• '.substr($penarikan->nomor_rekening, -4),
+                'reference_type' => Penarikan::class,
+                'reference_id' => $penarikan->id,
             ]);
-        }
+
+            $penarikan->update([
+                'status' => 'selesai',
+                'processed_at' => now(),
+            ]);
+        });
+
+        return back()->with('success', 'Penarikan berhasil disetujui, saldo mitra telah dipotong.');
+    }
+
+    public function reject(Request $request, Penarikan $penarikan): RedirectResponse
+    {
+        abort_unless($penarikan->status === 'pending', 400, 'Penarikan ini sudah diproses sebelumnya.');
 
         $validated = $request->validate([
-            'kata_sandi_lama' => ['required', 'string'],
-            'kata_sandi_baru' => ['required', 'string', 'min:8', 'confirmed'],
-        ], [], [
-            'kata_sandi_lama' => 'kata sandi lama',
-            'kata_sandi_baru' => 'kata sandi baru',
+            'catatan' => 'nullable|string|max:255',
         ]);
 
-        if (! Hash::check($validated['kata_sandi_lama'], $admin->password)) {
-            return back()->withErrors([
-                'kata_sandi_lama' => 'Kata sandi lama tidak sesuai.',
-            ]);
-        }
-
-        $admin->update([
-            'password' => Hash::make($validated['kata_sandi_baru']),
+        // Saldo tidak pernah dipotong di awal, jadi di sini tidak perlu
+        // dikembalikan - cukup ubah statusnya saja.
+        $penarikan->update([
+            'status' => 'ditolak',
+            'catatan' => $validated['catatan'] ?? null,
+            'processed_at' => now(),
         ]);
 
-        PasswordHistory::create([
-            'user_id'    => $admin->id,
-            'changed_at' => now(),
-        ]);
-
-        return redirect()
-            ->route('admin.pengaturan.keamanan')
-            ->with('success', 'Kata sandi berhasil diperbarui.');
+        return back()->with('success', 'Penarikan telah ditolak.');
     }
-
-    /**
-     * GET /admin/pengaturan/qris
-     */
-    public function qris()
-    {
-        $setting = PaymentSetting::current();
-
-        $qrisUrl = ($setting && $setting->qris_image) 
-            ? Storage::url($setting->qris_image) . '?v=' . time() 
-            : null;
-
-        return Inertia::render('Admin/Pengaturan/Qris', [
-            'qris_url' => $qrisUrl,
-        ]);
-    }
-
-    /**
-     * POST /admin/pengaturan/qris
-     */
-    public function updateQris(Request $request)
-    {
-        $request->validate([
-            'qris_image' => ['required', 'image', 'max:4096'],
-        ]);
-
-        $setting = PaymentSetting::current();
-
-        if ($setting && $setting->qris_image) {
-            Storage::delete($setting->qris_image);
-        }
-
-        $setting->update([
-            'qris_image' => $request->file('qris_image')->store('qris', 'public'),
-        ]);
-
-        return redirect()
-            ->route('admin.pengaturan.qris')
-            ->with('success', 'QRIS berhasil diperbarui.');
-    }
-
-    /**
-     * DELETE /admin/pengaturan/qris
-     */
-    public function destroyQris()
-    {
-        $setting = PaymentSetting::current();
-
-        if ($setting && $setting->qris_image) {
-            Storage::disk('public')->delete($setting->qris_image);
-            $setting->update([
-                'qris_image' => null,
-            ]);
-        }
-
-        return redirect()
-            ->route('admin.pengaturan.qris')
-            ->with('success', 'QRIS berhasil dihapus.');
-    }
-
-    /**
-     * GET /admin/pengaturan/komisi
-     */
-    /**
- * GET /admin/pengaturan/komisi
- */
-public function komisi()
-{
-    $setting = PaymentSetting::current();
-
-    return Inertia::render('Admin/Pengaturan/Komisi', [
-        'commission_rate' => $setting ? $setting->commission_rate : 0,
-    ]);
-}
-
-/**
- * PUT /admin/pengaturan/komisi
- */
-public function updateKomisi(Request $request)
-{
-    $validated = $request->validate([
-        'commission_rate' => ['required', 'numeric', 'min:0', 'max:100'],
-    ], [], [
-        'commission_rate' => 'persentase komisi',
-    ]);
-
-    $setting = PaymentSetting::current();
-
-    $setting->update([
-        'commission_rate' => $validated['commission_rate'],
-    ]);
-
-    return redirect()
-        ->route('admin.pengaturan.komisi')
-        ->with('success', 'Pengaturan komisi berhasil diperbarui.');
-}
 }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Mitra;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Penarikan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -14,6 +13,7 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
+        /** @var \App\Models\User $partner */
         $partner = Auth::user();
 
         // 1. Ambil pesanan aktif milik mitra ini
@@ -32,26 +32,7 @@ class DashboardController extends Controller
                   ->orWhere('service_type', 'titip_kendaraan');
             })->count();
 
-        // 2. Persentase Komisi Platform (10%)
-        $persenKomisi = 10;
-
-        // Hitung total pendapatan kotor dari pesanan selesai
-        $totalPendapatanKotor = Order::where('partner_id', $partner->id)
-            ->whereIn('status', ['selesai', 'completed', 'success'])
-            ->sum('total_price');
-
-        // Nilai kotor (menggunakan saldo user jika ada, atau kalkulasi pesanan)
-        $grossBalance = $partner->saldo > 0 ? $partner->saldo : $totalPendapatanKotor;
-
-        // Potong komisi 10%
-        $saldoBersih = $grossBalance * ((100 - $persenKomisi) / 100);
-
-        // Kurangi dengan total penarikan yang pernah/sedang dilakukan (selain yang ditolak)
-        $totalPenarikan = Penarikan::where('user_id', $partner->id)
-            ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal'])
-            ->sum('jumlah');    
-
-        // Hasil akhir saldo yang akan ditampilkan di Beranda
+        // 2. Ambil saldo bersih dari method saldoMitra()
         $saldoTampil = $partner->saldoMitra();
 
         // 3. Ambil Kategori Layanan Aktif

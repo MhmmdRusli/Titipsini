@@ -7,22 +7,13 @@ use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\PaymentSetting;
 use App\Models\PendapatanPlatform;
-use App\Models\SaldoMutasi;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class OrderController extends Controller
 {
-    /**
-     * Persentase komisi fallback kalau entah kenapa PaymentSetting belum
-     * ada baris sama sekali (seharusnya tidak pernah terjadi karena
-     * PaymentSetting::current() pakai firstOrCreate dengan default di migration).
-     */
-    private const KOMISI_PLATFORM_FALLBACK_PERSEN = 10;
-
     public function index(Request $request)
     {
         $search = $request->string('search')->toString();
@@ -106,51 +97,39 @@ class OrderController extends Controller
     }
 
     /**
-     * Kredit saldo mitra sebesar total pesanan dikurangi komisi platform.
-     * Cuma dijalankan sekali per pesanan — dijaga dengan cek status sebelumnya,
-     * supaya tidak dobel kredit kalau admin klik ulang status yang sama.
+     * Catat pendapatan platform (buat halaman rekap Admin/Pendapatan) saat
+     * pesanan pertama kali berstatus 'selesai'.
+     *
+     * PENTING: method ini TIDAK menyentuh kolom `users.saldo` maupun tabel
+     * `saldo_mutasi` sama sekali. Saldo mitra sekarang dihitung dinamis lewat
+     * User::saldoMitra() (langsung dari tabel `orders` + `penarikan`), jadi
+     * tidak perlu — dan tidak boleh — "dikreditkan" secara manual di sini.
+     * Kalau nanti butuh baca saldo mitra di mana pun, selalu panggil
+     * $order->partner->saldoMitra(), jangan pernah balik ke $user->saldo.
      */
-    protected function kreditSaldoMitra(Order $order): void
+    protected function catatPendapatanPlatform(Order $order): void
     {
         if (! $order->partner_id) {
             return;
         }
 
-        // Sudah pernah dikredit untuk pesanan ini? Cek dari riwayat mutasi biar tidak dobel.
-        $sudahDikredit = SaldoMutasi::where('reference_type', Order::class)
-            ->where('reference_id', $order->id)
-            ->where('type', 'penghasilan')
-            ->exists();
+        $sudahDicatat = PendapatanPlatform::where('order_id', $order->id)->exists();
 
-        if ($sudahDikredit) {
+        if ($sudahDicatat) {
             return;
         }
 
-        $komisiPersen = (float) (PaymentSetting::current()->komisi_persen ?? self::KOMISI_PLATFORM_FALLBACK_PERSEN);
+        $komisiPersen = (float) (PaymentSetting::current()->komisi_persen ?? 10);
         $totalPesanan = (float) $order->total_price;
         $komisi = round($totalPesanan * $komisiPersen / 100);
-        $pendapatanMitra = $totalPesanan - $komisi;
 
-        DB::transaction(function () use ($order, $pendapatanMitra, $komisi, $komisiPersen, $totalPesanan) {
-            $order->partner->increment('saldo', $pendapatanMitra);
-
-            SaldoMutasi::create([
-                'user_id' => $order->partner_id,
-                'type' => 'penghasilan',
-                'jumlah' => $pendapatanMitra,
-                'deskripsi' => 'Pendapatan dari pesanan '.$order->order_code.' (setelah komisi platform '.$komisiPersen.'%)',
-                'reference_type' => Order::class,
-                'reference_id' => $order->id,
-            ]);
-
-            PendapatanPlatform::create([
-                'order_id' => $order->id,
-                'partner_id' => $order->partner_id,
-                'total_transaksi' => $totalPesanan,
-                'komisi_persen' => $komisiPersen,
-                'jumlah_komisi' => $komisi,
-            ]);
-        });
+        PendapatanPlatform::create([
+            'order_id' => $order->id,
+            'partner_id' => $order->partner_id,
+            'total_transaksi' => $totalPesanan,
+            'komisi_persen' => $komisiPersen,
+            'jumlah_komisi' => $komisi,
+        ]);
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -160,17 +139,6 @@ class OrderController extends Controller
             'cancel_reason' => ['required_if:status,dibatalkan', 'nullable', 'string', 'max:255'],
         ]);
 
-        // Pesanan hanya boleh dikonfirmasi (diproses/selesai) kalau bukti
-        // pembayaran sudah diupload customer. Pengecualian: pembatalan tetap
-        // boleh dilakukan kapan saja meski belum ada bukti bayar.
-        $butuhBuktiBayar = in_array($validated['status'], ['diproses', 'selesai']);
-
-        if ($butuhBuktiBayar && ! $order->payment_receipt) {
-            return back()->withErrors([
-                'status' => 'Pesanan belum bisa dikonfirmasi karena bukti pembayaran belum diunggah customer.',
-            ]);
-        }
-
         $statusSebelumnya = $order->status;
 
         $order->update([
@@ -178,11 +146,11 @@ class OrderController extends Controller
             'cancel_reason' => $validated['status'] === 'dibatalkan' ? $validated['cancel_reason'] : null,
         ]);
 
-        // Kredit saldo mitra hanya saat status PERTAMA KALI berubah jadi 'diproses'
-        // (artinya admin baru saja memverifikasi pembayaran).
-        if ($validated['status'] === 'diproses' && $statusSebelumnya !== 'diproses') {
+        // Catat pendapatan platform hanya saat status PERTAMA KALI jadi 'selesai'
+        // (selaras dengan User::saldoMitra() yang cuma hitung order 'selesai').
+        if ($validated['status'] === 'selesai' && $statusSebelumnya !== 'selesai') {
             $order->load('partner');
-            $this->kreditSaldoMitra($order);
+            $this->catatPendapatanPlatform($order);
         }
 
         $this->notifikasiUntukStatus($order, $validated['status'], $validated['cancel_reason'] ?? null);
