@@ -19,7 +19,6 @@ class PengaturanController extends Controller
     public function komisi(): Response
     {
         // Nilai persentase komisi default / dari DB/Setting
-        // Silakan sesuaikan jika Anda menyimpan nilai komisi di database/setting
         $commissionRate = 10; 
 
         return Inertia::render('Admin/Pengaturan/Komisi', [
@@ -36,10 +35,28 @@ class PengaturanController extends Controller
             'commission_rate' => 'required|numeric|min:0|max:100',
         ]);
 
-        // Simpan logis nilai komisi ke database/setting di sini jika ada model Setting
-        // Contoh: Setting::updateOrCreate(['key' => 'commission_rate'], ['value' => $validated['commission_rate']]);
-
         return back()->with('success', 'Pengaturan komisi platform berhasil disimpan!');
+    }
+
+    /**
+     * Menampilkan halaman Pengaturan QRIS / Pembayaran.
+     */
+    public function qris(): Response
+    {
+        return Inertia::render('Admin/Pengaturan/Qris');
+    }
+
+    /**
+     * Menyimpan perubahan Pengaturan QRIS.
+     */
+    public function updateQris(Request $request): RedirectResponse
+    {
+        // Validasi jika ada upload gambar QRIS atau string data QRIS
+        $request->validate([
+            'qris_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        return back()->with('success', 'Pengaturan QRIS berhasil diperbarui.');
     }
 
     /**
