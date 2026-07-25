@@ -30,6 +30,14 @@ class PengaturanController extends Controller
     }
 
     /**
+     * Menampilkan halaman keamanan pengaturan admin.
+     */
+    public function keamanan(): Response
+    {
+        return Inertia::render('Admin/Pengaturan/Keamanan');
+    }
+
+    /**
      * Baru di sini saldo mitra benar-benar dipotong dan mutasi dicatat.
      *
      * PENTING: saldo mitra TIDAK disimpan di kolom `users.saldo` (kolom itu
