@@ -29,13 +29,13 @@ export default function ProfileEdit({ user }) {
     }
 
     const getInputClass = (hasError) => `
-        w-full rounded-2xl border bg-white dark:bg-zinc-900 px-4 py-3 pl-11 text-sm 
-        text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500
+        w-full rounded-2xl border bg-white dark:bg-gray-800 px-4 py-3 pl-11 text-sm 
+        text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
         transition-all duration-200 shadow-sm focus:outline-none focus:ring-4
         ${
             hasError
                 ? 'border-red-400 focus:border-red-500 focus:ring-red-500/10'
-                : 'border-zinc-200 dark:border-zinc-800 focus:border-[#22c55e] focus:ring-[#22c55e]/10 dark:focus:border-[#4ade80]'
+                : 'border-gray-200 dark:border-gray-700 focus:border-[#15803d] focus:ring-[#15803d]/10 dark:focus:border-[#4ade80]'
         }
     `;
 
@@ -43,11 +43,11 @@ export default function ProfileEdit({ user }) {
         <CustomerLayout title="Edit Profil" backHref="/app/profile">
             <Head title="Edit Profil - Titipsini.com" />
 
-            <div className="mx-auto max-w-lg px-4 py-8">
-                <form onSubmit={submit} className="rounded-3xl border border-zinc-100 bg-white p-6 shadow-xl shadow-zinc-900/5 dark:border-zinc-800/80 dark:bg-zinc-950 md:p-8">
+            <div className="mx-auto max-w-lg px-4 py-6">
+                <form onSubmit={submit} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-xl shadow-gray-900/5 dark:border-gray-800 dark:bg-gray-900 md:p-8">
                     
                     {/* Header Avatar Upload Section */}
-                    <div className="flex flex-col items-center pb-8 border-b border-zinc-100 dark:border-zinc-900">
+                    <div className="flex flex-col items-center pb-8 border-b border-gray-100 dark:border-gray-800">
                         <div className="relative group">
                             <button
                                 type="button"
@@ -72,7 +72,7 @@ export default function ProfileEdit({ user }) {
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#15803d] text-white shadow-lg ring-4 ring-white dark:ring-zinc-950 hover:bg-emerald-700 hover:scale-105 transition"
+                                className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#15803d] text-white shadow-lg ring-4 ring-white dark:ring-gray-900 hover:bg-emerald-700 hover:scale-105 transition"
                             >
                                 <Camera size={16} />
                             </button>
@@ -85,8 +85,8 @@ export default function ProfileEdit({ user }) {
                             onChange={handleFotoChange}
                             className="hidden"
                         />
-                        <p className="mt-4 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                            Ketuk foto untuk mengganti <span className="text-zinc-400 font-normal">(Maks. 2MB)</span>
+                        <p className="mt-4 text-xs font-medium text-gray-500 dark:text-gray-400">
+                            Ketuk foto untuk mengganti <span className="text-gray-400 dark:text-gray-500 font-normal">(Maks. 2MB)</span>
                         </p>
                         {errors.foto && <p className="mt-1.5 text-xs font-medium text-red-500">{errors.foto}</p>}
                     </div>
@@ -96,11 +96,11 @@ export default function ProfileEdit({ user }) {
                         
                         {/* Nama Lengkap */}
                         <div>
-                            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                                 Nama Lengkap
                             </label>
                             <div className="relative">
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-zinc-400 dark:text-zinc-500">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
                                     <User size={18} />
                                 </span>
                                 <input
@@ -116,7 +116,7 @@ export default function ProfileEdit({ user }) {
 
                         {/* Jenis Kelamin (Custom Card Selector) */}
                         <div>
-                            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                                 Jenis Kelamin
                             </label>
                             <div className="grid grid-cols-2 gap-3">
@@ -132,8 +132,8 @@ export default function ProfileEdit({ user }) {
                                             onClick={() => setData('gender', option.value)}
                                             className={`relative flex items-center justify-between rounded-2xl border p-3.5 text-left transition-all shadow-sm ${
                                                 isSelected
-                                                    ? 'border-[#15803d] bg-emerald-50/50 dark:bg-emerald-950/20 text-[#15803d] dark:text-[#4ade80] font-semibold ring-2 ring-[#15803d]/20'
-                                                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700'
+                                                    ? 'border-[#15803d] bg-emerald-50/50 dark:bg-emerald-950/30 text-[#15803d] dark:text-[#4ade80] font-semibold ring-2 ring-[#15803d]/20'
+                                                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                                             }`}
                                         >
                                             <span className="text-sm">{option.label}</span>
@@ -147,11 +147,11 @@ export default function ProfileEdit({ user }) {
 
                         {/* Nomor Telepon */}
                         <div>
-                            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                                 Nomor Telepon / Whatsapp
                             </label>
                             <div className="relative">
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-zinc-400 dark:text-zinc-500">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
                                     <Phone size={18} />
                                 </span>
                                 <input
@@ -167,12 +167,12 @@ export default function ProfileEdit({ user }) {
 
                         {/* Alamat */}
                         <div>
-                            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                                 Alamat Lengkap
                             </label>
                             <div className="relative">
-                                <span className="absolute top-3.5 left-0 flex items-center pl-4 text-zinc-400 dark:text-zinc-500">
-                                    <MapPin size={18} />
+                                <span className="absolute top-3.5 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                                    <MapPin size= {18} />
                                 </span>
                                 <textarea
                                     rows={3}
