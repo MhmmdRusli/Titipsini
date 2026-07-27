@@ -245,12 +245,10 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::put('/rekening/{id}', [RekeningController::class, 'update'])->name('rekening.update');
 
     /* Penarikan Dana Mitra */
-<<<<<<< HEAD
     Route::get('/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');
     Route::get('/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
     Route::post('/penarikan/tarik', [PenarikanController::class, 'store'])->name('penarikan.store');
     Route::get('/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
-=======
     Route::get('/pendapatan/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');
     Route::get('/pendapatan/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
     Route::post('/pendapatan/penarikan', [PenarikanController::class, 'store'])->name('penarikan.store');
@@ -260,7 +258,6 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::get('/penarikan', [PenarikanController::class, 'index'])->name('mitra.penarikan.index');
     Route::get('/penarikan/tarik', [PenarikanController::class, 'create'])->name('mitra.penarikan.create');
     Route::get('/penarikan/sukses/{penarikan}', [PenarikanController::class, 'sukses'])->name('mitra.penarikan.sukses');
->>>>>>> e774ddb96274ec20fd68d511d76335b367d56154
 
     Route::get('/keamanan', [KeamananController::class, 'edit'])->name('keamanan.edit');
     Route::put('/keamanan', [KeamananController::class, 'update'])->name('keamanan.update');
