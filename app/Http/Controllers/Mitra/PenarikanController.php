@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Mitra;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\PaymentSetting;
 use App\Models\Penarikan;
 use App\Models\RekeningBank;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,17 +17,7 @@ use Inertia\Response;
 class PenarikanController extends Controller
 {
     /**
-     * Halaman "Detail Saldo". Saldo & riwayat dibangun LANGSUNG dari tabel
-     * `orders` (penghasilan) dan `penarikan` (penarikan) — bukan dari
-     * `saldo_mutasi` — supaya selalu konsisten dengan User::saldoMitra()
-     * yang dipakai Admin\PenarikanController::approve() untuk validasi.
-     *
-     * CATATAN: sempat ada versi duplikat method index() ini hasil merge
-     * git yang membaca "penghasilan" dari tabel `saldo_mutasi`. Versi itu
-     * SENGAJA dibuang karena `saldo_mutasi` cuma diisi untuk type
-     * 'penarikan' (lihat Admin\PenarikanController::approve()), tidak
-     * pernah untuk 'penghasilan' — kalau dipakai, sisi penghasilan akan
-     * selalu tampil kosong walau saldo aslinya tidak kosong.
+     * Halaman "Detail Saldo" & Riwayat Mutasi
      */
     public function index(Request $request): Response
     {
@@ -34,7 +26,8 @@ class PenarikanController extends Controller
         $dari = $request->query('dari');
         $sampai = $request->query('sampai');
 
-        $komisiPersen = (float) (\App\Models\PaymentSetting::current()->komisi_persen ?? 10);
+        $paymentSetting = PaymentSetting::current();
+        $komisiPersen = (float) ($paymentSetting->komisi_persen ?? 10);
 
         // Sisi "penghasilan": order milik mitra ini yang statusnya selesai
         $ordersQuery = Order::where('partner_id', $user->id)
@@ -89,7 +82,7 @@ class PenarikanController extends Controller
                 'type' => $m['type'],
                 'jumlah' => $m['jumlah'],
                 'deskripsi' => $m['deskripsi'],
-                'tanggal' => $m['created_at']->translatedFormat('d M Y, H:i'),
+                'tanggal' => $m['created_at'] ? $m['created_at']->translatedFormat('d M Y, H:i') : '-',
             ]);
 
         return Inertia::render('Mitra/Penarikan/Index', [
@@ -99,22 +92,36 @@ class PenarikanController extends Controller
         ]);
     }
 
+    /**
+     * Form Pengajuan Penarikan
+     */
     public function create(): Response
     {
         $user = Auth::user();
-        $rekening = RekeningBank::where('user_id', $user->id)->first();
+        
+        // Ambil semua rekening user dari database
+        $rekeningList = RekeningBank::where('user_id', $user->id)
+            ->get()
+            ->map(fn ($r) => [
+                'id' => $r->id,
+                'nama_bank' => $r->nama_bank,
+                'nomor_rekening' => $r->nomor_rekening,
+                'nama_pemilik' => $r->nama_pemilik,
+            ]);
+
+        $firstRekening = $rekeningList->first();
 
         return Inertia::render('Mitra/Penarikan/Create', [
             'saldo' => $user->saldoMitra(),
-            'rekening' => $rekening ? [
-                'nama_bank' => $rekening->nama_bank,
-                'nomor_rekening' => $rekening->nomor_rekening,
-                'nama_pemilik' => $rekening->nama_pemilik,
-            ] : null,
+            'initialRekeningList' => $rekeningList,
+            'rekening' => $firstRekening,
         ]);
     }
 
-    public function store(Request $request)
+    /**
+     * Submit Form Penarikan
+     */
+    public function store(Request $request): RedirectResponse
     {
         $user = Auth::user();
         $saldoTersedia = $user->saldoMitra();
@@ -122,27 +129,33 @@ class PenarikanController extends Controller
         $validated = $request->validate([
             'jumlah' => ['required', 'integer', 'min:100000', 'max:'.max($saldoTersedia, 100000)],
             'pin' => ['required', 'string'],
+            'rekening_bank_id' => ['nullable', 'exists:rekening_banks,id'],
         ], [
             'jumlah.max' => 'Saldo kamu tidak mencukupi untuk jumlah penarikan ini.',
             'jumlah.min' => 'Minimal penarikan adalah Rp100.000.',
+            'pin.required' => 'PIN wajib diisi.',
         ]);
 
         if (! $user->pin || ! Hash::check($validated['pin'], $user->pin)) {
             return back()->withErrors(['pin' => 'PIN yang kamu masukkan salah.']);
         }
 
-        $rekening = RekeningBank::where('user_id', $user->id)->first();
+        // Cari rekening berdasarkan rekening_bank_id pilihan user atau ambil rekening pertama
+        $rekening = null;
+        if (!empty($validated['rekening_bank_id'])) {
+            $rekening = RekeningBank::where('user_id', $user->id)
+                ->where('id', $validated['rekening_bank_id'])
+                ->first();
+        }
+
+        if (! $rekening) {
+            $rekening = RekeningBank::where('user_id', $user->id)->first();
+        }
 
         if (! $rekening) {
             return back()->withErrors(['jumlah' => 'Silakan tambahkan rekening bank terlebih dahulu.']);
         }
 
-        // Saldo TIDAK dipotong di sini — cuma bikin pengajuan 'pending'.
-        // Begitu status bukan 'ditolak' (termasuk masih 'pending'), saldo
-        // yang dihitung saldoMitra() otomatis "berkurang" karena memang
-        // dihitung ulang dari tabel `penarikan` tiap kali dipanggil.
-        // Admin\PenarikanController::approve() cuma perlu ubah status,
-        // tidak perlu (dan tidak boleh) potong kolom saldo manapun lagi.
         $penarikan = Penarikan::create([
             'user_id' => $user->id,
             'jumlah' => $validated['jumlah'],
@@ -152,9 +165,12 @@ class PenarikanController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('mitra.penarikan.sukses', $penarikan->id);
+        return redirect()->route('mitra.penarikan.sukses', ['penarikan' => $penarikan->id]);
     }
 
+    /**
+     * Halaman Penarikan Sukses / Detail Penarikan
+     */
     public function sukses(Penarikan $penarikan): Response
     {
         abort_unless($penarikan->user_id === Auth::id(), 403);
@@ -162,15 +178,64 @@ class PenarikanController extends Controller
         return Inertia::render('Mitra/Penarikan/Sukses', [
             'penarikan' => [
                 'id' => $penarikan->id,
-                'jumlah' => $penarikan->jumlah,
+                'jumlah' => (float) $penarikan->jumlah,
                 'nama_bank' => $penarikan->nama_bank,
                 'nomor_rekening' => $penarikan->nomor_rekening,
                 'nama_pemilik' => $penarikan->nama_pemilik,
                 'status' => $penarikan->status,
-                'tanggal' => $penarikan->created_at->translatedFormat('d M Y, H:i'),
+                'tanggal' => $penarikan->created_at ? $penarikan->created_at->translatedFormat('d M Y, H:i') : '-',
             ],
         ]);
     }
+
+    /**
+     * Tambah Rekening Bank Baru Ke Database
+     */
+    public function storeRekening(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama_bank' => ['required', 'string', 'max:100'],
+            'nomor_rekening' => ['required', 'string', 'max:50'],
+            'nama_pemilik' => ['required', 'string', 'max:255'],
+        ]);
+
+        RekeningBank::create([
+            'user_id' => Auth::id(),
+            'nama_bank' => $validated['nama_bank'],
+            'nomor_rekening' => $validated['nomor_rekening'],
+            'nama_pemilik' => $validated['nama_pemilik'],
+        ]);
+
+        return back()->with('success', 'Rekening berhasil ditambahkan.');
+    }
+
+    /**
+     * Update Rekening Bank Di Database
+     */
+    public function updateRekening(Request $request, RekeningBank $rekening): RedirectResponse
+    {
+        abort_unless($rekening->user_id === Auth::id(), 403);
+
+        $validated = $request->validate([
+            'nama_bank' => ['required', 'string', 'max:100'],
+            'nomor_rekening' => ['required', 'string', 'max:50'],
+            'nama_pemilik' => ['required', 'string', 'max:255'],
+        ]);
+
+        $rekening->update($validated);
+
+        return back()->with('success', 'Rekening berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus Rekening Bank Dari Database
+     */
+    public function destroyRekening(RekeningBank $rekening): RedirectResponse
+    {
+        abort_unless($rekening->user_id === Auth::id(), 403);
+
+        $rekening->delete();
+
+        return back()->with('success', 'Rekening berhasil dihapus.');
+    }
 }
-
-

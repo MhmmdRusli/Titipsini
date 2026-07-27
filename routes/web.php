@@ -5,10 +5,14 @@ use App\Http\Controllers\Admin\Auth\NewPasswordController as AdminNewPasswordCon
 use App\Http\Controllers\Admin\Auth\PasswordResetLinkController as AdminPasswordResetLinkController;
 use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
+use App\Http\Controllers\Admin\PendapatanController as AdminPendapatanController;
+use App\Http\Controllers\Admin\PenarikanController as AdminPenarikanController;
 use App\Http\Controllers\Admin\PengaturanController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\TopupVerifikasiController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -19,8 +23,8 @@ use App\Http\Controllers\Customer\BantuanController;
 use App\Http\Controllers\Customer\BeritaController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\LengkapiDataController;
-use App\Http\Controllers\Customer\NotifikasiController;
 use App\Http\Controllers\Customer\NotificationSettingController;
+use App\Http\Controllers\Customer\NotifikasiController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Customer\PinController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
@@ -46,6 +50,7 @@ use App\Http\Controllers\Mitra\NotifikasiController as MitraNotifikasiController
 use App\Http\Controllers\Mitra\OnboardingController as MitraOnboardingController;
 use App\Http\Controllers\Mitra\OrderController as MitraOrderController;
 use App\Http\Controllers\Mitra\PenarikanController;
+use App\Http\Controllers\Mitra\PendapatanController as MitraPendapatanController;
 use App\Http\Controllers\Mitra\ProfileController as MitraProfileController;
 use App\Http\Controllers\Mitra\RekeningController;
 use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
@@ -154,8 +159,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/partners/{partner}/restore', [AdminPartnerController::class, 'restore'])->name('partners.restore');
     Route::post('/partners/bulk-destroy', [AdminPartnerController::class, 'bulkDestroy'])->name('partners.bulkDestroy');
 
-    Route::get('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profil.edit');
-    Route::put('/profil', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profil.update');
+    Route::get('/profil', [AdminProfileController::class, 'edit'])->name('profil.edit');
+    Route::put('/profil', [AdminProfileController::class, 'update'])->name('profil.update');
 
     Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
     Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
@@ -167,9 +172,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
-
-        Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
-        Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
     });
 
     Route::resource('berita', AdminBeritaController::class)
@@ -177,7 +179,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->parameters(['berita' => 'berita']);
 
     Route::resource('kota', KotaController::class)->except(['show', 'create', 'edit']);
-    Route::resource('faq', \App\Http\Controllers\Admin\FaqController::class)->except(['show', 'create', 'edit']);
+    Route::resource('faq', AdminFaqController::class)->except(['show', 'create', 'edit']);
 
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
@@ -202,11 +204,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('/{topup}/reject', [TopupVerifikasiController::class, 'reject'])->name('reject');
     });
 
-    Route::get('pendapatan', [\App\Http\Controllers\Admin\PendapatanController::class, 'index'])->name('pendapatan.index');
+    Route::get('pendapatan', [AdminPendapatanController::class, 'index'])->name('pendapatan.index');
     Route::prefix('penarikan')->name('penarikan.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\PenarikanController::class, 'index'])->name('index');
-        Route::post('/{penarikan}/approve', [\App\Http\Controllers\Admin\PenarikanController::class, 'approve'])->name('approve');
-        Route::post('/{penarikan}/reject', [\App\Http\Controllers\Admin\PenarikanController::class, 'reject'])->name('reject');
+        Route::get('/', [AdminPenarikanController::class, 'index'])->name('index');
+        Route::post('/{penarikan}/approve', [AdminPenarikanController::class, 'approve'])->name('approve');
+        Route::post('/{penarikan}/reject', [AdminPenarikanController::class, 'reject'])->name('reject');
     });
 });
 
@@ -237,19 +239,22 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
 
     Route::resource('layanan', MitraServiceController::class)->except(['show', 'create', 'edit']);
 
+    /* Rekening Bank Mitra */
     Route::get('/rekening', [RekeningController::class, 'edit'])->name('rekening.edit');
-    Route::put('/rekening', [RekeningController::class, 'update'])->name('rekening.update');
+    Route::post('/rekening', [RekeningController::class, 'store'])->name('rekening.store');
+    Route::put('/rekening/{id}', [RekeningController::class, 'update'])->name('rekening.update');
 
-    // Route Penarikan Dana Mitra (diperbarui agar tidak 404)
+    /* Penarikan Dana Mitra */
     Route::get('/pendapatan/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');
     Route::get('/pendapatan/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
-    Route::get('/penarikan/tarik', [PenarikanController::class, 'create']); // alias GET
-    
     Route::post('/pendapatan/penarikan', [PenarikanController::class, 'store'])->name('penarikan.store');
-    Route::post('/penarikan', [PenarikanController::class, 'store']); // alias POST
-    
     Route::get('/pendapatan/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
-    Route::get('/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses']); // alias Sukses
+
+    // Alias URL pendek penarikan
+    Route::get('/penarikan', [PenarikanController::class, 'index']);
+    Route::get('/penarikan/tarik', [PenarikanController::class, 'create']);
+    Route::post('/penarikan/tarik', [PenarikanController::class, 'store']);
+    Route::get('/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses']);
 
     Route::get('/keamanan', [KeamananController::class, 'edit'])->name('keamanan.edit');
     Route::put('/keamanan', [KeamananController::class, 'update'])->name('keamanan.update');
@@ -262,7 +267,7 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
 
     Route::patch('/pesanan/{order}/verifikasi-pembayaran', [MitraOrderController::class, 'verifikasiPembayaran'])->name('orders.verifikasiPembayaran');
 
-    Route::get('/pendapatan/riwayat', [\App\Http\Controllers\Mitra\PendapatanController::class, 'riwayat'])->name('pendapatan.riwayat');
+    Route::get('/pendapatan/riwayat', [MitraPendapatanController::class, 'riwayat'])->name('pendapatan.riwayat');
 });
 
 /*

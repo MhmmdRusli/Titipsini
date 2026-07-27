@@ -15,16 +15,15 @@ const Row = ({ label, value, bold }) => (
     </div>
 );
 
-export default function PenarikanSukses({ withdrawalData }) {
-    // Data dummy fallback
-    const data = withdrawalData || {
+export default function PenarikanSukses({ penarikan }) {
+    // Data dari Controller Laravel (penarikan) / fallback dummy jika dipanggil manual
+    const data = penarikan || {
         id: Date.now(),
-        jumlah: 250000,
-        rekening: {
-            nama_bank: 'PT. BCA (Bank Central Asia)',
-            nomor_rekening: '7310900342',
-            nama_pemilik: 'Angelina Hana',
-        },
+        jumlah: 0,
+        nama_bank: '-',
+        nomor_rekening: '-',
+        nama_pemilik: '-',
+        status: 'pending'
     };
 
     return (
@@ -34,7 +33,7 @@ export default function PenarikanSukses({ withdrawalData }) {
             {/* Container Mobile View */}
             <div className="relative flex h-[850px] w-full max-w-[430px] flex-col overflow-hidden bg-gray-50 dark:bg-gray-900 shadow-xl rounded-lg">
                 
-                {/* NAVBAR STANDAR (DIBENARKAN KE DASHBOARD MITRA) */}
+                {/* NAVBAR STANDAR (BACK KE DASHBOARD MITRA) */}
                 <header className="relative z-20 flex h-14 items-center justify-between border-b border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 px-4">
                     <Link
                         href={typeof route !== 'undefined' ? route('mitra.dashboard') : '/mitra/dashboard'}
@@ -54,7 +53,7 @@ export default function PenarikanSukses({ withdrawalData }) {
                 {/* Main Content */}
                 <div className="relative z-10 flex flex-grow flex-col items-center justify-start text-center p-5 pt-6">
                     
-                    {/* LOGO DI DALAM CEKUNGAN HIJAU */}
+                    {/* LOGO */}
                     <div className="mb-2 flex items-center justify-center">
                         <img
                             src="/images/logo-titipsini.png"
@@ -63,7 +62,7 @@ export default function PenarikanSukses({ withdrawalData }) {
                         />
                     </div>
 
-                    {/* TEKS BRAND WARNA HIJAU PENUH DI BAWAH CEKUNGAN */}
+                    {/* BRAND TEXT */}
                     <div className="mb-6 pt-8">
                         <span className="text-2xl font-bold tracking-tight text-[#15803d] dark:text-[#4ade80]">
                             Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
@@ -96,15 +95,15 @@ export default function PenarikanSukses({ withdrawalData }) {
                         />
                         <Row 
                             label="Bank Tujuan" 
-                            value={data.rekening?.nama_bank} 
+                            value={data.nama_bank} 
                         />
                         <Row 
                             label="Nomor Rekening" 
-                            value={data.rekening?.nomor_rekening} 
+                            value={data.nomor_rekening} 
                         />
                         <Row 
                             label="Nama Pemilik" 
-                            value={data.rekening?.nama_pemilik} 
+                            value={data.nama_pemilik} 
                         />
                         <Row 
                             label="Total Dana" 
@@ -114,13 +113,13 @@ export default function PenarikanSukses({ withdrawalData }) {
                         
                         <div className="flex items-center justify-between py-1.5 border-t border-emerald-100 dark:border-gray-800 mt-1">
                             <span className="text-gray-400 dark:text-gray-500 text-[11px]">Status</span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400">
-                                Diproses
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 capitalize">
+                                {data.status || 'Diproses'}
                             </span>
                         </div>
                     </div>
 
-                    {/* TOMBOL KEMBALI (DIBENARKAN KE DASHBOARD MITRA) */}
+                    {/* TOMBOL KEMBALI KE BERANDA */}
                     <div className="absolute bottom-6 left-5 right-5 z-20">
                         <Link
                             href={typeof route !== 'undefined' ? route('mitra.dashboard') : '/mitra/dashboard'}

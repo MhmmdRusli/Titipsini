@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import { ChevronLeft, Delete, Plus, Pencil, X, CheckCircle2 } from 'lucide-react';
 
 const PRESETS = [100000, 150000, 300000, 250000, 500000, 1000000];
@@ -9,31 +9,27 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID').format(value ?? 0);
 }
 
-export default function PenarikanCreate({ saldo = 8000000, initialRekeningList = [] }) {
+export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], rekening = null }) {
     const saldoNum = Number(saldo || 0);
+
+    // Dapatkan daftar rekening awal dari Props
+    const initialList = initialRekeningList.length > 0 
+        ? initialRekeningList 
+        : (rekening ? [rekening] : []);
+
+    // State Rekening List & Pilihan
+    const [rekeningList, setRekeningList] = useState(initialList);
+    const [selectedRekeningId, setSelectedRekeningId] = useState(initialList[0]?.id || null);
+
+    // Menggunakan Inertia Form untuk penarikan
+    const { data, setData, post, processing, errors, clearErrors } = useForm({
+        jumlah: '',
+        pin: '',
+        rekening_bank_id: initialList[0]?.id || '',
+    });
 
     // State Alur Penarikan
     const [step, setStep] = useState('jumlah'); // 'jumlah' | 'pin'
-    const [jumlah, setJumlah] = useState('');
-    const [pin, setPin] = useState('');
-    const [processing, setProcessing] = useState(false);
-    const [error, setError] = useState('');
-
-    // State Rekening List
-    const [rekeningList, setRekeningList] = useState(
-        initialRekeningList.length > 0
-            ? initialRekeningList
-            : [
-                  {
-                      id: 1,
-                      nama_bank: 'PT. BCA (Bank Central Asia)',
-                      nomor_rekening: '7310900342',
-                      nama_pemilik: 'Angelina Hana',
-                  },
-              ]
-    );
-
-    const [selectedRekeningId, setSelectedRekeningId] = useState(rekeningList[0]?.id || null);
 
     // State Modal (Tambah / Edit)
     const [showModalRekening, setShowModalRekening] = useState(false);
@@ -42,68 +38,94 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
     const [namaBank, setNamaBank] = useState('');
     const [noRekening, setNoRekening] = useState('');
     const [namaPemilik, setNamaPemilik] = useState('');
+    const [isSavingRekening, setIsSavingRekening] = useState(false);
 
-    const jumlahNumber = Number(jumlah) || 0;
+    const jumlahNumber = Number(data.jumlah) || 0;
     const isValidJumlah = jumlahNumber >= 100000 && jumlahNumber <= saldoNum && selectedRekeningId !== null;
 
     // Ambil data rekening yang sedang dipilih
     const selectedRekening = rekeningList.find((item) => item.id === selectedRekeningId);
 
+    // Sync state rekeningList jika props initialRekeningList diperbarui dari server (setelah save/edit)
+    useEffect(() => {
+        const updatedList = initialRekeningList.length > 0 
+            ? initialRekeningList 
+            : (rekening ? [rekening] : []);
+        
+        setRekeningList(updatedList);
+        
+        // Jika belum ada yang dipilih atau ID lama tidak ada di daftar, pilih ID rekening pertama
+        if (updatedList.length > 0 && (!selectedRekeningId || !updatedList.some(r => r.id === selectedRekeningId))) {
+            const defaultId = updatedList[0].id;
+            setSelectedRekeningId(defaultId);
+            setData('rekening_bank_id', defaultId);
+        }
+    }, [initialRekeningList, rekening]);
+
+    // Sync selectedRekeningId ke Inertia Form Data
+    useEffect(() => {
+        if (selectedRekeningId) {
+            setData('rekening_bank_id', selectedRekeningId);
+        }
+    }, [selectedRekeningId]);
+
     // Handlers Input Jumlah
     function handleJumlahChange(e) {
         const digitsOnly = e.target.value.replace(/\D/g, '');
-        setJumlah(digitsOnly);
+        setData('jumlah', digitsOnly);
     }
 
     // Handlers Keypad PIN
     function pressDigit(digit) {
-        if (pin.length >= PIN_LENGTH) return;
-        const next = pin + digit;
-        setPin(next);
-        if (next.length === PIN_LENGTH) {
-            submit(next);
+        if (data.pin.length >= PIN_LENGTH) return;
+        const nextPin = data.pin + digit;
+        setData('pin', nextPin);
+        if (nextPin.length === PIN_LENGTH) {
+            submitForm(nextPin);
         }
     }
 
     function pressBackspace() {
-        setPin((prev) => prev.slice(0, -1));
+        setData('pin', data.pin.slice(0, -1));
     }
 
     // Submit Penarikan
-    function submit(finalPin) {
-        setProcessing(true);
-        setError('');
-
-        router.post(
-            '/mitra/penarikan',
-            { 
-                jumlah: jumlahNumber, 
+    function submitForm(finalPin) {
+        clearErrors();
+        post('/mitra/penarikan', {
+            preserveState: false,
+            replace: true,
+            data: {
+                jumlah: jumlahNumber,
                 pin: finalPin,
-                rekening_id: selectedRekeningId 
+                rekening_bank_id: selectedRekeningId,
             },
-            {
-                onError: (errors) => {
-                    setProcessing(false);
-                    setPin('');
-                    setError(errors.pin ?? errors.jumlah ?? 'PIN salah, silakan coba lagi.');
-                },
-            }
-        );
+            onError: () => {
+                setData('pin', '');
+            },
+        });
     }
 
-    // Buka Modal Tambah
-    function handleOpenTambahModal() {
+    // Reset Form Modal
+    function resetModalForm() {
+        setShowModalRekening(false);
         setIsEditing(false);
         setEditId(null);
         setNamaBank('');
         setNoRekening('');
         setNamaPemilik('');
+        setIsSavingRekening(false);
+    }
+
+    // Buka Modal Tambah
+    function handleOpenTambahModal() {
+        resetModalForm();
         setShowModalRekening(true);
     }
 
     // Buka Modal Edit
     function handleOpenEditModal(item, e) {
-        e.stopPropagation(); // Mencegah pemicu klik select rekening
+        e.stopPropagation();
         setIsEditing(true);
         setEditId(item.id);
         setNamaBank(item.nama_bank);
@@ -112,39 +134,46 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
         setShowModalRekening(true);
     }
 
-    // Simpan Rekening (Tambah / Edit)
+    // SIMPAN REKENING VIA INERTIA ROUTER
     function handleSimpanRekening(e) {
         e.preventDefault();
-
         if (!namaBank.trim() || !noRekening.trim() || !namaPemilik.trim()) return;
 
-        if (isEditing) {
-            // Update Rekening
-            setRekeningList((prev) =>
-                prev.map((item) =>
-                    item.id === editId
-                        ? { ...item, nama_bank: namaBank, nomor_rekening: noRekening, nama_pemilik: namaPemilik }
-                        : item
-                )
-            );
-        } else {
-            // Tambah Rekening Baru
-            const newId = Date.now();
-            const rekeningBaru = {
-                id: newId,
-                nama_bank: namaBank,
-                nomor_rekening: noRekening,
-                nama_pemilik: namaPemilik,
-            };
-            setRekeningList((prev) => [...prev, rekeningBaru]);
-            setSelectedRekeningId(newId);
-        }
+        setIsSavingRekening(true);
 
-        // Reset & Close Modal
-        setNamaBank('');
-        setNoRekening('');
-        setNamaPemilik('');
-        setShowModalRekening(false);
+        const payload = {
+            nama_bank: namaBank,
+            nomor_rekening: noRekening,
+            nama_pemilik: namaPemilik,
+        };
+
+        if (isEditing) {
+            // Update Rekening ke Server
+            router.put(`/mitra/rekening/${editId}`, payload, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    resetModalForm();
+                },
+                onFinish: () => setIsSavingRekening(false),
+            });
+        } else {
+            // Tambah Rekening Baru ke Server
+            router.post('/mitra/rekening', payload, {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    resetModalForm();
+                    // Opsional: jika server mereturn list rekening baru di props
+                    const newList = page.props.initialRekeningList || [];
+                    if (newList.length > 0) {
+                        const lastAdded = newList[newList.length - 1];
+                        if (lastAdded) {
+                            setSelectedRekeningId(lastAdded.id);
+                        }
+                    }
+                },
+                onFinish: () => setIsSavingRekening(false),
+            });
+        }
     }
 
     // =========================================================================
@@ -161,7 +190,7 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                         <div className="relative flex items-center justify-center border-b border-gray-100 pb-3">
                             <button
                                 type="button"
-                                onClick={() => { setStep('jumlah'); setPin(''); setError(''); }}
+                                onClick={() => { setStep('jumlah'); setData('pin', ''); clearErrors(); }}
                                 className="absolute left-0 text-gray-600"
                             >
                                 <ChevronLeft size={20} />
@@ -180,12 +209,14 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                             <div className="mt-10 flex justify-center items-center gap-2 text-lg font-bold tracking-[0.2em] text-gray-800">
                                 {Array.from({ length: PIN_LENGTH }).map((_, i) => (
                                     <span key={i} className="w-4 text-center">
-                                        {i < pin.length ? (i === pin.length - 1 ? pin[i] : '•') : '•'}
+                                        {i < data.pin.length ? (i === data.pin.length - 1 ? data.pin[i] : '•') : '•'}
                                     </span>
                                 ))}
                             </div>
 
-                            {error && <p className="mt-4 text-[11px] text-red-500 font-medium">{error}</p>}
+                            {(errors.pin || errors.jumlah) && (
+                                <p className="mt-4 text-[11px] text-red-500 font-medium">{errors.pin || errors.jumlah}</p>
+                            )}
                         </div>
                     </div>
 
@@ -193,9 +224,9 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                     <div className="mb-2">
                         <button
                             type="button"
-                            disabled={pin.length < PIN_LENGTH || processing}
-                            onClick={() => submit(pin)}
-                            className="mb-8 w-full rounded-lg bg-[#2D7A44] py-3 text-xs font-semibold text-white transition active:bg-green-800 disabled:opacity-40"
+                            disabled={data.pin.length < PIN_LENGTH || processing}
+                            onClick={() => submitForm(data.pin)}
+                            className="mb-8 w-full rounded-lg bg-[#2D7A44] py-3 text-xs font-semibold text-white transition active:bg-green-800 disabled:opacity-40 cursor-pointer"
                         >
                             {processing ? 'Memverifikasi...' : 'Verifikasi'}
                         </button>
@@ -247,7 +278,10 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                 <div className="overflow-y-auto max-h-[700px] pr-1">
                     {/* Header Navigasi */}
                     <div className="relative flex items-center justify-center border-b border-gray-100 pb-3">
-                        <Link href="/mitra/penarikan" className="absolute left-0 text-gray-600">
+                        <Link 
+                            href={typeof route !== 'undefined' ? route('mitra.dashboard') : '/mitra/dashboard'} 
+                            className="absolute left-0 text-gray-600"
+                        >
                             <ChevronLeft size={20} />
                         </Link>
                         <h1 className="text-xs font-bold text-gray-800">Penarikan</h1>
@@ -266,8 +300,8 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                             <button
                                 key={value}
                                 type="button"
-                                onClick={() => setJumlah(String(value))}
-                                className={`rounded-lg border py-2 text-[11px] font-semibold transition ${
+                                onClick={() => setData('jumlah', String(value))}
+                                className={`rounded-lg border py-2 text-[11px] font-semibold transition cursor-pointer ${
                                     jumlahNumber === value
                                         ? 'border-[#2D7A44] bg-[#2D7A44] text-white'
                                         : 'border-gray-200 bg-white text-gray-700'
@@ -285,7 +319,7 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                         <input
                             type="text"
                             inputMode="numeric"
-                            value={jumlah ? formatRupiah(jumlahNumber) : '0'}
+                            value={data.jumlah ? formatRupiah(jumlahNumber) : '0'}
                             onChange={handleJumlahChange}
                             className="w-full border-none p-0 text-sm font-bold text-gray-900 focus:outline-none focus:ring-0"
                         />
@@ -335,7 +369,7 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                                         <button
                                             type="button"
                                             onClick={(e) => handleOpenEditModal(item, e)}
-                                            className="text-gray-400 hover:text-[#2D7A44] p-1"
+                                            className="text-gray-400 hover:text-[#2D7A44] p-1 cursor-pointer"
                                         >
                                             <Pencil size={13} />
                                         </button>
@@ -346,7 +380,7 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
 
                         {/* PANEL DETAIL REKENING TERPILIH */}
                         {selectedRekening && (
-                            <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/40 p-3.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/40 p-3.5">
                                 <div className="flex items-center gap-1.5 border-b border-emerald-100 pb-2 mb-2">
                                     <CheckCircle2 size={13} className="text-[#2D7A44]" />
                                     <p className="text-[10px] font-bold text-[#2D7A44] uppercase tracking-wider">
@@ -386,8 +420,8 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                 <button
                     type="button"
                     disabled={!isValidJumlah}
-                    onClick={() => { setError(''); setStep('pin'); }}
-                    className="mt-4 mb-2 w-full rounded-lg bg-[#2D7A44] py-3 text-xs font-semibold text-white transition active:bg-green-800 disabled:opacity-40"
+                    onClick={() => { clearErrors(); setStep('pin'); }}
+                    className="mt-4 mb-2 w-full rounded-lg bg-[#2D7A44] py-3 text-xs font-semibold text-white transition active:bg-green-800 disabled:opacity-40 cursor-pointer"
                 >
                     Tarik
                 </button>
@@ -395,14 +429,14 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                 {/* Modal Pop-up Tambah / Edit Rekening */}
                 {showModalRekening && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="w-full max-w-[320px] rounded-2xl bg-white p-4 shadow-2xl animate-in fade-in zoom-in duration-150">
+                        <div className="w-full max-w-[320px] rounded-2xl bg-white p-4 shadow-2xl">
                             <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-3">
                                 <h3 className="text-xs font-bold text-gray-900">
                                     {isEditing ? 'Edit Rekening' : 'Tambah Rekening Baru'}
                                 </h3>
                                 <button
                                     type="button"
-                                    onClick={() => setShowModalRekening(false)}
+                                    onClick={resetModalForm}
                                     className="text-gray-400 hover:text-gray-600"
                                 >
                                     <X size={16} />
@@ -448,16 +482,18 @@ export default function PenarikanCreate({ saldo = 8000000, initialRekeningList =
                                 <div className="mt-4 flex gap-2 pt-2">
                                     <button
                                         type="button"
-                                        onClick={() => setShowModalRekening(false)}
-                                        className="flex-1 rounded-lg border border-gray-200 py-2 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
+                                        onClick={resetModalForm}
+                                        disabled={isSavingRekening}
+                                        className="flex-1 rounded-lg border border-gray-200 py-2 text-[11px] font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-50"
                                     >
                                         Batal
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 rounded-lg bg-[#2D7A44] py-2 text-[11px] font-semibold text-white hover:bg-green-800 cursor-pointer"
+                                        disabled={isSavingRekening}
+                                        className="flex-1 rounded-lg bg-[#2D7A44] py-2 text-[11px] font-semibold text-white hover:bg-green-800 cursor-pointer disabled:opacity-50"
                                     >
-                                        Simpan
+                                        {isSavingRekening ? 'Menyimpan...' : 'Simpan'}
                                     </button>
                                 </div>
                             </form>
