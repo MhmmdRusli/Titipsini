@@ -98,7 +98,7 @@ class PenarikanController extends Controller
     public function create(): Response
     {
         $user = Auth::user();
-        
+
         // Ambil semua rekening user dari database
         $rekeningList = RekeningBank::where('user_id', $user->id)
             ->get()
@@ -129,7 +129,10 @@ class PenarikanController extends Controller
         $validated = $request->validate([
             'jumlah' => ['required', 'integer', 'min:100000', 'max:'.max($saldoTersedia, 100000)],
             'pin' => ['required', 'string'],
-            'rekening_bank_id' => ['nullable', 'exists:rekening_banks,id'],
+            // FIX: nama tabel yang benar adalah "rekening_bank" (singular),
+            // bukan "rekening_banks" (default Laravel). Sebelumnya ini
+            // menyebabkan 500 error karena query ke tabel yang tidak ada.
+            'rekening_bank_id' => ['nullable', 'exists:rekening_bank,id'],
         ], [
             'jumlah.max' => 'Saldo kamu tidak mencukupi untuk jumlah penarikan ini.',
             'jumlah.min' => 'Minimal penarikan adalah Rp100.000.',
@@ -142,7 +145,7 @@ class PenarikanController extends Controller
 
         // Cari rekening berdasarkan rekening_bank_id pilihan user atau ambil rekening pertama
         $rekening = null;
-        if (!empty($validated['rekening_bank_id'])) {
+        if (! empty($validated['rekening_bank_id'])) {
             $rekening = RekeningBank::where('user_id', $user->id)
                 ->where('id', $validated['rekening_bank_id'])
                 ->first();

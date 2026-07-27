@@ -251,10 +251,9 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::get('/pendapatan/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
 
     // Alias URL pendek penarikan
-    Route::get('/penarikan', [PenarikanController::class, 'index']);
-    Route::get('/penarikan/tarik', [PenarikanController::class, 'create']);
-    Route::post('/penarikan/tarik', [PenarikanController::class, 'store']);
-    Route::get('/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses']);
+    Route::get('/penarikan', [PenarikanController::class, 'index'])->name('mitra.penarikan.index');
+    Route::get('/penarikan/tarik', [PenarikanController::class, 'create'])->name('mitra.penarikan.create');
+    Route::get('/penarikan/sukses/{penarikan}', [PenarikanController::class, 'sukses'])->name('mitra.penarikan.sukses');
 
     Route::get('/keamanan', [KeamananController::class, 'edit'])->name('keamanan.edit');
     Route::put('/keamanan', [KeamananController::class, 'update'])->name('keamanan.update');
