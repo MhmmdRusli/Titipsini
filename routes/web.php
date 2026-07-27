@@ -162,10 +162,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/profil', [AdminProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [AdminProfileController::class, 'update'])->name('profil.update');
 
-    Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
-    Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
-
+    // --- SESUDAH (PERBAIKAN) ---
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
+        // Rute Komisi dipindahkan ke dalam kelompok pengaturan
+        Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
+        Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
+
         Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
         Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
         Route::delete('keamanan/sessions/{sessionId}', [PengaturanController::class, 'destroySession'])->name('keamanan.sessions.destroy');
