@@ -13,10 +13,10 @@ const TABS = [
     { value: 'penarikan', label: 'Penarikan' },
 ];
 
-export default function PenarikanIndex({ 
-    saldo = 8000000, 
-    mutasi = [], 
-    filter = {}, 
+export default function PenarikanIndex({
+    saldo = 8000000,
+    mutasi = [],
+    filter = {},
     rekening = null // Tambahkan prop rekening dari Controller
 }) {
     const tipe = filter.tipe ?? 'semua';
@@ -36,8 +36,8 @@ export default function PenarikanIndex({
             <div className="mx-auto max-w-md bg-white min-h-screen pb-10">
                 {/* Header Navigasi - FIXED: Pakai Link Inertia agar tidak Error saat Back */}
                 <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
-                    <Link 
-                        href={typeof route !== 'undefined' ? route('mitra.dashboard') : '/mitra/dashboard'} 
+                    <Link
+                        href={typeof route !== 'undefined' ? route('mitra.dashboard') : '/mitra/dashboard'}
                         className="flex h-8 w-8 items-center justify-center rounded-full text-gray-700 hover:bg-gray-100 transition"
                     >
                         <ChevronLeft size={20} />
@@ -53,7 +53,7 @@ export default function PenarikanIndex({
                         <ChevronDown size={14} />
                     </div>
                     <p className="mt-1 text-2xl font-black text-gray-900">{formatRupiah(saldo)}</p>
-                    
+
                     <Link
                         href={typeof route !== 'undefined' ? route('mitra.penarikan.create') : '/mitra/penarikan/create'}
                         className="mt-4 block w-full rounded-xl bg-[#2D7A44] py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-green-800 transition"
@@ -67,7 +67,7 @@ export default function PenarikanIndex({
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-xs font-bold text-gray-900">Rekening Bank Penarikan</p>
                         {rekening && (
-                            <Link 
+                            <Link
                                 href={typeof route !== 'undefined' ? route('mitra.rekening.edit') : '#'}
                                 className="text-[11px] font-medium text-[#2D7A44] hover:underline"
                             >
@@ -95,7 +95,7 @@ export default function PenarikanIndex({
                         <div className="flex items-center justify-between rounded-xl border border-dashed border-gray-300 p-3 bg-gray-50/40">
                             <span className="text-xs text-gray-500">Belum ada rekening terhubung</span>
                             <Link
-                                href={typeof route !== 'undefined' ? route('mitra.rekening.create') : '#'}
+                                href={typeof route !== 'undefined' ? route('mitra.rekening.edit') : '/mitra/rekening'}
                                 className="flex items-center gap-1 text-xs font-bold text-[#2D7A44]"
                             >
                                 <PlusCircle size={14} />
@@ -114,11 +114,10 @@ export default function PenarikanIndex({
                                 <button
                                     key={t.value}
                                     onClick={() => applyFilter(t.value)}
-                                    className={`rounded-full px-3 py-1 text-[11px] font-medium transition ${
-                                        tipe === t.value
+                                    className={`rounded-full px-3 py-1 text-[11px] font-medium transition ${tipe === t.value
                                             ? 'bg-green-50 text-[#2D7A44] border border-green-200'
                                             : 'bg-gray-50 text-gray-500'
-                                    }`}
+                                        }`}
                                 >
                                     {t.label}
                                 </button>

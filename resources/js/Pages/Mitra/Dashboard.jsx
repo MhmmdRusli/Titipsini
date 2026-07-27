@@ -93,8 +93,8 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                     <Link
                         href="/mitra/layanan/jam-operasional"
                         className={`mt-3 flex items-center justify-between rounded-lg px-3 py-2 transition ${toko?.buka
-                                ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40'
-                                : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40'
+                            ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40'
+                            : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40'
                             }`}
                     >
                         <div className="flex items-center gap-1.5">
@@ -159,7 +159,7 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                                 Riwayat
                             </Link>
                             <Link
-                                href="/mitra/pendapatan/penarikan/tarik"
+                                href="/mitra/penarikan/tarik"
                                 className="flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-bold text-green-700 hover:bg-white/90 transition"
                             >
                                 <ArrowDownToLine size={12} />

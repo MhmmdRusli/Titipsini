@@ -7,9 +7,23 @@ use App\Models\RekeningBank;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class RekeningController extends Controller
 {
+    /**
+     * Menampilkan halaman edit/form rekening bank.
+     */
+    public function edit(Request $request): Response
+{
+    $rekening = RekeningBank::where('user_id', Auth::id())->first();
+
+    return Inertia::render('Mitra/Rekening', [   // hapus '/Edit'
+        'rekening' => $rekening,
+    ]);
+}
+
     /**
      * Menyimpan rekening bank baru.
      */
@@ -21,15 +35,17 @@ class RekeningController extends Controller
             'nama_pemilik' => ['required', 'string', 'max:255'],
         ]);
 
-        // Simpan data rekening baru dengan relasi user_id
-        RekeningBank::create([
-            'user_id' => Auth::id(),
-            'nama_bank' => $validated['nama_bank'],
-            'nomor_rekening' => $validated['nomor_rekening'],
-            'nama_pemilik' => $validated['nama_pemilik'],
-        ]);
+        // Gunakan updateOrCreate agar aman jika data sudah ada atau ingin ditimpa/diperbarui otomatis
+        RekeningBank::updateOrCreate(
+            ['user_id' => Auth::id()],
+            [
+                'nama_bank' => $validated['nama_bank'],
+                'nomor_rekening' => $validated['nomor_rekening'],
+                'nama_pemilik' => $validated['nama_pemilik'],
+            ]
+        );
 
-        return back()->with('success', 'Rekening bank berhasil ditambahkan.');
+        return back()->with('success', 'Rekening bank berhasil disimpan.');
     }
 
     /**
@@ -43,7 +59,7 @@ class RekeningController extends Controller
             'nama_pemilik' => ['required', 'string', 'max:255'],
         ]);
 
-        // Pastikan rekening yang diubah milik user yang sedang login
+        // Pastikan rekening yang diubah benar-benar milik user yang sedang login
         $rekening = RekeningBank::where('user_id', Auth::id())->findOrFail($id);
         $rekening->update($validated);
 

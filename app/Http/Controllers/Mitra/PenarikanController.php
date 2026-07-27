@@ -29,7 +29,6 @@ class PenarikanController extends Controller
         $paymentSetting = PaymentSetting::current();
         $komisiPersen = (float) ($paymentSetting->komisi_persen ?? 10);
 
-        // Sisi "penghasilan": order milik mitra ini yang statusnya selesai
         $ordersQuery = Order::where('partner_id', $user->id)
             ->whereIn('status', ['selesai', 'completed', 'success']);
 
@@ -48,7 +47,6 @@ class PenarikanController extends Controller
             'created_at' => $order->created_at,
         ]);
 
-        // Sisi "penarikan": semua penarikan mitra ini yang belum ditolak
         $penarikanQuery = Penarikan::where('user_id', $user->id)
             ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal']);
 
@@ -93,13 +91,25 @@ class PenarikanController extends Controller
     }
 
     /**
+     * Halaman Kelola Rekening Bank Mitra
+     */
+    public function indexRekening(): Response
+    {
+        $user = Auth::user();
+        $rekeningList = RekeningBank::where('user_id', $user->id)->get();
+
+        return Inertia::render('Mitra/Rekening/Index', [
+            'rekeningList' => $rekeningList,
+        ]);
+    }
+
+    /**
      * Form Pengajuan Penarikan
      */
     public function create(): Response
     {
         $user = Auth::user();
         
-        // Ambil semua rekening user dari database
         $rekeningList = RekeningBank::where('user_id', $user->id)
             ->get()
             ->map(fn ($r) => [
@@ -140,7 +150,6 @@ class PenarikanController extends Controller
             return back()->withErrors(['pin' => 'PIN yang kamu masukkan salah.']);
         }
 
-        // Cari rekening berdasarkan rekening_bank_id pilihan user atau ambil rekening pertama
         $rekening = null;
         if (!empty($validated['rekening_bank_id'])) {
             $rekening = RekeningBank::where('user_id', $user->id)

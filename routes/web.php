@@ -162,9 +162,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/profil', [AdminProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [AdminProfileController::class, 'update'])->name('profil.update');
 
-    // --- SESUDAH (PERBAIKAN) ---
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
-        // Rute Komisi dipindahkan ke dalam kelompok pengaturan
         Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
         Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
 
@@ -247,16 +245,10 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::put('/rekening/{id}', [RekeningController::class, 'update'])->name('rekening.update');
 
     /* Penarikan Dana Mitra */
-    Route::get('/pendapatan/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');
-    Route::get('/pendapatan/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
-    Route::post('/pendapatan/penarikan', [PenarikanController::class, 'store'])->name('penarikan.store');
-    Route::get('/pendapatan/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
-
-    // Alias URL pendek penarikan
-    Route::get('/penarikan', [PenarikanController::class, 'index']);
-    Route::get('/penarikan/tarik', [PenarikanController::class, 'create']);
-    Route::post('/penarikan/tarik', [PenarikanController::class, 'store']);
-    Route::get('/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses']);
+    Route::get('/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');
+    Route::get('/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
+    Route::post('/penarikan/tarik', [PenarikanController::class, 'store'])->name('penarikan.store');
+    Route::get('/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
 
     Route::get('/keamanan', [KeamananController::class, 'edit'])->name('keamanan.edit');
     Route::put('/keamanan', [KeamananController::class, 'update'])->name('keamanan.update');

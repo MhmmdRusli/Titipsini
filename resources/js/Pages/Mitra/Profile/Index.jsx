@@ -2,36 +2,36 @@ import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import MitraLayout from '@/Layouts/MitraLayout';
 import {
-    MapPin, 
-    Clock, 
-    CreditCard, 
-    Wallet, 
-    Lock, 
-    ShieldCheck, 
-    HelpCircle, 
-    LogOut, 
-    ChevronRight, 
-    Pencil, 
-    CheckCircle2, 
+    MapPin,
+    Clock,
+    CreditCard,
+    Wallet,
+    Lock,
+    ShieldCheck,
+    HelpCircle,
+    LogOut,
+    ChevronRight,
+    Pencil,
+    CheckCircle2,
     XCircle
 } from 'lucide-react';
 
-function MenuCard({ href, icon: Icon, label, description, iconBg = "bg-emerald-50", iconColor = "text-emerald-600" }) {
+function MenuCard({ href, icon: Icon, label, description, iconBg = "bg-green-50", iconColor = "text-green-700" }) {
     return (
         <Link
             href={href}
-            className="group relative flex items-center gap-3.5 rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm transition-all duration-200 hover:border-emerald-200 hover:bg-emerald-50/30 hover:shadow-md active:scale-[0.99]"
+            className="group relative flex items-center gap-3.5 rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm transition-all duration-200 hover:border-green-200 hover:bg-green-50/30 hover:shadow-md active:scale-[0.99]"
         >
             <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconBg} ${iconColor} transition-transform duration-200 group-hover:scale-105`}>
                 <Icon size={18} />
             </div>
             <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-gray-900 group-hover:text-emerald-700">{label}</p>
+                <p className="text-xs font-bold text-gray-900 group-hover:text-green-700">{label}</p>
                 {description && (
                     <p className="mt-0.5 truncate text-[11px] text-gray-400">{description}</p>
                 )}
             </div>
-            <ChevronRight size={16} className="text-gray-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-emerald-500" />
+            <ChevronRight size={16} className="text-gray-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-green-500" />
         </Link>
     );
 }
@@ -48,23 +48,19 @@ export default function ProfileIndex({ partner }) {
             <Head title="Profil Mitra" />
 
             <div className="mx-auto max-w-lg space-y-5 px-4 py-4">
-                
-                {/* 1. Header Profil Minimalis & Elegan */}
-                <div className="relative overflow-hidden rounded-2xl border border-emerald-100/60 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 p-5 text-white shadow-md">
-                    {/* Background Decorative Pattern */}
-                    <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-white/10 blur-xl"></div>
-                    <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-emerald-400/20 blur-lg"></div>
 
+                {/* 1. Header Profil */}
+                <div className="relative overflow-hidden rounded-2xl bg-green-600 p-5 text-white shadow-md">
                     <div className="relative flex items-center gap-4">
                         <div className="relative h-14 w-14 shrink-0">
                             {partner.avatar ? (
-                                <img 
-                                    src={partner.avatar} 
-                                    alt={partner.name} 
-                                    className="h-14 w-14 rounded-xl object-cover ring-2 ring-white/30 shadow-sm" 
+                                <img
+                                    src={partner.avatar}
+                                    alt={partner.name}
+                                    className="h-14 w-14 rounded-xl object-cover ring-2 ring-white/30 shadow-sm"
                                 />
                             ) : (
-                                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/20 text-lg font-bold text-white backdrop-blur-md ring-2 ring-white/30">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/20 text-lg font-bold text-white ring-2 ring-white/30">
                                     {partner.name?.charAt(0).toUpperCase()}
                                 </div>
                             )}
@@ -74,32 +70,32 @@ export default function ProfileIndex({ partner }) {
                             <div className="flex items-center gap-1.5">
                                 <h2 className="truncate text-base font-bold text-white">{partner.name}</h2>
                                 {partner.is_verified && (
-                                    <CheckCircle2 size={16} className="shrink-0 fill-emerald-400 text-emerald-900" />
+                                    <CheckCircle2 size={16} className="shrink-0 text-white" />
                                 )}
                             </div>
-                            <p className="truncate text-xs text-emerald-100/80">{partner.email}</p>
+                            <p className="truncate text-xs text-green-100">{partner.email}</p>
 
                             <div className="mt-2.5 flex items-center gap-2">
                                 {partner.is_verified ? (
-                                    <span className="inline-flex items-center gap-1 rounded-md bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
-                                        <CheckCircle2 size={11} className="text-emerald-300" />
+                                    <span className="inline-flex items-center gap-1 rounded-md bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold text-white">
+                                        <CheckCircle2 size={11} />
                                         Terverifikasi
                                     </span>
                                 ) : (
                                     <Link
                                         href="/mitra/verifikasi"
-                                        className="inline-flex items-center gap-1 rounded-md bg-amber-400/20 px-2.5 py-0.5 text-[10px] font-semibold text-amber-200 backdrop-blur-md transition-all hover:bg-amber-400/30"
+                                        className="inline-flex items-center gap-1 rounded-md bg-amber-400/90 px-2.5 py-0.5 text-[10px] font-semibold text-white transition-all hover:bg-amber-400"
                                     >
-                                        <XCircle size={11} className="text-amber-300" />
+                                        <XCircle size={11} />
                                         Belum Verifikasi
                                     </Link>
                                 )}
                             </div>
                         </div>
 
-                        <Link 
-                            href={route('mitra.profil.edit')} 
-                            className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20"
+                        <Link
+                            href={route('mitra.profil.edit')}
+                            className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-white transition-all hover:bg-white/25"
                         >
                             <Pencil size={15} />
                         </Link>
@@ -112,38 +108,38 @@ export default function ProfileIndex({ partner }) {
                         Operasional & Keuangan
                     </p>
                     <div className="grid gap-2">
-                        <MenuCard 
-                            href={route('mitra.alamat.edit')} 
-                            icon={MapPin} 
-                            label="Alamat Toko" 
+                        <MenuCard
+                            href={route('mitra.alamat.edit')}
+                            icon={MapPin}
+                            label="Alamat Toko"
                             description="Atur lokasi fisik outlet atau titik penjemputan"
-                            iconBg="bg-blue-50"
-                            iconColor="text-blue-600"
+                            iconBg="bg-green-50"
+                            iconColor="text-green-700"
                         />
-                        <MenuCard 
-                            href={route('mitra.jam-operasional.edit')} 
-                            icon={Clock} 
-                            label="Jam Operasional" 
+                        <MenuCard
+                            href={route('mitra.jam-operasional.edit')}
+                            icon={Clock}
+                            label="Jam Operasional"
                             description="Atur jadwal buka & tutup toko harian"
-                            iconBg="bg-amber-50"
-                            iconColor="text-amber-600"
+                            iconBg="bg-green-50"
+                            iconColor="text-green-700"
                         />
                         <div className="grid grid-cols-2 gap-2">
-                            <MenuCard 
-                                href={route('mitra.rekening.edit')} 
-                                icon={CreditCard} 
-                                label="Rekening" 
+                            <MenuCard
+                                href={route('mitra.rekening.edit')}
+                                icon={CreditCard}
+                                label="Rekening"
                                 description="Bank tujuan"
-                                iconBg="bg-purple-50"
-                                iconColor="text-purple-600"
+                                iconBg="bg-green-50"
+                                iconColor="text-green-700"
                             />
-                            <MenuCard 
-                                href={route('mitra.penarikan.index')} 
-                                icon={Wallet} 
-                                label="Penarikan" 
+                            <MenuCard
+                                href={route('mitra.penarikan.index')}
+                                icon={Wallet}
+                                label="Penarikan"
                                 description="Tarik Saldo"
-                                iconBg="bg-emerald-50"
-                                iconColor="text-emerald-600"
+                                iconBg="bg-green-100"
+                                iconColor="text-green-800"
                             />
                         </div>
                     </div>
@@ -155,27 +151,62 @@ export default function ProfileIndex({ partner }) {
                         Akun & Lainnya
                     </p>
                     <div className="grid gap-2">
-                        <MenuCard 
-                            href={route('mitra.keamanan.edit')} 
-                            icon={Lock} 
-                            label="Keamanan Akun" 
+                        <MenuCard
+                            href={route('mitra.keamanan.edit')}
+                            icon={Lock}
+                            label="Keamanan Akun"
+                            description="Ubah kata sandi dan keamanan login"
+                            iconBg="bg-red-50"
+                            iconColor="text-red-500"
+                        />
+                        <div className="grid grid-cols-2 gap-2">
+                            <MenuCard
+                                href={route('mitra.kebijakan-privasi.index')}
+                                icon={ShieldCheck}
+                                label="Privasi"
+                                description="Ketentuan layanan"
+                                iconBg="bg-gray-100"
+                                iconColor="text-gray-600"
+                            />
+                            <MenuCard
+                                href={route('mitra.bantuan.index')}
+                                icon={HelpCircle}
+                                label="Bantuan"
+                                description="Pusat bantuan"
+                                iconBg="bg-gray-100"
+                                iconColor="text-gray-600"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Grup Menu: Pengaturan Akun & Bantuan */}
+                <div className="space-y-2">
+                    <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        Akun & Lainnya
+                    </p>
+                    <div className="grid gap-2">
+                        <MenuCard
+                            href={route('mitra.keamanan.edit')}
+                            icon={Lock}
+                            label="Keamanan Akun"
                             description="Ubah kata sandi dan keamanan login"
                             iconBg="bg-rose-50"
                             iconColor="text-rose-600"
                         />
                         <div className="grid grid-cols-2 gap-2">
-                            <MenuCard 
-                                href={route('mitra.kebijakan-privasi.index')} 
-                                icon={ShieldCheck} 
-                                label="Privasi" 
+                            <MenuCard
+                                href={route('mitra.kebijakan-privasi.index')}
+                                icon={ShieldCheck}
+                                label="Privasi"
                                 description="Ketentuan layanan"
                                 iconBg="bg-teal-50"
                                 iconColor="text-teal-600"
                             />
-                            <MenuCard 
-                                href={route('mitra.bantuan.index')} 
-                                icon={HelpCircle} 
-                                label="Bantuan" 
+                            <MenuCard
+                                href={route('mitra.bantuan.index')}
+                                icon={HelpCircle}
+                                label="Bantuan"
                                 description="Pusat bantuan"
                                 iconBg="bg-indigo-50"
                                 iconColor="text-indigo-600"
@@ -202,7 +233,7 @@ export default function ProfileIndex({ partner }) {
             {isLogoutOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 transition-all">
                     <div className="w-full max-w-xs transform overflow-hidden rounded-2xl bg-white p-6 text-center shadow-xl transition-all">
-                        
+
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-500">
                             <LogOut className="h-6 w-6 stroke-[2.5]" />
                         </div>

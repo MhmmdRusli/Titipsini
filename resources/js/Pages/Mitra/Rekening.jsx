@@ -3,7 +3,7 @@ import MitraLayout from '@/Layouts/MitraLayout';
 import { ChevronLeft, Landmark, Pencil } from 'lucide-react';
 
 export default function Rekening({ rekening }) {
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         nama_bank: rekening?.nama_bank ?? '',
         nomor_rekening: rekening?.nomor_rekening ?? '',
         nama_pemilik: rekening?.nama_pemilik ?? '',
@@ -11,7 +11,7 @@ export default function Rekening({ rekening }) {
 
     const submit = (e) => {
         e.preventDefault();
-        put('/mitra/rekening');
+        post('/mitra/rekening');
     };
 
     return (
