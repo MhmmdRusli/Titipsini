@@ -82,7 +82,6 @@ export default function LengkapiData() {
     }
 
     return (
-        // Backdrop abu-abu di layar lebar (desktop) agar konsisten dengan halaman login
         <div className="min-h-dvh bg-gray-100 sm:flex sm:items-center sm:justify-center sm:py-6">
             
             {/* Bodi Utama Bingkai HP */}
@@ -99,7 +98,7 @@ export default function LengkapiData() {
                             <ChevronLeft size={22} strokeWidth={2.5} />
                         </Link>
                         <h2 className="text-base font-bold text-gray-900">Daftar</h2>
-                        <div className="w-6"></div> {/* Spacer penyeimbang */}
+                        <div className="w-6"></div>
                     </div>
                     
                     {/* Progress Bar Indikator Hijau */}
@@ -108,10 +107,10 @@ export default function LengkapiData() {
                     </div>
                 </div>
 
-                {/* Konten Utama Form (Scrollable) */}
+                {/* Konten Utama Form */}
                 <div className="flex-1 overflow-y-auto px-6 pt-6 pb-8">
                     
-                    {/* Logo Image dan Teks Utama */}
+                    {/* Logo & Teks Utama */}
                     <div className="mb-6 flex flex-col items-center justify-center text-center">
                         <div className="flex items-center justify-center gap-3">
                             <img
@@ -130,7 +129,7 @@ export default function LengkapiData() {
 
                     <h2 className="text-lg font-bold text-gray-900">Isi Data Dirimu Yuk! 👋</h2>
                     
-                    {/* Box Alert Berwarna Hijau Lembut Sesuai Gambar */}
+                    {/* Box Alert Berwarna Hijau */}
                     <div className="mt-3 rounded-xl bg-green-50/70 border border-green-100/50 p-3 flex gap-2.5 items-start">
                         <span className="text-red-500 mt-0.5 text-xs">🔴</span>
                         <div className="text-[11px] text-green-700 font-medium leading-relaxed">
@@ -142,16 +141,21 @@ export default function LengkapiData() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                        {/* Nama Lengkap: Hanya Huruf dan Spasi */}
                         <Field label="Nama Lengkap" error={errors.name}>
                             <input
                                 type="text"
                                 value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                                    setData('name', val);
+                                }}
                                 placeholder="Nama Lengkap"
                                 className={inputClass(errors.name)}
                             />
                         </Field>
 
+                        {/* Username */}
                         <Field label="Username" error={errors.username}>
                             <input
                                 type="text"
@@ -162,11 +166,16 @@ export default function LengkapiData() {
                             />
                         </Field>
 
+                        {/* Nomor Telepon: Hanya Angka */}
                         <Field label="Nomor Telepon" error={errors.phone}>
                             <input
                                 type="tel"
+                                inputMode="numeric"
                                 value={data.phone}
-                                onChange={(e) => setData('phone', e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '');
+                                    setData('phone', val);
+                                }}
                                 placeholder="Nomor Telepon"
                                 className={inputClass(errors.phone)}
                             />
@@ -258,16 +267,20 @@ export default function LengkapiData() {
                             </select>
                         </Field>
 
+                        {/* Kode Pos: Input Teks Angka Maks 5 Digit */}
                         <Field label="Kode Pos" error={errors.postal_code}>
-                            <select
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={5}
                                 value={data.postal_code}
-                                onChange={(e) => setData('postal_code', e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '');
+                                    setData('postal_code', val);
+                                }}
+                                placeholder="Masukkan Kode Pos"
                                 className={inputClass(errors.postal_code)}
-                            >
-                                <option value="">Pilih Kodepos</option>
-                                {/* Silahkan map opsi kode pos jika ada data API-nya */}
-                                <option value="12345">12345</option> 
-                            </select>
+                            />
                         </Field>
 
                         {/* Tombol Aksi Utama */}
@@ -285,7 +298,6 @@ export default function LengkapiData() {
     );
 }
 
-// Komponen Field Kustom dengan Tanda Bintang di Kiri Label
 function Field({ label, error, children }) {
     return (
         <div className="space-y-1.5">
