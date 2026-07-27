@@ -145,4 +145,10 @@ class User extends Authenticatable implements MustVerifyEmail
     // 5. Kembalikan Sisa Saldo Bersih
     return (int) max(0, $saldoBersih - $totalPenarikan);
 }
+// Di dalam class User
+public function rekeningBank()
+{
+    // Pastikan memanggil class RekeningBank::class
+    return $this->hasMany(RekeningBank::class); 
+}
 }

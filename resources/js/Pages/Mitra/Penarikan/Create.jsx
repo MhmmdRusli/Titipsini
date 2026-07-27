@@ -22,7 +22,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
     const [selectedRekeningId, setSelectedRekeningId] = useState(initialList[0]?.id || null);
 
     // Menggunakan Inertia Form untuk penarikan
-    const { data, setData, post, processing, errors, clearErrors } = useForm({
+    const { data, setData, processing, errors, setError, clearErrors } = useForm({
         jumlah: '',
         pin: '',
         rekening_bank_id: initialList[0]?.id || '',
@@ -30,6 +30,9 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
 
     // State Alur Penarikan
     const [step, setStep] = useState('jumlah'); // 'jumlah' | 'pin'
+
+    // State submit manual (karena kita pakai router.post langsung, bukan form.post)
+    const [isSubmittingPin, setIsSubmittingPin] = useState(false);
 
     // State Modal (Tambah / Edit)
     const [showModalRekening, setShowModalRekening] = useState(false);
@@ -90,20 +93,33 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
     }
 
     // Submit Penarikan
+    // PENTING: pakai router.post langsung dengan payload eksplisit (bukan form.post),
+    // supaya PIN yang terkirim SELALU finalPin yang baru selesai diketik — tidak
+    // bergantung pada state React `data.pin` yang bisa saja belum ke-update
+    // (setData bersifat async) saat digit terakhir baru saja ditekan.
     function submitForm(finalPin) {
         clearErrors();
-        post('/mitra/penarikan', {
-            preserveState: false,
-            replace: true,
-            data: {
-                jumlah: jumlahNumber,
+        setIsSubmittingPin(true);
+
+        router.post(
+            route('mitra.penarikan.store'),
+            {
+                jumlah: data.jumlah,
+                rekening_bank_id: data.rekening_bank_id,
                 pin: finalPin,
-                rekening_bank_id: selectedRekeningId,
             },
-            onError: () => {
-                setData('pin', '');
-            },
-        });
+            {
+                preserveState: true,
+                onError: (serverErrors) => {
+                    setData('pin', '');
+                    // Tampilkan error dari server lewat helper useForm agar `errors.pin` terisi
+                    Object.entries(serverErrors).forEach(([key, message]) => {
+                        setError(key, message);
+                    });
+                },
+                onFinish: () => setIsSubmittingPin(false),
+            }
+        );
     }
 
     // Reset Form Modal
@@ -224,11 +240,11 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                     <div className="mb-2">
                         <button
                             type="button"
-                            disabled={data.pin.length < PIN_LENGTH || processing}
+                            disabled={data.pin.length < PIN_LENGTH || processing || isSubmittingPin}
                             onClick={() => submitForm(data.pin)}
                             className="mb-8 w-full rounded-lg bg-[#2D7A44] py-3 text-xs font-semibold text-white transition active:bg-green-800 disabled:opacity-40 cursor-pointer"
                         >
-                            {processing ? 'Memverifikasi...' : 'Verifikasi'}
+                            {isSubmittingPin ? 'Memverifikasi...' : 'Verifikasi'}
                         </button>
 
                         <div className="grid grid-cols-3 gap-y-5 text-center">
@@ -236,7 +252,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                 <button
                                     key={n}
                                     type="button"
-                                    disabled={processing}
+                                    disabled={isSubmittingPin}
                                     onClick={() => pressDigit(String(n))}
                                     className="text-lg font-bold text-gray-800 hover:bg-gray-50 active:bg-gray-100 py-1 rounded-full disabled:opacity-50"
                                 >
@@ -246,7 +262,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                             <div />
                             <button
                                 type="button"
-                                disabled={processing}
+                                disabled={isSubmittingPin}
                                 onClick={() => pressDigit('0')}
                                 className="text-lg font-bold text-gray-800 hover:bg-gray-50 active:bg-gray-100 py-1 rounded-full disabled:opacity-50"
                             >
@@ -254,7 +270,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                             </button>
                             <button
                                 type="button"
-                                disabled={processing}
+                                disabled={isSubmittingPin}
                                 onClick={pressBackspace}
                                 className="flex items-center justify-center text-gray-700 hover:bg-gray-50 active:bg-gray-100 py-1 rounded-full disabled:opacity-50"
                             >
