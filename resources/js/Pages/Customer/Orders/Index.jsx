@@ -64,14 +64,15 @@ export default function OrdersIndex({ orders, filters }) {
     }
 
     return (
-        <CustomerLayout title="Pesanan Saya">
+        <CustomerLayout title="Pesanan Saya" backHref="/app/dashboard">
             <Head title="Pesanan Saya" />
 
             <div className="pb-6">
                 {/* Header hijau melengkung dengan z-30 agar posisinya paling depan dan bisa diklik */}
                 <div className="relative z-30 bg-[#15803d] dark:bg-green-700 px-4 pt-3 pb-7 rounded-b-[32px] shadow-sm">
-                    {/* Tabs status - scroll horizontal */}
-                    <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none">
+                    {/* Tabs status - scroll horizontal, scrollbar disembunyikan lewat class .no-scrollbar
+                        (bukan mengandalkan "scrollbar-none" yang bukan class Tailwind bawaan) */}
+                    <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
                         {TABS.map((tab) => (
                             <button
                                 key={tab.value}
@@ -188,7 +189,16 @@ export default function OrdersIndex({ orders, filters }) {
                     )}
                 </div>
             </div>
+
+            <style>{`
+                .no-scrollbar {
+                    scrollbar-width: none; /* Firefox */
+                    -ms-overflow-style: none; /* IE / Edge lama */
+                }
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none; /* Chrome, Safari, Edge berbasis Chromium */
+                }
+            `}</style>
         </CustomerLayout>
     );
 }
-

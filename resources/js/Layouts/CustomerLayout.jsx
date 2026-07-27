@@ -19,6 +19,61 @@ export default function CustomerLayout({ children, title, backHref }) {
         document.documentElement.classList.toggle('dark', isDark);
     }, []);
 
+    // Menu akun (avatar + dropdown) dipakai di 2 kondisi header: saat tampil
+    // logo (halaman tanpa title, mis. Dashboard) maupun saat tampil title
+    // (halaman lain, mis. "Pesanan Saya"). Diekstrak supaya tidak dobel kode.
+    function AccountMenu() {
+        return (
+            <div className="relative">
+                <button
+                    type="button"
+                    onClick={() => setMenuOpen((v) => !v)}
+                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                    {user?.avatar ? (
+                        <img
+                            src={user.avatar}
+                            alt={user.name}
+                            className="h-8 w-8 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="h-8 w-8 rounded-full bg-brand-amber-50 text-brand-amber-700 flex items-center justify-center text-xs font-semibold">
+                            {(user?.name ?? 'P').charAt(0).toUpperCase()}
+                        </div>
+                    )}
+                    <ChevronDown
+                        size={14}
+                        className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`}
+                    />
+                </button>
+
+                {menuOpen && (
+                    <>
+                        <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                        <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                            <Link
+                                href="/app/profile"
+                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
+                            >
+                                <User size={15} />
+                                Profil Saya
+                            </Link>
+                            <Link
+                                href="/logout"
+                                method="post"
+                                as="button"
+                                className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+                            >
+                                <LogOut size={15} />
+                                Keluar
+                            </Link>
+                        </div>
+                    </>
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">
             {/* Ubah overflow-y-auto menjadi overflow-x-hidden / overflow-visible agar popup tidak terpotong container */}
@@ -37,7 +92,17 @@ export default function CustomerLayout({ children, title, backHref }) {
                                 </Link>
                                 <h1 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h1>
                             </>
+                        ) : title ? (
+                            // Halaman dengan title (mis. "Pesanan Saya") tampilkan
+                            // title itu di header, GANTIKAN logo - konsisten dengan
+                            // halaman lain, dan tidak perlu heading duplikat lagi
+                            // di bawah header (lihat <main> di bawah).
+                            <div className="flex flex-1 items-center justify-between">
+                                <h1 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h1>
+                                <AccountMenu />
+                            </div>
                         ) : (
+                            // Tanpa title (mis. Dashboard) tetap tampilkan logo seperti semula.
                             <div className="flex flex-1 items-center justify-between">
                                 <Link href="/app/dashboard" className="flex items-center gap-1.5">
                                     <img
@@ -49,66 +114,13 @@ export default function CustomerLayout({ children, title, backHref }) {
                                         Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                                     </span>
                                 </Link>
-
-                                <div className="relative">
-                                    <button
-                                        type="button"
-                                        onClick={() => setMenuOpen((v) => !v)}
-                                        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                                    >
-                                        {user?.avatar ? (
-                                            <img
-                                                src={user.avatar}
-                                                alt={user.name}
-                                                className="h-8 w-8 rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="h-8 w-8 rounded-full bg-brand-amber-50 text-brand-amber-700 flex items-center justify-center text-xs font-semibold">
-                                                {(user?.name ?? 'P').charAt(0).toUpperCase()}
-                                            </div>
-                                        )}
-                                        <ChevronDown
-                                            size={14}
-                                            className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`}
-                                        />
-                                    </button>
-
-                                    {menuOpen && (
-                                        <>
-                                            <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                                            {/* Naikkan z-index dropdown menjadi z-50 */}
-                                            <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
-                                                <Link
-                                                    href="/app/profile"
-                                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
-                                                >
-                                                    <User size={15} />
-                                                    Profil Saya
-                                                </Link>
-                                                <Link
-                                                    href="/logout"
-                                                    method="post"
-                                                    as="button"
-                                                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-                                                >
-                                                    <LogOut size={15} />
-                                                    Keluar
-                                                </Link>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
+                                <AccountMenu />
                             </div>
                         )}
                     </div>
                 </header>
 
                 <main className="flex-1 pb-20 relative z-0">
-                    {!backHref && title && (
-                        <div className="px-4 pt-4">
-                            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h1>
-                        </div>
-                    )}
                     {children}
                 </main>
 
