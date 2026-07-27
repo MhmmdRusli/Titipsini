@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { Plus, History, Package, Building2, Car, Truck, ChevronRight, ChevronDown, MapPin, Clock, Search } from 'lucide-react';
+import { Plus, History, Package, Building2, Car, Truck, ChevronRight, ChevronDown, MapPin, Clock, Search, Inbox } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const CATEGORIES = [
@@ -9,6 +9,29 @@ const CATEGORIES = [
     { key: 'kendaraan', label: 'Kendaraan', icon: Car, href: '/app/services?kategori=kendaraan' },
     { key: 'pindahan', label: 'Pindahan', icon: Truck, href: '/app/services?kategori=pindahan' },
 ];
+
+// Label & warna badge status order, dipakai di section "Aktivitas Terakhir"
+const ORDER_STATUS_LABEL = {
+    baru: 'Menunggu',
+    diproses: 'Diproses',
+    selesai: 'Selesai',
+    dibatalkan: 'Dibatalkan',
+};
+
+const ORDER_STATUS_STYLE = {
+    baru: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
+    diproses: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
+    selesai: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400',
+    dibatalkan: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400',
+};
+
+// Label kategori layanan, dipakai untuk menampilkan judul di kartu Aktivitas Terakhir
+const SERVICE_TYPE_LABEL = {
+    barang: 'Titip Barang',
+    bangunan: 'Titip Bangunan',
+    kendaraan: 'Titip Kendaraan',
+    pindahan: 'Jasa Pindahan',
+};
 
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })
@@ -43,7 +66,7 @@ function BoxIcon({ className }) {
     );
 }
 
-export default function Dashboard({ user, saldo = 10000, vendors = [], berita = [] }) {
+export default function Dashboard({ user, saldo = 10000, vendors = [], berita = [], aktivitasTerakhir = null }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedWilayah, setSelectedWilayah] = useState(user?.wilayah ?? 'Daerah Istimewa Yogyakarta');
     const [searchQuery, setSearchQuery] = useState('');
@@ -341,7 +364,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     </div>
                 </div>
 
-                {/* Section Aktivitas Terakhir */}
+                {/* Section Aktivitas Terakhir - sekarang pakai data order asli dari backend */}
                 <div className="mt-6">
                     <div className="mb-3 flex items-center justify-between">
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Aktivitas Terakhir</p>
@@ -349,30 +372,48 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                             Lihat semua</Link>
                     </div>
 
-                    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
-                        <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
-                                    <Clock size={18} />
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-xs font-bold text-gray-900 dark:text-gray-100">Titip Barang Elektronik</p>
-                                        <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 uppercase">
-                                            Diproses
-                                        </span>
+                    {aktivitasTerakhir ? (
+                        <Link
+                            href={`/app/orders/${aktivitasTerakhir.id}`}
+                            className="block rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                        <Clock size={18} />
                                     </div>
-                                    <p className="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">Durasi: 3 Hari &middot; Rp 45.000</p>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-xs font-bold text-gray-900 dark:text-gray-100">
+                                                {aktivitasTerakhir.item_name || SERVICE_TYPE_LABEL[aktivitasTerakhir.service_type] || 'Pesanan'}
+                                            </p>
+                                            <span
+                                                className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase ${
+                                                    ORDER_STATUS_STYLE[aktivitasTerakhir.status] ??
+                                                    'bg-gray-50 text-gray-600 dark:bg-gray-900/40 dark:text-gray-400'
+                                                }`}
+                                            >
+                                                {ORDER_STATUS_LABEL[aktivitasTerakhir.status] ?? aktivitasTerakhir.status}
+                                            </span>
+                                        </div>
+                                        <p className="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">
+                                            {aktivitasTerakhir.duration ? `Durasi: ${aktivitasTerakhir.duration} \u00b7 ` : ''}
+                                            {formatRupiah(aktivitasTerakhir.total_price)}
+                                        </p>
+                                    </div>
                                 </div>
+                                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                    <ChevronRight size={16} />
+                                </span>
                             </div>
-                            <Link
-                                href="/app/orders"
-                                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-gray-600 dark:bg-gray-700 dark:text-gray-300 transition hover:bg-gray-100"
-                            >
-                                <ChevronRight size={16} />
-                            </Link>
+                        </Link>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-8 text-center dark:border-gray-700 dark:bg-gray-800">
+                            <Inbox size={28} className="mb-2 text-gray-300 dark:text-gray-600" />
+                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Belum ada aktivitas</p>
+                            <p className="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">Pesanan kamu akan muncul di sini</p>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </CustomerLayout>

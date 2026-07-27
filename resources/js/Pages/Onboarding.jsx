@@ -57,7 +57,7 @@ export default function Onboarding() {
         return (
             <div
                 onClick={() => setShowSplash(false)}
-                className="flex min-h-screen flex-col items-center justify-between bg-[#15803d] px-8 py-16 text-white"
+                className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-between bg-[#15803d] px-8 py-16 text-white"
             >
                 <Head title="Titipsini.Com" />
                 <div />
