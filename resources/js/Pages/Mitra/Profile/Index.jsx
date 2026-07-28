@@ -145,40 +145,7 @@ export default function ProfileIndex({ partner }) {
                     </div>
                 </div>
 
-                {/* 3. Grup Menu: Pengaturan Akun & Bantuan */}
-                <div className="space-y-2">
-                    <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                        Akun & Lainnya
-                    </p>
-                    <div className="grid gap-2">
-                        <MenuCard
-                            href={route('mitra.keamanan.edit')}
-                            icon={Lock}
-                            label="Keamanan Akun"
-                            description="Ubah kata sandi dan keamanan login"
-                            iconBg="bg-red-50"
-                            iconColor="text-red-500"
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                            <MenuCard
-                                href={route('mitra.kebijakan-privasi.index')}
-                                icon={ShieldCheck}
-                                label="Privasi"
-                                description="Ketentuan layanan"
-                                iconBg="bg-gray-100"
-                                iconColor="text-gray-600"
-                            />
-                            <MenuCard
-                                href={route('mitra.bantuan.index')}
-                                icon={HelpCircle}
-                                label="Bantuan"
-                                description="Pusat bantuan"
-                                iconBg="bg-gray-100"
-                                iconColor="text-gray-600"
-                            />
-                        </div>
-                    </div>
-                </div>
+                
 
                 {/* 3. Grup Menu: Pengaturan Akun & Bantuan */}
                 <div className="space-y-2">
