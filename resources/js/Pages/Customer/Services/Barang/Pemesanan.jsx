@@ -32,14 +32,14 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
 
     const subtotalPaket = items.reduce((sum, item) => sum + item.harga * item.qty, 0);
 
-    function handleKonfirmasi() {
-        setProcessing(true);
-        router.post(
-            '/app/services/barang/konfirmasi',
-            { items },
-            { onFinish: () => setProcessing(false) }
-        );
-    }
+   function handleKonfirmasi() {
+    setProcessing(true);
+    router.post(
+        '/app/services/barang/simpan-item',
+        { items },
+        { onFinish: () => setProcessing(false) }
+    );
+}
 
     return (
         <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">

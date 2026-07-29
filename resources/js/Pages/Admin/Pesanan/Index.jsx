@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2, ChevronDown, ChevronRight, Package } from 'lucide-react';
+import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2, ChevronDown, ChevronRight, Package, HandCoins, CheckCircle2 } from 'lucide-react';
 
 const SERVICE_TYPES = [
     { value: '', label: 'Semua Layanan' },
@@ -34,6 +34,12 @@ const SERVICE_LABEL = {
     pindahan: 'Pindahan',
 };
 
+// Order dianggap "cash menunggu konfirmasi" kalau payment_method-nya 'cod'
+// dan payment_verified_at masih kosong (belum dikonfirmasi admin).
+function isCashPendingConfirmation(order) {
+    return order.payment_method === 'cod' && !order.payment_verified_at;
+}
+
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -49,6 +55,8 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
     const [city, setCity] = useState(filters?.city ?? '');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [cashConfirmTarget, setCashConfirmTarget] = useState(null);
+    const [isCashConfirming, setIsCashConfirming] = useState(false);
 
     const [selectMode, setSelectMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState([]);
@@ -81,6 +89,23 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
             preserveScroll: true,
             onSuccess: () => setDeleteTarget(null),
         });
+    }
+
+    function handleConfirmCash() {
+        setIsCashConfirming(true);
+        router.post(
+            `/admin/orders/${cashConfirmTarget.id}/konfirmasi-cash`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setIsCashConfirming(false);
+                    setCashConfirmTarget(null);
+                    setSelectedOrder(null);
+                },
+                onError: () => setIsCashConfirming(false),
+            }
+        );
     }
 
     function toggleSelectMode() {
@@ -131,7 +156,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari kode pesanan / customer..."
-                        className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-3 text-xs text-gray-800 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
+                        className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-3 text-xs text-gray-800 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600dark:border-gray-800 dark:bg-slate-900 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
                     />
                 </form>
 
@@ -156,7 +181,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                 {cities.length > 0 && (
                     <CustomSelect
                         value={city}
-                        options={[{ value: '', label: 'Semua Kota' }, ...cities.map((c) => ({ value: c, label: c }))]}
+                        options={[{ value: '', label: 'Semua Kota' }, ...cities.map((c) => ({ value: c,label: c }))]}
                         onChange={(val) => {
                             setCity(val);
                             applyFilters({ city: val });
@@ -241,7 +266,9 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                     </td>
                                 </tr>
                             )}
-                            {orders.data.map((order) => (
+                            {orders.data.map((order) => {
+                                const cashPending = isCashPendingConfirmation(order);
+                                return (
                                 <tr
                                     key={order.id}
                                     className={`transition-colors hover:bg-gray-50/60 dark:hover:bg-slate-800/50 ${
@@ -260,11 +287,24 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                     )}
                                     <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-gray-100">
                                         <div>{order.order_code}</div>
-                                        {order.payment_receipt && (
-                                            <span className="mt-1 inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                                                <FileText size={11} /> Bukti Diunggah
-                                            </span>
-                                        )}
+                                        <div className="mt-1 flex flex-wrap gap-1">
+                                            {order.payment_receipt && (
+                                                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                    <FileText size={11} /> Bukti Diunggah
+                                                </span>
+                                            )}
+                                            {order.payment_method === 'cod' && (
+                                                cashPending ? (
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-orange-50 px-2 py-0.5 text-[11px] font-medium text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
+                                                        <HandCoins size={11} /> Cash - Belum Diterima
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                        <CheckCircle2 size={11} /> Cash Diterima
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.customer?.name ?? '-'}</td>
                                     <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.partner?.name ?? '-'}</td>
@@ -287,6 +327,17 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                     </td>
                                     <td className="select-none px-4 py-3.5 text-right">
                                         <div className="flex items-center justify-end gap-1.5">
+                                            {cashPending && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCashConfirmTarget(order)}
+                                                    className="inline-flex items-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-700 transition hover:bg-orange-600 hover:text-white dark:border-orange-800/60 dark:bg-orange-950/50 dark:text-orange-400 dark:hover:bg-orange-600 dark:hover:text-white"
+                                                    title="Konfirmasi Uang Diterima"
+                                                >
+                                                    <HandCoins size={13} />
+                                                    Konfirmasi Cash
+                                                </button>
+                                            )}
                                             <button
                                                 type="button"
                                                 onClick={() => setSelectedOrder(order)}
@@ -306,7 +357,8 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -327,7 +379,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 href={link.url ?? '#'}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 preserveScroll
-                                className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
+                                className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all${
                                     link.active
                                         ? 'bg-green-700 text-white shadow-sm dark:bg-emerald-600'
                                         : link.url
@@ -341,7 +393,11 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
             )}
 
             {selectedOrder && (
-                <OrderDetailModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+                <OrderDetailModal
+                    order={selectedOrder}
+                    onClose={() => setSelectedOrder(null)}
+                    onConfirmCash={(order) => setCashConfirmTarget(order)}
+                />
             )}
 
             {deleteTarget && (
@@ -396,6 +452,43 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-60"
                             >
                                 {isBulkDeleting ? 'Menghapus...' : 'Ya, Hapus Semua'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal konfirmasi khusus cash - terpisah dari modal hapus/bulk-delete */}
+            {cashConfirmTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
+                                <HandCoins size={18} />
+                            </span>
+                            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Konfirmasi Uang Diterima?</h2>
+                        </div>
+                        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                            Pastikan uang tunai untuk pesanan <span className="font-semibold text-gray-800 dark:text-gray-200">{cashConfirmTarget.order_code}</span> sebesar{' '}
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{formatRupiah(cashConfirmTarget.total_price)}</span> sudah benar-benar diterima sebelum melanjutkan.
+                            Status pesanan akan berubah menjadi <span className="font-semibold">Diproses</span>.
+                        </p>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setCashConfirmTarget(null)}
+                                disabled={isCashConfirming}
+                                className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 disabled:opacity-60 dark:text-gray-300 dark:hover:bg-slate-800"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmCash}
+                                disabled={isCashConfirming}
+                                className="rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700 disabled:opacity-60"
+                            >
+                                {isCashConfirming ? 'Memproses...' : 'Ya, Uang Sudah Diterima'}
                             </button>
                         </div>
                     </div>
@@ -460,7 +553,7 @@ function CustomSelect({ value, options, onChange }) {
     );
 }
 
-function OrderDetailModal({ order, onClose }) {
+function OrderDetailModal({ order, onClose, onConfirmCash }) {
     const [previewImage, setPreviewImage] = useState(false);
     const { data, setData, errors } = useForm({
         status: order.status,
@@ -468,6 +561,8 @@ function OrderDetailModal({ order, onClose }) {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [statusError, setStatusError] = useState(null);
+
+    const cashPending = isCashPendingConfirmation(order);
 
     const nextActions = {
         baru: ['diproses', 'dibatalkan'],
@@ -539,7 +634,7 @@ function OrderDetailModal({ order, onClose }) {
                     <dd className="text-gray-900 dark:text-gray-100">{order.partner?.name ?? 'Belum ditugaskan'}</dd>
 
                     <dt className="text-gray-500 dark:text-gray-400">Jenis Layanan</dt>
-                    <dd className="text-gray-900 dark:text-gray-100">{SERVICE_LABEL[order.service_type] ?? order.service_type}</dd>
+                    <dd className="text-gray-900 dark:text-gray-100">{SERVICE_LABEL[order.service_type]?? order.service_type}</dd>
 
                     <dt className="text-gray-500 dark:text-gray-400">Antar-Jemput</dt>
                     <dd className="text-gray-900 dark:text-gray-100">{order.is_pickup ? 'Ya' : 'Tidak'}</dd>
@@ -560,6 +655,42 @@ function OrderDetailModal({ order, onClose }) {
                         </>
                     )}
                 </dl>
+
+                {/* Blok khusus cash - hanya tampil kalau payment_method 'cod' */}
+                {order.payment_method === 'cod' && (
+                    <div className="mt-5 rounded-xl border border-orange-200 bg-orange-50 p-4 dark:border-orange-900/50 dark:bg-orange-950/30">
+                        <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase text-orange-700 dark:text-orange-400">
+                                <HandCoins size={14} /> Pembayaran Tunai
+                            </span>
+                            {!cashPending && (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                    <CheckCircle2 size={12} /> Diterima {order.payment_verified_at}
+                                </span>
+                            )}
+                        </div>
+
+                        {cashPending ? (
+                            <>
+                                <p className="mt-2 text-xs text-orange-700/80 dark:text-orange-300/80">
+                                    Uang untuk pesanan ini belum dikonfirmasi diterima. Konfirmasi setelah mitra/customer benar-benar menyerahkan uang tunai.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => onConfirmCash(order)}
+                                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700"
+                                >
+                                    <HandCoins size={15} />
+                                    Konfirmasi Uang Diterima
+                                </button>
+                            </>
+                        ) : (
+                            <p className="mt-2 text-xs text-emerald-700/80 dark:text-emerald-300/80">
+                                Uang tunai untuk pesanan ini sudah dikonfirmasi diterima oleh admin.
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 <div className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-slate-800/50">
                     <div className="mb-2 flex items-center justify-between">

@@ -1,30 +1,18 @@
 import { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
-import { ChevronLeft, ChevronDown, Landmark, Wallet, HandCoins } from 'lucide-react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { QrCode, HandCoins, WalletMinimal } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-
-const BANKS = [
-    { value: 'bca', label: 'Bank BCA' },
-    { value: 'bni', label: 'Bank BNI' },
-    { value: 'bri', label: 'Bank BRI' },
-    { value: 'mandiri', label: 'Bank Mandiri' },
-];
-
-const EWALLETS = [
-    { value: 'ovo', label: 'OVO' },
-    { value: 'dana', label: 'Dana' },
-    { value: 'linkaja', label: 'LinkAja' },
-    { value: 'shopeepay', label: 'Shopee Pay' },
-];
 
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
-export default function MetodePembayaran({ total = 0 }) {
-    const [bankOpen, setBankOpen] = useState(true);
+export default function MetodePembayaran({ total = 0, saldo = 0 }) {
+    const { errors } = usePage().props;
     const [selected, setSelected] = useState('');
     const [submitting, setSubmitting] = useState(false);
+
+    const saldoCukup = saldo >= total;
 
     function confirm() {
         if (!selected) return;
@@ -46,61 +34,66 @@ export default function MetodePembayaran({ total = 0 }) {
                     <p className="mt-0.5 text-xl font-bold text-gray-900">{formatRupiah(total)}</p>
                 </div>
 
-                {/* Grup Transfer Bank - collapsible */}
+                {/* Saldo Titipsini */}
                 <div className="mt-4 rounded-xl border border-gray-100 bg-white shadow-sm">
+                    <div className="flex items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        <WalletMinimal size={14} />
+                        Saldo Titipsini
+                    </div>
                     <button
                         type="button"
-                        onClick={() => setBankOpen((v) => !v)}
-                        className="flex w-full items-center justify-between px-4 py-3"
+                        disabled={!saldoCukup}
+                        onClick={() => saldoCukup && setSelected('saldo')}
+                        className="flex w-full items-center gap-3 border-t border-gray-50 px-4 py-3 disabled:opacity-50"
                     >
-                        <span className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                            <Landmark size={16} className="text-green-600" />
-                            Transfer Bank
+                        <WalletMinimal size={16} className="text-green-600" />
+                        <span className="flex-1 text-left">
+                            <span className="block text-sm font-medium text-gray-800">Bayar dengan Saldo</span>
+                            <span className={`block text-xs ${saldoCukup ? 'text-gray-400' : 'text-red-500'}`}>
+                                {saldoCukup
+                                    ? `Saldo kamu: ${formatRupiah(saldo)}`
+                                    : `Saldo tidak cukup (${formatRupiah(saldo)})`}
+                            </span>
                         </span>
-                        <ChevronDown size={16} className={`text-gray-400 transition-transform ${bankOpen ? 'rotate-180' : ''}`} />
+                        <span
+                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                                selected === 'saldo' ? 'border-green-600' : 'border-gray-300'
+                            }`}
+                        >
+                            {selected === 'saldo' && <span className="h-2.5 w-2.5 rounded-full bg-green-600" />}
+                        </span>
                     </button>
-
-                    {bankOpen && (
-                        <div className="border-t border-gray-100">
-                            {BANKS.map((bank) => (
-                                <PaymentRow
-                                    key={bank.value}
-                                    label={bank.label}
-                                    active={selected === bank.value}
-                                    onClick={() => setSelected(bank.value)}
-                                />
-                            ))}
-                        </div>
+                    {!saldoCukup && (
+                        <p className="border-t border-gray-50 px-4 py-2 text-[11px] text-red-500">
+                            Saldo kamu belum cukup untuk transaksi ini. Top up dulu di halaman Beranda.
+                        </p>
                     )}
                 </div>
 
-                {/* Dompet digital */}
+                {/* QRIS */}
                 <div className="mt-3 rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <div className="flex items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                        <Wallet size={14} />
-                        Dompet Digital
-                    </div>
-                    <div className="border-t border-gray-100">
-                        {EWALLETS.map((wallet) => (
-                            <PaymentRow
-                                key={wallet.value}
-                                label={wallet.label}
-                                active={selected === wallet.value}
-                                onClick={() => setSelected(wallet.value)}
-                            />
-                        ))}
-                    </div>
+                    <PaymentRow
+                        icon={QrCode}
+                        label="QRIS"
+                        description="Scan kode QR lalu unggah bukti transfer"
+                        active={selected === 'qris'}
+                        onClick={() => setSelected('qris')}
+                    />
                 </div>
 
-                {/* Bayar di tempat */}
+                {/* Tunai / Bayar di tempat */}
                 <div className="mt-3 rounded-xl border border-gray-100 bg-white shadow-sm">
                     <PaymentRow
                         icon={HandCoins}
-                        label="Bayar di tempat"
+                        label="Tunai (Bayar di tempat)"
                         active={selected === 'cod'}
                         onClick={() => setSelected('cod')}
                     />
                 </div>
+
+                {errors?.payment_method && (
+                    <p className="mt-3 text-center text-xs text-red-500">{errors.payment_method}</p>
+                )}
 
                 <p className="mt-4 text-center text-[11px] text-gray-400">
                     Metode pembayaran tersedia dapat berubah sewaktu-waktu tergantung syarat dan ketentuan yang berlaku.
@@ -119,19 +112,22 @@ export default function MetodePembayaran({ total = 0 }) {
     );
 }
 
-function PaymentRow({ label, active, onClick, icon: Icon }) {
+function PaymentRow({ label, description, active, onClick, icon: Icon }) {
     return (
         <button
             type="button"
             onClick={onClick}
-            className="flex w-full items-center gap-3 border-b border-gray-50 px-4 py-3 last:border-b-0"
+            className="flex w-full items-center gap-3 px-4 py-3"
         >
             {Icon ? (
                 <Icon size={16} className="text-green-600" />
             ) : (
                 <span className="h-2 w-2" />
             )}
-            <span className="flex-1 text-left text-sm font-medium text-gray-800">{label}</span>
+            <span className="flex-1 text-left">
+                <span className="block text-sm font-medium text-gray-800">{label}</span>
+                {description && <span className="block text-xs text-gray-400">{description}</span>}
+            </span>
             <span
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
                     active ? 'border-green-600' : 'border-gray-300'

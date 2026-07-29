@@ -100,6 +100,9 @@ class OrderController extends Controller
                 'pickup_fee' => (float) $pickupFee,
                 'total' => (float) $order->total_price,
                 'created_at' => optional($order->created_at)->format('d M Y, H:i'),
+                // Dikirim supaya frontend bisa membedakan alur cash vs QRIS/transfer
+                // di blok "Bukti Pembayaran & Verifikasi".
+                'payment_method' => $order->payment_method,
                 'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
                 'payment_verified_at' => optional($order->payment_verified_at)->format('d M Y, H:i'),
             ],
@@ -107,27 +110,51 @@ class OrderController extends Controller
     }
 
     /**
-     * Mitra memverifikasi bukti pembayaran yang diunggah customer.
+     * Mitra memverifikasi pembayaran pesanan.
      * PATCH /mitra/pesanan/{order}/verifikasi-pembayaran
+     *
+     * Ada 2 alur berbeda tergantung payment_method:
+     * - QRIS/transfer: WAJIB ada payment_receipt (foto bukti transfer) dulu,
+     *   karena mitra memverifikasi keaslian bukti yang diunggah customer.
+     * - Cash (cod): TIDAK perlu payment_receipt sama sekali, karena mitra
+     *   menerima uang tunai secara fisik saat serah-terima barang - di sini
+     *   "verifikasi" artinya "konfirmasi uang tunai sudah diterima". Ini
+     *   melengkapi fitur "Konfirmasi Cash" di sisi Admin (Admin\OrderController
+     *   ::confirmCashPayment) - mana saja yang lebih dulu terjadi (mitra atau
+     *   admin) akan mengisi payment_verified_at yang sama.
      */
     public function verifikasiPembayaran(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
-        abort_unless($order->payment_receipt, 422, 'Belum ada bukti pembayaran yang diunggah untuk pesanan ini.');
+
+        $isCash = $order->payment_method === 'cod';
+
+        abort_unless(
+            $isCash || $order->payment_receipt,
+            422,
+            'Belum ada bukti pembayaran yang diunggah untuk pesanan ini.'
+        );
 
         if (! $order->payment_verified_at) {
-            $order->update(['payment_verified_at' => now()]);
+            $order->update([
+                'payment_verified_at' => now(),
+                // Samakan dengan Admin::confirmCashPayment() - order cash yang
+                // masih 'baru' otomatis naik ke 'diproses' begitu terverifikasi.
+                'status' => $order->status === 'baru' ? 'diproses' : $order->status,
+            ]);
 
             Notifikasi::create([
                 'user_id' => $order->customer_id,
                 'order_id' => $order->id,
                 'type' => 'pembayaran_diterima',
                 'judul' => 'Pembayaran Terverifikasi',
-                'pesan' => 'Mitra telah memverifikasi pembayaran untuk pesanan '.$order->order_code.'. Pesanan kamu sedang diproses.',
+                'pesan' => $isCash
+                    ? 'Pembayaran tunai untuk pesanan '.$order->order_code.' telah dikonfirmasi. Pesanan kamu sedang diproses.'
+                    : 'Mitra telah memverifikasi pembayaran untuk pesanan '.$order->order_code.'. Pesanan kamu sedang diproses.',
             ]);
         }
 
-        return back()->with('success', 'Pembayaran berhasil diverifikasi.');
+        return back()->with('success', $isCash ? 'Pembayaran tunai berhasil dikonfirmasi.' : 'Pembayaran berhasil diverifikasi.');
     }
 
     /**

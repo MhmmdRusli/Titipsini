@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowLeft, MapPin, User, Package, XCircle, CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink } from 'lucide-react';
+import { ArrowLeft, MapPin, User, Package, XCircle, CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, Banknote } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 function formatRupiah(value) {
@@ -20,6 +20,7 @@ export default function Show({ order }) {
 
     const statusInfo = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.diproses;
     const StatusIcon = statusInfo.icon;
+    const isCash = order.payment_method === 'cod';
 
     function verifikasiPembayaran() {
         setIsVerifying(true);
@@ -134,12 +135,16 @@ export default function Show({ order }) {
                     </div>
                 </div>
 
-                {/* Bukti Pembayaran & Verifikasi */}
+                {/* Bukti Pembayaran & Verifikasi - bercabang cash vs QRIS/transfer */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <div className="mb-3 flex items-center justify-between">
                         <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                            <Image size={15} className="text-gray-400" />
-                            Bukti Pembayaran
+                            {isCash ? (
+                                <Banknote size={15} className="text-gray-400" />
+                            ) : (
+                                <Image size={15} className="text-gray-400" />
+                            )}
+                            {isCash ? 'Pembayaran Tunai' : 'Bukti Pembayaran'}
                         </p>
                         {order.payment_verified_at && (
                             <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700 dark:bg-green-950/40 dark:text-[#4ade80]">
@@ -149,7 +154,32 @@ export default function Show({ order }) {
                         )}
                     </div>
 
-                    {order.payment_receipt ? (
+                    {isCash ? (
+                        // Alur Cash (COD) - tidak butuh foto bukti sama sekali,
+                        // mitra cukup konfirmasi uang tunai sudah diterima langsung.
+                        <>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Customer memilih bayar tunai langsung ke mitra saat serah-terima barang.
+                            </p>
+
+                            {order.payment_verified_at ? (
+                                <p className="mt-3 text-center text-xs text-gray-400">
+                                    Uang tunai dikonfirmasi diterima pada {order.payment_verified_at}
+                                </p>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={verifikasiPembayaran}
+                                    disabled={isVerifying}
+                                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                                >
+                                    <Banknote size={16} />
+                                    {isVerifying ? 'Memproses...' : 'Konfirmasi Uang Tunai Diterima'}
+                                </button>
+                            )}
+                        </>
+                    ) : order.payment_receipt ? (
+                        // Alur QRIS/transfer - butuh foto bukti dulu sebelum bisa diverifikasi.
                         <>
                             <div
                                 onClick={() => setPreviewOpen(true)}

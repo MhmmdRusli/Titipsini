@@ -88,13 +88,15 @@ class OrderController extends Controller
 }
 
     public function success(Request $request, Order $order): Response
-    {
-        abort_unless($order->customer_id === $request->user()->id, 403);
+{
+    abort_unless($order->customer_id === $request->user()->id, 403);
 
-        return Inertia::render('Customer/Orders/Success', [
-            'orderId' => $order->id,
-        ]);
-    }
+    return Inertia::render('Customer/Orders/Success', [
+        'orderId' => $order->id,
+        'sudahLunas' => $order->payment_verified_at !== null,
+        'paymentMethod' => $order->payment_method,
+    ]);
+}
 
     /**
      * Halaman instruksi / pemrosesan pembayaran oleh customer

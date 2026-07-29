@@ -187,6 +187,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/orders/{order}/lapor', [CustomerReportController::class, 'create'])->name('orders.lapor');
     Route::post('/orders/{order}/lapor', [CustomerReportController::class, 'store'])->name('orders.lapor.store');
+    Route::post('orders/{order}/konfirmasi-cash', [OrderController::class, 'confirmCashPayment'])->name('orders.konfirmasiCash');
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
@@ -302,6 +303,8 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::post('/services/{service}/pesan', [ServiceController::class, 'storePesanan'])->name('services.pesan');
     Route::get('/services/{service}/metode-pembayaran', [ServiceController::class, 'metodePembayaranLayanan'])->name('services.metodePembayaranLayanan');
     Route::post('/services/{service}/konfirmasi', [ServiceController::class, 'konfirmasiLayanan'])->name('services.konfirmasiLayanan');
+    Route::post('/services/barang/simpan-item', [ServiceController::class, 'simpanItemsBarang'])->name('services.barang.simpanItem');
+
 
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
     Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('berita.show');

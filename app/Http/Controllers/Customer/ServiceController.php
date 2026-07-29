@@ -7,6 +7,7 @@ use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,6 +30,22 @@ class ServiceController extends Controller
             'judul' => 'Pesanan Baru Masuk',
             'pesan' => 'Ada pesanan baru dengan kode '.$order->order_code.' menunggu diproses.',
         ]);
+    }
+
+    /**
+     * Potong saldo customer untuk pembayaran via "Saldo Titipsini".
+     * Melempar ValidationException kalau saldo tidak mencukupi, supaya
+     * ditangkap otomatis oleh Inertia sebagai error form (payment_method).
+     */
+    protected function potongSaldo($customer, float $total): void
+    {
+        if ((float) $customer->saldo < $total) {
+            throw ValidationException::withMessages([
+                'payment_method' => 'Saldo kamu tidak mencukupi untuk transaksi ini. Silakan top up terlebih dahulu atau pilih metode lain.',
+            ]);
+        }
+
+        $customer->decrement('saldo', $total);
     }
 
     /**
@@ -139,6 +156,32 @@ class ServiceController extends Controller
     }
 
     /**
+     * POST /app/services/barang/simpan-item
+     * Dipanggil dari tombol "Lanjut ke Pembayaran" di halaman Pemesanan.
+     * Simpan item + qty final (yang mungkin sudah diubah customer) ke session,
+     * lalu redirect ke halaman pilih metode pembayaran. Harga TETAP dihitung
+     * ulang dari data service di server, bukan dari request, saat konfirmasi.
+     */
+    public function simpanItemsBarang(Request $request)
+    {
+        $data = session('pesanan_barang');
+
+        if (!$data) {
+            return redirect()->route('customer.services.barang.pilihPaket');
+        }
+
+        $validated = $request->validate([
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.nama' => ['required', 'string'],
+            'items.*.qty' => ['required', 'integer', 'min:1'],
+        ]);
+
+        session(['pesanan_barang_items' => $validated['items']]);
+
+        return redirect()->route('customer.services.barang.metodePembayaran');
+    }
+
+    /**
      * 🟢 PROSES PEMESANAN BARANG (Langsung Buat Order & Ke Halaman Sukses)
      */
     public function konfirmasiPesanan(Request $request)
@@ -149,23 +192,42 @@ class ServiceController extends Controller
             return redirect()->route('customer.services.barang.pilihPaket');
         }
 
-        // Cuma percaya nama & qty dari request. Harga SELALU diambil ulang dari data
-        // vendor di server (bukan dari request), supaya customer tidak bisa mengubah
-        // harga sendiri lewat request yang dimanipulasi.
         $validated = $request->validate([
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.nama' => ['required', 'string'],
-            'items.*.qty' => ['required', 'integer', 'min:1'],
+            'payment_method' => ['required', 'string'],
         ]);
 
         $customer = auth()->user();
         $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
         $hargaPerItem = $service ? (float) $service->harga : 100000;
 
-        $items = collect($validated['items']);
+        // Item+qty diambil dari session (disimpan di step Pemesanan lewat
+        // simpanItemsBarang()), BUKAN dari request halaman metode pembayaran -
+        // karena halaman itu memang tidak pernah mengirim items sama sekali.
+        $items = session('pesanan_barang_items');
+
+        if (!$items) {
+            $items = collect(explode(',', $data['namaBarang']))
+                ->map(fn ($nama) => trim($nama))
+                ->filter()
+                ->map(fn ($nama) => ['nama' => $nama, 'qty' => 1])
+                ->values()
+                ->all();
+        }
+
+        $items = collect($items);
         $totalQty = $items->sum('qty');
         $total = $totalQty * $hargaPerItem;
         $itemNames = $items->map(fn ($item) => $item['nama'].' x'.$item['qty'])->implode(', ');
+
+        $paymentMethod = $validated['payment_method'];
+        $isSaldo = $paymentMethod === 'saldo';
+
+        // Kalau bayar pakai saldo, potong dulu SEBELUM order dibuat. Kalau saldo
+        // tidak cukup, potongSaldo() akan melempar ValidationException dan order
+        // tidak jadi dibuat sama sekali.
+        if ($isSaldo) {
+            $this->potongSaldo($customer, $total);
+        }
 
 $order = Order::create([
     'order_code' => 'TS-'.strtoupper(uniqid()),
@@ -177,17 +239,18 @@ $order = Order::create([
     'end_date' => $data['tanggalKeluar'],
     'is_pickup' => (bool) ($data['pickup'] ?? false),
     'city' => $service->kota ?? $customer->city ?? '-',
-    'status' => 'baru',
+    'status' => $isSaldo ? 'diproses' : 'baru',
     'subtotal' => $total,
     'discount' => 0,
     'pickup_fee' => 0,
     'total_price' => $total,
-    'payment_method' => 'default',
+    'payment_method' => $paymentMethod,
+    'payment_verified_at' => $isSaldo ? now() : null,
         ]);
 
         $this->notifikasiPesananBaru($order);
 
-        session()->forget('pesanan_barang');
+        session()->forget(['pesanan_barang', 'pesanan_barang_items']);
 
         return redirect()->route('customer.orders.success', $order->id);
     }
@@ -229,7 +292,9 @@ $order = Order::create([
     }
 
     /**
-     * 🟢 PROSES PEMESANAN LAYANAN/TITIPAN (Langsung Buat Order & Ke Halaman Sukses)
+     * 🟢 PROSES PEMESANAN LAYANAN/TITIPAN LANGSUNG TANPA PILIH METODE (kalau
+     * ada flow yang masih memanggil endpoint ini tanpa lewat halaman metode
+     * pembayaran). Dibiarkan pakai payment_method default seperti semula.
      * POST /app/services/{service}/pesan
      */
     public function storePesanan(Request $request, Service $service)
@@ -276,14 +341,28 @@ $order = Order::create([
             return redirect()->route('customer.services.barang.pilihPaket');
         }
 
-        $items = collect(explode(',', $data['namaBarang']))
-            ->map(fn ($nama) => trim($nama))
-            ->filter();
+        $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
+        $hargaPerItem = $service ? (float) $service->harga : 100000;
 
-        $total = $items->count() * 100000;
+        // Pakai item+qty yang disimpan dari halaman Pemesanan kalau ada,
+        // fallback ke parsing namaBarang (qty=1 semua) kalau belum ada.
+        $items = session('pesanan_barang_items');
+
+        if (!$items) {
+            $items = collect(explode(',', $data['namaBarang']))
+                ->map(fn ($nama) => trim($nama))
+                ->filter()
+                ->map(fn ($nama) => ['nama' => $nama, 'qty' => 1])
+                ->values()
+                ->all();
+        }
+
+        $totalQty = collect($items)->sum('qty');
+        $total = $totalQty * $hargaPerItem;
 
         return Inertia::render('Customer/Services/Barang/MetodePembayaran', [
             'total' => $total,
+            'saldo' => (float) auth()->user()->saldo,
         ]);
     }
 
@@ -296,6 +375,7 @@ $order = Order::create([
         return Inertia::render('Customer/Services/MetodePembayaranLayanan', [
             'serviceId' => $service->id,
             'total' => (float) $service->harga,
+            'saldo' => (float) auth()->user()->saldo,
         ]);
     }
 
@@ -312,6 +392,11 @@ $order = Order::create([
         ]);
 
         $customer = auth()->user();
+        $isSaldo = $data['payment_method'] === 'saldo';
+
+        if ($isSaldo) {
+            $this->potongSaldo($customer, (float) $service->harga);
+        }
 
         $order = Order::create([
             'order_code' => 'TS-'.strtoupper(uniqid()),
@@ -323,12 +408,13 @@ $order = Order::create([
             'end_date' => $data['tanggalKeluar'],
             'is_pickup' => false,
             'city' => $service->kota,
-            'status' => 'baru',
+            'status' => $isSaldo ? 'diproses' : 'baru',
             'subtotal' => $service->harga,
             'discount' => 0,
             'pickup_fee' => 0,
             'total_price' => $service->harga,
             'payment_method' => $data['payment_method'],
+            'payment_verified_at' => $isSaldo ? now() : null,
         ]);
 
         $this->notifikasiPesananBaru($order);

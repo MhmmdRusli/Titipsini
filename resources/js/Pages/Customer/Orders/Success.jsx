@@ -2,7 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { CheckCircle2 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
-export default function Success({ orderId }) {
+export default function Success({ orderId, sudahLunas = false, paymentMethod }) {
     return (
         <CustomerLayout>
             <Head title="Pesanan Berhasil" />
@@ -12,26 +12,34 @@ export default function Success({ orderId }) {
                     <CheckCircle2 size={40} />
                 </div>
 
-                <h1 className="mt-5 text-lg font-bold text-gray-900 dark:text-gray-100">Pesanan Berhasil Dibuat! </h1>
+                <h1 className="mt-5 text-lg font-bold text-gray-900 dark:text-gray-100">Pesanan Berhasil Dibuat!</h1>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Satu langkah lagi! Silakan selesaikan pembayaran kamu.
+                    {sudahLunas
+                        ? paymentMethod === 'saldo'
+                            ? 'Pembayaran menggunakan Saldo Titipsini berhasil, pesananmu sedang diproses.'
+                            : 'Pembayaran kamu sudah berhasil, pesananmu sedang diproses.'
+                        : 'Satu langkah lagi! Silakan selesaikan pembayaran kamu.'}
                 </p>
 
                 <div className="mt-8 w-full max-w-xs space-y-3">
-                    {/* Tombol Utama Pembayaran */}
-                    <Link
-                        href={`/app/orders/${orderId}/pembayaran`}
-                        className="block w-full rounded-xl bg-[#15803d] hover:bg-[#166534] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] py-3 text-sm font-bold text-white shadow-sm transition"
-                    >
-                        Lakukan Pembayaran
-                    </Link>
-                    
-                    {/* Tombol Sekunder Pesanan Saya */}
+                    {!sudahLunas && (
+                        <Link
+                            href={`/app/orders/${orderId}/pembayaran`}
+                            className="block w-full rounded-xl bg-[#15803d] hover:bg-[#166534] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] py-3 text-sm font-bold text-white shadow-sm transition"
+                        >
+                            Lakukan Pembayaran
+                        </Link>
+                    )}
+
                     <Link
                         href="/app/orders"
-                        className="block w-full rounded-xl border border-green-200 bg-green-50 py-3 text-sm font-bold text-[#15803d] hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/40 dark:text-[#4ade80] dark:hover:bg-green-900/50 transition"
+                        className={`block w-full rounded-xl py-3 text-sm font-bold transition ${
+                            sudahLunas
+                                ? 'bg-[#15803d] hover:bg-[#166534] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] text-white shadow-sm'
+                                : 'border border-green-200 bg-green-50 text-[#15803d] hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/40 dark:text-[#4ade80] dark:hover:bg-green-900/50'
+                        }`}
                     >
-                        Pesanan Saya
+                        Lihat Pesanan Saya
                     </Link>
                 </div>
             </div>

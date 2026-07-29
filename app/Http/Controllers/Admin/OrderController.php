@@ -43,6 +43,9 @@ class OrderController extends Controller
                     'total_price'     => $order->total_price,
                     'payment_method'  => $order->payment_method,
                     'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
+                    // Dipakai frontend untuk menampilkan badge "Uang Belum Diterima"
+                    // + tombol konfirmasi, khusus order dengan payment_method 'cod'.
+                    'payment_verified_at' => $order->payment_verified_at?->format('d M Y H:i'),
                     'created_at'      => $order->created_at ? $order->created_at->format('d M Y H:i') : null,
                     'customer'        => $order->customer,
                     'partner'         => $order->partner,
@@ -156,6 +159,38 @@ class OrderController extends Controller
         $this->notifikasiUntukStatus($order, $validated['status'], $validated['cancel_reason'] ?? null);
 
         return back()->with('success', 'Status pesanan berhasil diperbarui.');
+    }
+
+    /**
+     * POST /admin/pesanan/{order}/konfirmasi-cash
+     *
+     * Khusus untuk order dengan payment_method 'cod' (Tunai/Bayar di tempat).
+     * Berbeda dari updateStatus() di atas: ini TIDAK mengubah alur status
+     * baru->diproses->selesai secara umum, tapi khusus mencatat KAPAN uang
+     * cash-nya benar-benar diterima/dikonfirmasi oleh admin - memakai kolom
+     * `payment_verified_at` yang sama seperti yang dipakai untuk pembayaran
+     * saldo (supaya konsisten, satu kolom = "kapan pembayaran terverifikasi"
+     * untuk semua metode pembayaran).
+     *
+     * Order cash yang baru dibuat statusnya 'baru' dan payment_verified_at
+     * masih null (lihat ServiceController::konfirmasiPesanan()). Begitu admin
+     * konfirmasi di sini, payment_verified_at diisi DAN status ikut naik ke
+     * 'diproses' - supaya konsisten dengan order saldo yang sudah otomatis
+     * 'diproses' sejak awal.
+     */
+    public function confirmCashPayment(Order $order)
+    {
+        abort_unless($order->payment_method === 'cod', 400, 'Order ini bukan pembayaran tunai.');
+        abort_if($order->payment_verified_at, 400, 'Uang untuk pesanan ini sudah dikonfirmasi diterima sebelumnya.');
+
+        $order->update([
+            'payment_verified_at' => now(),
+            'status' => $order->status === 'baru' ? 'diproses' : $order->status,
+        ]);
+
+        $this->notifikasiUntukStatus($order, 'diproses', null);
+
+        return back()->with('success', 'Pembayaran tunai untuk pesanan '.$order->order_code.' berhasil dikonfirmasi.');
     }
 
     public function destroy(Order $order)
