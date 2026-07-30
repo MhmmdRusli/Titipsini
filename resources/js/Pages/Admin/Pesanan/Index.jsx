@@ -40,6 +40,14 @@ function isCashPendingConfirmation(order) {
     return order.payment_method === 'cod' && !order.payment_verified_at;
 }
 
+// Order dianggap "siap diselesaikan" kalau:
+// 1) pembayaran sudah diverifikasi (payment_verified_at keisi), DAN
+// 2) fase operasionalnya sudah akhir (Mitra sudah tandai dititip lalu diambil/dst)
+// tapi status masih 'diproses' — artinya tinggal nunggu Admin klik "Selesaikan Pesanan".
+function isReadyToComplete(order) {
+    return !!order.payment_verified_at && order.fase === 'akhir' && order.status === 'diproses';
+}
+
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -156,7 +164,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari kode pesanan / customer..."
-                        className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-3 text-xs text-gray-800 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600dark:border-gray-800 dark:bg-slate-900 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
+                        className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-3 text-xs text-gray-800 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
                     />
                 </form>
 
@@ -181,7 +189,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                 {cities.length > 0 && (
                     <CustomSelect
                         value={city}
-                        options={[{ value: '', label: 'Semua Kota' }, ...cities.map((c) => ({ value: c,label: c }))]}
+                        options={[{ value: '', label: 'Semua Kota' }, ...cities.map((c) => ({ value: c, label: c }))]}
                         onChange={(val) => {
                             setCity(val);
                             applyFilters({ city: val });
@@ -268,95 +276,101 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                             )}
                             {orders.data.map((order) => {
                                 const cashPending = isCashPendingConfirmation(order);
+                                const readyToComplete = isReadyToComplete(order);
                                 return (
-                                <tr
-                                    key={order.id}
-                                    className={`transition-colors hover:bg-gray-50/60 dark:hover:bg-slate-800/50 ${
-                                        selectedIds.includes(order.id) ? 'bg-green-50/50 dark:bg-emerald-950/20' : ''
-                                    }`}
-                                >
-                                    {selectMode && (
-                                        <td className="px-4 py-3.5">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedIds.includes(order.id)}
-                                                onChange={() => toggleSelectOne(order.id)}
-                                                className="rounded text-green-600 focus:ring-green-600 dark:border-gray-700 dark:bg-slate-800 dark:checked:bg-emerald-600"
-                                            />
-                                        </td>
-                                    )}
-                                    <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-gray-100">
-                                        <div>{order.order_code}</div>
-                                        <div className="mt-1 flex flex-wrap gap-1">
-                                            {order.payment_receipt && (
-                                                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                                                    <FileText size={11} /> Bukti Diunggah
-                                                </span>
-                                            )}
-                                            {order.payment_method === 'cod' && (
-                                                cashPending ? (
-                                                    <span className="inline-flex items-center gap-1 rounded-md bg-orange-50 px-2 py-0.5 text-[11px] font-medium text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
-                                                        <HandCoins size={11} /> Cash - Belum Diterima
-                                                    </span>
-                                                ) : (
+                                    <tr
+                                        key={order.id}
+                                        className={`transition-colors hover:bg-gray-50/60 dark:hover:bg-slate-800/50 ${
+                                            selectedIds.includes(order.id) ? 'bg-green-50/50 dark:bg-emerald-950/20' : ''
+                                        }`}
+                                    >
+                                        {selectMode && (
+                                            <td className="px-4 py-3.5">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIds.includes(order.id)}
+                                                    onChange={() => toggleSelectOne(order.id)}
+                                                    className="rounded text-green-600 focus:ring-green-600 dark:border-gray-700 dark:bg-slate-800 dark:checked:bg-emerald-600"
+                                                />
+                                            </td>
+                                        )}
+                                        <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-gray-100">
+                                            <div>{order.order_code}</div>
+                                            <div className="mt-1 flex flex-wrap gap-1">
+                                                {order.payment_receipt && (
                                                     <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                                                        <CheckCircle2 size={11} /> Cash Diterima
+                                                        <FileText size={11} /> Bukti Diunggah
                                                     </span>
-                                                )
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.customer?.name ?? '-'}</td>
-                                    <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.partner?.name ?? '-'}</td>
-                                    <td className="px-4 py-3.5">
-                                        <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-300">
-                                            {SERVICE_LABEL[order.service_type] ?? order.service_type}
-                                            {order.is_pickup && <Truck size={13} className="text-green-700 dark:text-emerald-400" />}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.city}</td>
-                                    <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300 font-medium">{formatRupiah(order.total_price)}</td>
-                                    <td className="select-none px-4 py-3.5">
-                                        <span
-                                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
-                                                STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-400'
-                                            }`}
-                                        >
-                                            {order.status}
-                                        </span>
-                                    </td>
-                                    <td className="select-none px-4 py-3.5 text-right">
-                                        <div className="flex items-center justify-end gap-1.5">
-                                            {cashPending && (
+                                                )}
+                                                {readyToComplete && (
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                        <CheckCircle2 size={11} /> Siap Diselesaikan
+                                                    </span>
+                                                )}
+                                                {order.payment_method === 'cod' && (
+                                                    cashPending ? (
+                                                        <span className="inline-flex items-center gap-1 rounded-md bg-orange-50 px-2 py-0.5 text-[11px] font-medium text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
+                                                            <HandCoins size={11} /> Cash - Belum Diterima
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                            <CheckCircle2 size={11} /> Cash Diterima
+                                                        </span>
+                                                    )
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.customer?.name ?? '-'}</td>
+                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.partner?.name ?? '-'}</td>
+                                        <td className="px-4 py-3.5">
+                                            <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-300">
+                                                {SERVICE_LABEL[order.service_type] ?? order.service_type}
+                                                {order.is_pickup && <Truck size={13} className="text-green-700 dark:text-emerald-400" />}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.city}</td>
+                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300 font-medium">{formatRupiah(order.total_price)}</td>
+                                        <td className="select-none px-4 py-3.5">
+                                            <span
+                                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
+                                                    STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-400'
+                                                }`}
+                                            >
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td className="select-none px-4 py-3.5 text-right">
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                {cashPending && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setCashConfirmTarget(order)}
+                                                        className="inline-flex items-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-700 transition hover:bg-orange-600 hover:text-white dark:border-orange-800/60 dark:bg-orange-950/50 dark:text-orange-400 dark:hover:bg-orange-600 dark:hover:text-white"
+                                                        title="Konfirmasi Uang Diterima"
+                                                    >
+                                                        <HandCoins size={13} />
+                                                        Konfirmasi Cash
+                                                    </button>
+                                                )}
                                                 <button
                                                     type="button"
-                                                    onClick={() => setCashConfirmTarget(order)}
-                                                    className="inline-flex items-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-700 transition hover:bg-orange-600 hover:text-white dark:border-orange-800/60 dark:bg-orange-950/50 dark:text-orange-400 dark:hover:bg-orange-600 dark:hover:text-white"
-                                                    title="Konfirmasi Uang Diterima"
+                                                    onClick={() => setSelectedOrder(order)}
+                                                    className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 transition hover:bg-green-600 hover:text-white dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
                                                 >
-                                                    <HandCoins size={13} />
-                                                    Konfirmasi Cash
+                                                    Detail
+                                                    <ChevronRight size={14} />
                                                 </button>
-                                            )}
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedOrder(order)}
-                                                className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 transition hover:bg-green-600 hover:text-white dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
-                                            >
-                                                Detail
-                                                <ChevronRight size={14} />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setDeleteTarget(order)}
-                                                className="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
-                                                title="Hapus Pesanan"
-                                            >
-                                                <Trash2 size={15} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDeleteTarget(order)}
+                                                    className="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                                                    title="Hapus Pesanan"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 );
                             })}
                         </tbody>
@@ -379,7 +393,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 href={link.url ?? '#'}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 preserveScroll
-                                className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all${
+                                className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
                                     link.active
                                         ? 'bg-green-700 text-white shadow-sm dark:bg-emerald-600'
                                         : link.url
@@ -563,10 +577,14 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
     const [statusError, setStatusError] = useState(null);
 
     const cashPending = isCashPendingConfirmation(order);
+    const readyToComplete = isReadyToComplete(order);
 
     const nextActions = {
         baru: ['diproses', 'dibatalkan'],
-        diproses: ['selesai', 'dibatalkan'],
+        // Tombol 'selesai' cuma dimasukkan kalau readyToComplete true —
+        // artinya pembayaran sudah diverifikasi DAN Mitra sudah menandai
+        // fase akhir. Kalau belum, Admin cuma bisa membatalkan pesanan.
+        diproses: [...(readyToComplete ? ['selesai'] : []), 'dibatalkan'],
         selesai: [],
         dibatalkan: [],
     }[order.status] ?? [];
@@ -613,13 +631,20 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
                 <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3 dark:border-gray-800">
                     <div>
                         <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{order.order_code}</h2>
-                        <span
-                            className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
-                                STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-400'
-                            }`}
-                        >
-                            {order.status}
-                        </span>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                            <span
+                                className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
+                                    STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-400'
+                                }`}
+                            >
+                                {order.status}
+                            </span>
+                            {readyToComplete && (
+                                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                    <CheckCircle2 size={11} /> Siap Diselesaikan
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <button type="button" onClick={onClose} className="text-gray-400 transition hover:text-gray-600 dark:hover:text-gray-300">
                         <X size={18} />
@@ -634,7 +659,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
                     <dd className="text-gray-900 dark:text-gray-100">{order.partner?.name ?? 'Belum ditugaskan'}</dd>
 
                     <dt className="text-gray-500 dark:text-gray-400">Jenis Layanan</dt>
-                    <dd className="text-gray-900 dark:text-gray-100">{SERVICE_LABEL[order.service_type]?? order.service_type}</dd>
+                    <dd className="text-gray-900 dark:text-gray-100">{SERVICE_LABEL[order.service_type] ?? order.service_type}</dd>
 
                     <dt className="text-gray-500 dark:text-gray-400">Antar-Jemput</dt>
                     <dd className="text-gray-900 dark:text-gray-100">{order.is_pickup ? 'Ya' : 'Tidak'}</dd>
@@ -718,6 +743,12 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
                         <p className="text-xs italic text-gray-400 dark:text-gray-500">Customer belum mengunggah bukti pembayaran.</p>
                     )}
                 </div>
+
+                {order.status === 'diproses' && !readyToComplete && (
+                    <p className="mt-5 text-xs italic text-gray-400 dark:text-gray-500">
+                        Menunggu {!order.payment_verified_at ? 'verifikasi pembayaran' : 'Mitra menandai fase akhir'} sebelum pesanan ini bisa diselesaikan.
+                    </p>
+                )}
 
                 {nextActions.length > 0 && (
                     <div className="mt-5 border-t border-gray-100 pt-4 dark:border-gray-800">

@@ -39,6 +39,10 @@ class OrderController extends Controller
                     'is_pickup'       => $order->is_pickup,
                     'city'            => $order->city,
                     'status'          => $order->status,
+                    // Fase operasional (menunggu/berjalan/akhir) - dipakai frontend
+                    // untuk menampilkan badge "Siap Diselesaikan" saat fase sudah
+                    // akhir tapi status masih 'diproses'.
+                    'fase'            => $order->fase,
                     'cancel_reason'   => $order->cancel_reason,
                     'total_price'     => $order->total_price,
                     'payment_method'  => $order->payment_method,
@@ -141,6 +145,17 @@ class OrderController extends Controller
             'status'        => ['required', Rule::in(['baru', 'diproses', 'selesai', 'dibatalkan'])],
             'cancel_reason' => ['required_if:status,dibatalkan', 'nullable', 'string', 'max:255'],
         ]);
+
+        // Guard: pesanan cuma boleh 'selesai' kalau
+        // 1) pembayaran sudah diverifikasi, DAN
+        // 2) Mitra sudah menandai fase operasional sampai 'akhir'
+        //    (sudah dititipkan lalu sudah diambil/dikembalikan/dst).
+        // Ini mencegah Admin menyelesaikan pesanan yang belum pernah
+        // diverifikasi pembayarannya atau belum pernah disentuh Mitra.
+        if ($validated['status'] === 'selesai') {
+            abort_unless($order->payment_verified_at, 422, 'Pesanan belum bisa diselesaikan — pembayaran belum diverifikasi.');
+            abort_unless($order->fase === 'akhir', 422, 'Pesanan belum bisa diselesaikan — Mitra belum menandai fase akhir (barang diambil/sewa berakhir/dst).');
+        }
 
         $statusSebelumnya = $order->status;
 
