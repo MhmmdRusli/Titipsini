@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowLeft, MapPin, User, Package, XCircle, CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, Banknote } from 'lucide-react';
+import { ArrowLeft, MapPin, User, Package, XCircle, CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, HandCoins, Clock, ArrowRightCircle } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 function formatRupiah(value) {
@@ -14,9 +14,17 @@ const STATUS_CONFIG = {
     dibatalkan: { label: 'Dibatalkan', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
 };
 
+// Warna badge fase - generik untuk semua kategori (menunggu = abu, berjalan = biru, akhir = hijau)
+const FASE_COLOR = {
+    menunggu: 'bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-300',
+    berjalan: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400',
+    akhir: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-[#4ade80]',
+};
+
 export default function Show({ order }) {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
+    const [isAdvancingFase, setIsAdvancingFase] = useState(false);
 
     const statusInfo = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.diproses;
     const StatusIcon = statusInfo.icon;
@@ -30,6 +38,18 @@ export default function Show({ order }) {
             {
                 preserveScroll: true,
                 onFinish: () => setIsVerifying(false),
+            }
+        );
+    }
+
+    function advanceFase() {
+        setIsAdvancingFase(true);
+        router.patch(
+            `/mitra/pesanan/${order.id}/fase`,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setIsAdvancingFase(false),
             }
         );
     }
@@ -69,6 +89,42 @@ export default function Show({ order }) {
                         )}
                     </div>
                 </div>
+
+                {/* Status Operasional (Fase) - baru: menunggu -> berjalan -> akhir,
+                    label & tombol aksinya beda tergantung kategori layanan */}
+                {order.fase_label && (
+                    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                        <div className="flex items-center justify-between">
+                            <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <Clock size={15} className="text-gray-400" />
+                                Status Operasional
+                            </p>
+                            <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${FASE_COLOR[order.fase] ?? FASE_COLOR.menunggu}`}>
+                                {order.fase_label}
+                            </span>
+                        </div>
+
+                        {order.can_advance_fase ? (
+                            <button
+                                type="button"
+                                onClick={advanceFase}
+                                disabled={isAdvancingFase}
+                                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                            >
+                                <ArrowRightCircle size={16} />
+                                {isAdvancingFase ? 'Memproses...' : order.next_fase_action_label}
+                            </button>
+                        ) : order.status !== 'diproses' ? (
+                            <p className="mt-2 text-xs italic text-gray-400 dark:text-gray-500">
+                                Status operasional hanya bisa diubah selagi pesanan sedang diproses.
+                            </p>
+                        ) : (
+                            <p className="mt-2 text-xs italic text-gray-400 dark:text-gray-500">
+                                Pesanan ini sudah berada di fase akhir.
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {/* Info Order / Ringkasan Transaksi & Logistik */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3 dark:border-gray-800 dark:bg-gray-800">
@@ -135,12 +191,12 @@ export default function Show({ order }) {
                     </div>
                 </div>
 
-                {/* Bukti Pembayaran & Verifikasi - bercabang cash vs QRIS/transfer */}
+                {/* Bukti Pembayaran & Verifikasi */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <div className="mb-3 flex items-center justify-between">
                         <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
                             {isCash ? (
-                                <Banknote size={15} className="text-gray-400" />
+                                <HandCoins size={15} className="text-gray-400" />
                             ) : (
                                 <Image size={15} className="text-gray-400" />
                             )}
@@ -155,35 +211,33 @@ export default function Show({ order }) {
                     </div>
 
                     {isCash ? (
-                        // Alur Cash (COD) - tidak butuh foto bukti sama sekali,
-                        // mitra cukup konfirmasi uang tunai sudah diterima langsung.
-                        <>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                Customer memilih bayar tunai langsung ke mitra saat serah-terima barang.
+                        // --- Alur khusus CASH: tidak ada foto bukti, verifikasi = konfirmasi uang diterima ---
+                        order.payment_verified_at ? (
+                            <p className="text-center text-xs text-gray-400 py-4">
+                                Pembayaran tunai sudah dikonfirmasi pada {order.payment_verified_at}
                             </p>
-
-                            {order.payment_verified_at ? (
-                                <p className="mt-3 text-center text-xs text-gray-400">
-                                    Uang tunai dikonfirmasi diterima pada {order.payment_verified_at}
+                        ) : (
+                            <>
+                                <p className="text-center text-xs italic text-gray-400 pb-3">
+                                    Customer membayar tunai langsung saat serah-terima barang. Konfirmasi setelah uang benar-benar diterima.
                                 </p>
-                            ) : (
                                 <button
                                     type="button"
                                     onClick={verifikasiPembayaran}
                                     disabled={isVerifying}
-                                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
                                 >
-                                    <Banknote size={16} />
+                                    <HandCoins size={16} />
                                     {isVerifying ? 'Memproses...' : 'Konfirmasi Uang Tunai Diterima'}
                                 </button>
-                            )}
-                        </>
+                            </>
+                        )
                     ) : order.payment_receipt ? (
-                        // Alur QRIS/transfer - butuh foto bukti dulu sebelum bisa diverifikasi.
+                        // --- Alur QRIS/transfer: seperti semula ---
                         <>
                             <div
                                 onClick={() => setPreviewOpen(true)}
-                                className="relative cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
+                                className="relative cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-gray-50 dark:border-gray-700dark:bg-gray-900"
                             >
                                 <img src={order.payment_receipt} alt="Bukti Pembayaran" className="h-44 w-full object-contain p-2" />
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition hover:bg-black/40 hover:opacity-100">

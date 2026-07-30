@@ -13,6 +13,57 @@ use Inertia\Response;
 
 class OrderController extends Controller
 {
+    /**
+     * Label fase yang ditampilkan ke user, beda-beda per kategori layanan
+     * meskipun kode fase di database sama (menunggu/berjalan/akhir).
+     */
+    public const FASE_LABELS = [
+        'barang' => [
+            'menunggu' => 'Menunggu Pickup',
+            'berjalan' => 'Dititipkan',
+            'akhir' => 'Diambil Kembali',
+        ],
+        'bangunan' => [
+            'menunggu' => 'Menunggu Konfirmasi',
+            'berjalan' => 'Sedang Disewa',
+            'akhir' => 'Sewa Berakhir',
+        ],
+        'kendaraan' => [
+            'menunggu' => 'Menunggu Serah Terima',
+            'berjalan' => 'Sedang Dipakai',
+            'akhir' => 'Dikembalikan',
+        ],
+        'pindahan' => [
+            'menunggu' => 'Dijadwalkan',
+            'berjalan' => 'Proses Pindahan',
+            'akhir' => 'Selesai Pindahan',
+        ],
+    ];
+
+    public const FASE_ACTION_LABELS = [
+        'barang' => [
+            'menunggu' => 'Tandai Sudah Dititip',
+            'berjalan' => 'Tandai Sudah Diambil',
+        ],
+        'bangunan' => [
+            'menunggu' => 'Mulai Masa Sewa',
+            'berjalan' => 'Tandai Sewa Berakhir',
+        ],
+        'kendaraan' => [
+            'menunggu' => 'Tandai Sudah Diserahkan',
+            'berjalan' => 'Tandai Sudah Dikembalikan',
+        ],
+        'pindahan' => [
+            'menunggu' => 'Mulai Proses Pindahan',
+            'berjalan' => 'Tandai Pindahan Selesai',
+        ],
+    ];
+
+    private const NEXT_FASE = [
+        'menunggu' => 'berjalan',
+        'berjalan' => 'akhir',
+    ];
+
     public function index(Request $request): Response
     {
         $partner = Auth::user();
@@ -45,6 +96,8 @@ class OrderController extends Controller
                 'service_type' => $order->service_type,
                 'duration' => $this->hitungDurasi($order),
                 'status' => $order->status,
+                'fase' => $order->fase,
+                'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
             ];
         });
 
@@ -70,12 +123,12 @@ class OrderController extends Controller
 
         $order->load('customer');
 
-        // Order lama (sebelum kolom subtotal/discount/pickup_fee diisi saat create)
-        // kemungkinan subtotal-nya masih 0 (bukan null, karena default kolomnya 0),
-        // jadi fallback berdasarkan nilai > 0, bukan pakai `??` yang tidak akan pernah kena.
+        
         $subtotal = $order->subtotal > 0 ? $order->subtotal : $order->total_price;
         $discount = $order->discount ?? 0;
         $pickupFee = $order->pickup_fee ?? 0;
+
+        $nextFaseAction = self::FASE_ACTION_LABELS[$order->service_type][$order->fase] ?? null;
 
         return Inertia::render('Mitra/Orders/Show', [
             'order' => [
@@ -105,24 +158,18 @@ class OrderController extends Controller
                 'payment_method' => $order->payment_method,
                 'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
                 'payment_verified_at' => optional($order->payment_verified_at)->format('d M Y, H:i'),
+                // Status operasional (fase) - lihat blok baru "Status Operasional" di Show.jsx
+                'fase' => $order->fase,
+                'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
+                'next_fase_action_label' => $nextFaseAction,
+                // Tombol maju fase HANYA boleh dipakai kalau order sudah 'diproses'
+                // (payment sudah terverifikasi) dan masih ada fase berikutnya.
+                'can_advance_fase' => $order->status === 'diproses' && $nextFaseAction !== null,
             ],
         ]);
     }
 
-    /**
-     * Mitra memverifikasi pembayaran pesanan.
-     * PATCH /mitra/pesanan/{order}/verifikasi-pembayaran
-     *
-     * Ada 2 alur berbeda tergantung payment_method:
-     * - QRIS/transfer: WAJIB ada payment_receipt (foto bukti transfer) dulu,
-     *   karena mitra memverifikasi keaslian bukti yang diunggah customer.
-     * - Cash (cod): TIDAK perlu payment_receipt sama sekali, karena mitra
-     *   menerima uang tunai secara fisik saat serah-terima barang - di sini
-     *   "verifikasi" artinya "konfirmasi uang tunai sudah diterima". Ini
-     *   melengkapi fitur "Konfirmasi Cash" di sisi Admin (Admin\OrderController
-     *   ::confirmCashPayment) - mana saja yang lebih dulu terjadi (mitra atau
-     *   admin) akan mengisi payment_verified_at yang sama.
-     */
+    
     public function verifikasiPembayaran(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
@@ -138,8 +185,7 @@ class OrderController extends Controller
         if (! $order->payment_verified_at) {
             $order->update([
                 'payment_verified_at' => now(),
-                // Samakan dengan Admin::confirmCashPayment() - order cash yang
-                // masih 'baru' otomatis naik ke 'diproses' begitu terverifikasi.
+               
                 'status' => $order->status === 'baru' ? 'diproses' : $order->status,
             ]);
 
@@ -157,9 +203,32 @@ class OrderController extends Controller
         return back()->with('success', $isCash ? 'Pembayaran tunai berhasil dikonfirmasi.' : 'Pembayaran berhasil diverifikasi.');
     }
 
-    /**
-     * Hitung durasi penitipan dari start_date - end_date (dalam hari).
-     */
+    
+    public function updateFase(Order $order)
+    {
+        abort_unless($order->partner_id === Auth::id(), 403);
+        abort_unless($order->status === 'diproses', 400, 'Fase hanya bisa diubah selagi pesanan berstatus Diproses.');
+
+        $next = self::NEXT_FASE[$order->fase] ?? null;
+
+        abort_unless($next, 400, 'Pesanan ini sudah berada di fase akhir.');
+
+        $order->update(['fase' => $next]);
+
+        $label = self::FASE_LABELS[$order->service_type][$next] ?? $next;
+
+        Notifikasi::create([
+            'user_id' => $order->customer_id,
+            'order_id' => $order->id,
+            'type' => 'transaksi_masuk',
+            'judul' => 'Status Pesanan Diperbarui',
+            'pesan' => 'Pesanan '.$order->order_code.' sekarang: '.$label.'.',
+        ]);
+
+        return back()->with('success', 'Status pesanan berhasil diperbarui menjadi "'.$label.'".');
+    }
+
+   
     private function hitungDurasi(Order $order): ?string
     {
         if (! $order->start_date || ! $order->end_date) {

@@ -27,6 +27,7 @@ class Order extends Model
         'dropoff_address',
         'city',
         'status',
+        'fase',
         'cancel_reason',
         'subtotal',
         'discount',
