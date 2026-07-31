@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
-import { Plus, History, Package, Building2, Car, Truck, ChevronRight, ChevronDown, MapPin, Clock, Search, Inbox } from 'lucide-react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Plus, History, Package, Building2, Car, Truck, ChevronRight, ChevronDown, MapPin, Clock, Search, Inbox, User, LogOut } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const CATEGORIES = [
@@ -67,16 +67,29 @@ function BoxIcon({ className }) {
 }
 
 export default function Dashboard({ user, saldo = 10000, vendors = [], berita = [], aktivitasTerakhir = null }) {
+    // Pakai auth.user yang di-share global lewat Inertia (HandleInertiaRequests)
+    // sebagai sumber utama, dengan fallback ke prop `user` halaman ini. Jadi
+    // begitu foto profil diganti di halaman Profil (yang meng-update auth.user
+    // yang sama), avatar di Dashboard otomatis ikut ter-update juga tanpa perlu
+    // reload manual, karena keduanya membaca dari satu sumber yang sama.
+    const { props: pageProps } = usePage();
+    const currentUser = pageProps.auth?.user ?? user;
+
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [selectedWilayah, setSelectedWilayah] = useState(user?.wilayah ?? 'Daerah Istimewa Yogyakarta');
+    const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
+    const [selectedWilayah, setSelectedWilayah] = useState(currentUser?.wilayah ?? 'Daerah Istimewa Yogyakarta');
     const [searchQuery, setSearchQuery] = useState('');
 
     const dropdownRef = useRef(null);
+    const avatarMenuRef = useRef(null);
 
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
+            }
+            if (avatarMenuRef.current && !avatarMenuRef.current.contains(event.target)) {
+                setIsAvatarMenuOpen(false);
             }
         }
         document.addEventListener('mousedown', handleClickOutside);
@@ -89,7 +102,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
         { id: 3, judul: 'Aplikasi Titipsini.Com terbaru Rilis, Buat...', published_at: null, foto: null },
     ];
 
-    const firstName = (user?.name ?? 'Riza Hidayat').split(' ')[0];
+    const firstName = (currentUser?.name ?? 'Riza Hidayat').split(' ')[0];
 
     // Daftar Wilayah Utama / Kota-Kota Besar Seluruh Indonesia
     const daftarWilayahIndonesia = [
@@ -137,69 +150,112 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
             <div className="px-4 pt-2 pb-6">
                 {/* Greeting Section */}
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
-                            {getGreeting()}, {firstName} <span className="text-xl">👋</span>
-                        </h2>
-                        
-                        {/* Wrapper Dropdown */}
-                        <div className="relative mt-1.5 inline-block" ref={dropdownRef}>
+                    <div className="flex items-center gap-3">
+                        <div className="relative shrink-0" ref={avatarMenuRef}>
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setIsDropdownOpen(!isDropdownOpen);
-                                    setSearchQuery('');
-                                }}
-                                className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-500 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 cursor-pointer"
+                                onClick={() => setIsAvatarMenuOpen((v) => !v)}
+                                className="block cursor-pointer"
                             >
-                                <MapPin size={11} className="text-gray-400 dark:text-gray-500" />
-                                <span className="max-w-[180px] truncate">{selectedWilayah}</span>
-                                <ChevronDown size={11} className={`text-gray-400 dark:text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                                {currentUser?.avatar ? (
+                                    <img
+                                        src={currentUser.avatar}
+                                        alt={currentUser.name}
+                                        className="h-11 w-11 rounded-full border border-gray-200 object-cover transition hover:border-green-400 dark:border-gray-700 dark:hover:border-green-500"
+                                    />
+                                ) : (
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-green-200 bg-green-50 text-sm font-semibold text-[#15803d] transition hover:border-green-400 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300 dark:hover:border-green-500">
+                                        {firstName.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
                             </button>
 
-                            {/* Menu Dropdown All Indonesia */}
-                            {isDropdownOpen && (
-                                <div className="absolute left-0 mt-1.5 w-64 rounded-xl bg-white dark:bg-gray-800 p-2 shadow-xl border border-gray-100 dark:border-gray-700 z-50">
-                                    
-                                    {/* Kolom Pencarian */}
-                                    <div className="mb-2 relative">
-                                        <Search size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            placeholder="Cari kota / provinsi..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 pl-8 pr-3 py-1.5 text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-green-500"
-                                            autoFocus
-                                        />
-                                    </div>
-
-                                    {/* Daftar Pilihan */}
-                                    <div className="space-y-0.5 max-h-60 overflow-y-auto pr-1">
-                                        {filteredWilayah.length > 0 ? (
-                                            filteredWilayah.map((wilayah, index) => (
-                                                <button
-                                                    key={index}
-                                                    onClick={() => {
-                                                        setSelectedWilayah(wilayah);
-                                                        setIsDropdownOpen(false);
-                                                    }}
-                                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between cursor-pointer ${
-                                                        selectedWilayah === wilayah 
-                                                            ? 'bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400 font-bold' 
-                                                            : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
-                                                    }`}
-                                                >
-                                                    <span className="truncate">{wilayah}</span>
-                                                    {selectedWilayah === wilayah && <MapPin size={12} className="shrink-0 text-green-600 dark:text-green-400" />}
-                                                </button>
-                                            ))
-                                        ) : (
-                                            <p className="py-3 text-center text-xs text-gray-400">Wilayah tidak ditemukan</p>
-                                        )}
-                                    </div>
+                            {isAvatarMenuOpen && (
+                                <div className="absolute left-0 z-50 mt-2 w-44 rounded-xl border border-gray-100 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                                    <Link
+                                        href="/app/profile"
+                                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
+                                    >
+                                        <User size={15} />
+                                        Profil Saya
+                                    </Link>
+                                    <Link
+                                        href="/logout"
+                                        method="post"
+                                        as="button"
+                                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+                                    >
+                                        <LogOut size={15} />
+                                        Keluar
+                                    </Link>
                                 </div>
                             )}
+                        </div>
+
+                        <div>
+                            <h2 className="text-[15px] font-semibold text-gray-900 dark:text-gray-100">
+                                {getGreeting()}, {firstName}
+                            </h2>
+
+                            {/* Wrapper Dropdown */}
+                            <div className="relative mt-0.5 inline-block" ref={dropdownRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsDropdownOpen(!isDropdownOpen);
+                                        setSearchQuery('');
+                                    }}
+                                    className="inline-flex items-center gap-1 text-xs text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer"
+                                >
+                                    <MapPin size={13} />
+                                    <span className="max-w-[180px] truncate">{selectedWilayah}</span>
+                                    <ChevronDown size={12} className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {/* Menu Dropdown All Indonesia */}
+                                {isDropdownOpen && (
+                                    <div className="absolute left-0 mt-1.5 w-64 rounded-xl bg-white dark:bg-gray-800 p-2 shadow-xl border border-gray-100 dark:border-gray-700 z-50">
+
+                                        {/* Kolom Pencarian */}
+                                        <div className="mb-2 relative">
+                                            <Search size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Cari kota / provinsi..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 pl-8 pr-3 py-1.5 text-xs text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                                autoFocus
+                                            />
+                                        </div>
+
+                                        {/* Daftar Pilihan */}
+                                        <div className="space-y-0.5 max-h-60 overflow-y-auto pr-1">
+                                            {filteredWilayah.length > 0 ? (
+                                                filteredWilayah.map((wilayah, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => {
+                                                            setSelectedWilayah(wilayah);
+                                                            setIsDropdownOpen(false);
+                                                        }}
+                                                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between cursor-pointer ${
+                                                            selectedWilayah === wilayah
+                                                                ? 'bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400 font-bold'
+                                                                : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
+                                                        }`}
+                                                    >
+                                                        <span className="truncate">{wilayah}</span>
+                                                        {selectedWilayah === wilayah && <MapPin size={12} className="shrink-0 text-green-600 dark:text-green-400" />}
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                <p className="py-3 text-center text-xs text-gray-400">Wilayah tidak ditemukan</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

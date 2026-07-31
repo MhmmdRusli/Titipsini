@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Package, Bell, User, LayoutGrid, LogOut, ChevronDown, ChevronLeft } from 'lucide-react';
+import { Package, Bell, User, LayoutGrid, ChevronLeft } from 'lucide-react';
 
 const navItems = [
     { label: 'Beranda', href: '/app/dashboard', icon: LayoutGrid },
@@ -10,69 +10,12 @@ const navItems = [
 ];
 
 export default function CustomerLayout({ children, title, backHref }) {
-    const { url, props } = usePage();
-    const user = props.auth?.user;
-    const [menuOpen, setMenuOpen] = useState(false);
+    const { url } = usePage();
 
     useEffect(() => {
         const isDark = typeof window !== 'undefined' && localStorage.getItem('titipsini_theme') === 'dark';
         document.documentElement.classList.toggle('dark', isDark);
     }, []);
-
-    // Menu akun (avatar + dropdown) dipakai di 2 kondisi header: saat tampil
-    // logo (halaman tanpa title, mis. Dashboard) maupun saat tampil title
-    // (halaman lain, mis. "Pesanan Saya"). Diekstrak supaya tidak dobel kode.
-    function AccountMenu() {
-        return (
-            <div className="relative">
-                <button
-                    type="button"
-                    onClick={() => setMenuOpen((v) => !v)}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
-                    {user?.avatar ? (
-                        <img
-                            src={user.avatar}
-                            alt={user.name}
-                            className="h-8 w-8 rounded-full object-cover"
-                        />
-                    ) : (
-                        <div className="h-8 w-8 rounded-full bg-brand-amber-50 text-brand-amber-700 flex items-center justify-center text-xs font-semibold">
-                            {(user?.name ?? 'P').charAt(0).toUpperCase()}
-                        </div>
-                    )}
-                    <ChevronDown
-                        size={14}
-                        className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`}
-                    />
-                </button>
-
-                {menuOpen && (
-                    <>
-                        <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                        <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
-                            <Link
-                                href="/app/profile"
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700"
-                            >
-                                <User size={15} />
-                                Profil Saya
-                            </Link>
-                            <Link
-                                href="/logout"
-                                method="post"
-                                as="button"
-                                className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-                            >
-                                <LogOut size={15} />
-                                Keluar
-                            </Link>
-                        </div>
-                    </>
-                )}
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">
@@ -97,25 +40,19 @@ export default function CustomerLayout({ children, title, backHref }) {
                             // title itu di header, GANTIKAN logo - konsisten dengan
                             // halaman lain, dan tidak perlu heading duplikat lagi
                             // di bawah header (lihat <main> di bawah).
-                            <div className="flex flex-1 items-center justify-between">
-                                <h1 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h1>
-                                <AccountMenu />
-                            </div>
+                            <h1 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h1>
                         ) : (
                             // Tanpa title (mis. Dashboard) tetap tampilkan logo seperti semula.
-                            <div className="flex flex-1 items-center justify-between">
-                                <Link href="/app/dashboard" className="flex items-center gap-1.5">
-                                    <img
-                                        src="/images/logo-titipsini.png"
-                                        alt="Logo"
-                                        className="h-6 w-auto object-contain"
-                                    />
-                                    <span className="text-base font-bold tracking-tight text-[#15803d] dark:text-[#4ade80]">
-                                        Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
-                                    </span>
-                                </Link>
-                                <AccountMenu />
-                            </div>
+                            <Link href="/app/dashboard" className="flex items-center gap-1.5">
+                                <img
+                                    src="/images/logo-titipsini.png"
+                                    alt="Logo"
+                                    className="h-6 w-auto object-contain"
+                                />
+                                <span className="text-base font-bold tracking-tight text-[#15803d] dark:text-[#4ade80]">
+                                    Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
+                                </span>
+                            </Link>
                         )}
                     </div>
                 </header>
