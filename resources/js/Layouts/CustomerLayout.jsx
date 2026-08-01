@@ -36,10 +36,6 @@ export default function CustomerLayout({ children, title, backHref }) {
                                 <h1 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h1>
                             </>
                         ) : title ? (
-                            // Halaman dengan title (mis. "Pesanan Saya") tampilkan
-                            // title itu di header, GANTIKAN logo - konsisten dengan
-                            // halaman lain, dan tidak perlu heading duplikat lagi
-                            // di bawah header (lihat <main> di bawah).
                             <h1 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h1>
                         ) : (
                             // Tanpa title (mis. Dashboard) tetap tampilkan logo seperti semula.
