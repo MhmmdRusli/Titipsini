@@ -64,39 +64,93 @@ class OrderController extends Controller
     }
 
     public function cancel(Request $request, Order $order): RedirectResponse
-{
-    abort_unless($order->customer_id === $request->user()->id, 403);
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
 
-    abort_unless(
-        $order->status === 'baru',
-        400,
-        'Pesanan ini sudah diproses dan tidak bisa dibatalkan lagi.'
-    );
+        abort_unless(
+            $order->status === 'baru',
+            400,
+            'Pesanan ini sudah diproses dan tidak bisa dibatalkan lagi.'
+        );
 
-    $validated = $request->validate([
-        'cancel_reason' => 'required|string|max:255',
-    ], [
-        'cancel_reason.required' => 'Alasan pembatalan wajib diisi.',
-    ]);
+        $validated = $request->validate([
+            'cancel_reason' => 'required|string|max:255',
+        ], [
+            'cancel_reason.required' => 'Alasan pembatalan wajib diisi.',
+        ]);
 
-    $order->update([
-        'status' => 'dibatalkan',
-        'cancel_reason' => $validated['cancel_reason'],
-    ]);
+        $order->update([
+            'status' => 'dibatalkan',
+            'cancel_reason' => $validated['cancel_reason'],
+        ]);
 
-    return back()->with('success', 'Pesanan berhasil dibatalkan.');
-}
+        return back()->with('success', 'Pesanan berhasil dibatalkan.');
+    }
 
+    /**
+     * Halaman sukses setelah pesanan dibuat. Karena sekarang tidak ada lagi
+     * halaman pilih metode bayar terpisah, halaman ini juga menampilkan
+     * opsi "Bayar dengan Saldo" (kalau belum lunas) - makanya butuh total
+     * pesanan & saldo customer.
+     */
     public function success(Request $request, Order $order): Response
-{
-    abort_unless($order->customer_id === $request->user()->id, 403);
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
 
-    return Inertia::render('Customer/Orders/Success', [
-        'orderId' => $order->id,
-        'sudahLunas' => $order->payment_verified_at !== null,
-        'paymentMethod' => $order->payment_method,
-    ]);
-}
+        return Inertia::render('Customer/Orders/Success', [
+            'orderId' => $order->id,
+            'sudahLunas' => $order->payment_verified_at !== null,
+            'paymentMethod' => $order->payment_method,
+            'total' => (float) $order->total_price,
+            'saldo' => (float) $request->user()->saldo,
+        ]);
+    }
+
+    /**
+     * POST /app/orders/{order}/bayar-saldo
+     * Dipanggil dari tombol "Bayar dengan Saldo Titipsini" - bisa dari halaman
+     * Success ATAU halaman BuktiPembayaran. Potong saldo & tandai order lunas
+     * kalau saldo cukup; kalau tidak, kembalikan error ke halaman asal (tanpa
+     * redirect) supaya errors.saldo bisa ditampilkan di sana.
+     */
+    public function bayarSaldo(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+
+        if ($order->payment_verified_at !== null) {
+            return redirect()->route('customer.orders.show', $order->id);
+        }
+
+        $customer = $request->user();
+        $total = (float) $order->total_price;
+
+        if ((float) $customer->saldo < $total) {
+            return back()->withErrors([
+                'saldo' => 'Saldo kamu tidak mencukupi untuk membayar pesanan ini. Silakan top up terlebih dahulu atau bayar via transfer.',
+            ]);
+        }
+
+        $customer->decrement('saldo', $total);
+
+        $order->update([
+            'payment_method' => 'saldo',
+            'payment_verified_at' => now(),
+            'status' => 'diproses',
+        ]);
+
+        if ($order->partner_id) {
+            Notifikasi::create([
+                'user_id' => $order->partner_id,
+                'order_id' => $order->id,
+                'type' => 'transaksi_masuk',
+                'judul' => 'Pesanan Baru Masuk',
+                'pesan' => 'Ada pesanan baru dengan kode '.$order->order_code.' menunggu diproses.',
+            ]);
+        }
+
+        return redirect()->route('customer.orders.show', $order->id)
+            ->with('success', 'Pembayaran dengan saldo berhasil! Pesananmu sedang diproses.');
+    }
 
     /**
      * Halaman instruksi / pemrosesan pembayaran oleh customer
@@ -120,6 +174,8 @@ class OrderController extends Controller
                 'created_at',
             ]),
             'qris_url' => $qrisUrl,
+            'saldo' => (float) $request->user()->saldo,
+            'sudahLunas' => $order->payment_verified_at !== null,
         ]);
     }
 
@@ -141,6 +197,8 @@ class OrderController extends Controller
                 'created_at',
             ]),
             'qris_url' => $qrisUrl,
+            'saldo' => (float) $request->user()->saldo,
+            'sudahLunas' => $order->payment_verified_at !== null,
         ]);
     }
 
@@ -160,10 +218,12 @@ class OrderController extends Controller
 
             $path = $request->file('payment_receipt')->store('payment_proofs', 'public');
 
-            // 3. Update status pesanan & simpan path foto bukti ke database
+            // 3. Update status pesanan, path foto bukti, & metode bayar (kalau
+            // sebelumnya masih 'pending' karena order dibuat tanpa pilih metode).
             $order->update([
                 'payment_receipt' => $path,
                 'status'          => 'diproses',
+                'payment_method'  => $order->payment_method === 'pending' ? 'transfer' : $order->payment_method,
             ]);
 
             // 4. Beri tahu mitra bahwa bukti pembayaran sudah diunggah & menunggu verifikasi
@@ -191,6 +251,4 @@ class OrderController extends Controller
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi.');
     }
-
-    
 }

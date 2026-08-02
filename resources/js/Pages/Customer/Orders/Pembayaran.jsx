@@ -1,14 +1,23 @@
 import { useState } from 'react';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, router, usePage } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { ArrowLeft, Upload, CheckCircle2, QrCode } from 'lucide-react';
+import { ArrowLeft, Upload, CheckCircle2, QrCode, WalletMinimal, AlertCircle } from 'lucide-react';
 
-export default function BuktiPembayaran({ order, qris_url }) {
+function formatRupiah(value) {
+    return 'Rp ' + Number(value || 0).toLocaleString('id-ID');
+}
+
+export default function BuktiPembayaran({ order, qris_url, saldo = 0, sudahLunas = false }) {
     const { data, setData, post, processing, errors } = useForm({
         payment_receipt: null,
     });
+    const { errors: pageErrors } = usePage().props;
 
     const [previewUrl, setPreviewUrl] = useState(null);
+    const [processingSaldo, setProcessingSaldo] = useState(false);
+
+    const total = Number(order?.total_price || 0);
+    const saldoCukup = saldo >= total;
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -28,6 +37,15 @@ export default function BuktiPembayaran({ order, qris_url }) {
         });
     };
 
+    function bayarDenganSaldo() {
+        setProcessingSaldo(true);
+        router.post(
+            `/app/orders/${order.id}/bayar-saldo`,
+            {},
+            { onFinish: () => setProcessingSaldo(false), preserveScroll: true }
+        );
+    }
+
     return (
         <CustomerLayout>
             <Head title="Upload Bukti Pembayaran" />
@@ -40,24 +58,61 @@ export default function BuktiPembayaran({ order, qris_url }) {
                     >
                         <ArrowLeft size={20} />
                     </Link>
-                    <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">Upload Bukti Transfer</h1>
+                    <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">Pembayaran Pesanan</h1>
                 </div>
 
-                {/* 🟢 TAMPILAN QRIS PEMBAYARAN DARI ADMIN */}
-                {qris_url && (
-                    <div className="mb-5 rounded-2xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-800 p-5 shadow-sm text-center">
-                        <div className="flex items-center justify-center gap-2 mb-3 text-[#15803d] dark:text-[#4ade80] font-semibold text-sm">
-                            <QrCode size={18} />
-                            <span>Scan QRIS untuk Pembayaran</span>
+                {!sudahLunas && (
+                    <div className="mb-5 rounded-2xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-800 p-5 shadow-sm">
+                        <div className="flex items-center gap-2 mb-3 text-[#15803d] dark:text-[#4ade80] font-semibold text-sm">
+                            <WalletMinimal size={18} />
+                            <span>Bayar dengan Saldo Titipsini</span>
                         </div>
-                        <img 
-                            src={qris_url} 
-                            alt="QRIS Pembayaran" 
-                            className="mx-auto w-52 h-52 rounded-xl border border-gray-200 dark:border-gray-700 p-2 bg-white object-contain shadow-xs"
-                        />
-                        <p className="mt-2 text-[11px] text-gray-400 dark:text-gray-500">
-                            Silakan transfer sesuai total tagihan sebelum mengunggah bukti.
+
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500 dark:text-gray-400">Total Tagihan</span>
+                            <span className="font-bold text-gray-900 dark:text-gray-100">{formatRupiah(total)}</span>
+                        </div>
+                        <p className={`mt-1 text-xs ${saldoCukup ? 'text-gray-400' : 'text-red-500'}`}>
+                            {saldoCukup
+                                ? `Saldo kamu: ${formatRupiah(saldo)}`
+                                : `Saldo tidak cukup (${formatRupiah(saldo)})`}
                         </p>
+
+                        {pageErrors?.saldo && (
+                            <div className="mt-2 flex items-start gap-1.5 text-xs text-red-600 dark:text-red-400">
+                                <AlertCircle size={13} className="mt-0.5 shrink-0" />
+                                <span>{pageErrors.saldo}</span>
+                            </div>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={bayarDenganSaldo}
+                            disabled={!saldoCukup || processingSaldo}
+                            className="mt-3 w-full rounded-xl bg-green-600 py-2.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-40"
+                        >
+                            {processingSaldo ? 'Memproses...' : 'Bayar dengan Saldo'}
+                        </button>
+
+                        <div className="my-4 flex items-center gap-3 text-[11px] text-gray-400">
+                            <div className="h-px flex-1 bg-gray-100 dark:bg-gray-700" />
+                            atau transfer manual
+                            <div className="h-px flex-1 bg-gray-100 dark:bg-gray-700" />
+                        </div>
+
+                        {/* 🟢 TAMPILAN QRIS PEMBAYARAN DARI ADMIN */}
+                        {qris_url && (
+                            <div className="text-center">
+                                <img 
+                                    src={qris_url} 
+                                    alt="QRIS Pembayaran" 
+                                    className="mx-auto w-52 h-52 rounded-xl border border-gray-200 dark:border-gray-700 p-2 bg-white object-contain shadow-xs"
+                                />
+                                <p className="mt-2 text-[11px] text-gray-400 dark:text-gray-500">
+                                    Silakan transfer sesuai total tagihan sebelum mengunggah bukti.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -70,7 +125,7 @@ export default function BuktiPembayaran({ order, qris_url }) {
                         <div className="flex justify-between">
                             <span>Total Tagihan:</span>
                             <span className="font-bold text-[#15803d] dark:text-[#4ade80]">
-                                Rp {Number(order?.total_price || 0).toLocaleString('id-ID')}
+                                {formatRupiah(total)}
                             </span>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { ShieldCheck, Building2, Calendar, AlertCircle, Loader2 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
@@ -14,11 +14,27 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID').format(value);
 }
 
+// Sama persis dengan hitungJumlahHari() di ServiceController - dipakai hanya
+// untuk preview di frontend, harga final tetap dihitung ulang di server.
+function hitungJumlahHari(tanggalMasuk, tanggalKeluar) {
+    if (!tanggalMasuk || !tanggalKeluar) return null;
+    const d1 = new Date(tanggalMasuk);
+    const d2 = new Date(tanggalKeluar);
+    const diffDays = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+    return Math.max(1, diffDays);
+}
+
 export default function Show({ service }) {
     const [tanggalMasuk, setTanggalMasuk] = useState('');
     const [tanggalKeluar, setTanggalKeluar] = useState('');
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState('');
+
+    const jumlahHari = useMemo(
+        () => hitungJumlahHari(tanggalMasuk, tanggalKeluar),
+        [tanggalMasuk, tanggalKeluar]
+    );
+    const estimasiTotal = jumlahHari ? service.harga * jumlahHari : null;
 
     function handleSubmit(e) {
         e.preventDefault();
@@ -48,7 +64,7 @@ export default function Show({ service }) {
 
                     <p className="text-2xl font-extrabold leading-none">
                         {formatRupiah(service.harga)}
-                        <span className="ml-1 text-sm font-semibold align-middle">(1 item)</span>
+                        <span className="ml-1 text-sm font-semibold align-middle">/ hari</span>
                     </p>
                     <p className="mt-1 text-sm font-semibold text-white/90">Layanan Terbaik Kami</p>
 
@@ -102,6 +118,17 @@ export default function Show({ service }) {
                             />
                         </div>
                     </div>
+
+                    {estimasiTotal !== null && (
+                        <div className="flex items-center justify-between rounded-xl bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm">
+                            <span className="text-gray-500 dark:text-gray-400">
+                                Estimasi ({jumlahHari} hari)
+                            </span>
+                            <span className="font-bold text-gray-900 dark:text-gray-100">
+                                Rp {formatRupiah(estimasiTotal)}
+                            </span>
+                        </div>
+                    )}
 
                     {error && (
                         <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
