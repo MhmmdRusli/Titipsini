@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mitra;
 use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Order;
+use App\Services\OrderFaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -216,6 +217,18 @@ class OrderController extends Controller
         $order->update(['fase' => $next]);
 
         $label = self::FASE_LABELS[$order->service_type][$next] ?? $next;
+
+        // Kalau fase baru saja mencapai 'akhir' DAN pembayaran sudah
+        // terverifikasi, otomatis selesaikan pesanan (status -> 'selesai')
+        // supaya Admin tidak perlu klik "Selesaikan Pesanan" manual lagi.
+        // Kalau pembayaran BELUM terverifikasi, fase tetap ditandai 'akhir'
+        // tapi status menunggu Admin/Mitra verifikasi pembayaran dulu
+        // (lihat badge "Siap Diselesaikan" di halaman Admin).
+        if ($next === 'akhir' && $order->payment_verified_at) {
+            OrderFaseService::completeOrder($order);
+
+            return back()->with('success', 'Status pesanan diperbarui menjadi "'.$label.'" dan pesanan otomatis diselesaikan.');
+        }
 
         Notifikasi::create([
             'user_id' => $order->customer_id,

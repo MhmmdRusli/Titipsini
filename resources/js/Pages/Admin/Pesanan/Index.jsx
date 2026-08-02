@@ -48,6 +48,17 @@ function isReadyToComplete(order) {
     return !!order.payment_verified_at && order.fase === 'akhir' && order.status === 'diproses';
 }
 
+// Label status yang ditampilkan ke Admin. Selagi pesanan masih 'diproses' dan
+// ada fase_label (mis. "Sedang Disewa", "Dititipkan"), tampilkan itu supaya
+// Admin lihat status operasional yang lebih jelas daripada tulisan "diproses"
+// yang generik. Untuk status lain (baru/selesai/dibatalkan) tetap apa adanya.
+function displayStatusLabel(order) {
+    if (order.status === 'diproses' && order.fase_label) {
+        return order.fase_label;
+    }
+    return order.status;
+}
+
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -336,7 +347,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                     STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-400'
                                                 }`}
                                             >
-                                                {order.status}
+                                                {displayStatusLabel(order)}
                                             </span>
                                         </td>
                                         <td className="select-none px-4 py-3.5 text-right">
@@ -637,7 +648,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
                                     STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-400'
                                 }`}
                             >
-                                {order.status}
+                                {displayStatusLabel(order)}
                             </span>
                             {readyToComplete && (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">

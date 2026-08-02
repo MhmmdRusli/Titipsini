@@ -7,6 +7,7 @@ use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\PaymentSetting;
 use App\Models\PendapatanPlatform;
+use App\Services\OrderFaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -43,6 +44,10 @@ class OrderController extends Controller
                     // untuk menampilkan badge "Siap Diselesaikan" saat fase sudah
                     // akhir tapi status masih 'diproses'.
                     'fase'            => $order->fase,
+                    // Label fase yang enak dibaca (mis. "Sedang Disewa") - dipakai
+                    // frontend untuk menggantikan tulisan "diproses" yang generik
+                    // selagi pesanan masih berjalan.
+                    'fase_label'      => OrderFaseService::label($order->service_type, $order->fase),
                     'cancel_reason'   => $order->cancel_reason,
                     'total_price'     => $order->total_price,
                     'payment_method'  => $order->payment_method,
