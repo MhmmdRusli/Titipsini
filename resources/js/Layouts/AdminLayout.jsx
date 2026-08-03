@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import {
     MapPin, LayoutDashboard, CircleUserRound, Users, Handshake,
     Package, BarChart3, Settings, LogOut, ChevronDown, Wallet, Newspaper,
     HelpCircle, Clock, Calendar, Sun, Cloud, CloudRain, CloudFog, CloudLightning,
-    CloudSnow, Moon,
+    CloudSnow, Moon, AlertCircle, X
 } from 'lucide-react';
 
 const navItems = [
@@ -100,6 +100,10 @@ export default function AdminLayout({ children, title }) {
     const { jam, tanggal } = useJamTanggal();
     const cuaca = useCuaca();
 
+    // State Logout Modal
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
     // State & Preference Dark Mode
     const [isDarkMode, setIsDarkMode] = useState(() => {
         return localStorage.getItem('theme') === 'dark' ||
@@ -124,6 +128,17 @@ export default function AdminLayout({ children, title }) {
         );
         return active?.label ?? null;
     });
+
+    // Handler Logout Eksekusi
+    const handleLogout = () => {
+        setIsLoggingOut(true);
+        router.post('/logout', {}, {
+            onFinish: () => {
+                setIsLoggingOut(false);
+                setShowLogoutModal(false);
+            },
+        });
+    };
 
     return (
         <div className="flex h-screen bg-[#f8fafc] dark:bg-[#0b0f19] text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-300">
@@ -244,17 +259,16 @@ export default function AdminLayout({ children, title }) {
                     })}
                 </nav>
 
-                {/* Tombol Keluar */}
+                {/* Tombol Keluar (Membuka Modal) */}
                 <div className="border-t border-white/10 p-3 shrink-0">
-                    <Link
-                        href="/logout"
-                        method="post"
-                        as="button"
+                    <button
+                        type="button"
+                        onClick={() => setShowLogoutModal(true)}
                         className="flex w-full items-center justify-center gap-2 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-red-400 border border-red-500/40 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-sm"
                     >
                         <LogOut size={16} />
                         Keluar
-                    </Link>
+                    </button>
                 </div>
             </aside>
 
@@ -316,6 +330,54 @@ export default function AdminLayout({ children, title }) {
                 {/* Konten Utama */}
                 <main className="flex-1 p-6 relative z-10 transition-colors">{children}</main>
             </div>
+
+            {/* Modal Pop-up Konfirmasi Logout */}
+            {showLogoutModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                    <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-2xl border border-gray-100 dark:border-gray-700 animate-in fade-in duration-150">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-xl bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
+                                    <AlertCircle size={22} />
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                                    Konfirmasi Keluar
+                                </h3>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowLogoutModal(false)}
+                                className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                            Apakah kamu yakin ingin keluar dari halaman admin dashboard?
+                        </p>
+
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                disabled={isLoggingOut}
+                                onClick={() => setShowLogoutModal(false)}
+                                className="rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                disabled={isLoggingOut}
+                                onClick={handleLogout}
+                                className="rounded-xl bg-red-600 hover:bg-red-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition disabled:opacity-60"
+                            >
+                                {isLoggingOut ? 'Memproses...' : 'Ya, Keluar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
