@@ -15,6 +15,17 @@ function formatTanggal(value) {
     });
 }
 
+// Sama persis dengan hitungJumlahHari() di ServiceController (server tetap
+// yang menentukan harga final) - ini hanya untuk preview di frontend biar
+// customer lihat total yang konsisten sebelum submit.
+function hitungJumlahHari(checkIn, checkOut) {
+    if (!checkIn || !checkOut) return 1;
+    const d1 = new Date(checkIn);
+    const d2 = new Date(checkOut);
+    const diffDays = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+    return Math.max(1, diffDays);
+}
+
 export default function Pemesanan({ customer, items: initialItems, detail }) {
     const [items, setItems] = useState(initialItems);
     const [processing, setProcessing] = useState(false);
@@ -30,16 +41,19 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
         );
     }
 
-    const subtotalPaket = items.reduce((sum, item) => sum + item.harga * item.qty, 0);
+    const jumlahHari = detail.jumlahHari ?? hitungJumlahHari(detail.checkIn, detail.checkOut);
+    const pickupFee = detail.pickupFee ?? 0;
+    const subtotalPerHari = items.reduce((sum, item) => sum + item.harga * item.qty, 0);
+    const subtotalPaket = subtotalPerHari * jumlahHari + pickupFee;
 
-   function handleKonfirmasi() {
-    setProcessing(true);
-    router.post(
-        '/app/services/barang/simpan-item',
-        { items },
-        { onFinish: () => setProcessing(false) }
-    );
-}
+    function handleKonfirmasi() {
+        setProcessing(true);
+        router.post(
+            '/app/services/barang/simpan-item',
+            { items },
+            { onFinish: () => setProcessing(false) }
+        );
+    }
 
     return (
         <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">
@@ -88,7 +102,7 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
 
                         <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-2 pb-2 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                             <span>Product</span>
-                            <span>Price</span>
+                            <span>Price/hari</span>
                             <span className="text-center">Qty</span>
                             <span className="text-right">Subtotal</span>
                         </div>
@@ -140,6 +154,10 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
                                 <span className="font-medium text-gray-900 dark:text-gray-100">{formatTanggal(detail.checkOut)}</span>
                             </div>
                             <div className="flex items-center justify-between">
+                                <span className="text-gray-500 dark:text-gray-400">Durasi</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100">{jumlahHari} hari</span>
+                            </div>
+                            <div className="flex items-center justify-between">
                                 <span className="text-gray-500 dark:text-gray-400">Pick Up</span>
                                 <span className="font-medium text-gray-900 dark:text-gray-100">{detail.pickup ? 'Ya' : 'Tidak'}</span>
                             </div>
@@ -149,6 +167,20 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
 
                         <h3 className="mb-3 text-sm font-bold text-gray-900 dark:text-gray-100">Rincian Pembayaran</h3>
                         <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500 dark:text-gray-400">Subtotal / hari</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{formatRupiah(subtotalPerHari)}</span>
+                        </div>
+                        <div className="mt-1.5 flex items-center justify-between text-sm">
+                            <span className="text-gray-500 dark:text-gray-400">Durasi</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">x {jumlahHari} hari</span>
+                        </div>
+                        {pickupFee > 0 && (
+                            <div className="mt-1.5 flex items-center justify-between text-sm">
+                                <span className="text-gray-500 dark:text-gray-400">Biaya Pickup</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100">{formatRupiah(pickupFee)}</span>
+                            </div>
+                        )}
+                        <div className="mt-1.5 flex items-center justify-between text-sm">
                             <span className="text-gray-500 dark:text-gray-400">Subtotal Paket</span>
                             <span className="font-bold text-gray-900 dark:text-gray-100">{formatRupiah(subtotalPaket)}</span>
                         </div>
@@ -173,7 +205,7 @@ export default function Pemesanan({ customer, items: initialItems, detail }) {
                             disabled={processing || items.length === 0}
                             className="mt-2 w-full rounded-full bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-50"
                         >
-                            {processing ? 'Memproses...' : 'Lanjut ke Pembayaran'}
+                            {processing ? 'Memproses...' : 'Buat Pesanan'}
                         </button>
                     </div>
                 </div>

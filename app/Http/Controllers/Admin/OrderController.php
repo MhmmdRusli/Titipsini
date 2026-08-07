@@ -7,6 +7,7 @@ use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\PaymentSetting;
 use App\Models\PendapatanPlatform;
+use App\Services\OrderFaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -43,6 +44,10 @@ class OrderController extends Controller
                     // untuk menampilkan badge "Siap Diselesaikan" saat fase sudah
                     // akhir tapi status masih 'diproses'.
                     'fase'            => $order->fase,
+                    // Label fase yang enak dibaca (mis. "Sedang Disewa") - dipakai
+                    // frontend untuk menggantikan tulisan "diproses" yang generik
+                    // selagi pesanan masih berjalan.
+                    'fase_label'      => OrderFaseService::label($order->service_type, $order->fase),
                     'cancel_reason'   => $order->cancel_reason,
                     'total_price'     => $order->total_price,
                     'payment_method'  => $order->payment_method,
@@ -51,6 +56,12 @@ class OrderController extends Controller
                     // + tombol konfirmasi, khusus order dengan payment_method 'cod'.
                     'payment_verified_at' => $order->payment_verified_at?->format('d M Y H:i'),
                     'created_at'      => $order->created_at ? $order->created_at->format('d M Y H:i') : null,
+                    // Rentang waktu sewa/titip sesuai yang diisi customer saat booking
+                    // (bukan waktu aktual dititip/diambil) - dipakai untuk kolom
+                    // "Periode" di tabel Admin.
+                    'start_date'      => $order->start_date ? \Illuminate\Support\Carbon::parse($order->start_date)->format('d M Y') : null,
+                    'end_date'        => $order->end_date ? \Illuminate\Support\Carbon::parse($order->end_date)->format('d M Y') : null,
+                    'duration_label'  => $this->hitungDurasi($order),
                     'customer'        => $order->customer,
                     'partner'         => $order->partner,
                 ];
@@ -67,6 +78,24 @@ class OrderController extends Controller
             ],
             'cities'  => Order::query()->whereNotNull('city')->distinct()->orderBy('city')->pluck('city'),
         ]);
+    }
+
+    /**
+     * Hitung durasi sewa/titip dalam hari, berdasarkan start_date & end_date
+     * yang diisi customer saat booking. Sama persis dengan yang dipakai di
+     * Mitra\OrderController, supaya angka "X hari" konsisten di kedua panel.
+     */
+    private function hitungDurasi(Order $order): ?string
+    {
+        if (! $order->start_date || ! $order->end_date) {
+            return null;
+        }
+
+        $mulai = \Illuminate\Support\Carbon::parse($order->start_date);
+        $selesai = \Illuminate\Support\Carbon::parse($order->end_date);
+        $hari = $mulai->diffInDays($selesai) + 1;
+
+        return $hari.' hari';
     }
 
     /**

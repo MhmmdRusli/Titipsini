@@ -49,8 +49,6 @@ class TopUpController extends Controller
             'total' => $validated['nominal'] + $biayaAdmin,
             'metode_pembayaran' => $validated['metode_pembayaran'],
             'channel' => $validated['channel'],
-            // Simulasi nomor VA - kalau nanti disambungkan ke payment
-            // gateway asli, ini diganti dengan VA number dari respons API-nya.
             'va_number' => $validated['metode_pembayaran'] === 'transfer_bank'
                 ? (string) random_int(1000000000000, 9999999999999)
                 : null,
@@ -63,23 +61,72 @@ class TopUpController extends Controller
     /**
      * GET /app/saldo/topup/{topup}/instruksi - Step 2/3: instruksi pembayaran
      */
-    public function instruksi(Request $request, Topup $topup): Response
+    public function instruksi(Request $request, Topup $topup): Response|RedirectResponse
     {
         $this->authorizeOwnership($request, $topup);
+
+        // Jika user sudah upload bukti transfer, alihkan ke halaman menunggu
+        if ($topup->status === 'menunggu_verifikasi') {
+            return redirect()->route('customer.topup.menunggu', $topup);
+        }
+
+        // Jika sudah berhasil, alihkan ke halaman sukses
+        if (in_array($topup->status, ['berhasil', 'sukses', 'success'])) {
+            return redirect()->route('customer.topup.sukses', $topup);
+        }
 
         return Inertia::render('Customer/Topup/Instruksi', [
             'topup' => $topup,
         ]);
     }
 
+    public function konfirmasi(Request $request, Topup $topup): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $topup);
+
+        abort_unless($topup->status === 'pending', 422, 'Transaksi ini sudah diproses sebelumnya.');
+
+        $validated = $request->validate([
+            'bukti_transfer' => ['required', 'image', 'max:2048'],
+        ], [
+            'bukti_transfer.required' => 'Silakan unggah bukti pembayaran terlebih dahulu.',
+            'bukti_transfer.image' => 'File harus berupa gambar (screenshot bukti transfer).',
+        ]);
+
+        $path = $request->file('bukti_transfer')->store('bukti-topup', 'public');
+
+        $topup->update([
+            'status' => 'menunggu_verifikasi',
+            'bukti_transfer' => '/storage/' . $path,
+            'paid_at' => now(),
+        ]);
+
+        return redirect()->route('customer.topup.menunggu', $topup);
+    }
+
     /**
-     * POST /app/saldo/topup/{topup}/konfirmasi - simulasi "Selesai" ditekan
-     *
-     * Catatan: ini SIMULASI. Kalau nanti pakai payment gateway asli (Midtrans/
-     * Xendit dll), method ini diganti jadi webhook callback yang dipanggil
-     * otomatis oleh gateway, bukan ditekan manual oleh user.
+     * GET /app/saldo/topup/{topup}/menunggu - Halaman Menunggu Verifikasi
      */
-   
+    public function menunggu(Request $request, Topup $topup): Response|RedirectResponse
+    {
+        $this->authorizeOwnership($request, $topup);
+
+        // FIX: Jika Admin sudah menyetujui transaksi (status berubah jadi berhasil/sukses)
+        // Maka OTOMATIS lempar user ke halaman sukses!
+        if (in_array($topup->status, ['berhasil', 'sukses', 'success'])) {
+            return redirect()->route('customer.topup.sukses', $topup);
+        }
+
+        // Jika transaksi ditolak/gagal oleh admin
+        if (in_array($topup->status, ['gagal', 'failed', 'dibatalkan'])) {
+            return redirect()->route('customer.topup.riwayat')
+                ->with('error', 'Top Up kamu ditolak atau dibatalkan.');
+        }
+
+        return Inertia::render('Customer/Topup/Menunggu', [
+            'topup' => $topup,
+        ]);
+    }
 
     /**
      * GET /app/saldo/topup/{topup}/sukses - Step 4: halaman sukses
@@ -94,53 +141,20 @@ class TopUpController extends Controller
         ]);
     }
 
+    public function riwayat(Request $request): Response
+    {
+        $topups = $request->user()->topups()
+            ->latest()
+            ->paginate(10);
+
+        return Inertia::render('Customer/Topup/Riwayat', [
+            'topups' => $topups,
+            'saldo' => $request->user()->saldo,
+        ]);
+    }
+
     protected function authorizeOwnership(Request $request, Topup $topup): void
     {
         abort_unless($topup->user_id === $request->user()->id, 403);
     }
-
-  
-public function konfirmasi(Request $request, Topup $topup): RedirectResponse
-{
-    $this->authorizeOwnership($request, $topup);
-
-    abort_unless($topup->status === 'pending', 422, 'Transaksi ini sudah diproses sebelumnya.');
-
-    $validated = $request->validate([
-        'bukti_transfer' => ['required', 'image', 'max:2048'],
-    ], [
-        'bukti_transfer.required' => 'Silakan unggah bukti pembayaran terlebih dahulu.',
-        'bukti_transfer.image' => 'File harus berupa gambar (screenshot bukti transfer).',
-    ]);
-
-    $path = $request->file('bukti_transfer')->store('bukti-topup', 'public');
-
-    $topup->update([
-        'status' => 'menunggu_verifikasi',
-        'bukti_transfer' => '/storage/' . $path,
-        'paid_at' => now(), // waktu user klaim sudah bayar, bukan waktu terverifikasi
-    ]);
-
-    return redirect()->route('customer.topup.menunggu', $topup);
-}
-
-public function menunggu(Request $request, Topup $topup): Response
-{
-    $this->authorizeOwnership($request, $topup);
-
-    return Inertia::render('Customer/Topup/Menunggu', [
-        'topup' => $topup,
-    ]);
-}
-public function riwayat(Request $request): Response
-{
-    $topups = $request->user()->topups()
-        ->latest()
-        ->paginate(10);
-
-    return Inertia::render('Customer/Topup/Riwayat', [
-        'topups' => $topups,
-        'saldo' => $request->user()->saldo,
-    ]);
-}
 }

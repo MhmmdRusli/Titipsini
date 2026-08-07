@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\Service;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -14,8 +15,29 @@ use Inertia\Response;
 class ServiceController extends Controller
 {
     /**
+     * Biaya tambahan flat kalau customer pilih opsi pickup (barang dijemput,
+     * bukan diantar sendiri). Berlaku sekali per pesanan, bukan per hari
+     * atau per item. Ubah nilai ini kalau ternyata beda kebijakannya.
+     */
+    protected const BIAYA_PICKUP = 20000;
+
+    /**
+     * Hitung jumlah hari penitipan dari tanggal masuk ke tanggal keluar.
+     * Minimal 1 hari supaya checkin == checkout tetap dihargai (bukan 0).
+     * Dipakai di SEMUA titik penghitungan harga (barang & layanan) supaya
+     * konsisten - jangan hitung durasi manual di tempat lain.
+     */
+    protected function hitungJumlahHari(string $tanggalMasuk, string $tanggalKeluar): int
+    {
+        $masuk = Carbon::parse($tanggalMasuk)->startOfDay();
+        $keluar = Carbon::parse($tanggalKeluar)->startOfDay();
+
+        return max(1, $masuk->diffInDays($keluar));
+    }
+
+    /**
      * Kirim notifikasi ke mitra bahwa ada pesanan baru masuk.
-     * Dipanggil setelah Order::create() di 3 titik pemesanan.
+     * Dipanggil setelah Order::create() di titik-titik pemesanan.
      */
     protected function notifikasiPesananBaru(Order $order): void
     {
@@ -58,24 +80,24 @@ class ServiceController extends Controller
         $search = $request->string('search')->toString();
 
         $services = Service::query()
-    ->where('is_active', true)
-    ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
-    ->when($jenis && $kategori === 'kendaraan', fn ($query) => $query->where('jenis_kendaraan', $jenis))
-    ->when($jenis && $kategori === 'bangunan', fn ($query) => $query->where('jenis_bangunan', $jenis))
-    ->when($search, function ($query) use ($search) {
-        $query->where(function ($q) use ($search) {
-            $q->where('kota', 'like', "%{$search}%")
-                ->orWhere('kecamatan', 'like', "%{$search}%");
-        });
-    })
-    ->with('vendor:id,name')
-    ->orderBy('kota')
-    ->paginate(10)
-    ->withQueryString()
-    ->through(function ($service) {
-        $service->foto = $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null;
-        return $service;
-    });
+            ->where('is_active', true)
+            ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
+            ->when($jenis && $kategori === 'kendaraan', fn ($query) => $query->where('jenis_kendaraan', $jenis))
+            ->when($jenis && $kategori === 'bangunan', fn ($query) => $query->where('jenis_bangunan', $jenis))
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('kota', 'like', "%{$search}%")
+                        ->orWhere('kecamatan', 'like', "%{$search}%");
+                });
+            })
+            ->with('vendor:id,name')
+            ->orderBy('kota')
+            ->paginate(10)
+            ->withQueryString()
+            ->through(function ($service) {
+                $service->foto = $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null;
+                return $service;
+            });
 
         return Inertia::render('Customer/Services/Index', [
             'services' => $services,
@@ -88,20 +110,20 @@ class ServiceController extends Controller
     }
 
     public function pilihPaket(Request $request)
-{
-    return Inertia::render('Customer/Services/PilihPaket', [
-        'hargaMulai' => 100000,
-        'serviceId' => $request->query('service_id'),
-    ]);
-}
+    {
+        return Inertia::render('Customer/Services/PilihPaket', [
+            'hargaMulai' => 100000,
+            'serviceId' => $request->query('service_id'),
+        ]);
+    }
 
     public function formBarang(Request $request)
-{
-    return Inertia::render('Customer/Services/Barang/Form', [
-        'hargaMulai' => 100000,
-        'serviceId' => $request->query('service_id'),
-    ]);
-}
+    {
+        return Inertia::render('Customer/Services/Barang/Form', [
+            'hargaMulai' => 100000,
+            'serviceId' => $request->query('service_id'),
+        ]);
+    }
 
     public function simpanBarang(Request $request)
     {
@@ -131,6 +153,7 @@ class ServiceController extends Controller
         // (customer belum sempat memilih vendor tertentu).
         $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
         $hargaPerItem = $service ? (float) $service->harga : 100000;
+        $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
 
         $items = collect(explode(',', $data['namaBarang']))
             ->map(fn ($nama) => trim($nama))
@@ -139,6 +162,8 @@ class ServiceController extends Controller
             ->values();
 
         $customer = auth()->user();
+        $isPickup = (bool) $data['pickup'];
+        $pickupFee = $isPickup ? self::BIAYA_PICKUP : 0;
 
         return Inertia::render('Customer/Services/Barang/Pemesanan', [
             'customer' => [
@@ -150,17 +175,19 @@ class ServiceController extends Controller
             'detail' => [
                 'checkIn' => $data['tanggalMasuk'],
                 'checkOut' => $data['tanggalKeluar'],
-                'pickup' => (bool) $data['pickup'],
+                'pickup' => $isPickup,
+                'jumlahHari' => $jumlahHari,
+                'pickupFee' => $pickupFee,
             ],
         ]);
     }
 
     /**
      * POST /app/services/barang/simpan-item
-     * Dipanggil dari tombol "Lanjut ke Pembayaran" di halaman Pemesanan.
-     * Simpan item + qty final (yang mungkin sudah diubah customer) ke session,
-     * lalu redirect ke halaman pilih metode pembayaran. Harga TETAP dihitung
-     * ulang dari data service di server, bukan dari request, saat konfirmasi.
+     * Dipanggil dari tombol "Buat Pesanan" di halaman Pemesanan.
+     * LANGSUNG membuat Order (tanpa halaman pilih metode bayar terpisah).
+     * payment_method diisi 'pending' dulu - metode bayar aktual (termasuk
+     * saldo) baru ditentukan di halaman Success/Pembayaran setelah ini.
      */
     public function simpanItemsBarang(Request $request)
     {
@@ -176,76 +203,38 @@ class ServiceController extends Controller
             'items.*.qty' => ['required', 'integer', 'min:1'],
         ]);
 
-        session(['pesanan_barang_items' => $validated['items']]);
-
-        return redirect()->route('customer.services.barang.metodePembayaran');
-    }
-
-    /**
-     * 🟢 PROSES PEMESANAN BARANG (Langsung Buat Order & Ke Halaman Sukses)
-     */
-    public function konfirmasiPesanan(Request $request)
-    {
-        $data = session('pesanan_barang');
-
-        if (!$data) {
-            return redirect()->route('customer.services.barang.pilihPaket');
-        }
-
-        $validated = $request->validate([
-            'payment_method' => ['required', 'string'],
-        ]);
-
         $customer = auth()->user();
         $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
         $hargaPerItem = $service ? (float) $service->harga : 100000;
+        $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
 
-        // Item+qty diambil dari session (disimpan di step Pemesanan lewat
-        // simpanItemsBarang()), BUKAN dari request halaman metode pembayaran -
-        // karena halaman itu memang tidak pernah mengirim items sama sekali.
-        $items = session('pesanan_barang_items');
-
-        if (!$items) {
-            $items = collect(explode(',', $data['namaBarang']))
-                ->map(fn ($nama) => trim($nama))
-                ->filter()
-                ->map(fn ($nama) => ['nama' => $nama, 'qty' => 1])
-                ->values()
-                ->all();
-        }
-
-        $items = collect($items);
+        $items = collect($validated['items']);
         $totalQty = $items->sum('qty');
-        $total = $totalQty * $hargaPerItem;
+        $isPickup = (bool) ($data['pickup'] ?? false);
+        $pickupFee = $isPickup ? self::BIAYA_PICKUP : 0;
+
+        // Harga = (qty x harga per item x jumlah hari penitipan) + biaya pickup (kalau ada).
+        $subtotal = $totalQty * $hargaPerItem * $jumlahHari;
+        $total = $subtotal + $pickupFee;
         $itemNames = $items->map(fn ($item) => $item['nama'].' x'.$item['qty'])->implode(', ');
 
-        $paymentMethod = $validated['payment_method'];
-        $isSaldo = $paymentMethod === 'saldo';
-
-        // Kalau bayar pakai saldo, potong dulu SEBELUM order dibuat. Kalau saldo
-        // tidak cukup, potongSaldo() akan melempar ValidationException dan order
-        // tidak jadi dibuat sama sekali.
-        if ($isSaldo) {
-            $this->potongSaldo($customer, $total);
-        }
-
-$order = Order::create([
-    'order_code' => 'TS-'.strtoupper(uniqid()),
-    'customer_id' => $customer->id,
-    'partner_id' => $service?->user_id,
-    'service_type' => 'barang',
-    'item_name' => $itemNames,
-    'start_date' => $data['tanggalMasuk'],
-    'end_date' => $data['tanggalKeluar'],
-    'is_pickup' => (bool) ($data['pickup'] ?? false),
-    'city' => $service->kota ?? $customer->city ?? '-',
-    'status' => $isSaldo ? 'diproses' : 'baru',
-    'subtotal' => $total,
-    'discount' => 0,
-    'pickup_fee' => 0,
-    'total_price' => $total,
-    'payment_method' => $paymentMethod,
-    'payment_verified_at' => $isSaldo ? now() : null,
+        $order = Order::create([
+            'order_code' => 'TS-'.strtoupper(uniqid()),
+            'customer_id' => $customer->id,
+            'partner_id' => $service?->user_id,
+            'service_type' => 'barang',
+            'item_name' => $itemNames,
+            'start_date' => $data['tanggalMasuk'],
+            'end_date' => $data['tanggalKeluar'],
+            'is_pickup' => $isPickup,
+            'city' => $service->kota ?? $customer->city ?? '-',
+            'status' => 'baru',
+            'subtotal' => $subtotal,
+            'discount' => 0,
+            'pickup_fee' => $pickupFee,
+            'total_price' => $total,
+            'payment_method' => 'pending',
+            'payment_verified_at' => null,
         ]);
 
         $this->notifikasiPesananBaru($order);
@@ -254,6 +243,7 @@ $order = Order::create([
 
         return redirect()->route('customer.orders.success', $order->id);
     }
+
 
     protected function jenisLabel(Service $service): string
     {
@@ -305,6 +295,8 @@ $order = Order::create([
         ]);
 
         $customer = auth()->user();
+        $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
+        $total = (float) $service->harga * $jumlahHari;
 
         $order = Order::create([
             'order_code' => 'TS-'.strtoupper(uniqid()),
@@ -317,10 +309,10 @@ $order = Order::create([
             'is_pickup' => false,
             'city' => $service->kota,
             'status' => 'baru',
-            'subtotal' => $service->harga,
+            'subtotal' => $total,
             'discount' => 0,
             'pickup_fee' => 0,
-            'total_price' => $service->harga,
+            'total_price' => $total,
             'payment_method' => 'default', // Menggunakan nilai bawaan/default
         ]);
 
@@ -330,52 +322,26 @@ $order = Order::create([
     }
 
     /**
-     * GET /app/services/barang/metode-pembayaran
-     * Menampilkan halaman pilih metode pembayaran untuk pesanan barang
-     */
-    public function metodePembayaran()
-    {
-        $data = session('pesanan_barang');
-
-        if (!$data) {
-            return redirect()->route('customer.services.barang.pilihPaket');
-        }
-
-        $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
-        $hargaPerItem = $service ? (float) $service->harga : 100000;
-
-        // Pakai item+qty yang disimpan dari halaman Pemesanan kalau ada,
-        // fallback ke parsing namaBarang (qty=1 semua) kalau belum ada.
-        $items = session('pesanan_barang_items');
-
-        if (!$items) {
-            $items = collect(explode(',', $data['namaBarang']))
-                ->map(fn ($nama) => trim($nama))
-                ->filter()
-                ->map(fn ($nama) => ['nama' => $nama, 'qty' => 1])
-                ->values()
-                ->all();
-        }
-
-        $totalQty = collect($items)->sum('qty');
-        $total = $totalQty * $hargaPerItem;
-
-        return Inertia::render('Customer/Services/Barang/MetodePembayaran', [
-            'total' => $total,
-            'saldo' => (float) auth()->user()->saldo,
-        ]);
-    }
-
-    /**
      * GET /app/services/{service}/metode-pembayaran
-     * Menampilkan halaman pilih metode pembayaran untuk layanan titipan
+     * Menampilkan halaman pilih metode pembayaran untuk layanan titipan.
+     * Butuh tanggalMasuk & tanggalKeluar sebagai query string (dikirim dari
+     * halaman Show) supaya total yang ditampilkan sudah termasuk durasi.
      */
-    public function metodePembayaranLayanan(Service $service)
+    public function metodePembayaranLayanan(Request $request, Service $service)
     {
+        $tanggalMasuk = $request->query('tanggalMasuk');
+        $tanggalKeluar = $request->query('tanggalKeluar');
+        $jumlahHari = ($tanggalMasuk && $tanggalKeluar)
+            ? $this->hitungJumlahHari($tanggalMasuk, $tanggalKeluar)
+            : 1;
+
         return Inertia::render('Customer/Services/MetodePembayaranLayanan', [
             'serviceId' => $service->id,
-            'total' => (float) $service->harga,
+            'total' => (float) $service->harga * $jumlahHari,
             'saldo' => (float) auth()->user()->saldo,
+            'tanggalMasuk' => $tanggalMasuk,
+            'tanggalKeluar' => $tanggalKeluar,
+            'jumlahHari' => $jumlahHari,
         ]);
     }
 
@@ -393,9 +359,11 @@ $order = Order::create([
 
         $customer = auth()->user();
         $isSaldo = $data['payment_method'] === 'saldo';
+        $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
+        $total = (float) $service->harga * $jumlahHari;
 
         if ($isSaldo) {
-            $this->potongSaldo($customer, (float) $service->harga);
+            $this->potongSaldo($customer, $total);
         }
 
         $order = Order::create([
@@ -409,10 +377,10 @@ $order = Order::create([
             'is_pickup' => false,
             'city' => $service->kota,
             'status' => $isSaldo ? 'diproses' : 'baru',
-            'subtotal' => $service->harga,
+            'subtotal' => $total,
             'discount' => 0,
             'pickup_fee' => 0,
-            'total_price' => $service->harga,
+            'total_price' => $total,
             'payment_method' => $data['payment_method'],
             'payment_verified_at' => $isSaldo ? now() : null,
         ]);

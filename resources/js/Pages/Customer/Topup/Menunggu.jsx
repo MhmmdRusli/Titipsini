@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import { Clock } from 'lucide-react';
 
@@ -7,6 +8,22 @@ function formatRupiah(value) {
 }
 
 export default function Menunggu({ topup }) {
+
+    // --- LOGIKA POLLING OTOMATIS ---
+    useEffect(() => {
+        // Cek data terbaru dari server setiap 3 detik
+        const interval = setInterval(() => {
+            router.reload({
+                only: ['topup'], // Hanya memperbarui objek topup
+                preserveScroll: true, // Mencegah layar lompat/scroll ke atas saat reload
+            });
+        }, 3000);
+
+        // Hentikan interval/timer ketika user meninggalkan halaman
+        return () => clearInterval(interval);
+    }, []);
+    // --------------------------------
+
     return (
         <CustomerLayout title="Status Top Up" backHref="/app/dashboard">
             <Head title="Menunggu Verifikasi" />
@@ -45,4 +62,4 @@ export default function Menunggu({ topup }) {
             </div>
         </CustomerLayout>
     );
-}
+}   

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { ArrowLeft, User, Building2, CheckCircle2, XCircle, X } from 'lucide-react';
+import { ArrowLeft, User, Building2, CheckCircle2, XCircle, X, AlertCircle } from 'lucide-react';
 
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(
@@ -27,6 +27,7 @@ const STATUS_BADGE = {
 };
 
 export default function Show({ topup }) {
+    const [approveOpen, setApproveOpen] = useState(false);
     const [rejectOpen, setRejectOpen] = useState(false);
     const [alasan, setAlasan] = useState('');
     const [processing, setProcessing] = useState(false);
@@ -36,13 +37,17 @@ export default function Show({ topup }) {
     const isPending = topup.status === 'menunggu_verifikasi';
 
     function handleApprove() {
-        if (!confirm(`Setujui top up sebesar ${formatRupiah(topup.nominal)} untuk ${topup.user?.name}? Saldo pelanggan akan langsung ditambahkan.`)) {
-            return;
-        }
         setProcessing(true);
-        router.post(`/admin/topup/${topup.id}/approve`, {}, {
-            onFinish: () => setProcessing(false),
-        });
+        router.post(
+            `/admin/topup/${topup.id}/approve`,
+            {},
+            {
+                onFinish: () => {
+                    setProcessing(false);
+                    setApproveOpen(false);
+                },
+            }
+        );
     }
 
     function handleReject() {
@@ -176,7 +181,7 @@ export default function Show({ topup }) {
                         </button>
                         <button
                             type="button"
-                            onClick={handleApprove}
+                            onClick={() => setApproveOpen(true)}
                             disabled={processing}
                             className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3 text-sm font-semibold text-white shadow-sm transition disabled:opacity-50"
                         >
@@ -187,10 +192,50 @@ export default function Show({ topup }) {
                 )}
             </div>
 
+            {/* Modal Konfirmasi Persetujuan */}
+            {approveOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                    <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-xl border border-gray-100 dark:border-gray-700 animate-in fade-in duration-150">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-emerald-100 text-[#15803d] dark:bg-emerald-950/60 dark:text-[#22c55e]">
+                                <CheckCircle2 size={22} />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Setujui Top Up</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{topup.kode_transaksi}</p>
+                            </div>
+                        </div>
+
+                        <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                            Setujui top up sebesar <strong className="text-emerald-600 dark:text-emerald-400">{formatRupiah(topup.nominal)}</strong> untuk <strong className="text-gray-900 dark:text-gray-100">{topup.user?.name}</strong>? Saldo pelanggan akan langsung ditambahkan.
+                        </p>
+
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                disabled={processing}
+                                onClick={() => setApproveOpen(false)}
+                                className="rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                disabled={processing}
+                                onClick={handleApprove}
+                                className="rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition disabled:opacity-60"
+                            >
+                                {processing ? 'Memproses...' : 'Ya, Setujui'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Modal alasan penolakan */}
             {rejectOpen && (
-                <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 px-4">
-                    <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-lg">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+                    <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-xl border border-gray-100 dark:border-gray-700 animate-in fade-in duration-150">
                         <div className="mb-3 flex items-center justify-between">
                             <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Tolak Top Up</h2>
                             <button onClick={() => setRejectOpen(false)} className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">

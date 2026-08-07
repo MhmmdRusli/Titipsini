@@ -48,6 +48,17 @@ function isReadyToComplete(order) {
     return !!order.payment_verified_at && order.fase === 'akhir' && order.status === 'diproses';
 }
 
+// Label status yang ditampilkan ke Admin. Selagi pesanan masih 'diproses' dan
+// ada fase_label (mis. "Sedang Disewa", "Dititipkan"), tampilkan itu supaya
+// Admin lihat status operasional yang lebih jelas daripada tulisan "diproses"
+// yang generik. Untuk status lain (baru/selesai/dibatalkan) tetap apa adanya.
+function displayStatusLabel(order) {
+    if (order.status === 'diproses' && order.fase_label) {
+        return order.fase_label;
+    }
+    return order.status;
+}
+
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -255,6 +266,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 <th className="px-4 py-3 font-bold">Customer</th>
                                 <th className="px-4 py-3 font-bold">Vendor</th>
                                 <th className="px-4 py-3 font-bold">Layanan</th>
+                                <th className="px-4 py-3 font-bold">Periode</th>
                                 <th className="px-4 py-3 font-bold">Kota</th>
                                 <th className="px-4 py-3 font-bold">Total</th>
                                 <th className="px-4 py-3 font-bold">Status</th>
@@ -264,7 +276,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {orders.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={selectMode ? 9 : 8} className="select-none px-4 py-12 text-center text-gray-400 dark:text-gray-500">
+                                    <td colSpan={selectMode ? 10 : 9} className="select-none px-4 py-12 text-center text-gray-400 dark:text-gray-500">
                                         <div className="flex flex-col items-center justify-center">
                                             <Package size={32} className="mb-2 text-gray-300 dark:text-gray-600" />
                                             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -328,6 +340,22 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                 {order.is_pickup && <Truck size={13} className="text-green-700 dark:text-emerald-400" />}
                                             </span>
                                         </td>
+                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">
+                                            {order.start_date && order.end_date ? (
+                                                <>
+                                                    <div className="whitespace-nowrap text-xs">
+                                                        {order.start_date} <span className="text-gray-300 dark:text-gray-600">→</span> {order.end_date}
+                                                    </div>
+                                                    {order.duration_label && (
+                                                        <div className="mt-0.5 text-[10px] text-gray-400 dark:text-gray-500">
+                                                            {order.duration_label}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <span className="text-xs italic text-gray-300 dark:text-gray-600">-</span>
+                                            )}
+                                        </td>
                                         <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.city}</td>
                                         <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300 font-medium">{formatRupiah(order.total_price)}</td>
                                         <td className="select-none px-4 py-3.5">
@@ -336,7 +364,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                     STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-400'
                                                 }`}
                                             >
-                                                {order.status}
+                                                {displayStatusLabel(order)}
                                             </span>
                                         </td>
                                         <td className="select-none px-4 py-3.5 text-right">
@@ -637,7 +665,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
                                     STATUS_STYLE[order.status] ?? 'border border-slate-200 bg-slate-100 text-slate-700 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-400'
                                 }`}
                             >
-                                {order.status}
+                                {displayStatusLabel(order)}
                             </span>
                             {readyToComplete && (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
@@ -669,6 +697,18 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
 
                     <dt className="text-gray-500 dark:text-gray-400">Kota</dt>
                     <dd className="text-gray-900 dark:text-gray-100">{order.city}</dd>
+
+                    {order.start_date && order.end_date && (
+                        <>
+                            <dt className="text-gray-500 dark:text-gray-400">Periode</dt>
+                            <dd className="text-gray-900 dark:text-gray-100">
+                                {order.start_date} → {order.end_date}
+                                {order.duration_label && (
+                                    <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">({order.duration_label})</span>
+                                )}
+                            </dd>
+                        </>
+                    )}
 
                     <dt className="text-gray-500 dark:text-gray-400">Total Harga</dt>
                     <dd className="font-bold text-green-700 dark:text-emerald-400">{formatRupiah(order.total_price)}</dd>

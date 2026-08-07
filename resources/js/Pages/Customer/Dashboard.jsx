@@ -266,7 +266,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                         <span>Saldo Titip Saat Ini</span>
                         <div className="flex items-center gap-4">
                             <Link href="/app/saldo/topup" className="flex items-center gap-1 hover:text-white">
-                                <span>Top UP</span>
+                                <span>Top Up</span>
                                 <Plus size={14} strokeWidth={3} className="border border-white rounded-full p-0.5 w-4 h-4" />
                             </Link>
                             <Link href="/app/saldo/riwayat" className="flex items-center gap-1 hover:text-white">

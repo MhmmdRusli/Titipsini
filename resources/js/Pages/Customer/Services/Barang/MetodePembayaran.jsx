@@ -1,14 +1,29 @@
 import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import { QrCode, HandCoins, WalletMinimal } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Landmark, Wallet, HandCoins, WalletMinimal } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+
+const BANKS = [
+    { value: 'bca', label: 'Bank BCA' },
+    { value: 'bni', label: 'Bank BNI' },
+    { value: 'bri', label: 'Bank BRI' },
+    { value: 'mandiri', label: 'Bank Mandiri' },
+];
+
+const EWALLETS = [
+    { value: 'ovo', label: 'OVO' },
+    { value: 'dana', label: 'Dana' },
+    { value: 'linkaja', label: 'LinkAja' },
+    { value: 'shopeepay', label: 'Shopee Pay' },
+];
 
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
-export default function MetodePembayaran({ total = 0, saldo = 0 }) {
+export default function MetodePembayaran({ total = 0, saldo = 0, jumlahHari = 1 }) {
     const { errors } = usePage().props;
+    const [bankOpen, setBankOpen] = useState(true);
     const [selected, setSelected] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
@@ -30,11 +45,11 @@ export default function MetodePembayaran({ total = 0, saldo = 0 }) {
 
             <div className="px-4 py-3">
                 <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <p className="text-xs text-gray-500">Total Pembayaran</p>
+                    <p className="text-xs text-gray-500">Total Pembayaran ({jumlahHari} hari)</p>
                     <p className="mt-0.5 text-xl font-bold text-gray-900">{formatRupiah(total)}</p>
                 </div>
 
-                {/* Saldo Titipsini */}
+                {/* Saldo Titipsini - ditampilkan paling atas karena paling cepat diproses */}
                 <div className="mt-4 rounded-xl border border-gray-100 bg-white shadow-sm">
                     <div className="flex items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
                         <WalletMinimal size={14} />
@@ -70,22 +85,57 @@ export default function MetodePembayaran({ total = 0, saldo = 0 }) {
                     )}
                 </div>
 
-                {/* QRIS */}
+                {/* Grup Transfer Bank - collapsible */}
                 <div className="mt-3 rounded-xl border border-gray-100 bg-white shadow-sm">
-                    <PaymentRow
-                        icon={QrCode}
-                        label="QRIS"
-                        description="Scan kode QR lalu unggah bukti transfer"
-                        active={selected === 'qris'}
-                        onClick={() => setSelected('qris')}
-                    />
+                    <button
+                        type="button"
+                        onClick={() => setBankOpen((v) => !v)}
+                        className="flex w-full items-center justify-between px-4 py-3"
+                    >
+                        <span className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                            <Landmark size={16} className="text-green-600" />
+                            Transfer Bank
+                        </span>
+                        <ChevronDown size={16} className={`text-gray-400 transition-transform ${bankOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {bankOpen && (
+                        <div className="border-t border-gray-100">
+                            {BANKS.map((bank) => (
+                                <PaymentRow
+                                    key={bank.value}
+                                    label={bank.label}
+                                    active={selected === bank.value}
+                                    onClick={() => setSelected(bank.value)}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                {/* Tunai / Bayar di tempat */}
+                {/* Dompet digital */}
+                <div className="mt-3 rounded-xl border border-gray-100 bg-white shadow-sm">
+                    <div className="flex items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        <Wallet size={14} />
+                        Dompet Digital
+                    </div>
+                    <div className="border-t border-gray-100">
+                        {EWALLETS.map((wallet) => (
+                            <PaymentRow
+                                key={wallet.value}
+                                label={wallet.label}
+                                active={selected === wallet.value}
+                                onClick={() => setSelected(wallet.value)}
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Bayar di tempat */}
                 <div className="mt-3 rounded-xl border border-gray-100 bg-white shadow-sm">
                     <PaymentRow
                         icon={HandCoins}
-                        label="Tunai (Bayar di tempat)"
+                        label="Bayar di tempat"
                         active={selected === 'cod'}
                         onClick={() => setSelected('cod')}
                     />
@@ -112,22 +162,19 @@ export default function MetodePembayaran({ total = 0, saldo = 0 }) {
     );
 }
 
-function PaymentRow({ label, description, active, onClick, icon: Icon }) {
+function PaymentRow({ label, active, onClick, icon: Icon }) {
     return (
         <button
             type="button"
             onClick={onClick}
-            className="flex w-full items-center gap-3 px-4 py-3"
+            className="flex w-full items-center gap-3 border-b border-gray-50 px-4 py-3 last:border-b-0"
         >
             {Icon ? (
                 <Icon size={16} className="text-green-600" />
             ) : (
                 <span className="h-2 w-2" />
             )}
-            <span className="flex-1 text-left">
-                <span className="block text-sm font-medium text-gray-800">{label}</span>
-                {description && <span className="block text-xs text-gray-400">{description}</span>}
-            </span>
+            <span className="flex-1 text-left text-sm font-medium text-gray-800">{label}</span>
             <span
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
                     active ? 'border-green-600' : 'border-gray-300'

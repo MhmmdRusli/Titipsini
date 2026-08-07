@@ -21,7 +21,7 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
-export default function MetodePembayaran({ total = 0, saldo = 0 }) {
+export default function MetodePembayaran({ total = 0, saldo = 0, jumlahHari = 1, pickupFee = 0 }) {
     const { errors } = usePage().props;
     const [bankOpen, setBankOpen] = useState(true);
     const [selected, setSelected] = useState('');
@@ -45,8 +45,15 @@ export default function MetodePembayaran({ total = 0, saldo = 0 }) {
 
             <div className="px-4 py-3">
                 <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <p className="text-xs text-gray-500">Total Pembayaran</p>
+                    <p className="text-xs text-gray-500">
+                        Total Pembayaran ({jumlahHari} hari{pickupFee > 0 ? ' + pickup' : ''})
+                    </p>
                     <p className="mt-0.5 text-xl font-bold text-gray-900">{formatRupiah(total)}</p>
+                    {pickupFee > 0 && (
+                        <p className="mt-1 text-xs text-gray-400">
+                            Termasuk biaya pickup {formatRupiah(pickupFee)}
+                        </p>
+                    )}
                 </div>
 
                 {/* Saldo Titipsini - ditampilkan paling atas karena paling cepat diproses */}
