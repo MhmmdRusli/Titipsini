@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowLeft, MapPin, User, Package, XCircle, CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, HandCoins, Clock, ArrowRightCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, User, Package, XCircle, CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, HandCoins, Clock, ArrowRightCircle, AlertTriangle } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 function formatRupiah(value) {
@@ -123,6 +123,30 @@ export default function Show({ order }) {
                                 Pesanan ini sudah berada di fase akhir.
                             </p>
                         )}
+                    </div>
+                )}
+
+                {/* Info Denda Keterlambatan - cuma muncul kalau denda > 0.
+                    Denda 100% masuk ke mitra (tidak dipotong komisi), akan
+                    ditambahkan otomatis ke saldoMitra() begitu order berstatus
+                    'selesai'. Nilainya "live" selagi order masih berjalan
+                    (belum fase akhir), dan TERKUNCI begitu fase jadi akhir. */}
+                {order.denda > 0 && (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/30">
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400" />
+                            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                Pesanan Ini Terlambat
+                            </p>
+                        </div>
+                        <p className="mt-1.5 text-xs text-amber-700/80 dark:text-amber-300/80">
+                            {order.fase === 'akhir'
+                                ? 'Denda keterlambatan berikut akan otomatis ditambahkan ke saldo kamu.'
+                                : 'Estimasi denda berjalan - akan terkunci begitu status operasional ditandai selesai.'}
+                        </p>
+                        <p className="mt-2 text-lg font-bold text-amber-800 dark:text-amber-300">
+                            {formatRupiah(order.denda)}
+                        </p>
                     </div>
                 )}
 

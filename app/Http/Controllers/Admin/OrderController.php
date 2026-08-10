@@ -48,6 +48,14 @@ class OrderController extends Controller
                     // frontend untuk menggantikan tulisan "diproses" yang generik
                     // selagi pesanan masih berjalan.
                     'fase_label'      => OrderFaseService::label($order->service_type, $order->fase),
+                    // Denda keterlambatan (0 kalau tidak terlambat). Karena
+                    // updateStatus() di bawah sudah mewajibkan fase === 'akhir'
+                    // sebelum status bisa 'selesai', tanggal_selesai_aktual
+                    // dijamin sudah terkunci begitu order selesai - jadi nilai
+                    // ini konsisten baik masih berjalan (estimasi live) maupun
+                    // sudah selesai (nilai final). 100% masuk saldo mitra,
+                    // tanpa potongan komisi - lihat User::saldoMitra().
+                    'denda'           => $order->hitungDenda(),
                     'cancel_reason'   => $order->cancel_reason,
                     'total_price'     => $order->total_price,
                     'payment_method'  => $order->payment_method,

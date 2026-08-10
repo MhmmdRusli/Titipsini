@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2, ChevronDown, ChevronRight, Package, HandCoins, CheckCircle2 } from 'lucide-react';
+import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2, ChevronDown, ChevronRight, Package, HandCoins, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 const SERVICE_TYPES = [
     { value: '', label: 'Semua Layanan' },
@@ -330,6 +330,11 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                         </span>
                                                     )
                                                 )}
+                                                {order.denda > 0 && (
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                                        <AlertTriangle size={11} /> Terlambat
+                                                    </span>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.customer?.name ?? '-'}</td>
@@ -357,7 +362,14 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                             )}
                                         </td>
                                         <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{order.city}</td>
-                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300 font-medium">{formatRupiah(order.total_price)}</td>
+                                        <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300 font-medium">
+                                            <div>{formatRupiah(order.total_price)}</div>
+                                            {order.denda > 0 && (
+                                                <div className="mt-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                                                    +{formatRupiah(order.denda)} denda
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className="select-none px-4 py-3.5">
                                             <span
                                                 className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
@@ -672,6 +684,11 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
                                     <CheckCircle2 size={11} /> Siap Diselesaikan
                                 </span>
                             )}
+                            {order.denda > 0 && (
+                                <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                    <AlertTriangle size={11} /> Terlambat
+                                </span>
+                            )}
                         </div>
                     </div>
                     <button type="button" onClick={onClose} className="text-gray-400 transition hover:text-gray-600 dark:hover:text-gray-300">
@@ -712,6 +729,16 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
 
                     <dt className="text-gray-500 dark:text-gray-400">Total Harga</dt>
                     <dd className="font-bold text-green-700 dark:text-emerald-400">{formatRupiah(order.total_price)}</dd>
+
+                    {order.denda > 0 && (
+                        <>
+                            <dt className="text-gray-500 dark:text-gray-400">Denda Keterlambatan</dt>
+                            <dd className="font-bold text-amber-600 dark:text-amber-400">
+                                +{formatRupiah(order.denda)}
+                                <span className="ml-1 text-xs font-normal text-gray-400 dark:text-gray-500">(masuk saldo mitra)</span>
+                            </dd>
+                        </>
+                    )}
 
                     {order.status === 'dibatalkan' && order.cancel_reason && (
                         <>

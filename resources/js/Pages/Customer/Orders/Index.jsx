@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Package, MapPin, Truck, Building2, Car, CreditCard } from 'lucide-react';
+import { Package, MapPin, Truck, Building2, Car, CreditCard, AlertTriangle } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const TABS = [
@@ -124,14 +124,22 @@ export default function OrdersIndex({ orders, filters }) {
                                                 </p>
                                             </div>
                                         </div>
-                                        <span
-                                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${order.status === 'baru'
-                                                ? 'bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-300 animate-pulse'
-                                                : STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300'
-                                                }`}
-                                        >
-                                            {order.status === 'baru' ? 'Perlu Bayar' : order.status}
-                                        </span>
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span
+                                                className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${order.status === 'baru'
+                                                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-300 animate-pulse'
+                                                    : STATUS_STYLE[order.status] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300'
+                                                    }`}
+                                            >
+                                                {order.status === 'baru' ? 'Perlu Bayar' : order.status}
+                                            </span>
+                                            {/* Badge Terlambat - muncul kalau order kena denda keterlambatan */}
+                                            {order.denda > 0 && (
+                                                <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                                    <AlertTriangle size={10} /> Terlambat
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Tengah: Tanggal & Durasi */}
@@ -159,6 +167,11 @@ export default function OrdersIndex({ orders, filters }) {
                                             <p className="mt-0.5 text-xs font-extrabold text-gray-900 dark:text-gray-100">
                                                 {formatRupiah(order.total_price)}
                                             </p>
+                                            {order.denda > 0 && (
+                                                <p className="mt-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                                                    +{formatRupiah(order.denda)} denda keterlambatan
+                                                </p>
+                                            )}
                                         </div>
                                         <span className="flex items-center gap-0.5 text-xs font-bold text-[#15803d] transition group-hover:translate-x-0.5 dark:text-[#4ade80]">
                                             Detail &gt;

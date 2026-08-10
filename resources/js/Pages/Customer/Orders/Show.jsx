@@ -67,6 +67,7 @@ export default function OrderShow({ order }) {
     const currentStepIndex = STEPS.indexOf(order.status);
     const statusInfo = STATUS_CONFIG[order.status] || STATUS_CONFIG.baru;
     const StatusIcon = statusInfo.icon;
+    const adaDenda = Number(order.denda) > 0;
 
     const [cancelOpen, setCancelOpen] = useState(false);
     const [reason, setReason] = useState('');
@@ -144,6 +145,32 @@ export default function OrderShow({ order }) {
                         </div>
                     </div>
                 </div>
+
+                {/* --- INFO DENDA KETERLAMBATAN --- */}
+                {/* Muncul kalau order.denda > 0 (dihitung otomatis dari end_date vs
+                    tanggal pesanan benar-benar selesai). Ditaruh menonjol di atas,
+                    sebelum tombol aksi, supaya customer langsung tahu ada biaya
+                    tambahan sebelum melakukan pembayaran/aksi lain. */}
+                {adaDenda && (
+                    <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
+                        <div className="flex items-start gap-2.5">
+                            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                            <div>
+                                <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                                    Ada Denda Keterlambatan
+                                </p>
+                                <p className="mt-1 text-xs leading-relaxed text-amber-700/90 dark:text-amber-300/80">
+                                    {order.status === 'selesai'
+                                        ? 'Pesanan ini melewati batas waktu yang disepakati, sehingga dikenakan denda keterlambatan berikut.'
+                                        : 'Pesanan ini sudah melewati batas waktu (durasi/jadwal) yang disepakati. Denda akan terus dihitung sampai pesanan ditandai selesai.'}
+                                </p>
+                                <p className="mt-2 text-lg font-extrabold text-amber-800 dark:text-amber-300">
+                                    +{formatRupiah(order.denda)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* --- TOMBOL AKSI CEPAT --- */}
                 {order.status === 'baru' && (
@@ -293,6 +320,18 @@ export default function OrderShow({ order }) {
                                 {formatTanggal(order.created_at)}
                             </span>
                         </div>
+
+                        {adaDenda && (
+                            <div className="flex justify-between text-amber-600 dark:text-amber-400">
+                                <span className="flex items-center gap-2">
+                                    <AlertTriangle size={14} /> Denda Keterlambatan
+                                </span>
+                                <span className="font-semibold">
+                                    +{formatRupiah(order.denda)}
+                                </span>
+                            </div>
+                        )}
+
                         {/* Garis pemisah */}
                         <div className="pt-2.5 border-t border-gray-100 dark:border-gray-700/60 flex justify-between items-center">
                             <span className="flex items-center gap-2 font-semibold text-gray-800 dark:text-gray-100 text-sm">
@@ -304,6 +343,11 @@ export default function OrderShow({ order }) {
                                 {formatRupiah(order.total_price)}
                             </span>
                         </div>
+                        {adaDenda && (
+                            <p className="text-right text-[10px] italic text-gray-400 dark:text-gray-500">
+                                Belum termasuk denda keterlambatan di atas
+                            </p>
+                        )}
                     </div>
                 </div>
 

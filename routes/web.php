@@ -172,6 +172,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
+        Route::get('denda', [\App\Http\Controllers\Admin\PengaturanController::class, 'denda'])->name('denda');
+Route::put('denda', [\App\Http\Controllers\Admin\PengaturanController::class, 'updateDenda'])->name('denda.update');
     });
 
     Route::resource('berita', AdminBeritaController::class)

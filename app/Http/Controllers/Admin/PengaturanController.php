@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Penarikan;
 use App\Models\SaldoMutasi;
+use App\Models\DendaSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -154,4 +155,47 @@ class PengaturanController extends Controller
 
         return back()->with('success', 'Penarikan telah ditolak.');
     }
+    public function denda()
+{
+    $kategori = ['barang', 'bangunan', 'kendaraan', 'pindahan'];
+ 
+    $settings = collect($kategori)->map(function ($tipe) {
+        $setting = DendaSetting::current($tipe);
+ 
+        return [
+            'service_type' => $tipe,
+            'persen_per_hari' => (float) $setting->persen_per_hari,
+            'max_persen' => (float) $setting->max_persen,
+        ];
+    });
+ 
+    return Inertia::render('Admin/Pengaturan/Denda', [
+        'settings' => $settings,
+    ]);
+}
+ 
+/**
+ * PUT /admin/pengaturan/denda
+ */
+public function updateDenda(Request $request)
+{
+    $validated = $request->validate([
+        'settings' => ['required', 'array', 'size:4'],
+        'settings.*.service_type' => ['required', 'string', 'in:barang,bangunan,kendaraan,pindahan'],
+        'settings.*.persen_per_hari' => ['required', 'numeric', 'min:0', 'max:100'],
+        'settings.*.max_persen' => ['required', 'numeric', 'min:0', 'max:100'],
+    ]);
+ 
+    foreach ($validated['settings'] as $item) {
+        DendaSetting::current($item['service_type'])->update([
+            'persen_per_hari' => $item['persen_per_hari'],
+            'max_persen' => $item['max_persen'],
+        ]);
+    }
+ 
+    return redirect()
+        ->route('admin.pengaturan.denda')
+        ->with('success', 'Pengaturan denda berhasil diperbarui.');
+}
+ 
 }

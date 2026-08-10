@@ -51,18 +51,17 @@ class OrderController extends Controller
             ],
         ]);
     }
-
     public function show(Request $request, Order $order): Response
-    {
-        abort_unless($order->customer_id === $request->user()->id, 403);
+{
+    abort_unless($order->customer_id === $request->user()->id, 403);
 
-        $order->load('partner:id,name,phone');
+    $order->load('partner:id,name,phone');
+    $order->denda = $order->hitungDenda(); // <-- tambahin baris ini
 
-        return Inertia::render('Customer/Orders/Show', [
-            'order' => $order,
-        ]);
-    }
-
+    return Inertia::render('Customer/Orders/Show', [
+        'order' => $order,
+    ]);
+}
     public function cancel(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
@@ -251,4 +250,5 @@ class OrderController extends Controller
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi.');
     }
+    
 }
