@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { 
     Package, Truck, MapPin, User, Phone, CreditCard, 
     ArrowLeft, XCircle, X, Check, Clock, AlertTriangle,
-    CalendarDays, TicketPercent
+    CalendarDays, TicketPercent, QrCode, WalletMinimal, Upload, CheckCircle2
 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
@@ -62,16 +62,59 @@ function formatTanggal(value) {
     });
 }
 
-export default function OrderShow({ order }) {
+export default function OrderShow({ order, qris_url }) {
+    const { errors } = usePage().props;
     const isCancelled = order.status === 'dibatalkan';
     const currentStepIndex = STEPS.indexOf(order.status);
     const statusInfo = STATUS_CONFIG[order.status] || STATUS_CONFIG.baru;
     const StatusIcon = statusInfo.icon;
     const adaDenda = Number(order.denda) > 0;
+    const dendaBelumDibayar = adaDenda && !order.denda_paid_at;
 
     const [cancelOpen, setCancelOpen] = useState(false);
     const [reason, setReason] = useState('');
     const [processing, setProcessing] = useState(false);
+    const [payingDenda, setPayingDenda] = useState(false);
+    const [showQrisDenda, setShowQrisDenda] = useState(false);
+    const [dendaFile, setDendaFile] = useState(null);
+    const [dendaPreview, setDendaPreview] = useState(null);
+    const [uploadingDenda, setUploadingDenda] = useState(false);
+
+    function bayarDenda() {
+        setPayingDenda(true);
+        router.post(
+            `/app/orders/${order.id}/bayar-denda`,
+            {},
+            { preserveScroll: true, onFinish: () => setPayingDenda(false) }
+        );
+    }
+
+    function handleDendaFileChange(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setDendaFile(file);
+        setDendaPreview(URL.createObjectURL(file));
+    }
+
+    function uploadBuktiDenda(e) {
+        e.preventDefault();
+        if (!dendaFile) return;
+        setUploadingDenda(true);
+        router.post(
+            `/app/orders/${order.id}/upload-bukti-denda`,
+            { denda_receipt: dendaFile },
+            {
+                forceFormData: true,
+                preserveScroll: true,
+                onFinish: () => setUploadingDenda(false),
+                onSuccess: () => {
+                    setShowQrisDenda(false);
+                    setDendaFile(null);
+                    setDendaPreview(null);
+                },
+            }
+        );
+    }
 
     // Fungsi untuk menangani pembatalan pesanan
     function handleCancel(e) {
@@ -155,18 +198,119 @@ export default function OrderShow({ order }) {
                     <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
                         <div className="flex items-start gap-2.5">
                             <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
-                            <div>
+                            <div className="flex-1">
                                 <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
                                     Ada Denda Keterlambatan
                                 </p>
                                 <p className="mt-1 text-xs leading-relaxed text-amber-700/90 dark:text-amber-300/80">
-                                    {order.status === 'selesai'
+                                    {order.denda_paid_at
+                                        ? 'Denda keterlambatan berikut sudah kamu bayar. Terima kasih.'
+                                        : order.denda_payment_receipt
+                                        ? 'Bukti pembayaran denda sudah diunggah, menunggu verifikasi mitra.'
+                                        : order.status === 'selesai'
                                         ? 'Pesanan ini melewati batas waktu yang disepakati, sehingga dikenakan denda keterlambatan berikut.'
-                                        : 'Pesanan ini sudah melewati batas waktu (durasi/jadwal) yang disepakati. Denda akan terus dihitung sampai pesanan ditandai selesai.'}
+                                        : 'Pesanan ini sudah melewati batas waktu (durasi/jadwal) yang disepakati. Denda perlu dibayar sebelum pesanan bisa diselesaikan.'}
                                 </p>
                                 <p className="mt-2 text-lg font-extrabold text-amber-800 dark:text-amber-300">
                                     +{formatRupiah(order.denda)}
                                 </p>
+
+                                {order.denda_paid_at ? (
+                                    <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                                        <CheckCircle2 size={14} /> Lunas pada {order.denda_paid_at}
+                                    </p>
+                                ) : order.denda_payment_receipt ? (
+                                    <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+                                        <Clock size={14} /> Menunggu verifikasi mitra
+                                    </p>
+                                ) : (
+                                    <>
+                                        {errors?.saldo_denda && (
+                                            <div className="mt-2 rounded-lg bg-red-50 p-2.5 dark:bg-red-950/30">
+                                                <p className="text-xs font-medium text-red-600 dark:text-red-400">
+                                                    {errors.saldo_denda}
+                                                </p>
+                                                <Link
+                                                    href="/app/saldo/topup"
+                                                    className="mt-1 inline-block text-xs font-bold text-red-700 underline dark:text-red-300"
+                                                >
+                                                    Top Up Saldo Sekarang &rarr;
+                                                </Link>
+                                            </div>
+                                        )}
+
+                                        {!showQrisDenda ? (
+                                            <div className="mt-3 flex flex-col gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={bayarDenda}
+                                                    disabled={payingDenda}
+                                                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-600 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-amber-700 disabled:opacity-60"
+                                                >
+                                                    <WalletMinimal size={16} />
+                                                    {payingDenda ? 'Memproses...' : 'Bayar dengan Saldo'}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowQrisDenda(true)}
+                                                    className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-white py-2.5 text-sm font-bold text-amber-700 shadow-sm transition hover:bg-amber-50 dark:border-amber-800 dark:bg-transparent dark:text-amber-300 dark:hover:bg-amber-950/40"
+                                                >
+                                                    <QrCode size={16} />
+                                                    Bayar via QRIS
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="mt-3 rounded-xl border border-amber-200 bg-white p-3 dark:border-amber-800 dark:bg-gray-900">
+                                                {qris_url ? (
+                                                    <img
+                                                        src={qris_url}
+                                                        alt="QRIS Pembayaran Denda"
+                                                        className="mx-auto h-40 w-40 rounded-lg border border-gray-200 object-contain dark:border-gray-700"
+                                                    />
+                                                ) : (
+                                                    <p className="text-center text-xs italic text-gray-400">QRIS belum tersedia.</p>
+                                                )}
+
+                                                <form onSubmit={uploadBuktiDenda} className="mt-3 space-y-2">
+                                                    <div className="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-4 dark:border-gray-700">
+                                                        {dendaPreview ? (
+                                                            <img src={dendaPreview} alt="Preview" className="max-h-28 rounded" />
+                                                        ) : (
+                                                            <>
+                                                                <Upload size={20} className="text-gray-400" />
+                                                                <span className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                                                    Unggah bukti transfer
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={handleDendaFileChange}
+                                                            className="absolute inset-0 cursor-pointer opacity-0"
+                                                        />
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowQrisDenda(false)}
+                                                            className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-semibold text-gray-600 dark:border-gray-700 dark:text-gray-300"
+                                                        >
+                                                            Batal
+                                                        </button>
+                                                        <button
+                                                            type="submit"
+                                                            disabled={!dendaFile || uploadingDenda}
+                                                            className="flex-1 rounded-lg bg-amber-600 py-2 text-xs font-bold text-white disabled:opacity-50"
+                                                        >
+                                                            {uploadingDenda ? 'Mengunggah...' : 'Kirim Bukti'}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

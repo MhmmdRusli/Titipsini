@@ -153,7 +153,11 @@ class User extends Authenticatable implements MustVerifyEmail
     $saldoBersihTransaksi = $totalKotor * $persentaseMitra;
 
     // 5. Total denda keterlambatan - 100% masuk mitra, TIDAK kena komisi.
-    $totalDenda = $ordersSelesai->sum(fn ($order) => $order->hitungDenda());
+    // PENTING: cuma dihitung kalau denda_paid_at sudah terisi (customer
+    // benar-benar sudah bayar) - order dengan denda tapi belum dibayar
+    // TIDAK menambah saldo mitra, supaya platform tidak "membayar duluan"
+    // pakai uang yang belum ditagih dari customer.
+    $totalDenda = $ordersSelesai->sum(fn ($order) => $order->denda_paid_at ? $order->hitungDenda() : 0);
 
     $saldoBersih = $saldoBersihTransaksi + $totalDenda;
 

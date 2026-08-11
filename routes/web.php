@@ -173,7 +173,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
         Route::get('denda', [\App\Http\Controllers\Admin\PengaturanController::class, 'denda'])->name('denda');
-Route::put('denda', [\App\Http\Controllers\Admin\PengaturanController::class, 'updateDenda'])->name('denda.update');
+        Route::put('denda', [\App\Http\Controllers\Admin\PengaturanController::class, 'updateDenda'])->name('denda.update');
     });
 
     Route::resource('berita', AdminBeritaController::class)
@@ -328,6 +328,8 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/orders/{order}/bukti-pembayaran', [CustomerOrderController::class, 'buktiPembayaran'])->name('orders.buktiPembayaran');
     Route::post('/orders/{order}/upload-bukti', [CustomerOrderController::class, 'uploadBukti'])->name('orders.uploadBukti');
     Route::post('/orders/{order}/bayar-saldo', [CustomerOrderController::class, 'bayarSaldo'])->name('orders.bayarSaldo');
+    Route::post('/orders/{order}/bayar-denda', [CustomerOrderController::class, 'bayarDenda'])->name('orders.bayarDenda');
+    Route::post('/orders/{order}/upload-bukti-denda', [CustomerOrderController::class, 'uploadBuktiDenda'])->name('orders.uploadBuktiDenda');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::patch('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');

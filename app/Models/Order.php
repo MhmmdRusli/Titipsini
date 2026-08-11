@@ -25,6 +25,8 @@ class Order extends Model
         'status',
         'fase',
         'tanggal_selesai_aktual',
+        'denda_paid_at',
+        'denda_payment_receipt',
         'cancel_reason',
         'subtotal',
         'discount',
@@ -48,6 +50,7 @@ class Order extends Model
             'total' => 'decimal:2',
             'payment_verified_at' => 'datetime',
             'tanggal_selesai_aktual' => 'datetime',
+            'denda_paid_at' => 'datetime',
             'end_date' => 'date',
         ];
     }
@@ -120,6 +123,16 @@ class Order extends Model
     }
 
     /**
+     * True kalau tidak ada denda sama sekali, ATAU denda sudah dibayar
+     * customer (denda_paid_at terisi). Dipakai sebagai syarat sebelum Admin
+     * bisa menyelesaikan pesanan - lihat Admin\OrderController::updateStatus().
+     */
+    public function dendaLunas(): bool
+    {
+        return $this->hitungDenda() <= 0 || $this->denda_paid_at !== null;
+    }
+
+    /**
      * Accessor 'denda' - membuat hitungDenda() otomatis ikut ter-serialize
      * setiap kali Order dikirim ke frontend (lihat $appends di atas), tanpa
      * perlu ditulis manual satu-satu di tiap controller (index, show, dll).
@@ -131,4 +144,4 @@ class Order extends Model
     {
         return $this->hitungDenda();
     }
-}   
+}

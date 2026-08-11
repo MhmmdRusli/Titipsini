@@ -250,5 +250,54 @@ class OrderController extends Controller
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi.');
     }
+    public function bayarDenda(Request $request, Order $order): RedirectResponse
+{
+    abort_unless($order->customer_id === $request->user()->id, 403);
+ 
+    if ($order->denda_paid_at !== null) {
+        return back()->with('success', 'Denda untuk pesanan ini sudah dibayar sebelumnya.');
+    }
+ 
+    $dendaAmount = $order->hitungDenda();
+ 
+    if ($dendaAmount <= 0) {
+        return back()->with('success', 'Pesanan ini tidak memiliki denda keterlambatan.');
+    }
+ 
+    $customer = $request->user();
+ 
+    if ((float) $customer->saldo < $dendaAmount) {
+        return back()->withErrors([
+            'saldo_denda' => 'Saldo kamu tidak mencukupi untuk membayar denda ini. Silakan top up terlebih dahulu.',
+        ]);
+    }
+ 
+    $customer->decrement('saldo', $dendaAmount);
+ 
+    $order->update([
+        'denda_paid_at' => now(),
+    ]);
+ 
+    return back()->with('success', 'Denda keterlambatan berhasil dibayar.');
+}
+public function uploadBuktiDenda(Request $request, Order $order)
+{
+    $request->validate([
+        'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
+
+    if ($request->hasFile('bukti_pembayaran')) {
+        $path = $request->file('bukti_pembayaran')->store('bukti-denda', 'public');
+        
+        // Simpan path ke database (sesuaikan nama kolom di tabel orders kamu)
+        $order->update([
+            'bukti_denda' => $path,
+            'status_denda' => 'menunggu_verifikasi', // atau sesuaikan dengan flow kamu
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Bukti pembayaran denda berhasil diunggah!');
+}
+ 
     
 }

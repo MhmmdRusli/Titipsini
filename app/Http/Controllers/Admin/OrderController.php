@@ -192,6 +192,7 @@ class OrderController extends Controller
         if ($validated['status'] === 'selesai') {
             abort_unless($order->payment_verified_at, 422, 'Pesanan belum bisa diselesaikan — pembayaran belum diverifikasi.');
             abort_unless($order->fase === 'akhir', 422, 'Pesanan belum bisa diselesaikan — Mitra belum menandai fase akhir (barang diambil/sewa berakhir/dst).');
+            abort_unless($order->dendaLunas(), 422, 'Pesanan belum bisa diselesaikan — denda keterlambatan belum dibayar customer.');
         }
 
         $statusSebelumnya = $order->status;
