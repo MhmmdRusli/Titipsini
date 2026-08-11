@@ -45,9 +45,18 @@ class HandleInertiaRequests extends Middleware
                         // Kalau nilainya path relatif polos (mis. 'avatars/x.jpg'), baru resolve
                         // lewat disk direct_public.
                         return Storage::disk('direct_public')->url($raw);
-                        })(),
+                    })(),
                 ] : null,
             ],
+
+            // 💡 DATA CUACA GLOBAL (Bisa diakses dari seluruh halaman JSX/React via usePage().props)
+            'cuaca' => [
+                'kota' => 'Semarang',
+                'suhu' => '30°C',
+                'kondisi' => 'Cerah',
+                'icon' => '🌤️',
+            ],
+
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

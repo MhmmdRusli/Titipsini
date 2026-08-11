@@ -36,6 +36,7 @@ const navItems = [
         children: [
             { label: 'Keamanan', href: '/admin/pengaturan/keamanan' },
             { label: 'Komisi', href: '/admin/pengaturan/komisi' },
+            { label: 'Denda', href: '/admin/pengaturan/denda' },
             { label: 'Qris', href: '/admin/pengaturan/qris' },
         ],
     },
@@ -68,28 +69,44 @@ function useJamTanggal() {
     return { jam, tanggal };
 }
 
-function useCuaca() {
+function useCuaca(propsCuaca) {
     const [cuaca, setCuaca] = useState(null);
 
     useEffect(() => {
-        let cancelled = false;
+        if (propsCuaca) {
+            setCuaca({
+                label: propsCuaca.kondisi || 'Cerah',
+                suhu: propsCuaca.suhu || '30°C',
+                Icon: Cloud,
+            });
+            return;
+        }
 
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current_weather=true`)
-            .then((res) => res.json())
-            .then((data) => {
-                if (!cancelled && data?.current_weather) {
-                    setCuaca({
-                        suhu: Math.round(data.current_weather.temperature),
-                        ...weatherFromCode(data.current_weather.weathercode),
-                    });
-                }
-            })
-            .catch(() => {});
-
-        return () => {
-            cancelled = true;
+        // Fungsi fetch data cuaca berdasarkan koordinat
+        const fetchWeather = (lat, lon) => {
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data?.current_weather) {
+                        setCuaca({
+                            suhu: `${Math.round(data.current_weather.temperature)}°C`,
+                            ...weatherFromCode(data.current_weather.weathercode),
+                        });
+                    }
+                })
+                .catch(() => {});
         };
-    }, []);
+
+        // Deteksi lokasi aktual pengguna dari Browser
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+                () => fetchWeather(WEATHER_LAT, WEATHER_LON) // Fallback ke koordinat default jika akses lokasi ditolak
+            );
+        } else {
+            fetchWeather(WEATHER_LAT, WEATHER_LON);
+        }
+    }, [propsCuaca]);
 
     return cuaca;
 }
@@ -98,13 +115,11 @@ export default function AdminLayout({ children, title }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
     const { jam, tanggal } = useJamTanggal();
-    const cuaca = useCuaca();
+    const cuaca = useCuaca(props.cuaca);
 
-    // State Logout Modal
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    // State & Preference Dark Mode
     const [isDarkMode, setIsDarkMode] = useState(() => {
         return localStorage.getItem('theme') === 'dark' ||
             (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -129,7 +144,6 @@ export default function AdminLayout({ children, title }) {
         return active?.label ?? null;
     });
 
-    // Handler Logout Eksekusi
     const handleLogout = () => {
         setIsLoggingOut(true);
         router.post('/logout', {}, {
@@ -142,7 +156,6 @@ export default function AdminLayout({ children, title }) {
 
     return (
         <div className="flex h-screen bg-[#f8fafc] dark:bg-[#0b0f19] text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-300">
-            {/* Style Injection khusus agar komponen child (Cards/Charts) otomatis menyesuaikan Mode Gelap */}
             <style>{`
                 .dark main .bg-white {
                     background-color: #111827 !important;
@@ -176,7 +189,6 @@ export default function AdminLayout({ children, title }) {
 
             {/* Sidebar */}
             <aside className="w-64 shrink-0 bg-[#0d5235] dark:bg-[#093221] text-gray-100 flex flex-col border-r border-[#0a422a] dark:border-gray-800 shadow-md h-full transition-colors">
-                {/* Logo Section */}
                 <div className="px-5 py-6 border-b border-white/10 flex flex-col items-center text-center shrink-0">
                     <img
                         src="/images/admin-titipsini.png"
@@ -191,7 +203,6 @@ export default function AdminLayout({ children, title }) {
                     </span>
                 </div>
 
-                {/* Nav items */}
                 <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
                     {navItems.map(({ label, href, icon: Icon, children: subItems }) => {
                         const active = url.startsWith(href);
@@ -259,7 +270,6 @@ export default function AdminLayout({ children, title }) {
                     })}
                 </nav>
 
-                {/* Tombol Keluar (Membuka Modal) */}
                 <div className="border-t border-white/10 p-3 shrink-0">
                     <button
                         type="button"
@@ -272,9 +282,8 @@ export default function AdminLayout({ children, title }) {
                 </div>
             </aside>
 
-            {/* Area Utama (Kanan) */}
+            {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto overflow-x-hidden relative">
-                {/* Header Navbar */}
                 <header className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800/80 bg-white/80 dark:bg-[#111827]/80 backdrop-blur-md px-6 py-4 shadow-sm shrink-0 sticky top-0 z-30 transition-colors duration-300">
                     <div>
                         <h1 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-white">{title}</h1>
@@ -287,17 +296,21 @@ export default function AdminLayout({ children, title }) {
                                 <Clock size={13} className="text-emerald-600 dark:text-emerald-400" />
                                 {jam}
                             </span>
+                            {/* 💡 Widget Cuaca Konsisten */}
                             {cuaca && (
                                 <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-gray-300">
-                                    <cuaca.Icon size={13} className="text-amber-500" />
-                                    {cuaca.label}, {cuaca.suhu}&deg;C
+                                    {cuaca.Icon ? (
+                                        <cuaca.Icon size={13} className="text-amber-500" />
+                                    ) : (
+                                        <span className="text-amber-500">🌤️</span>
+                                    )}
+                                    {cuaca.label}, {cuaca.suhu}
                                 </span>
                             )}
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* Tombol Toggle Mode Gelap/Terang */}
                         <button
                             type="button"
                             onClick={toggleDarkMode}
@@ -309,7 +322,6 @@ export default function AdminLayout({ children, title }) {
 
                         <div className="h-6 w-px bg-gray-200 dark:bg-gray-800" />
 
-                        {/* Profil User */}
                         <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-200">
                             <span className="text-xs font-semibold">{user?.name ?? 'Apip'}</span>
                             {user?.avatar ? (
@@ -327,11 +339,10 @@ export default function AdminLayout({ children, title }) {
                     </div>
                 </header>
 
-                {/* Konten Utama */}
                 <main className="flex-1 p-6 relative z-10 transition-colors">{children}</main>
             </div>
 
-            {/* Modal Pop-up Konfirmasi Logout */}
+            {/* Logout Modal */}
             {showLogoutModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
                     <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-2xl border border-gray-100 dark:border-gray-700 animate-in fade-in duration-150">
