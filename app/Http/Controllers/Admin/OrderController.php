@@ -56,6 +56,8 @@ class OrderController extends Controller
                     // sudah selesai (nilai final). 100% masuk saldo mitra,
                     // tanpa potongan komisi - lihat User::saldoMitra().
                     'denda'           => $order->hitungDenda(),
+                    'denda_payment_receipt' => $order->denda_payment_receipt ? Storage::disk('public')->url($order->denda_payment_receipt) : null,
+                    'denda_paid_at'   => $order->denda_paid_at?->format('d M Y H:i'),
                     'cancel_reason'   => $order->cancel_reason,
                     'total_price'     => $order->total_price,
                     'payment_method'  => $order->payment_method,
@@ -246,6 +248,27 @@ class OrderController extends Controller
         return back()->with('success', 'Pembayaran tunai untuk pesanan '.$order->order_code.' berhasil dikonfirmasi.');
     }
 
+
+    public function approveDenda(Order $order)
+{
+    abort_unless($order->denda_payment_receipt, 422, 'Bukti pembayaran denda belum diunggah.');
+    abort_if($order->denda_paid_at, 422, 'Denda untuk pesanan ini sudah diverifikasi sebelumnya.');
+
+    $order->update(['denda_paid_at' => now()]);
+
+    if ($order->customer_id) {
+        Notifikasi::create([
+            'user_id' => $order->customer_id,
+            'order_id' => $order->id,
+            'type' => 'pembayaran_diterima',
+            'judul' => 'Denda Terverifikasi',
+            'pesan' => 'Pembayaran denda untuk pesanan '.$order->order_code.' telah diverifikasi.',
+        ]);
+    }
+
+    return back()->with('success', 'Denda berhasil diverifikasi, saldo mitra otomatis bertambah.');
+}
+
     public function destroy(Order $order)
     {
         // Hapus file bukti pembayaran fisik jika ada
@@ -257,6 +280,8 @@ class OrderController extends Controller
 
         return back()->with('success', 'Pesanan berhasil dihapus.');
     }
+
+    
 
     public function bulkDestroy(Request $request)
     {

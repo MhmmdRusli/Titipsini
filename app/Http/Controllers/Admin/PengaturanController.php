@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Penarikan;
 use App\Models\SaldoMutasi;
 use App\Models\DendaSetting;
+use App\Models\PaymentSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,22 +44,34 @@ class PengaturanController extends Controller
      * Menampilkan halaman Pengaturan QRIS / Pembayaran.
      */
     public function qris(): Response
-    {
-        return Inertia::render('Admin/Pengaturan/Qris');
-    }
+{
+    $setting = PaymentSetting::current();
+
+    return Inertia::render('Admin/Pengaturan/Qris', [
+        'qris_url' => $setting->qris_image ? Storage::url($setting->qris_image) : null,
+    ]);
+}
 
     /**
      * Menyimpan perubahan Pengaturan QRIS.
      */
     public function updateQris(Request $request): RedirectResponse
-    {
-        // Validasi jika ada upload gambar QRIS atau string data QRIS
-        $request->validate([
-            'qris_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
+{
+    $request->validate([
+        'qris_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
 
-        return back()->with('success', 'Pengaturan QRIS berhasil diperbarui.');
+    $setting = PaymentSetting::current();
+
+    if ($setting->qris_image) {
+        Storage::disk('public')->delete($setting->qris_image);
     }
+
+    $path = $request->file('qris_image')->store('qris', 'public');
+    $setting->update(['qris_image' => $path]);
+
+    return back()->with('success', 'Pengaturan QRIS berhasil diperbarui.');
+}
 
     /**
      * Menampilkan halaman keamanan pengaturan admin.

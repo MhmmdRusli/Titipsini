@@ -172,8 +172,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
         Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
-        Route::get('denda', [\App\Http\Controllers\Admin\PengaturanController::class, 'denda'])->name('denda');
-        Route::put('denda', [\App\Http\Controllers\Admin\PengaturanController::class, 'updateDenda'])->name('denda.update');
+        Route::get('denda', [PengaturanController::class, 'denda'])->name('denda');
+        Route::put('denda', [PengaturanController::class, 'updateDenda'])->name('denda.update');
+        // NOTE: route approve-denda DIPINDAH ke luar group ini, lihat bagian
+        // "orders" di bawah — sebelumnya salah taruh di sini, bikin URL dobel
+        // /admin/pengaturan/admin/pesanan/... dan route name nyasar.
     });
 
     Route::resource('berita', AdminBeritaController::class)
@@ -185,6 +188,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::patch('orders/{order}/approve-denda', [OrderController::class, 'approveDenda'])->name('orders.approveDenda');
     Route::delete('orders/bulk-delete', [OrderController::class, 'bulkDestroy'])->name('orders.bulkDestroy');
     Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/orders/{order}/lapor', [CustomerReportController::class, 'create'])->name('orders.lapor');

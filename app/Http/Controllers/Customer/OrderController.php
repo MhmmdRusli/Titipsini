@@ -51,15 +51,18 @@ class OrderController extends Controller
             ],
         ]);
     }
-    public function show(Request $request, Order $order): Response
+   public function show(Request $request, Order $order): Response
 {
     abort_unless($order->customer_id === $request->user()->id, 403);
 
     $order->load('partner:id,name,phone');
-    $order->denda = $order->hitungDenda(); // <-- tambahin baris ini
+
+    $setting = PaymentSetting::current();
+    $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
 
     return Inertia::render('Customer/Orders/Show', [
-        'order' => $order,
+        'order' => $order, // denda sudah otomatis ke-append lewat accessor di model
+        'qris_url' => $qrisUrl,
     ]);
 }
     public function cancel(Request $request, Order $order): RedirectResponse
@@ -280,23 +283,36 @@ class OrderController extends Controller
  
     return back()->with('success', 'Denda keterlambatan berhasil dibayar.');
 }
-public function uploadBuktiDenda(Request $request, Order $order)
+public function uploadBuktiDenda(Request $request, Order $order): RedirectResponse
 {
+    abort_unless($order->customer_id === $request->user()->id, 403);
+
     $request->validate([
-        'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        'denda_receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
     ]);
 
-    if ($request->hasFile('bukti_pembayaran')) {
-        $path = $request->file('bukti_pembayaran')->store('bukti-denda', 'public');
-        
-        // Simpan path ke database (sesuaikan nama kolom di tabel orders kamu)
-        $order->update([
-            'bukti_denda' => $path,
-            'status_denda' => 'menunggu_verifikasi', // atau sesuaikan dengan flow kamu
+    if ($order->denda_payment_receipt) {
+        Storage::disk('public')->delete($order->denda_payment_receipt);
+    }
+
+    $path = $request->file('denda_receipt')->store('bukti-denda', 'public');
+
+    $order->update([
+        'denda_payment_receipt' => $path,
+    ]);
+
+    if ($order->partner_id) {
+        Notifikasi::create([
+            'user_id' => $order->partner_id,
+            'order_id' => $order->id,
+            'type' => 'pembayaran_diterima',
+            'judul' => 'Bukti Pembayaran Denda Diunggah',
+            'pesan' => 'Customer telah mengunggah bukti pembayaran denda untuk pesanan '.$order->order_code.'.',
         ]);
     }
 
-    return redirect()->back()->with('success', 'Bukti pembayaran denda berhasil diunggah!');
+    return redirect()->route('customer.orders.show', $order->id)
+        ->with('success', 'Bukti pembayaran denda berhasil diunggah! Menunggu verifikasi.');
 }
  
     

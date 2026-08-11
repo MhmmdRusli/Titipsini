@@ -77,6 +77,12 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
     const [cashConfirmTarget, setCashConfirmTarget] = useState(null);
     const [isCashConfirming, setIsCashConfirming] = useState(false);
 
+    // Verifikasi denda keterlambatan oleh Admin - setelah customer bayar &
+    // upload bukti, Admin verifikasi di sini. Saldo mitra bertambah otomatis
+    // (dihitung dinamis lewat User::saldoMitra()), tidak ada increment manual.
+    const [dendaApproveTarget, setDendaApproveTarget] = useState(null);
+    const [isApprovingDenda, setIsApprovingDenda] = useState(false);
+
     const [selectMode, setSelectMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState([]);
     const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
@@ -123,6 +129,23 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                     setSelectedOrder(null);
                 },
                 onError: () => setIsCashConfirming(false),
+            }
+        );
+    }
+
+    function handleApproveDenda() {
+        setIsApprovingDenda(true);
+        router.patch(
+            `/admin/orders/${dendaApproveTarget.id}/approve-denda`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setIsApprovingDenda(false);
+                    setDendaApproveTarget(null);
+                    setSelectedOrder(null);
+                },
+                onError: () => setIsApprovingDenda(false),
             }
         );
     }
@@ -331,9 +354,19 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                     )
                                                 )}
                                                 {order.denda > 0 && (
-                                                    <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
-                                                        <AlertTriangle size={11} /> Terlambat
-                                                    </span>
+                                                    order.denda_paid_at ? (
+                                                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                            <CheckCircle2 size={11} /> Denda Lunas
+                                                        </span>
+                                                    ) : order.denda_payment_receipt ? (
+                                                        <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                                            <AlertTriangle size={11} /> Denda Perlu Verifikasi
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                                            <AlertTriangle size={11} /> Terlambat
+                                                        </span>
+                                                    )
                                                 )}
                                             </div>
                                         </td>
@@ -390,6 +423,17 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                     >
                                                         <HandCoins size={13} />
                                                         Konfirmasi Cash
+                                                    </button>
+                                                )}
+                                                {order.denda > 0 && !order.denda_paid_at && order.denda_payment_receipt && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setDendaApproveTarget(order)}
+                                                        className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 transition hover:bg-amber-600 hover:text-white dark:border-amber-800/60 dark:bg-amber-950/50 dark:text-amber-400 dark:hover:bg-amber-600 dark:hover:text-white"
+                                                        title="Verifikasi Denda"
+                                                    >
+                                                        <AlertTriangle size={13} />
+                                                        Verifikasi Denda
                                                     </button>
                                                 )}
                                                 <button
@@ -451,6 +495,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                     order={selectedOrder}
                     onClose={() => setSelectedOrder(null)}
                     onConfirmCash={(order) => setCashConfirmTarget(order)}
+                    onApproveDenda={(order) => setDendaApproveTarget(order)}
                 />
             )}
 
@@ -548,6 +593,43 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                     </div>
                 </div>
             )}
+
+            {/* Modal konfirmasi verifikasi denda - terpisah, sama pola dengan cash */}
+            {dendaApproveTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                <AlertTriangle size={18} />
+                            </span>
+                            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Verifikasi Denda?</h2>
+                        </div>
+                        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                            Pastikan bukti bayar denda pesanan <span className="font-semibold text-gray-800 dark:text-gray-200">{dendaApproveTarget.order_code}</span> sebesar{' '}
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{formatRupiah(dendaApproveTarget.denda)}</span> sudah benar sebelum melanjutkan.
+                            Saldo mitra akan otomatis bertambah.
+                        </p>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setDendaApproveTarget(null)}
+                                disabled={isApprovingDenda}
+                                className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 disabled:opacity-60 dark:text-gray-300 dark:hover:bg-slate-800"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleApproveDenda}
+                                disabled={isApprovingDenda}
+                                className="rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 disabled:opacity-60"
+                            >
+                                {isApprovingDenda ? 'Memproses...' : 'Ya, Verifikasi Denda'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 }
@@ -607,7 +689,7 @@ function CustomSelect({ value, options, onChange }) {
     );
 }
 
-function OrderDetailModal({ order, onClose, onConfirmCash }) {
+function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda }) {
     const [previewImage, setPreviewImage] = useState(false);
     const { data, setData, errors } = useForm({
         status: order.status,
@@ -779,6 +861,54 @@ function OrderDetailModal({ order, onClose, onConfirmCash }) {
                         ) : (
                             <p className="mt-2 text-xs text-emerald-700/80 dark:text-emerald-300/80">
                                 Uang tunai untuk pesanan ini sudah dikonfirmasi diterima oleh admin.
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {/* Blok khusus denda keterlambatan - tampil kalau order.denda > 0 */}
+                {order.denda > 0 && (
+                    <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
+                        <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase text-amber-700 dark:text-amber-400">
+                                <AlertTriangle size={14} /> Denda Keterlambatan
+                            </span>
+                            {order.denda_paid_at && (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                    <CheckCircle2 size={12} /> Terverifikasi {order.denda_paid_at}
+                                </span>
+                            )}
+                        </div>
+
+                        <p className="mt-2 text-sm font-bold text-amber-800 dark:text-amber-300">
+                            {formatRupiah(order.denda)}
+                        </p>
+
+                        {order.denda_paid_at ? (
+                            <p className="mt-2 text-xs text-emerald-700/80 dark:text-emerald-300/80">
+                                Denda sudah diverifikasi, saldo mitra otomatis bertambah.
+                            </p>
+                        ) : order.denda_payment_receipt ? (
+                            <>
+                                <div className="mt-3 overflow-hidden rounded-xl border border-amber-200 bg-white dark:border-amber-800 dark:bg-slate-900">
+                                    <img
+                                        src={order.denda_payment_receipt}
+                                        alt="Bukti Bayar Denda"
+                                        className="h-32 w-full object-contain"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => onApproveDenda(order)}
+                                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
+                                >
+                                    <CheckCircle2 size={15} />
+                                    Verifikasi Denda
+                                </button>
+                            </>
+                        ) : (
+                            <p className="mt-2 text-xs text-amber-700/80 dark:text-amber-300/80">
+                                Menunggu customer membayar & mengunggah bukti pembayaran denda.
                             </p>
                         )}
                     </div>
