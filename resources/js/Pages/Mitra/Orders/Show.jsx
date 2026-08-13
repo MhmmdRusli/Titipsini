@@ -7,6 +7,15 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
+// Helper untuk memastikan URL gambar selalu valid
+function getImageUrl(path) {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/storage/')) {
+        return path;
+    }
+    return `/storage/${path}`;
+}
+
 const STATUS_CONFIG = {
     baru: { label: 'Pesanan Diproses', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400', icon: Loader2 },
     diproses: { label: 'Pesanan Diproses', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400', icon: Loader2 },
@@ -14,7 +23,7 @@ const STATUS_CONFIG = {
     dibatalkan: { label: 'Dibatalkan', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
 };
 
-// Warna badge fase - generik untuk semua kategori (menunggu = abu, berjalan = biru, akhir = hijau)
+// Warna badge fase - generik untuk semua kategori
 const FASE_COLOR = {
     menunggu: 'bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-300',
     berjalan: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400',
@@ -23,7 +32,9 @@ const FASE_COLOR = {
 
 export default function Show({ order }) {
     const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewDendaOpen, setPreviewDendaOpen] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
+    const [isVerifyingDenda, setIsVerifyingDenda] = useState(false);
     const [isAdvancingFase, setIsAdvancingFase] = useState(false);
 
     const statusInfo = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.diproses;
@@ -38,6 +49,18 @@ export default function Show({ order }) {
             {
                 preserveScroll: true,
                 onFinish: () => setIsVerifying(false),
+            }
+        );
+    }
+
+    function verifikasiDenda() {
+        setIsVerifyingDenda(true);
+        router.patch(
+            `/mitra/pesanan/${order.id}/verifikasi-denda`,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setIsVerifyingDenda(false),
             }
         );
     }
@@ -90,8 +113,7 @@ export default function Show({ order }) {
                     </div>
                 </div>
 
-                {/* Status Operasional (Fase) - baru: menunggu -> berjalan -> akhir,
-                    label & tombol aksinya beda tergantung kategori layanan */}
+                {/* Status Operasional (Fase) */}
                 {order.fase_label && (
                     <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                         <div className="flex items-center justify-between">
@@ -126,11 +148,7 @@ export default function Show({ order }) {
                     </div>
                 )}
 
-                {/* Info Denda Keterlambatan - cuma muncul kalau denda > 0.
-                    Denda 100% masuk ke mitra (tidak dipotong komisi), akan
-                    ditambahkan otomatis ke saldoMitra() begitu order berstatus
-                    'selesai'. Nilainya "live" selagi order masih berjalan
-                    (belum fase akhir), dan TERKUNCI begitu fase jadi akhir. */}
+                {/* Info Denda Keterlambatan */}
                 {order.denda > 0 && (
                     <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/30">
                         <div className="flex items-center gap-2">
@@ -170,7 +188,7 @@ export default function Show({ order }) {
                         </div>
                     </div>
 
-                    {/* Logistik Rute Penjemputan & Pengantaran */}
+                    {/* Logistik Rute Penjemputan */}
                     <div className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
                         <MapPin size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
                         <div>
@@ -215,7 +233,7 @@ export default function Show({ order }) {
                     </div>
                 </div>
 
-                {/* Bukti Pembayaran & Verifikasi */}
+                {/* Bukti Pembayaran & Verifikasi Utama */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <div className="mb-3 flex items-center justify-between">
                         <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -235,7 +253,6 @@ export default function Show({ order }) {
                     </div>
 
                     {isCash ? (
-                        // --- Alur khusus CASH: tidak ada foto bukti, verifikasi = konfirmasi uang diterima ---
                         order.payment_verified_at ? (
                             <p className="text-center text-xs text-gray-400 py-4">
                                 Pembayaran tunai sudah dikonfirmasi pada {order.payment_verified_at}
@@ -257,13 +274,12 @@ export default function Show({ order }) {
                             </>
                         )
                     ) : order.payment_receipt ? (
-                        // --- Alur QRIS/transfer: seperti semula ---
                         <>
                             <div
                                 onClick={() => setPreviewOpen(true)}
-                                className="relative cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-gray-50 dark:border-gray-700dark:bg-gray-900"
+                                className="relative cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
                             >
-                                <img src={order.payment_receipt} alt="Bukti Pembayaran" className="h-44 w-full object-contain p-2" />
+                                <img src={getImageUrl(order.payment_receipt)} alt="Bukti Pembayaran" className="h-44 w-full object-contain p-2" />
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition hover:bg-black/40 hover:opacity-100">
                                     <span className="flex items-center gap-1 text-xs font-semibold">
                                         <ExternalLink size={13} /> Lihat Penuh
@@ -294,6 +310,60 @@ export default function Show({ order }) {
                     )}
                 </div>
 
+                {/* --- BLOK BUKTI PEMBAYARAN DENDA KETERLAMBATAN --- */}
+                {order.denda > 0 && (
+                    <div className="rounded-2xl border border-amber-200 bg-white p-4 shadow-sm dark:border-amber-900/50 dark:bg-gray-800">
+                        <div className="mb-3 flex items-center justify-between">
+                            <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                <Image size={15} className="text-amber-600 dark:text-amber-400" />
+                                Bukti Pembayaran Denda
+                            </p>
+                            {order.status_denda === 'terverifikasi' && (
+                                <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700 dark:bg-green-950/40 dark:text-[#4ade80]">
+                                    <ShieldCheck size={12} />
+                                    Terverifikasi
+                                </span>
+                            )}
+                        </div>
+
+                        {order.bukti_denda ? (
+                            <>
+                                <div
+                                    onClick={() => setPreviewDendaOpen(true)}
+                                    className="relative cursor-pointer overflow-hidden rounded-xl border border-amber-100 bg-amber-50/50 dark:border-amber-900/30 dark:bg-gray-900"
+                                >
+                                    <img src={getImageUrl(order.bukti_denda)} alt="Bukti Pembayaran Denda" className="h-44 w-full object-contain p-2" />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition hover:bg-black/40 hover:opacity-100">
+                                        <span className="flex items-center gap-1 text-xs font-semibold">
+                                            <ExternalLink size={13} /> Lihat Penuh
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {order.status_denda === 'terverifikasi' ? (
+                                    <p className="mt-3 text-center text-xs text-gray-400">
+                                        Pembayaran denda telah diverifikasi.
+                                    </p>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={verifikasiDenda}
+                                        disabled={isVerifyingDenda}
+                                        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-600 dark:bg-amber-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                                    >
+                                        <ShieldCheck size={16} />
+                                        {isVerifyingDenda ? 'Memverifikasi...' : 'Verifikasi Denda'}
+                                    </button>
+                                )}
+                            </>
+                        ) : (
+                            <p className="text-center text-xs text-gray-400 italic py-4">
+                                Customer belum mengunggah bukti pembayaran denda.
+                            </p>
+                        )}
+                    </div>
+                )}
+
                 {/* Nota Finansial / Rincian Pembayaran */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Nota Finansial Pembayaran</p>
@@ -318,15 +388,29 @@ export default function Show({ order }) {
                 </div>
             </div>
 
-            {/* Modal Perbesar Gambar */}
+            {/* Modal Perbesar Gambar Bukti Utama */}
             {previewOpen && order.payment_receipt && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
                     onClick={() => setPreviewOpen(false)}
                 >
                     <img
-                        src={order.payment_receipt}
+                        src={getImageUrl(order.payment_receipt)}
                         alt="Bukti Pembayaran Perbesar"
+                        className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl"
+                    />
+                </div>
+            )}
+
+            {/* Modal Perbesar Gambar Bukti Denda */}
+            {previewDendaOpen && order.bukti_denda && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+                    onClick={() => setPreviewDendaOpen(false)}
+                >
+                    <img
+                        src={getImageUrl(order.bukti_denda)}
+                        alt="Bukti Pembayaran Denda Perbesar"
                         className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl"
                     />
                 </div>

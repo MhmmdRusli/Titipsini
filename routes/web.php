@@ -282,6 +282,9 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
 
     Route::get('/pendapatan/riwayat', [MitraPendapatanController::class, 'riwayat'])->name('pendapatan.riwayat');
 
+    Route::patch('/pesanan/{order}/verifikasi-denda', [\App\Http\Controllers\Mitra\OrderController::class, 'verifikasiDenda'])
+        ->name('orders.verifikasiDenda');
+
     
 });
 

@@ -124,7 +124,6 @@ class OrderController extends Controller
 
         $order->load('customer');
 
-        
         $subtotal = $order->subtotal > 0 ? $order->subtotal : $order->total_price;
         $discount = $order->discount ?? 0;
         $pickupFee = $order->pickup_fee ?? 0;
@@ -146,31 +145,29 @@ class OrderController extends Controller
                 'dropoff_address' => $order->dropoff_address,
                 'item_description' => $order->item_name,
                 'duration' => $this->hitungDurasi($order),
-                // Dikirim sebagai label string, bukan boolean mentah — supaya tidak
-                // "hilang" saat dirender di React (JSX tidak menampilkan boolean false).
                 'pickup_status' => $order->is_pickup ? 'Dijemput oleh mitra' : 'Diantar sendiri oleh customer',
                 'subtotal' => (float) $subtotal,
                 'discount' => (float) $discount,
                 'pickup_fee' => (float) $pickupFee,
                 'total' => (float) $order->total_price,
                 'created_at' => optional($order->created_at)->format('d M Y, H:i'),
-                // Dikirim supaya frontend bisa membedakan alur cash vs QRIS/transfer
-                // di blok "Bukti Pembayaran & Verifikasi".
                 'payment_method' => $order->payment_method,
                 'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
                 'payment_verified_at' => optional($order->payment_verified_at)->format('d M Y, H:i'),
-                // Status operasional (fase) - lihat blok baru "Status Operasional" di Show.jsx
+                
+                // 👇 Properti Denda yang ditambahkan agar muncul di halaman Mitra
+                'denda' => (float) $order->denda, 
+                'bukti_denda' => $order->bukti_denda ? Storage::disk('public')->url($order->bukti_denda) : null,
+                'status_denda' => $order->status_denda,
+
                 'fase' => $order->fase,
                 'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
                 'next_fase_action_label' => $nextFaseAction,
-                // Tombol maju fase HANYA boleh dipakai kalau order sudah 'diproses'
-                // (payment sudah terverifikasi) dan masih ada fase berikutnya.
                 'can_advance_fase' => $order->status === 'diproses' && $nextFaseAction !== null,
             ],
         ]);
     }
 
-    
     public function verifikasiPembayaran(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
@@ -186,7 +183,6 @@ class OrderController extends Controller
         if (! $order->payment_verified_at) {
             $order->update([
                 'payment_verified_at' => now(),
-               
                 'status' => $order->status === 'baru' ? 'diproses' : $order->status,
             ]);
 
@@ -204,7 +200,6 @@ class OrderController extends Controller
         return back()->with('success', $isCash ? 'Pembayaran tunai berhasil dikonfirmasi.' : 'Pembayaran berhasil diverifikasi.');
     }
 
-    
     public function updateFase(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
@@ -218,12 +213,6 @@ class OrderController extends Controller
 
         $label = self::FASE_LABELS[$order->service_type][$next] ?? $next;
 
-        // Kalau fase baru saja mencapai 'akhir' DAN pembayaran sudah
-        // terverifikasi, otomatis selesaikan pesanan (status -> 'selesai')
-        // supaya Admin tidak perlu klik "Selesaikan Pesanan" manual lagi.
-        // Kalau pembayaran BELUM terverifikasi, fase tetap ditandai 'akhir'
-        // tapi status menunggu Admin/Mitra verifikasi pembayaran dulu
-        // (lihat badge "Siap Diselesaikan" di halaman Admin).
         if ($next === 'akhir' && $order->payment_verified_at) {
             OrderFaseService::completeOrder($order);
 
@@ -241,7 +230,6 @@ class OrderController extends Controller
         return back()->with('success', 'Status pesanan berhasil diperbarui menjadi "'.$label.'".');
     }
 
-   
     private function hitungDurasi(Order $order): ?string
     {
         if (! $order->start_date || ! $order->end_date) {
@@ -254,4 +242,29 @@ class OrderController extends Controller
 
         return $hari.' hari';
     }
+
+    public function verifikasiDenda(Request $request, Order $order)
+{
+    // Pengaman: Pastikan order benar-benar milik mitra yang sedang login
+    abort_unless($order->partner_id === Auth::id(), 403);
+
+    abort_unless($order->bukti_denda, 422, 'Belum ada bukti pembayaran denda yang diunggah.');
+    abort_if($order->denda_paid_at, 422, 'Denda untuk pesanan ini sudah diverifikasi sebelumnya.');
+
+    $order->update([
+        'status_denda' => 'terverifikasi',
+        'denda_paid_at' => now(),
+    ]);
+
+    // Kirim notifikasi ke Customer bahwa denda sudah diverifikasi
+    Notifikasi::create([
+        'user_id' => $order->customer_id,
+        'order_id' => $order->id,
+        'type' => 'pembayaran_diterima',
+        'judul' => 'Denda Terverifikasi',
+        'pesan' => 'Mitra telah memverifikasi pembayaran denda untuk pesanan '.$order->order_code.'.',
+    ]);
+
+    return redirect()->back()->with('success', 'Pembayaran denda keterlambatan berhasil diverifikasi!');
+}
 }

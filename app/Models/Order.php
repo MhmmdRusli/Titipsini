@@ -27,6 +27,8 @@ class Order extends Model
         'tanggal_selesai_aktual',
         'denda_paid_at',
         'denda_payment_receipt',
+        'bukti_denda',
+        'status_denda',
         'cancel_reason',
         'subtotal',
         'discount',

@@ -91,7 +91,8 @@ export default function OrderShow({ order, qris_url }) {
 
     function handleDendaFileChange(e) {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (!
+            file) return;
         setDendaFile(file);
         setDendaPreview(URL.createObjectURL(file));
     }

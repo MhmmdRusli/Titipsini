@@ -51,20 +51,22 @@ class OrderController extends Controller
             ],
         ]);
     }
-   public function show(Request $request, Order $order): Response
-{
-    abort_unless($order->customer_id === $request->user()->id, 403);
 
-    $order->load('partner:id,name,phone');
+    public function show(Request $request, Order $order): Response
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
 
-    $setting = PaymentSetting::current();
-    $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
+        $order->load('partner:id,name,phone');
 
-    return Inertia::render('Customer/Orders/Show', [
-        'order' => $order, // denda sudah otomatis ke-append lewat accessor di model
-        'qris_url' => $qrisUrl,
-    ]);
-}
+        $setting = PaymentSetting::current();
+        $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
+
+        return Inertia::render('Customer/Orders/Show', [
+            'order' => $order, // denda sudah otomatis ke-append lewat accessor di model
+            'qris_url' => $qrisUrl,
+        ]);
+    }
+
     public function cancel(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
@@ -90,10 +92,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Halaman sukses setelah pesanan dibuat. Karena sekarang tidak ada lagi
-     * halaman pilih metode bayar terpisah, halaman ini juga menampilkan
-     * opsi "Bayar dengan Saldo" (kalau belum lunas) - makanya butuh total
-     * pesanan & saldo customer.
+     * Halaman sukses setelah pesanan dibuat.
      */
     public function success(Request $request, Order $order): Response
     {
@@ -110,10 +109,6 @@ class OrderController extends Controller
 
     /**
      * POST /app/orders/{order}/bayar-saldo
-     * Dipanggil dari tombol "Bayar dengan Saldo Titipsini" - bisa dari halaman
-     * Success ATAU halaman BuktiPembayaran. Potong saldo & tandai order lunas
-     * kalau saldo cukup; kalau tidak, kembalikan error ke halaman asal (tanpa
-     * redirect) supaya errors.saldo bisa ditampilkan di sana.
      */
     public function bayarSaldo(Request $request, Order $order): RedirectResponse
     {
@@ -220,15 +215,14 @@ class OrderController extends Controller
 
             $path = $request->file('payment_receipt')->store('payment_proofs', 'public');
 
-            // 3. Update status pesanan, path foto bukti, & metode bayar (kalau
-            // sebelumnya masih 'pending' karena order dibuat tanpa pilih metode).
+            // 3. Update status pesanan & path foto bukti
             $order->update([
                 'payment_receipt' => $path,
                 'status'          => 'diproses',
                 'payment_method'  => $order->payment_method === 'pending' ? 'transfer' : $order->payment_method,
             ]);
 
-            // 4. Beri tahu mitra bahwa bukti pembayaran sudah diunggah & menunggu verifikasi
+            // 4. Beri tahu mitra
             if ($order->partner_id) {
                 Notifikasi::create([
                     'user_id' => $order->partner_id,
@@ -239,7 +233,7 @@ class OrderController extends Controller
                 ]);
             }
 
-            // 5. Beri tahu customer sendiri sebagai konfirmasi bahwa bukti pembayarannya sudah diterima sistem
+            // 5. Beri tahu customer
             Notifikasi::create([
                 'user_id' => $order->customer_id,
                 'order_id' => $order->id,
@@ -249,71 +243,74 @@ class OrderController extends Controller
             ]);
         }
 
-        // 6. Kembali ke halaman detail pesanan dengan pesan sukses
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi.');
     }
+
     public function bayarDenda(Request $request, Order $order): RedirectResponse
-{
-    abort_unless($order->customer_id === $request->user()->id, 403);
- 
-    if ($order->denda_paid_at !== null) {
-        return back()->with('success', 'Denda untuk pesanan ini sudah dibayar sebelumnya.');
-    }
- 
-    $dendaAmount = $order->hitungDenda();
- 
-    if ($dendaAmount <= 0) {
-        return back()->with('success', 'Pesanan ini tidak memiliki denda keterlambatan.');
-    }
- 
-    $customer = $request->user();
- 
-    if ((float) $customer->saldo < $dendaAmount) {
-        return back()->withErrors([
-            'saldo_denda' => 'Saldo kamu tidak mencukupi untuk membayar denda ini. Silakan top up terlebih dahulu.',
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+     
+        if ($order->denda_paid_at !== null) {
+            return back()->with('success', 'Denda untuk pesanan ini sudah dibayar sebelumnya.');
+        }
+     
+        $dendaAmount = $order->hitungDenda();
+     
+        if ($dendaAmount <= 0) {
+            return back()->with('success', 'Pesanan ini tidak memiliki denda keterlambatan.');
+        }
+     
+        $customer = $request->user();
+     
+        if ((float) $customer->saldo < $dendaAmount) {
+            return back()->withErrors([
+                'saldo_denda' => 'Saldo kamu tidak mencukupi untuk membayar denda ini. Silakan top up terlebih dahulu.',
+            ]);
+        }
+     
+        $customer->decrement('saldo', $dendaAmount);
+     
+        $order->update([
+            'denda_paid_at' => now(),
+            'status_denda'  => 'terverifikasi',
         ]);
-    }
- 
-    $customer->decrement('saldo', $dendaAmount);
- 
-    $order->update([
-        'denda_paid_at' => now(),
-    ]);
- 
-    return back()->with('success', 'Denda keterlambatan berhasil dibayar.');
-}
-public function uploadBuktiDenda(Request $request, Order $order): RedirectResponse
-{
-    abort_unless($order->customer_id === $request->user()->id, 403);
-
-    $request->validate([
-        'denda_receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-    ]);
-
-    if ($order->denda_payment_receipt) {
-        Storage::disk('public')->delete($order->denda_payment_receipt);
+     
+        return back()->with('success', 'Denda keterlambatan berhasil dibayar.');
     }
 
-    $path = $request->file('denda_receipt')->store('bukti-denda', 'public');
+    public function uploadBuktiDenda(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
 
-    $order->update([
-        'denda_payment_receipt' => $path,
-    ]);
-
-    if ($order->partner_id) {
-        Notifikasi::create([
-            'user_id' => $order->partner_id,
-            'order_id' => $order->id,
-            'type' => 'pembayaran_diterima',
-            'judul' => 'Bukti Pembayaran Denda Diunggah',
-            'pesan' => 'Customer telah mengunggah bukti pembayaran denda untuk pesanan '.$order->order_code.'.',
+        $request->validate([
+            'denda_receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
-    }
 
-    return redirect()->route('customer.orders.show', $order->id)
-        ->with('success', 'Bukti pembayaran denda berhasil diunggah! Menunggu verifikasi.');
-}
- 
-    
+        // Hapus file denda lama jika ada (menggunakan nama kolom bukti_denda)
+        if ($order->bukti_denda) {
+            Storage::disk('public')->delete($order->bukti_denda);
+        }
+
+        $path = $request->file('denda_receipt')->store('bukti-denda', 'public');
+
+        // Disimpan ke kolom 'bukti_denda' dan ubah 'status_denda'
+        $order->update([
+            'bukti_denda'  => $path,
+            'status_denda' => 'menunggu_verifikasi',
+        ]);
+
+        if ($order->partner_id) {
+            Notifikasi::create([
+                'user_id' => $order->partner_id,
+                'order_id' => $order->id,
+                'type' => 'pembayaran_diterima',
+                'judul' => 'Bukti Pembayaran Denda Diunggah',
+                'pesan' => 'Customer telah mengunggah bukti pembayaran denda untuk pesanan '.$order->order_code.'.',
+            ]);
+        }
+
+        return redirect()->route('customer.orders.show', $order->id)
+            ->with('success', 'Bukti pembayaran denda berhasil diunggah! Menunggu verifikasi.');
+    }
 }
