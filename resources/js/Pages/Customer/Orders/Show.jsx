@@ -220,7 +220,7 @@ export default function OrderShow({ order, qris_url }) {
                                     <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
                                         <CheckCircle2 size={14} /> Lunas pada {order.denda_paid_at}
                                     </p>
-                                ) : order.denda_payment_receipt ? (
+                                ) : order.bukti_denda ?  (
                                     <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400">
                                         <Clock size={14} /> Menunggu verifikasi mitra
                                     </p>
