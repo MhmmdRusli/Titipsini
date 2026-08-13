@@ -174,9 +174,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
         Route::get('denda', [PengaturanController::class, 'denda'])->name('denda');
         Route::put('denda', [PengaturanController::class, 'updateDenda'])->name('denda.update');
-        // NOTE: route approve-denda DIPINDAH ke luar group ini, lihat bagian
-        // "orders" di bawah — sebelumnya salah taruh di sini, bikin URL dobel
-        // /admin/pengaturan/admin/pesanan/... dan route name nyasar.
     });
 
     Route::resource('berita', AdminBeritaController::class)
@@ -256,15 +253,11 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::get('/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
     Route::post('/penarikan/tarik', [PenarikanController::class, 'store'])->name('penarikan.store');
     Route::get('/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
-    Route::get('/pendapatan/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');
-    Route::get('/pendapatan/penarikan/tarik', [PenarikanController::class, 'create'])->name('penarikan.create');
-    Route::post('/pendapatan/penarikan', [PenarikanController::class, 'store'])->name('penarikan.store');
-    Route::get('/pendapatan/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('penarikan.sukses');
 
-    // Alias URL pendek penarikan
-    Route::get('/penarikan', [PenarikanController::class, 'index'])->name('mitra.penarikan.index');
-    Route::get('/penarikan/tarik', [PenarikanController::class, 'create'])->name('mitra.penarikan.create');
-    Route::get('/penarikan/sukses/{penarikan}', [PenarikanController::class, 'sukses'])->name('mitra.penarikan.sukses');
+    Route::get('/pendapatan/penarikan', [PenarikanController::class, 'index'])->name('pendapatan.penarikan.index');
+    Route::get('/pendapatan/penarikan/tarik', [PenarikanController::class, 'create'])->name('pendapatan.penarikan.create');
+    Route::post('/pendapatan/penarikan', [PenarikanController::class, 'store'])->name('pendapatan.penarikan.store');
+    Route::get('/pendapatan/penarikan/{penarikan}/sukses', [PenarikanController::class, 'sukses'])->name('pendapatan.penarikan.sukses');
 
     Route::get('/keamanan', [KeamananController::class, 'edit'])->name('keamanan.edit');
     Route::put('/keamanan', [KeamananController::class, 'update'])->name('keamanan.update');
@@ -277,15 +270,14 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
 
     Route::patch('/pesanan/{order}/verifikasi-pembayaran', [MitraOrderController::class, 'verifikasiPembayaran'])->name('orders.verifikasiPembayaran');
 
+    // 👇 DITAMBAHKAN: route ini sebelumnya belum terdaftar, menyebabkan
+    // klik tombol "Verifikasi Denda" di halaman Mitra selalu 404.
+    Route::patch('/pesanan/{order}/verifikasi-denda', [MitraOrderController::class, 'verifikasiDenda'])->name('orders.verifikasiDenda');
+
     Route::patch('/pesanan/{order}/fase', [\App\Http\Controllers\Mitra\OrderController::class, 'updateFase'])
-    ->name('orders.updateFase');
+        ->name('orders.updateFase');
 
     Route::get('/pendapatan/riwayat', [MitraPendapatanController::class, 'riwayat'])->name('pendapatan.riwayat');
-
-    Route::patch('/pesanan/{order}/verifikasi-denda', [\App\Http\Controllers\Mitra\OrderController::class, 'verifikasiDenda'])
-        ->name('orders.verifikasiDenda');
-
-    
 });
 
 /*
@@ -318,7 +310,6 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/services/{service}/metode-pembayaran', [ServiceController::class, 'metodePembayaranLayanan'])->name('services.metodePembayaranLayanan');
     Route::post('/services/{service}/konfirmasi', [ServiceController::class, 'konfirmasiLayanan'])->name('services.konfirmasiLayanan');
     Route::post('/services/barang/simpan-item', [ServiceController::class, 'simpanItemsBarang'])->name('services.barang.simpanItem');
-
 
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
     Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('berita.show');
@@ -376,4 +367,4 @@ Route::get('/api/wilayah/districts/{regencyId}', [WilayahController::class, 'dis
 Route::middleware(['auth', 'role:customer'])->prefix('buat-pin')->name('customer.pin.')->group(function () {
     Route::get('/', [PinController::class, 'create'])->name('create');
     Route::post('/', [PinController::class, 'store'])->name('store');
-});
+}); 
