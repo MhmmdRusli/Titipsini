@@ -29,9 +29,7 @@ class PengaturanController extends Controller
         ]);
     }
 
-    /**
-     * Menyimpan perubahan Pengaturan Komisi Platform.
-     */
+    
     public function updateKomisi(Request $request): RedirectResponse
     {
         $validated = $request->validate([
