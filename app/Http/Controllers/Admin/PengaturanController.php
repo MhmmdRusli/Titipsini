@@ -51,9 +51,6 @@ class PengaturanController extends Controller
     ]);
 }
 
-    /**
-     * Menyimpan perubahan Pengaturan QRIS.
-     */
     public function updateQris(Request $request): RedirectResponse
 {
     $request->validate([
