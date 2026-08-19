@@ -40,6 +40,7 @@ export default function Show({ order }) {
     const statusInfo = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.diproses;
     const StatusIcon = statusInfo.icon;
     const isCash = order.payment_method === 'cod';
+    const isSaldo = order.payment_method === 'saldo';
 
     function verifikasiPembayaran() {
         setIsVerifying(true);
@@ -237,14 +238,16 @@ export default function Show({ order }) {
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <div className="mb-3 flex items-center justify-between">
                         <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                            {isCash ? (
+                            {isSaldo ? (
+                                <ShieldCheck size={15} className="text-gray-400" />
+                            ) : isCash ? (
                                 <HandCoins size={15} className="text-gray-400" />
                             ) : (
                                 <Image size={15} className="text-gray-400" />
                             )}
-                            {isCash ? 'Pembayaran Tunai' : 'Bukti Pembayaran'}
+                            {isSaldo ? 'Pembayaran Saldo' : isCash ? 'Pembayaran Tunai' : 'Bukti Pembayaran'}
                         </p>
-                        {order.payment_verified_at && (
+                        {(isSaldo || order.payment_verified_at) && (
                             <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700 dark:bg-green-950/40 dark:text-[#4ade80]">
                                 <ShieldCheck size={12} />
                                 Terverifikasi
@@ -252,7 +255,11 @@ export default function Show({ order }) {
                         )}
                     </div>
 
-                    {isCash ? (
+                    {isSaldo ? (
+                        <p className="text-center text-xs text-gray-400 py-4">
+                            Pembayaran dipotong otomatis dari saldo customer{order.payment_verified_at ? ` pada ${order.payment_verified_at}` : ''}. Tidak perlu verifikasi manual.
+                        </p>
+                    ) : isCash ? (
                         order.payment_verified_at ? (
                             <p className="text-center text-xs text-gray-400 py-4">
                                 Pembayaran tunai sudah dikonfirmasi pada {order.payment_verified_at}
