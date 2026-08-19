@@ -56,16 +56,6 @@ function getGreeting() {
     return 'Selamat Malam';
 }
 
-function BoxIcon({ className }) {
-    return (
-        <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8">
-            <path d="M3 8l9-4 9 4-9 4-9-4z" />
-            <path d="M3 8v8l9 4 9-4V8" />
-            <path d="M12 12v8" />
-        </svg>
-    );
-}
-
 export default function Dashboard({ user, saldo = 10000, vendors = [], berita = [], aktivitasTerakhir = null }) {
     // Pakai auth.user yang di-share global lewat Inertia (HandleInertiaRequests)
     // sebagai sumber utama, dengan fallback ke prop `user` halaman ini. Jadi
@@ -297,52 +287,23 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     </div>
                 </div>
 
-                {/* Banner Promo */}
-                <div className="mt-5 relative flex h-[128px] rounded-2xl shadow-md">
-                    <div
-                        className="absolute inset-0 rounded-2xl bg-green-600 dark:bg-green-700"
-                        style={{
-                            backgroundImage:
-                                'repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 10px)',
-                        }}
-                    />
-
-                    <div className="relative z-10 flex flex-1 flex-col justify-between p-4">
-                        <div>
-                            <p className="font-mono text-[10px] tracking-[0.2em] text-green-100">
-                                TIKET-PROMO &middot; BULAN INI
-                            </p>
-                            <div className="mt-1 flex items-baseline gap-1">
-                                <span className="text-[13px] font-semibold text-green-100">Cashback</span>
-                                <span className="text-4xl font-black italic leading-none text-amber-300">30%</span>
-                            </div>
-                            <p className="mt-1 text-[10px] text-green-100">
-                                untuk penitipan Barang, Bangunan & Kendaraan
-                            </p>
-                        </div>
-                        <p className="font-mono text-[9px] text-green-200">Berlaku s.d. akhir bulan &middot; S&amp;K berlaku</p>
-                    </div>
-
-                    <div className="relative z-10 flex w-16 shrink-0 flex-col items-center justify-between py-3">
-                        <div className="absolute inset-y-2 left-0 border-l-2 border-dashed border-green-300/50" />
-                        <div className="absolute -left-2 -top-2 h-4 w-4 rounded-full bg-gray-50 dark:bg-gray-900" />
-                        <div className="absolute -bottom-2 -left-2 h-4 w-4 rounded-full bg-gray-50 dark:bg-gray-900" />
-
-                        <BoxIcon className="h-6 w-6 text-green-100" />
-                        <span
-                            className="font-mono text-[10px] font-bold tracking-wider text-green-100"
-                            style={{ writingMode: 'vertical-rl' }}
-                        >
-                            NO. 0030
-                        </span>
-                    </div>
-
-                    <div className="pointer-events-none absolute -right-3 -top-3 z-20 rotate-[18deg]">
-                        <div className="rounded-md border-[3px] border-red-600 bg-red-600/10 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-red-600">
-                            Promo
-                        </div>
-                    </div>
-                </div>
+               {/* Banner Info - simple version */}
+<div className="mt-5 rounded-xl bg-green-600 dark:bg-green-700 p-4 text-white shadow-sm">
+    <div className="flex items-center justify-between gap-3">
+        <div>
+            <p className="text-base font-bold">Titip Aman, Kapan Saja</p>
+            <p className="mt-1 text-[11px] text-green-100">
+                Barang, bangunan, sampai kendaraan kamu diawasi mitra terpercaya 24 jam
+            </p>
+        </div>
+        <Link
+            href="/app/services"
+            className="shrink-0 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-green-700"
+        >
+            Mulai
+        </Link>
+    </div>
+</div>
 
                 {/* Section Berita */}
                 <div className="mt-6">

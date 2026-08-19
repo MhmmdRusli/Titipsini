@@ -10,9 +10,7 @@ const BENEFITS = [
     'Konsultasi & Support',
 ];
 
-export default function FormBarang({ hargaMulai = 100000, serviceId }) {
-    const formattedHarga = new Intl.NumberFormat('id-ID').format(hargaMulai);
-
+export default function FormBarang({ serviceId }) {
     const [form, setForm] = useState({
         namaBarang: '',
         pickup: false,
@@ -40,11 +38,7 @@ export default function FormBarang({ hargaMulai = 100000, serviceId }) {
                         <Package size={20} />
                     </div>
 
-                    <p className="text-2xl font-extrabold leading-none">
-                        {formattedHarga}
-                        <span className="ml-1 text-sm font-semibold align-middle">(1 item)</span>
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-white/90">Our Best Service</p>
+                    <p className="text-lg font-extrabold leading-none">Our Best Service</p>
 
                     <ul className="mt-4 space-y-1.5">
                         {BENEFITS.map((benefit) => (
