@@ -47,11 +47,6 @@ return [
             'report' => false,
         ],
 
-        // Disk tambahan: file disimpan LANGSUNG di folder public/ (bukan
-        // storage/app/public), jadi gak butuh symlink sama sekali. Dipakai
-        // supaya upload foto (avatar dll) tetap bisa diakses lewat browser
-        // meskipun jalan pakai `php artisan serve` di Windows, yang kadang
-        // menolak nyajiin file lewat symlink/junction (403 Forbidden).
         'direct_public' => [
             'driver' => 'local',
             'root' => public_path(),
