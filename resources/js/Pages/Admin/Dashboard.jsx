@@ -227,11 +227,14 @@ export default function Dashboard({
                                     ))}
                                 </Pie>
                                 <Tooltip
+                                    position={{ y: 0 }}
+                                    wrapperStyle={{ zIndex: 50 }}
                                     contentStyle={{
-                                        backgroundColor: '#1f2937',
+                                        backgroundColor: '#ffffff',
                                         borderRadius: '12px',
-                                        borderColor: '#374151',
-                                        color: '#ffffff'
+                                        border: '1px solid #e5e7eb',
+                                        color: '#1f2937',
+                                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                                     }}
                                     formatter={(value, name, props) => [`${value} (${props.payload.percentage}%)`, name]}
                                 />
@@ -311,11 +314,10 @@ function BannerFilterDropdown({ icon: Icon, value, options, onChange }) {
                                     onChange(opt.value);
                                     setIsOpen(false);
                                 }}
-                                className={`w-full px-3 py-2 text-left text-xs transition ${
-                                    isSelected
+                                className={`w-full px-3 py-2 text-left text-xs transition ${isSelected
                                         ? 'bg-green-700 font-semibold text-white'
                                         : 'text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-gray-700 hover:text-green-800 dark:hover:text-white'
-                                }`}
+                                    }`}
                             >
                                 {opt.label}
                             </button>

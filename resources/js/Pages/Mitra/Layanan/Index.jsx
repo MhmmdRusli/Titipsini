@@ -116,7 +116,7 @@ export default function LayananIndex({ layanan, daftarKota = [] }) {
     }
 
     return (
-        <MitraLayout title="Kelola Layanan">
+        <MitraLayout title="Kelola Layanan" backHref="/mitra/dashboard">
             <div className="px-4 py-3">
                 <button
                     onClick={openCreateModal}
