@@ -97,7 +97,6 @@ function useCuaca(propsCuaca) {
                 .catch(() => {});
         };
 
-        // Deteksi lokasi aktual pengguna dari Browser
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
