@@ -247,6 +247,7 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::get('/rekening', [RekeningController::class, 'edit'])->name('rekening.edit');
     Route::post('/rekening', [RekeningController::class, 'store'])->name('rekening.store');
     Route::put('/rekening/{id}', [RekeningController::class, 'update'])->name('rekening.update');
+    Route::delete('/rekening/{id}', [RekeningController::class, 'destroy'])->name('rekening.destroy');
 
     /* Penarikan Dana Mitra */
     Route::get('/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');
