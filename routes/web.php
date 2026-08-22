@@ -297,6 +297,11 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     // klik tombol "Verifikasi Denda" di halaman Mitra selalu 404.
     Route::patch('/pesanan/{order}/verifikasi-denda', [MitraOrderController::class, 'verifikasiDenda'])->name('orders.verifikasiDenda');
 
+    // 👇 DITAMBAHKAN: verifikasi perpanjangan penitipan yang dibayar via
+    // transfer manual (bukan saldo). Baru di titik ini end_date & total_price
+    // order benar-benar diperbarui - lihat Mitra\OrderController::verifikasiPerpanjangan().
+    Route::patch('/pesanan/{order}/verifikasi-perpanjangan', [MitraOrderController::class, 'verifikasiPerpanjangan'])->name('orders.verifikasiPerpanjangan');
+
     Route::patch('/pesanan/{order}/fase', [\App\Http\Controllers\Mitra\OrderController::class, 'updateFase'])
         ->name('orders.updateFase');
 
@@ -351,6 +356,16 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::post('/orders/{order}/bayar-saldo', [CustomerOrderController::class, 'bayarSaldo'])->name('orders.bayarSaldo');
     Route::post('/orders/{order}/bayar-denda', [CustomerOrderController::class, 'bayarDenda'])->name('orders.bayarDenda');
     Route::post('/orders/{order}/upload-bukti-denda', [CustomerOrderController::class, 'uploadBuktiDenda'])->name('orders.uploadBuktiDenda');
+
+    // 👇 DITAMBAHKAN: fitur Perpanjang Penitipan.
+    // Alur: form (pilih tanggal keluar baru) -> invoice -> bayar saldo
+    // (langsung lunas) atau upload bukti transfer (menunggu verifikasi
+    // mitra lewat mitra.orders.verifikasiPerpanjangan di atas).
+    Route::get('/orders/{order}/extend', [CustomerOrderController::class, 'extendForm'])->name('orders.extend.form');
+    Route::post('/orders/{order}/extend', [CustomerOrderController::class, 'extendStore'])->name('orders.extend.store');
+    Route::get('/orders/{order}/extend/invoice', [CustomerOrderController::class, 'extendInvoice'])->name('orders.extend.invoice');
+    Route::post('/orders/{order}/extend/bayar-saldo', [CustomerOrderController::class, 'extendBayarSaldo'])->name('orders.extend.bayarSaldo');
+    Route::post('/orders/{order}/extend/upload-bukti', [CustomerOrderController::class, 'extendUploadBukti'])->name('orders.extend.uploadBukti');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::patch('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');

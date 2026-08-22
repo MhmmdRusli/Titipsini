@@ -38,6 +38,13 @@ class Order extends Model
         'payment_method',
         'payment_receipt',
         'payment_verified_at',
+         'extend_end_date',
+    'extend_price',
+    'extend_requested_at',
+    'extend_paid_at',
+    'extend_payment_method',
+    'extend_payment_receipt',
+    'status_perpanjangan',
     ];
     protected $appends = ['denda'];
 
@@ -54,6 +61,9 @@ class Order extends Model
             'tanggal_selesai_aktual' => 'datetime',
             'denda_paid_at' => 'datetime',
             'end_date' => 'date',
+            'extend_end_date' => 'date',
+    'extend_requested_at' => 'datetime',
+    'extend_paid_at' => 'datetime',
         ];
     }
     public function customer(): BelongsTo
@@ -146,4 +156,18 @@ class Order extends Model
     {
         return $this->hitungDenda();
     }
+    public function hargaPerpanjangan(string $tanggalKeluarBaru): float
+{
+    $mulai = \Carbon\Carbon::parse($this->start_date)->startOfDay();
+    $selesaiLama = \Carbon\Carbon::parse($this->end_date)->startOfDay();
+    $selesaiBaru = \Carbon\Carbon::parse($tanggalKeluarBaru)->startOfDay();
+ 
+    $jumlahHariAsli = max(1, $mulai->diffInDays($selesaiLama));
+    $hargaPerHari = ((float) $this->subtotal) / $jumlahHariAsli;
+ 
+    $jumlahHariTambahan = max(1, $selesaiLama->diffInDays($selesaiBaru));
+ 
+    return round($hargaPerHari * $jumlahHariTambahan);
+}
+
 }
