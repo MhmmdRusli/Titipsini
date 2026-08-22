@@ -379,8 +379,17 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/profile/tentang', [TentangController::class, 'index'])->name('profile.tentang');
     Route::get('/profile/tentang/syarat-ketentuan', [TentangController::class, 'syaratKetentuan'])->name('profile.tentang.syarat');
     Route::get('/profile/tentang/kebijakan-privasi', [TentangController::class, 'kebijakanPrivasi'])->name('profile.tentang.privasi');
+
     Route::get('/profile/keamanan', [SecurityController::class, 'edit'])->name('profile.keamanan');
+
+    // 👇 DITAMBAHKAN: route GET untuk merender sub-halaman "Ubah Kata Sandi"
+    // dan "Ubah PIN". Sebelumnya path ini hanya punya route PUT (untuk
+    // submit form), sehingga navigasi <Link> dari menu Keamanan.jsx
+    // (yang selalu GET) menghasilkan error 405 Method Not Allowed.
+    Route::get('/profile/keamanan/password', [SecurityController::class, 'editPassword'])->name('profile.keamanan.password.edit');
     Route::put('/profile/keamanan/password', [SecurityController::class, 'updatePassword'])->name('profile.keamanan.password');
+
+    Route::get('/profile/keamanan/pin', [SecurityController::class, 'editPin'])->name('profile.keamanan.pin.edit');
     Route::put('/profile/keamanan/pin', [SecurityController::class, 'updatePin'])->name('profile.keamanan.pin');
 
     Route::get('/saldo/topup', [TopUpController::class, 'create'])->name('topup.create');

@@ -55,4 +55,13 @@ class SecurityController extends Controller
 
         return redirect()->back()->with('success', 'PIN berhasil diubah.');
     }
+     public function editPassword()
+{
+    return Inertia::render('Customer/Profile/Keamanan/Password');
+}
+
+public function editPin()
+{
+    return Inertia::render('Customer/Profile/Keamanan/Pin');
+}
 }
