@@ -50,12 +50,22 @@ class DashboardController extends Controller
         // 4. Hitung status buka/tutup toko hari ini dari jadwal_operasional
         $statusToko = $this->hitungStatusToko($partner->jadwal_operasional ?? []);
 
+        // 5. Cek status verifikasi KTP (Fleksibel mendukung string atau boolean)
+        $isVerified = in_array(strtolower((string) $partner->verification_status), ['terverifikasi', 'verified', '1', 'true'], true) 
+            || (bool) $partner->is_verified;
+
+        // 6. Flag "baru saja login/daftar" — session()->pull() otomatis MENGHAPUS
+        // nilainya setelah dibaca, jadi cuma true SEKALI di request berikutnya
+        // setelah login, dan false lagi untuk navigasi-navigasi setelahnya.
+        $justLoggedIn = session()->pull('mitra_just_authenticated', false);
+
         return Inertia::render('Mitra/Dashboard', [
             'partner' => [
                 'name' => $partner->name,
                 'avatar' => $partner->avatar ? Storage::disk('direct_public')->url($partner->avatar) : null,
-                'is_verified' => in_array($partner->verification_status, ['terverifikasi', 'verified']),
+                'is_verified' => $isVerified,
             ],
+            'just_logged_in' => $justLoggedIn,
             'saldo' => $saldoTampil,
             'toko' => [
                 'nama' => $partner->nama_usaha ?? $partner->name,
@@ -79,10 +89,14 @@ class DashboardController extends Controller
      */
     private function hitungStatusToko(array $jadwalOperasional): array
     {
-        $sekarang = Carbon::now();
+        // Kunci timezone Asia/Jakarta agar tidak bentrok dengan UTC server
+        $sekarang = Carbon::now('Asia/Jakarta');
+        
         // dayOfWeekIso: Senin=1 ... Minggu=7, pas dengan urutan HARI_LIST
         $hariIni = self::HARI_LIST[$sekarang->dayOfWeekIso - 1];
-        $jamSekarang = $sekarang->format('H:i');
+        
+        // Gunakan format H:i:s agar konsisten dengan format waktu database
+        $jamSekarang = $sekarang->format('H:i:s');
 
         $jadwalHariIni = $jadwalOperasional[$hariIni] ?? null;
 
@@ -100,15 +114,18 @@ class DashboardController extends Controller
         }
 
         // Cek apakah sekarang ada di dalam salah satu slot yang aktif -> berarti toko BUKA
-        $slotBerjalan = $slots->first(
-            fn ($slot) => $jamSekarang >= $slot['jam_buka'] && $jamSekarang < $slot['jam_tutup']
-        );
+        $slotBerjalan = $slots->first(function ($slot) use ($jamSekarang) {
+            $buka = Carbon::parse($slot['jam_buka'])->format('H:i:s');
+            $tutup = Carbon::parse($slot['jam_tutup'])->format('H:i:s');
+
+            return $jamSekarang >= $buka && $jamSekarang <= $tutup;
+        });
 
         if ($slotBerjalan) {
             return [
                 'buka' => true,
-                'jam_buka' => $slotBerjalan['jam_buka'],
-                'jam_tutup' => $slotBerjalan['jam_tutup'],
+                'jam_buka' => Carbon::parse($slotBerjalan['jam_buka'])->format('H:i'),
+                'jam_tutup' => Carbon::parse($slotBerjalan['jam_tutup'])->format('H:i'),
             ];
         }
 
@@ -117,8 +134,8 @@ class DashboardController extends Controller
 
         return [
             'buka' => false,
-            'jam_buka' => $slotPertama['jam_buka'],
-            'jam_tutup' => $slotPertama['jam_tutup'],
+            'jam_buka' => Carbon::parse($slotPertama['jam_buka'])->format('H:i'),
+            'jam_tutup' => Carbon::parse($slotPertama['jam_tutup'])->format('H:i'),
         ];
     }
 }

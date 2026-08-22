@@ -47,6 +47,7 @@ use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
 use App\Http\Controllers\Mitra\JamOperasionalController;
 use App\Http\Controllers\Mitra\KeamananController;
 use App\Http\Controllers\Mitra\KebijakanPrivasiController;
+use App\Http\Controllers\Mitra\LegalitasController;
 use App\Http\Controllers\Mitra\NotifikasiController as MitraNotifikasiController;
 use App\Http\Controllers\Mitra\OnboardingController as MitraOnboardingController;
 use App\Http\Controllers\Mitra\OrderController as MitraOrderController;
@@ -257,6 +258,12 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
 
     Route::get('/layanan/jam-operasional', [JamOperasionalController::class, 'edit'])->name('jam-operasional.edit');
     Route::put('/layanan/jam-operasional', [JamOperasionalController::class, 'update'])->name('jam-operasional.update');
+
+     /* Verifikasi Legalitas (KTP + PIN pertama kali) */
+    Route::get('/legalitas', [LegalitasController::class, 'edit'])->name('legalitas.edit');
+    Route::post('/legalitas', [LegalitasController::class, 'storeKtp'])->name('legalitas.store');
+    Route::post('/legalitas/pin', [LegalitasController::class, 'storePin'])->name('legalitas.pin.store');
+
 
     Route::resource('layanan', MitraServiceController::class)->except(['show', 'create', 'edit']);
 
