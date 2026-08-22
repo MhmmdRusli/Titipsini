@@ -10,6 +10,14 @@ const LAYANAN_ICON = {
     pindahan: Truck,
 };
 
+// Href per kategori - masing-masing sekarang punya halaman kelola sendiri
+const LAYANAN_HREF = {
+    barang: '/mitra/layanan/barang',
+    kendaraan: '/mitra/layanan/kendaraan',
+    bangunan: '/mitra/layanan/bangunan',
+    pindahan: '/mitra/layanan/pindahan',
+};
+
 const PESANAN_CARDS = [
     { key: 'barang', label: 'Barang', icon: Package },
     { key: 'kendaraan', label: 'Kendaraan', icon: Car },
@@ -226,7 +234,7 @@ export default function Dashboard({ partner = {}, saldo = 0, toko = {}, layanan 
                     </div>
                 </div>
 
-                {/* Layanan Vendors */}
+                {/* Layanan Vendors - sekarang tiap ikon menuju halaman kategori masing-masing */}
                 <div>
                     <div className="mb-2 flex items-center justify-between">
                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Layanan Vendors</p>
@@ -245,7 +253,7 @@ export default function Dashboard({ partner = {}, saldo = 0, toko = {}, layanan 
                             return (
                                 <Link
                                     key={key}
-                                    href="/mitra/layanan"
+                                    href={LAYANAN_HREF[key] ?? '/mitra/layanan'}
                                     className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
                                 >
                                     <Icon size={22} className="text-green-600 dark:text-[#4ade80]" strokeWidth={1.75} />

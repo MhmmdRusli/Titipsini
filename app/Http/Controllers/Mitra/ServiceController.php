@@ -8,6 +8,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Kota;
+use Illuminate\Support\Facades\Storage;
 
 class ServiceController extends Controller
 {
@@ -30,6 +32,38 @@ class ServiceController extends Controller
         'daftarKota' => \App\Models\Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
     ]);
 }
+
+    /**
+     * GET /mitra/layanan/{kategori}
+     * Menampilkan halaman kelola khusus 1 kategori (barang/kendaraan/bangunan/pindahan)
+     */
+    public function kategori(Request $request, string $kategori): Response
+    {
+        $halamanPerKategori = [
+            'barang' => 'Mitra/Layanan/KelolaBarang',
+            'kendaraan' => 'Mitra/Layanan/KelolaKendaraan',
+            'bangunan' => 'Mitra/Layanan/KelolaBangunan',
+            'pindahan' => 'Mitra/Layanan/KelolaPickUp',
+        ];
+
+        abort_unless(array_key_exists($kategori, $halamanPerKategori), 404);
+
+        $layanan = Service::query()
+            ->where('user_id', $request->user()->id)
+            ->where('kategori', $kategori)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $item->foto_url = $item->foto ? Storage::url($item->foto) : null;
+                return $item;
+            });
+
+        return Inertia::render($halamanPerKategori[$kategori], [
+            'layanan' => $layanan,
+            'daftarKota' => Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
+            'menungguVerifikasi' => false,
+        ]);
+    }
 
     /**
      * POST /mitra/layanan
