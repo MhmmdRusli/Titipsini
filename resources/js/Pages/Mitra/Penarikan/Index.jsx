@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import MitraLayout from '@/Layouts/MitraLayout';
-import { ChevronLeft, ChevronDown, Building, CreditCard, User, PlusCircle } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Building, CreditCard, User, PlusCircle, Calendar } from 'lucide-react';
 
 function formatRupiah(angka) {
     return 'Rp' + Number(angka).toLocaleString('id-ID');
@@ -21,12 +21,33 @@ export default function PenarikanIndex({
 }) {
     const tipe = filter.tipe ?? 'semua';
 
-    const applyFilter = (nextTipe) => {
+    // PENTING: nama parameter ini harus SAMA PERSIS dengan yang dibaca
+    // controller ($request->query('dari') / ->query('sampai')), makanya
+    // dipakai "dari" dan "sampai", bukan "tanggal_awal"/"tanggal_akhir".
+    const [dari, setDari] = useState(filter.dari ?? '');
+    const [sampai, setSampai] = useState(filter.sampai ?? '');
+
+    const kirimFilter = (override = {}) => {
         router.get(
             route('mitra.penarikan.index'),
-            { tipe: nextTipe },
+            {
+                tipe,
+                dari,
+                sampai,
+                ...override,
+            },
             { preserveScroll: true, preserveState: true }
         );
+    };
+
+    const applyFilter = (nextTipe) => kirimFilter({ tipe: nextTipe });
+    const applyDari = (value) => {
+        setDari(value);
+        kirimFilter({ dari: value });
+    };
+    const applySampai = (value) => {
+        setSampai(value);
+        kirimFilter({ sampai: value });
     };
 
     return (
@@ -108,6 +129,35 @@ export default function PenarikanIndex({
                 {/* Filter Tab */}
                 <div className="mt-5 px-4">
                     <p className="text-xs font-bold text-gray-900 mb-2">Riwayat Transaksi</p>
+
+                    {/* Filter Tanggal */}
+                    <div className="mb-3 grid grid-cols-2 gap-2">
+                        <div>
+                            <label className="mb-1 block text-[10px] text-gray-400">Tanggal Awal</label>
+                            <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5">
+                                <Calendar size={13} className="shrink-0 text-[#2D7A44]" />
+                                <input
+                                    type="date"
+                                    value={dari}
+                                    onChange={(e) => applyDari(e.target.value)}
+                                    className="w-full border-none p-0 text-[11px] font-medium text-gray-700 focus:outline-none focus:ring-0"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-[10px] text-gray-400">Tanggal Akhir</label>
+                            <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5">
+                                <Calendar size={13} className="shrink-0 text-[#2D7A44]" />
+                                <input
+                                    type="date"
+                                    value={sampai}
+                                    onChange={(e) => applySampai(e.target.value)}
+                                    className="w-full border-none p-0 text-[11px] font-medium text-gray-700 focus:outline-none focus:ring-0"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-3">
                         <div className="flex gap-1.5">
                             {TABS.map((t) => (
