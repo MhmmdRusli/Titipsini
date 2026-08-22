@@ -14,14 +14,36 @@ use Inertia\Response;
 
 class OrderController extends Controller
 {
+    /**
+     * Mapping dari nilai tab (yang dikirim frontend lewat query string `status`)
+     * ke daftar nilai status yang benar-benar mungkin tersimpan di database.
+     *
+     * Kenapa perlu array, bukan 1 nilai saja?
+     * Karena di data lama / hasil import bisa jadi status tersimpan dengan
+     * variasi penamaan yang berbeda (mis. 'pending' vs 'baru', atau
+     * 'active' vs 'diproses'). Dengan whereIn(), semua variasi tetap
+     * tertangkap sehingga tab tidak tampil kosong padahal datanya ada.
+     */
     protected function statusesForTab(string $status): array
     {
+        // Normalisasi: buang spasi & samakan huruf kecil, biar 'Baru', ' baru ', 'BARU' tetap cocok
+        $status = strtolower(trim($status));
+
         return match ($status) {
-            'baru' => ['baru'],
-            'diproses' => ['diproses'],
+            // Tab "Belum Bayar"
+            'baru', 'pending', 'unpaid', 'belum_bayar', 'belum-bayar' => ['baru', 'pending', 'unpaid'],
+
+            // Tab "Dititipkan"
+            'diproses', 'dititipkan', 'active' => ['diproses', 'dititipkan', 'active'],
+
+            // Tab "Selesai"
             'selesai' => ['selesai'],
+
+            // Tab "Dibatalkan"
             'dibatalkan' => ['dibatalkan'],
-            default => [], // Kosong atau 'semua' berarti ambil semua data
+
+            // Tab "Semua" (status kosong / nilai tak dikenal) -> tanpa filter
+            default => [],
         };
     }
 
@@ -47,6 +69,8 @@ class OrderController extends Controller
         return Inertia::render('Customer/Orders/Index', [
             'orders' => $orders,
             'filters' => [
+                // Kembalikan status "mentah" yang dikirim user, supaya tab aktif
+                // di frontend tetap ter-highlight sesuai klik terakhir.
                 'status' => $status,
             ],
         ]);
