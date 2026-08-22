@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
@@ -111,7 +112,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Service::class);
     }
-     
+
+    // 👇 DITAMBAHKAN: relasi ke alamat pengiriman/penitipan milik customer.
+    // Dipakai oleh Customer\AddressController (index, store, dst).
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
     public function topups(): HasMany
     {
         return $this->hasMany(Topup::class);
@@ -171,4 +179,5 @@ class User extends Authenticatable implements MustVerifyEmail
     // 7. Kembalikan Sisa Saldo Bersih
     return (int) max(0, $saldoBersih - $totalPenarikan);
 }
+
 }

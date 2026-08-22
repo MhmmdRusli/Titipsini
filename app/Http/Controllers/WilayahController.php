@@ -2,30 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class WilayahController extends Controller
 {
     protected string $base = 'https://emsifa.github.io/api-wilayah-indonesia/api';
 
-    public function provinces()
+    /**
+     * GET /api/wilayah/provinces
+     */
+    public function provinces(): JsonResponse
     {
         return response()->json(
-            Http::withOptions(['verify' => false])->get("{$this->base}/provinces.json")->json()
+            $this->fetch('provinces.json')
         );
     }
 
-    public function regencies(string $provinceId)
+    /**
+     * GET /api/wilayah/cities?province_id=ID
+     */
+    public function cities(Request $request): JsonResponse
     {
+        $request->validate([
+            'province_id' => ['required'],
+        ]);
+
+        $provinceId = $request->query('province_id');
+
         return response()->json(
-            Http::withOptions(['verify' => false])->get("{$this->base}/regencies/{$provinceId}.json")->json()
+            $this->fetch("regencies/{$provinceId}.json")
         );
     }
 
-    public function districts(string $regencyId)
+    /**
+     * GET /api/wilayah/districts?city_id=ID
+     */
+    public function districts(Request $request): JsonResponse
     {
+        $request->validate([
+            'city_id' => ['required'],
+        ]);
+
+        $cityId = $request->query('city_id');
+
         return response()->json(
-            Http::withOptions(['verify' => false])->get("{$this->base}/districts/{$regencyId}.json")->json()
+            $this->fetch("districts/{$cityId}.json")
         );
+    }
+
+    /**
+     * Ambil data dari API wilayah eksternal, dengan cache ringan
+     * supaya tidak membebani API pihak ketiga di setiap request,
+     * dan normalisasi field agar konsisten { id, name }.
+     */
+    private function fetch(string $path): array
+    {
+        return Cache::remember("wilayah:{$path}", now()->addDay(), function () use ($path) {
+            $response = Http::withOptions(['verify' => false])
+                ->timeout(10)
+                ->get("{$this->base}/{$path}");
+
+            if ($response->failed()) {
+                return [];
+            }
+
+            $data = $response->json();
+
+            if (! is_array($data)) {
+                return [];
+            }
+
+            return collect($data)
+                ->map(fn (array $item) => [
+                    'id' => $item['id'] ?? null,
+                    'name' => $item['name'] ?? null,
+                ])
+                ->filter(fn (array $item) => $item['id'] !== null && $item['name'] !== null)
+                ->values()
+                ->all();
+        });
     }
 }

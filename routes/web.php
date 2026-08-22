@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Customer\AddressController;
 use App\Http\Controllers\Customer\BantuanController;
 use App\Http\Controllers\Customer\BeritaController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
@@ -392,6 +393,18 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/profile/keamanan/pin', [SecurityController::class, 'editPin'])->name('profile.keamanan.pin.edit');
     Route::put('/profile/keamanan/pin', [SecurityController::class, 'updatePin'])->name('profile.keamanan.pin');
 
+    // 👇 DITAMBAHKAN: Alamat Saya (Address Book) - CRUD alamat pengiriman /
+    // penitipan milik customer. Dipakai oleh AddressController + Pages
+    // Customer/Address/Index.jsx & Customer/Address/Form.jsx.
+    Route::prefix('profile/alamat')->name('profile.alamat.')->group(function () {
+        Route::get('/', [AddressController::class, 'index'])->name('index');
+        Route::get('/tambah', [AddressController::class, 'create'])->name('create');
+        Route::post('/', [AddressController::class, 'store'])->name('store');
+        Route::get('/{alamat}/edit', [AddressController::class, 'edit'])->name('edit');
+        Route::put('/{alamat}', [AddressController::class, 'update'])->name('update');
+        Route::delete('/{alamat}', [AddressController::class, 'destroy'])->name('destroy');
+    });
+
     Route::get('/saldo/topup', [TopUpController::class, 'create'])->name('topup.create');
     Route::post('/saldo/topup', [TopUpController::class, 'store'])->name('topup.store');
     Route::get('/saldo/topup/{topup}/instruksi', [TopUpController::class, 'instruksi'])->name('topup.instruksi');
@@ -407,9 +420,16 @@ Route::middleware(['auth'])->prefix('lengkapi-data')->name('customer.lengkapi-da
     Route::post('/', [LengkapiDataController::class, 'store'])->name('store');
 });
 
+// 👇 DIPERBAIKI: sebelumnya "regencies/{provinceId}" dan
+// "districts/{regencyId}" pakai path-param, sementara
+// WilayahController@cities/@districts sekarang membaca province_id /
+// city_id dari QUERY STRING (?province_id=... , ?city_id=...) sesuai
+// yang dipanggil AddressForm.jsx. Path-param lama membuat endpoint
+// "cities" tidak pernah cocok -> selalu 404 -> dropdown Kabupaten/Kota
+// dan Kecamatan tidak pernah terisi.
 Route::get('/api/wilayah/provinces', [WilayahController::class, 'provinces']);
-Route::get('/api/wilayah/regencies/{provinceId}', [WilayahController::class, 'regencies']);
-Route::get('/api/wilayah/districts/{regencyId}', [WilayahController::class, 'districts']);
+Route::get('/api/wilayah/cities', [WilayahController::class, 'cities']);
+Route::get('/api/wilayah/districts', [WilayahController::class, 'districts']);
 
 Route::middleware(['auth', 'role:customer'])->prefix('buat-pin')->name('customer.pin.')->group(function () {
     Route::get('/', [PinController::class, 'create'])->name('create');
