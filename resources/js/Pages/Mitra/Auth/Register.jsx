@@ -1,48 +1,104 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Eye, EyeOff, Handshake, Lock } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Eye, EyeOff, Shield } from 'lucide-react';
+
+const COUNTRIES = [
+    { code: '62', name: 'Indonesia', flag: '🇮🇩' },
+    { code: '60', name: 'Malaysia', flag: '🇲🇾' },
+    { code: '65', name: 'Singapura', flag: '🇸🇬' },
+    { code: '63', name: 'Filipina', flag: '🇵🇭' },
+    { code: '66', name: 'Thailand', flag: '🇹🇭' },
+    { code: '84', name: 'Vietnam', flag: '🇻🇳' },
+    { code: '1', name: 'Amerika Serikat', flag: '🇺🇸' },
+    { code: '44', name: 'Inggris', flag: '🇬🇧' },
+    { code: '61', name: 'Australia', flag: '🇦🇺' },
+];
 
 export default function Register() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, transform } = useForm({
         name: '',
         email: '',
         phone: '',
         password: '',
         password_confirmation: '',
-        pin: '',
-        pin_confirmation: '',
     });
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [country, setCountry] = useState(COUNTRIES[0]);
+    const [countryOpen, setCountryOpen] = useState(false);
+    const countryRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (countryRef.current && !countryRef.current.contains(e.target)) {
+                setCountryOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    transform((formData) => ({
+        ...formData,
+        phone: formData.phone ? `${country.code}${formData.phone}` : '',
+    }));
 
     const submit = (e) => {
         e.preventDefault();
         post(route('mitra.register.store'));
     };
 
-    const onPinChange = (field) => (e) => {
-        setData(field, e.target.value.replace(/\D/g, '').slice(0, 6));
+    const onPhoneChange = (e) => {
+        setData('phone', e.target.value.replace(/\D/g, '').slice(0, 13));
     };
+
+    const inputBase =
+        'block w-full rounded-xl border bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition';
+
+    const inputClass = (field) =>
+        `${inputBase} ${errors[field] ? 'border-red-400 bg-red-50 focus:ring-red-400' : 'border-transparent'}`;
 
     return (
         <div className="min-h-dvh bg-gray-200 sm:flex sm:items-center sm:justify-center sm:py-6">
-            <Head title="Daftar Jadi Mitra" />
+            <Head title="Daftar" />
 
-            <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-y-auto bg-white px-6 py-8 sm:h-[850px] sm:shadow-xl">
-                <div className="flex items-center gap-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600">
-                        <Handshake size={20} />
-                    </div>
-                    <span className="font-mono text-xs tracking-widest text-green-600">TITIPSINI &middot; MITRA</span>
+            <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-y-auto bg-white sm:h-[850px] sm:shadow-xl">
+                {/* Header */}
+                <div className="flex items-center gap-3 px-4 pt-4">
+                    <Link
+                        href={route('mitra.login')}
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100"
+                    >
+                        <ChevronLeft size={22} />
+                    </Link>
+                    <h1 className="text-base font-semibold text-gray-900">Daftar</h1>
                 </div>
 
-                <h1 className="mt-6 text-xl font-bold text-gray-900">Daftar Jadi Mitra</h1>
-                <p className="mt-1 text-sm text-gray-500">Lengkapi data diri kamu untuk membuat akun mitra baru.</p>
+                {/* Progress bar */}
+                <div className="mt-3 flex gap-1 px-4">
+                    <div className="h-1.5 flex-1 rounded-full bg-green-600" />
+                    <div className="h-1.5 flex-1 rounded-full bg-blue-200" />
+                </div>
 
-                <form onSubmit={submit} className="mt-6 space-y-4">
+                {/* Logo */}
+                <div className="mt-6 flex flex-col items-center px-6 text-center">
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-50 text-green-600">
+                            <Shield size={18} />
+                        </div>
+                        <span className="text-2xl font-extrabold text-green-600">
+                            Titipsini
+                            <span className="text-yellow-400">&middot;</span>
+                            Com
+                        </span>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-400">Tempat Yang Aman Untuk Barang Berharga Anda</p>
+                </div>
+
+                <form onSubmit={submit} className="mt-6 flex-1 space-y-4 px-6">
                     <div>
-                        <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
+                        <label htmlFor="name" className="mb-1 block text-sm font-semibold text-gray-800">
                             Nama Lengkap
                         </label>
                         <input
@@ -51,17 +107,19 @@ export default function Register() {
                             autoComplete="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="Nama sesuai KTP"
-                            className={`block w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                errors.name ? 'border-red-400' : 'border-gray-300'
-                            }`}
+                            placeholder="Nama Lengkap"
+                            className={inputClass('name')}
                         />
-                        {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
+                        {errors.name ? (
+                            <p className="mt-1 text-xs text-red-600">{errors.name}</p>
+                        ) : (
+                            <p className="mt-1 text-xs text-gray-400">Nama Lengkap harap sesuai KTP</p>
+                        )}
                     </div>
 
                     <div>
-                        <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
-                            Email
+                        <label htmlFor="email" className="mb-1 block text-sm font-semibold text-gray-800">
+                            E-mail
                         </label>
                         <input
                             id="email"
@@ -69,34 +127,14 @@ export default function Register() {
                             autoComplete="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
-                            placeholder="nama@email.com"
-                            className={`block w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                errors.email ? 'border-red-400' : 'border-gray-300'
-                            }`}
+                            placeholder="Email"
+                            className={inputClass('email')}
                         />
                         {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
                     </div>
 
                     <div>
-                        <label htmlFor="phone" className="mb-1 block text-sm font-medium text-gray-700">
-                            Nomor Telepon
-                        </label>
-                        <input
-                            id="phone"
-                            type="tel"
-                            autoComplete="tel"
-                            value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
-                            placeholder="08xxxxxxxxxx"
-                            className={`block w-full rounded-lg border px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                errors.phone ? 'border-red-400' : 'border-gray-300'
-                            }`}
-                        />
-                        {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
-                    </div>
-
-                    <div>
-                        <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+                        <label htmlFor="password" className="mb-1 block text-sm font-semibold text-gray-800">
                             Kata Sandi
                         </label>
                         <div className="relative">
@@ -106,10 +144,8 @@ export default function Register() {
                                 autoComplete="new-password"
                                 value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
-                                placeholder="Minimal 8 karakter"
-                                className={`block w-full rounded-lg border px-3 py-2.5 pr-10 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                    errors.password ? 'border-red-400' : 'border-gray-300'
-                                }`}
+                                placeholder="Min.8 Karakter"
+                                className={`${inputClass('password')} pr-10`}
                             />
                             <button
                                 type="button"
@@ -124,7 +160,7 @@ export default function Register() {
                     </div>
 
                     <div>
-                        <label htmlFor="password_confirmation" className="mb-1 block text-sm font-medium text-gray-700">
+                        <label htmlFor="password_confirmation" className="mb-1 block text-sm font-semibold text-gray-800">
                             Konfirmasi Kata Sandi
                         </label>
                         <div className="relative">
@@ -134,10 +170,8 @@ export default function Register() {
                                 autoComplete="new-password"
                                 value={data.password_confirmation}
                                 onChange={(e) => setData('password_confirmation', e.target.value)}
-                                placeholder="Ulangi kata sandi"
-                                className={`block w-full rounded-lg border px-3 py-2.5 pr-10 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                    errors.password_confirmation ? 'border-red-400' : 'border-gray-300'
-                                }`}
+                                placeholder="Min.8 Karakter"
+                                className={`${inputClass('password_confirmation')} pr-10`}
                             />
                             <button
                                 type="button"
@@ -153,73 +187,80 @@ export default function Register() {
                         )}
                     </div>
 
-                    <div className="border-t border-dashed border-gray-200 pt-4">
-                        <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
-                            <Lock size={14} className="text-green-600" />
-                            PIN Keamanan
-                        </p>
-                        <p className="mt-0.5 text-xs text-gray-500">
-                            PIN 6 digit ini dipakai untuk verifikasi penarikan saldo nanti. Jangan bagikan ke siapapun.
-                        </p>
-                    </div>
-
                     <div>
-                        <label htmlFor="pin" className="mb-1 block text-sm font-medium text-gray-700">
-                            PIN (6 digit)
+                        <label htmlFor="phone" className="mb-1 block text-sm font-semibold text-gray-800">
+                            Nomor Telepon
                         </label>
-                        <input
-                            id="pin"
-                            type="password"
-                            inputMode="numeric"
-                            maxLength={6}
-                            autoComplete="new-password"
-                            value={data.pin}
-                            onChange={onPinChange('pin')}
-                            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;"
-                            className={`block w-full rounded-lg border px-3 py-2.5 text-center text-lg tracking-[0.5em] text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                errors.pin ? 'border-red-400' : 'border-gray-300'
+                        <div
+                            className={`flex items-center rounded-xl border bg-gray-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-green-500 transition ${
+                                errors.phone ? 'border-red-400 bg-red-50 focus-within:ring-red-400' : 'border-transparent'
                             }`}
-                        />
-                        {errors.pin && <p className="mt-1 text-xs text-red-600">{errors.pin}</p>}
-                    </div>
+                        >
+                            <div className="relative" ref={countryRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setCountryOpen((v) => !v)}
+                                    className="flex items-center gap-1.5 border-r border-gray-200 px-3 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded-l-xl"
+                                >
+                                    <span className="leading-none">{country.flag}</span>
+                                    <span className="font-medium">+{country.code}</span>
+                                    <ChevronDown size={14} className="text-gray-400" />
+                                </button>
 
-                    <div>
-                        <label htmlFor="pin_confirmation" className="mb-1 block text-sm font-medium text-gray-700">
-                            Konfirmasi PIN
-                        </label>
-                        <input
-                            id="pin_confirmation"
-                            type="password"
-                            inputMode="numeric"
-                            maxLength={6}
-                            autoComplete="new-password"
-                            value={data.pin_confirmation}
-                            onChange={onPinChange('pin_confirmation')}
-                            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;"
-                            className={`block w-full rounded-lg border px-3 py-2.5 text-center text-lg tracking-[0.5em] text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                errors.pin_confirmation ? 'border-red-400' : 'border-gray-300'
-                            }`}
-                        />
-                        {errors.pin_confirmation && (
-                            <p className="mt-1 text-xs text-red-600">{errors.pin_confirmation}</p>
-                        )}
+                                {countryOpen && (
+                                    <div className="absolute left-0 top-full z-20 mt-1 max-h-64 w-56 overflow-y-auto rounded-xl border border-gray-100 bg-white py-1 shadow-lg">
+                                        {COUNTRIES.map((c) => (
+                                            <button
+                                                key={c.code}
+                                                type="button"
+                                                onClick={() => {
+                                                    setCountry(c);
+                                                    setCountryOpen(false);
+                                                }}
+                                                className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                                                    c.code === country.code ? 'bg-green-50 text-green-700' : 'text-gray-700'
+                                                }`}
+                                            >
+                                                <span>{c.flag}</span>
+                                                <span className="flex-1">{c.name}</span>
+                                                <span className="text-gray-400">+{c.code}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <input
+                                id="phone"
+                                type="tel"
+                                inputMode="numeric"
+                                autoComplete="tel"
+                                value={data.phone}
+                                onChange={onPhoneChange}
+                                placeholder="00-0000-0000"
+                                className="block w-full bg-transparent px-3 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
+                            />
+                        </div>
+                        {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
                     </div>
+                </form>
 
+                <p className="mt-4 text-center text-sm text-gray-500">
+                    Sudah punya akun?{' '}
+                    <Link href={route('mitra.login')} className="font-semibold text-green-700 hover:underline">
+                        Masuk disini
+                    </Link>
+                </p>
+
+                <div className="sticky bottom-0 bg-white px-6 pb-6 pt-3">
                     <button
                         type="submit"
+                        onClick={submit}
                         disabled={processing}
-                        className="w-full rounded-full bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                        className="w-full rounded-full bg-green-600 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-50"
                     >
                         Daftar
                     </button>
-                </form>
-
-                <p className="mt-6 text-center text-sm text-gray-500">
-                    Sudah punya akun mitra?{' '}
-                    <Link href={route('mitra.login')} className="font-semibold text-green-700 hover:underline">
-                        Masuk
-                    </Link>
-                </p>
+                </div>
             </div>
         </div>
     );
