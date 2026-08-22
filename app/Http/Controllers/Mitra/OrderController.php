@@ -267,4 +267,31 @@ class OrderController extends Controller
 
     return redirect()->back()->with('success', 'Pembayaran denda keterlambatan berhasil diverifikasi!');
 }
+public function verifikasiPerpanjangan(Order $order): RedirectResponse
+{
+    abort_unless($order->partner_id === auth()->id(), 403);
+ 
+    abort_unless(
+        $order->status_perpanjangan === 'menunggu_verifikasi',
+        400,
+        'Tidak ada perpanjangan yang menunggu verifikasi untuk pesanan ini.'
+    );
+ 
+    $order->update([
+        'end_date' => $order->extend_end_date,
+        'total_price' => $order->total_price + $order->extend_price,
+        'extend_paid_at' => now(),
+        'status_perpanjangan' => 'terverifikasi',
+    ]);
+ 
+    Notifikasi::create([
+        'user_id' => $order->customer_id,
+        'order_id' => $order->id,
+        'type' => 'pembayaran_diterima',
+        'judul' => 'Perpanjangan Disetujui',
+        'pesan' => 'Perpanjangan penitipan untuk pesanan '.$order->order_code.' sudah diverifikasi mitra.',
+    ]);
+ 
+    return back()->with('success', 'Perpanjangan penitipan berhasil diverifikasi.');
+}
 }

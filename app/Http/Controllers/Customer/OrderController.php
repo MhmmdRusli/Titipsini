@@ -16,25 +16,25 @@ class OrderController extends Controller
 {
     protected function statusesForTab(string $status): array
     {
+        $status = strtolower(trim($status));
+
         return match ($status) {
-            'baru' => ['baru'],
-            'diproses' => ['diproses'],
+            'baru', 'pending', 'unpaid', 'belum_bayar', 'belum-bayar' => ['baru', 'pending', 'unpaid'],
+            'diproses', 'dititipkan', 'active' => ['diproses', 'dititipkan', 'active'],
             'selesai' => ['selesai'],
             'dibatalkan' => ['dibatalkan'],
-            default => [], // Kosong atau 'semua' berarti ambil semua data
+            default => [],
         };
     }
 
     public function index(Request $request): Response
     {
-        // Tangkap parameter 'status' dari request
         $status = $request->string('status')->toString();
 
         $query = $request->user()
             ->ordersAsCustomer()
             ->with('partner:id,name');
 
-        // Filter berdasarkan status jika dipilih
         $statuses = $this->statusesForTab($status);
         if (!empty($statuses)) {
             $query->whereIn('status', $statuses);
@@ -62,7 +62,7 @@ class OrderController extends Controller
         $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
 
         return Inertia::render('Customer/Orders/Show', [
-            'order' => $order, // denda sudah otomatis ke-append lewat accessor di model
+            'order' => $order,
             'qris_url' => $qrisUrl,
         ]);
     }
@@ -91,9 +91,6 @@ class OrderController extends Controller
         return back()->with('success', 'Pesanan berhasil dibatalkan.');
     }
 
-    /**
-     * Halaman sukses setelah pesanan dibuat.
-     */
     public function success(Request $request, Order $order): Response
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
@@ -107,9 +104,6 @@ class OrderController extends Controller
         ]);
     }
 
-    /**
-     * POST /app/orders/{order}/bayar-saldo
-     */
     public function bayarSaldo(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
@@ -149,9 +143,6 @@ class OrderController extends Controller
             ->with('success', 'Pembayaran dengan saldo berhasil! Pesananmu sedang diproses.');
     }
 
-    /**
-     * Halaman instruksi / pemrosesan pembayaran oleh customer
-     */
     public function pembayaran(Request $request, Order $order): Response
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
@@ -201,28 +192,23 @@ class OrderController extends Controller
 
     public function uploadBukti(Request $request, Order $order)
     {
-        // 1. Validasi file gambar
         $request->validate([
             'payment_receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // 2. Simpan file gambar ke storage public
         if ($request->hasFile('payment_receipt')) {
-            // Hapus bukti lama jika ada
             if ($order->payment_receipt) {
                 Storage::disk('public')->delete($order->payment_receipt);
             }
 
             $path = $request->file('payment_receipt')->store('payment_proofs', 'public');
 
-            // 3. Update status pesanan & path foto bukti
             $order->update([
                 'payment_receipt' => $path,
                 'status'          => 'diproses',
                 'payment_method'  => $order->payment_method === 'pending' ? 'transfer' : $order->payment_method,
             ]);
 
-            // 4. Beri tahu mitra
             if ($order->partner_id) {
                 Notifikasi::create([
                     'user_id' => $order->partner_id,
@@ -233,7 +219,6 @@ class OrderController extends Controller
                 ]);
             }
 
-            // 5. Beri tahu customer
             Notifikasi::create([
                 'user_id' => $order->customer_id,
                 'order_id' => $order->id,
@@ -287,14 +272,12 @@ class OrderController extends Controller
             'denda_receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // Hapus file denda lama jika ada (menggunakan nama kolom bukti_denda)
         if ($order->bukti_denda) {
             Storage::disk('public')->delete($order->bukti_denda);
         }
 
         $path = $request->file('denda_receipt')->store('bukti-denda', 'public');
 
-        // Disimpan ke kolom 'bukti_denda' dan ubah 'status_denda'
         $order->update([
             'bukti_denda'  => $path,
             'status_denda' => 'menunggu_verifikasi',
@@ -312,5 +295,178 @@ class OrderController extends Controller
 
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Bukti pembayaran denda berhasil diunggah! Menunggu verifikasi.');
+    }
+
+    /* =====================================================================
+     |  PERPANJANG PENITIPAN
+     |  Alur: form (pilih tanggal keluar baru) -> hitung & simpan draft ->
+     |  invoice perpanjangan -> bayar (saldo langsung lunas, atau upload
+     |  bukti transfer menunggu verifikasi mitra).
+     |  end_date ASLI baru ikut berubah setelah status_perpanjangan jadi
+     |  'terverifikasi' (lihat extendBayarSaldo & Mitra\OrderController::verifikasiPerpanjangan).
+     * =====================================================================
+     */
+
+    /**
+     * GET /app/orders/{order}/extend
+     */
+    public function extendForm(Request $request, Order $order): Response
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+
+        abort_unless(
+            $order->status === 'diproses',
+            400,
+            'Hanya pesanan yang sedang dititipkan yang bisa diperpanjang.'
+        );
+
+        $jumlahHariAsli = max(1, \Carbon\Carbon::parse($order->start_date)->diffInDays($order->end_date));
+        $hargaPerHari = round(((float) $order->subtotal) / $jumlahHariAsli);
+
+        return Inertia::render('Customer/Orders/Extend', [
+            'order' => $order->only([
+                'id', 'order_code', 'item_name', 'service_type',
+                'start_date', 'end_date', 'city',
+            ]),
+            'hargaPerHari' => $hargaPerHari,
+        ]);
+    }
+
+    /**
+     * POST /app/orders/{order}/extend
+     */
+    public function extendStore(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+
+        abort_unless(
+            $order->status === 'diproses',
+            400,
+            'Hanya pesanan yang sedang dititipkan yang bisa diperpanjang.'
+        );
+
+        $validated = $request->validate([
+            'extend_end_date' => ['required', 'date', 'after:'.$order->end_date],
+        ], [
+            'extend_end_date.after' => 'Tanggal keluar baru harus setelah tanggal keluar saat ini.',
+        ]);
+
+        $harga = $order->hargaPerpanjangan($validated['extend_end_date']);
+
+        $order->update([
+            'extend_end_date' => $validated['extend_end_date'],
+            'extend_price' => $harga,
+            'extend_requested_at' => now(),
+            'extend_paid_at' => null,
+            'extend_payment_method' => null,
+            'extend_payment_receipt' => null,
+            'status_perpanjangan' => 'menunggu_pembayaran',
+        ]);
+
+        return redirect()->route('customer.orders.extend.invoice', $order->id);
+    }
+
+    /**
+     * GET /app/orders/{order}/extend/invoice
+     */
+    public function extendInvoice(Request $request, Order $order): Response
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+        abort_unless($order->extend_end_date !== null, 404);
+
+        $setting = PaymentSetting::current();
+        $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
+
+        return Inertia::render('Customer/Orders/ExtendInvoice', [
+            'order' => $order->only([
+                'id', 'order_code', 'item_name', 'service_type',
+                'start_date', 'end_date', 'extend_end_date', 'extend_price',
+                'extend_paid_at', 'extend_payment_receipt', 'status_perpanjangan',
+                'created_at',
+            ]),
+            'qris_url' => $qrisUrl,
+            'saldo' => (float) $request->user()->saldo,
+        ]);
+    }
+
+    /**
+     * POST /app/orders/{order}/extend/bayar-saldo
+     */
+    public function extendBayarSaldo(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+
+        abort_unless($order->status_perpanjangan === 'menunggu_pembayaran', 400, 'Tidak ada perpanjangan yang menunggu pembayaran.');
+
+        $customer = $request->user();
+        $harga = (float) $order->extend_price;
+
+        if ((float) $customer->saldo < $harga) {
+            return back()->withErrors([
+                'saldo_perpanjangan' => 'Saldo kamu tidak mencukupi untuk membayar perpanjangan ini. Silakan top up terlebih dahulu atau bayar via QRIS.',
+            ]);
+        }
+
+        $customer->decrement('saldo', $harga);
+
+        $order->update([
+            'end_date' => $order->extend_end_date,
+            'total_price' => $order->total_price + $harga,
+            'extend_paid_at' => now(),
+            'extend_payment_method' => 'saldo',
+            'status_perpanjangan' => 'terverifikasi',
+        ]);
+
+        if ($order->partner_id) {
+            Notifikasi::create([
+                'user_id' => $order->partner_id,
+                'order_id' => $order->id,
+                'type' => 'transaksi_masuk',
+                'judul' => 'Penitipan Diperpanjang',
+                'pesan' => 'Pesanan '.$order->order_code.' diperpanjang sampai '.\Carbon\Carbon::parse($order->end_date)->translatedFormat('d F Y').'.',
+            ]);
+        }
+
+        return redirect()->route('customer.orders.show', $order->id)
+            ->with('success', 'Perpanjangan penitipan berhasil dibayar dengan saldo.');
+    }
+
+    /**
+     * POST /app/orders/{order}/extend/upload-bukti
+     */
+    public function extendUploadBukti(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+
+        abort_unless($order->status_perpanjangan === 'menunggu_pembayaran', 400, 'Tidak ada perpanjangan yang menunggu pembayaran.');
+
+        $request->validate([
+            'extend_receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        if ($order->extend_payment_receipt) {
+            Storage::disk('public')->delete($order->extend_payment_receipt);
+        }
+
+        $path = $request->file('extend_receipt')->store('extend_proofs', 'public');
+
+        $order->update([
+            'extend_payment_receipt' => $path,
+            'extend_payment_method' => 'transfer',
+            'status_perpanjangan' => 'menunggu_verifikasi',
+        ]);
+
+        if ($order->partner_id) {
+            Notifikasi::create([
+                'user_id' => $order->partner_id,
+                'order_id' => $order->id,
+                'type' => 'pembayaran_diterima',
+                'judul' => 'Bukti Perpanjangan Diunggah',
+                'pesan' => 'Customer mengunggah bukti pembayaran perpanjangan untuk pesanan '.$order->order_code.'. Mohon segera diverifikasi.',
+            ]);
+        }
+
+        return redirect()->route('customer.orders.show', $order->id)
+            ->with('success', 'Bukti pembayaran perpanjangan berhasil diunggah! Menunggu verifikasi mitra.');
     }
 }
