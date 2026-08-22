@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import { Pencil, Bell, ShieldCheck, HelpCircle, Info, ChevronRight, LogOut, Sun, Moon } from 'lucide-react';
+import { Pencil, Bell, ShieldCheck, HelpCircle, Info, ChevronRight, LogOut, Sun, Moon, MapPin } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 // --- Helper Functions & Constants ---
@@ -206,6 +206,11 @@ export default function ProfileIndex({ user }) {
                             Akun
                         </h3>
                         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-700/80 dark:bg-gray-800">
+                            <MenuLink
+                                href="/app/profile/alamat"
+                                icon={MapPin}
+                                label="Alamat Saya"
+                            />
                             <MenuLink
                                 href="/app/profile/notifikasi"
                                 icon={Bell}
