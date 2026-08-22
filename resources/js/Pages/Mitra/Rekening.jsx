@@ -22,6 +22,7 @@ export default function Rekening({ rekening = [] }) {
     const [view, setView] = useState('list');
     const [step, setStep] = useState(1);
     const [hapusTarget, setHapusTarget] = useState(null);
+    const [showKonfirmasi, setShowKonfirmasi] = useState(false);
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm(emptyForm);
 
@@ -48,6 +49,7 @@ export default function Rekening({ rekening = [] }) {
     const batal = () => {
         reset();
         clearErrors();
+        setShowKonfirmasi(false);
         setView('list');
     };
 
@@ -57,21 +59,40 @@ export default function Rekening({ rekening = [] }) {
         setStep(2);
     };
 
-    const simpan = (e) => {
-        e.preventDefault();
-
-        const opts = {
+    // Simpan rekening baru (tidak perlu konfirmasi/verifikasi tambahan)
+    const simpanBaru = () => {
+        post('/mitra/rekening', {
             onSuccess: () => {
                 reset();
                 setView('list');
             },
-        };
+        });
+    };
 
+    // Klik "Simpan" di Step 2. Untuk rekening baru -> langsung simpan.
+    // Untuk ubah rekening -> tampilkan popup konfirmasi dulu.
+    const klikSimpan = (e) => {
+        e.preventDefault();
         if (data.id) {
-            put(`/mitra/rekening/${data.id}`, opts);
+            setShowKonfirmasi(true);
         } else {
-            post('/mitra/rekening', opts);
+            simpanBaru();
         }
+    };
+
+    // Dipanggil saat user menekan "Ya, Benar" di popup konfirmasi.
+    // Mengarahkan ke halaman verifikasi (PIN) sebelum perubahan benar-benar disimpan.
+    const konfirmasiUbah = () => {
+        setShowKonfirmasi(false);
+        router.visit(`/mitra/rekening/${data.id}/verifikasi`, {
+            method: 'post',
+            data: {
+                nama_bank: data.nama_bank,
+                nomor_rekening: data.nomor_rekening,
+                nama_pemilik: data.nama_pemilik,
+                utama: data.utama,
+            },
+        });
     };
 
     const konfirmasiHapus = () => {
@@ -116,12 +137,20 @@ export default function Rekening({ rekening = [] }) {
                 )}
 
                 {view === 'form' && step === 2 && (
-                    <StepDua data={data} setData={setData} errors={errors} processing={processing} onSimpan={simpan} />
+                    <StepDua data={data} setData={setData} errors={errors} processing={processing} onSimpan={klikSimpan} />
                 )}
             </div>
 
             {hapusTarget && (
                 <ModalHapus item={hapusTarget} onTidak={() => setHapusTarget(null)} onYa={konfirmasiHapus} />
+            )}
+
+            {showKonfirmasi && (
+                <ModalKonfirmasiUbah
+                    data={data}
+                    onKembali={() => setShowKonfirmasi(false)}
+                    onYaBenar={konfirmasiUbah}
+                />
             )}
         </MitraLayout>
     );
@@ -350,6 +379,33 @@ function ModalHapus({ item, onTidak, onYa }) {
                         className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white hover:bg-red-500"
                     >
                         Ya
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ---------------------------------------------------------------------- */
+/* Modal konfirmasi ubah rekening (sebelum diarahkan ke verifikasi PIN)    */
+/* ---------------------------------------------------------------------- */
+
+function ModalKonfirmasiUbah({ data, onKembali, onYaBenar }) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+                <p className="text-lg font-bold text-gray-900">Apakah Rekening sudah Benar?</p>
+                <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                    Anda akan mengubah rekening menjadi rekening {data.nama_bank} {data.nomor_rekening} atas nama{' '}
+                    {data.nama_pemilik}.
+                </p>
+
+                <div className="mt-6 flex items-center justify-end gap-6">
+                    <button type="button" onClick={onKembali} className="text-sm font-semibold text-gray-500 hover:text-gray-700">
+                        Kembali
+                    </button>
+                    <button type="button" onClick={onYaBenar} className="text-sm font-semibold text-green-700 hover:text-green-600">
+                        Ya, Benar
                     </button>
                 </div>
             </div>
