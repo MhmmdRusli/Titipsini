@@ -263,6 +263,13 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::get('/rekening', [RekeningController::class, 'edit'])->name('rekening.edit');
     Route::post('/rekening', [RekeningController::class, 'store'])->name('rekening.store');
     Route::put('/rekening/{id}', [RekeningController::class, 'update'])->name('rekening.update');
+    Route::delete('/rekening/{id}', [RekeningController::class, 'destroy'])->name('rekening.destroy');
+    Route::post('/rekening/{id}/verifikasi', [RekeningController::class, 'verifikasi'])
+    ->name('rekening.verifikasi');
+    Route::post('/rekening/{id}/verifikasi/kirim-ulang', [RekeningController::class, 'verifikasiKirimUlang'])
+    ->name('rekening.verifikasi.kirim-ulang');
+    Route::post('/rekening/{id}/verifikasi/konfirmasi', [RekeningController::class, 'verifikasiKonfirmasi'])
+    ->name('rekening.verifikasi.konfirmasi');
 
     /* Penarikan Dana Mitra */
     Route::get('/penarikan', [PenarikanController::class, 'index'])->name('penarikan.index');

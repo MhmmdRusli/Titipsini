@@ -34,8 +34,9 @@ export default function Notifikasi({ notifikasi = [] }) {
     }
 
     return (
-        /* Mengosongkan title di MitraLayout agar teks "Notifikasi" ganda di atas header hijau hilang */
-        <MitraLayout title="">
+        /* Mengosongkan title di MitraLayout agar teks "Notifikasi" ganda di atas header hijau hilang.
+           backHref tetap ditambahkan agar tombol panah kembali muncul di header putih paling atas. */
+        <MitraLayout title="" backHref="/mitra/dashboard">
             <Head title="Notifikasi Mitra" />
 
             {/* Header hijau dengan lengkungan bawah, hanya menampilkan judul dan tombol aksi */}
@@ -105,8 +106,8 @@ export default function Notifikasi({ notifikasi = [] }) {
                                         </span>
 
                                         {n.order_id ? (
-                                            <a
-                                                href={'/mitra/pesanan/' + n.order_id}
+                                            
+                                               <a href={'/mitra/pesanan/' + n.order_id}
                                                 onClick={function () { if (!n.is_read) markAsRead(n.id); }}
                                                 className="text-xs font-bold text-[#15803d] hover:underline dark:text-[#4ade80]"
                                             >

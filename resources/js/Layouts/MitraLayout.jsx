@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Package, Bell, User, CheckCircle2, XCircle, X, ChevronLeft } from 'lucide-react';
+import { LayoutGrid, Package, Bell, User, CheckCircle2, XCircle, X } from 'lucide-react';
 
 const navItems = [
     { label: 'Beranda', href: '/mitra/dashboard', icon: LayoutGrid },
@@ -36,7 +36,7 @@ function Toast({ type, message, onClose }) {
     );
 }
 
-export default function MitraLayout({ children, title, backHref }) {
+export default function MitraLayout({ children, title }) {
     const { url, props } = usePage();
     const [toast, setToast] = useState(null);
 
@@ -53,28 +53,19 @@ export default function MitraLayout({ children, title, backHref }) {
             <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-gray-50 sm:h-[850px] sm:shadow-xl">
                 <header className="z-10 shrink-0 border-b border-gray-200 bg-white">
                     <div
-                        className="flex items-center gap-3 px-4 pb-3"
+                        className="flex items-center px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
                     >
-                        {backHref ? (
-                            <>
-                                <Link href={backHref} className="text-gray-700 hover:text-gray-900">
-                                    <ChevronLeft size={22} />
-                                </Link>
-                                {title && <h1 className="text-base font-bold text-gray-900">{title}</h1>}
-                            </>
-                        ) : (
-                            <Link href="/mitra/dashboard" className="flex items-center gap-1.5">
-                                <img
-                                    src="/images/logo-titipsini.png"
-                                    alt="Logo"
-                                    className="h-6 w-auto object-contain"
-                                />
-                                <span className="text-base font-bold tracking-tight text-[#15803d]">
-                                    Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
-                                </span>
-                            </Link>
-                        )}
+                        <Link href="/mitra/dashboard" className="flex items-center gap-1.5">
+                            <img
+                                src="/images/logo-titipsini.png"
+                                alt="Logo"
+                                className="h-6 w-auto object-contain"
+                            />
+                            <span className="text-base font-bold tracking-tight text-[#15803d]">
+                                Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
+                            </span>
+                        </Link>
                     </div>
                 </header>
 
@@ -85,7 +76,7 @@ export default function MitraLayout({ children, title, backHref }) {
                 )}
 
                 <main className="flex-1 overflow-y-auto pb-20">
-                    {title && !backHref && (
+                    {title && (
                         <div className="px-4 pt-4">
                             <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
                         </div>

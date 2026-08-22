@@ -39,6 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'jam_buka',
         'jam_tutup',
         'layanan_kategori',
+        'jadwal_operasional',
         'verification_status',
         'rejection_reason',
         'suspended_at',
@@ -62,6 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'pin' => 'hashed',
             'toko_buka' => 'boolean',
             'layanan_kategori' => 'array',
+            'jadwal_operasional' => 'array',
         ];
     }
 
