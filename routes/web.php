@@ -72,8 +72,24 @@ Route::get('/', function () {
         };
     }
 
-    return Inertia::render('Onboarding');
+    // Landing page desktop (marketing) - halaman pertama yang dilihat
+    // pengunjung, menggantikan Onboarding di posisi ini.
+    return Inertia::render('Landing');
 })->name('welcome');
+
+// Onboarding mobile (splash + slide + tombol Daftar/Masuk) - sekarang
+// diakses lewat tombol "Mulai Sekarang" di Landing page, bukan langsung di '/'.
+Route::get('/mulai', function () {
+    if (auth()->check()) {
+        return match (auth()->user()->role) {
+            'admin' => redirect()->route('admin.dashboard'),
+            'partner' => redirect()->route('mitra.dashboard'),
+            default => redirect()->route('customer.dashboard'),
+        };
+    }
+
+    return Inertia::render('Onboarding');
+})->name('onboarding');
 
 
 Route::middleware('guest')->group(function () {
@@ -367,4 +383,4 @@ Route::get('/api/wilayah/districts/{regencyId}', [WilayahController::class, 'dis
 Route::middleware(['auth', 'role:customer'])->prefix('buat-pin')->name('customer.pin.')->group(function () {
     Route::get('/', [PinController::class, 'create'])->name('create');
     Route::post('/', [PinController::class, 'store'])->name('store');
-}); 
+});
