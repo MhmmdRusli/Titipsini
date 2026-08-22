@@ -1,5 +1,5 @@
-import { Head, router } from '@inertiajs/react';
-import { Bell, Clock, CheckCheck, CheckCircle2, Wallet, BellRing, CheckSquare, ShieldCheck } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { ChevronLeft, Bell, Clock, CheckCheck, CheckCircle2, Wallet, BellRing, CheckSquare, ShieldCheck } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const TYPE_CONFIG = {
@@ -39,12 +39,20 @@ export default function Notifikasi({ notifikasi = [] }) {
         <MitraLayout title="" backHref="/mitra/dashboard">
             <Head title="Notifikasi Mitra" />
 
-            {/* Header hijau dengan lengkungan bawah, hanya menampilkan judul dan tombol aksi */}
+            {/* Header hijau dengan lengkungan bawah, sekarang ada tombol panah kembali di kiri */}
             <div className="bg-[#15803d] dark:bg-green-700 px-4 pt-3 pb-6 rounded-b-[32px] shadow-sm">
                 <div className="flex items-center justify-between">
-                    <h1 className="flex items-center gap-1.5 text-base font-bold text-white">
-                        Notifikasi <Bell size={16} />
-                    </h1>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href="/mitra/dashboard"
+                            className="flex h-8 w-8 items-center justify-center text-white/90 hover:text-white transition"
+                        >
+                            <ChevronLeft size={20} />
+                        </Link>
+                        <h1 className="flex items-center gap-1.5 text-base font-bold text-white">
+                            Notifikasi <Bell size={16} />
+                        </h1>
+                    </div>
                     {hasUnread ? (
                         <button onClick={markAllAsRead} className="flex items-center gap-1 text-xs font-medium text-white/90 hover:text-white transition">
                             <CheckCheck size={14} />

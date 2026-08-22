@@ -94,11 +94,19 @@ export default function Show({ partner }) {
                             <dt className="text-slate-500 dark:text-gray-400">No. Telepon</dt>
                             <dd className="font-medium text-slate-800 dark:text-gray-200">{partner.phone ?? '-'}</dd>
                         </div>
-                        <div className="flex justify-between">
+                            <div className="flex justify-between">
                             <dt className="text-slate-500 dark:text-gray-400">Jenis Kelamin</dt>
                             <dd className="font-medium text-slate-800 dark:text-gray-200">
                                 {partner.gender === 'male' ? 'Laki-laki' : partner.gender === 'female' ? 'Perempuan' : '-'}
                             </dd>
+                        </div>
+                        <div className="flex justify-between">
+                            <dt className="text-slate-500 dark:text-gray-400">NIK</dt>
+                            <dd className="font-medium text-slate-800 dark:text-gray-200">{partner.nik ?? '-'}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                            <dt className="text-slate-500 dark:text-gray-400">Kota</dt>
+                            <dd className="font-medium text-slate-800 dark:text-gray-200">{partner.city ?? '-'}</dd>
                         </div>
                         <div className="flex justify-between">
                             <dt className="text-slate-500 dark:text-gray-400">Kota</dt>
@@ -108,10 +116,19 @@ export default function Show({ partner }) {
                             <dt className="text-slate-500 dark:text-gray-400">Bergabung</dt>
                             <dd className="font-medium text-slate-800 dark:text-gray-200">{formatDate(partner.created_at)}</dd>
                         </div>
-                        {partner.address && (
+                            {partner.link_verifikasi_ktp && (
                             <div>
-                                <dt className="text-slate-500 dark:text-gray-400">Alamat</dt>
-                                <dd className="mt-1 font-medium text-slate-800 dark:text-gray-200">{partner.address}</dd>
+                                <dt className="text-slate-500 dark:text-gray-400">Foto KTP & Selfie</dt>
+                                <dd className="mt-1">
+                                    
+                                       <a href={partner.link_verifikasi_ktp}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-medium text-emerald-600 dark:text-emerald-400 underline break-all"
+                                    >
+                                        Buka link Google Drive
+                                    </a>
+                                </dd>
                             </div>
                         )}
                         {partner.rejection_reason && (

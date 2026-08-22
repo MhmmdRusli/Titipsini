@@ -96,7 +96,7 @@ export default function Register() {
                     <p className="mt-1 text-xs text-gray-400">Tempat Yang Aman Untuk Barang Berharga Anda</p>
                 </div>
 
-                <form onSubmit={submit} className="mt-6 flex-1 space-y-4 px-6">
+                <form id="register-form" onSubmit={submit} className="mt-6 flex-1 space-y-4 px-6">
                     <div>
                         <label htmlFor="name" className="mb-1 block text-sm font-semibold text-gray-800">
                             Nama Lengkap
@@ -236,7 +236,7 @@ export default function Register() {
                                 autoComplete="tel"
                                 value={data.phone}
                                 onChange={onPhoneChange}
-                                placeholder="00-0000-0000"
+                                placeholder="8123456789"
                                 className="block w-full bg-transparent px-3 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
                             />
                         </div>
@@ -254,11 +254,11 @@ export default function Register() {
                 <div className="sticky bottom-0 bg-white px-6 pb-6 pt-3">
                     <button
                         type="submit"
-                        onClick={submit}
+                        form="register-form"
                         disabled={processing}
                         className="w-full rounded-full bg-green-600 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-50"
                     >
-                        Daftar
+                        {processing ? 'Memproses...' : 'Daftar'}
                     </button>
                 </div>
             </div>

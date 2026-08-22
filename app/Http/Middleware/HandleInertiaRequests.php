@@ -19,6 +19,9 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
 
+        // Cek apakah user terverifikasi (statusnya 'terverifikasi' atau 'verified')
+        $isVerified = $user ? in_array(strtolower((string) $user->verification_status), ['terverifikasi', 'verified'], true) : false;
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user ? [
@@ -26,9 +29,8 @@ class HandleInertiaRequests extends Middleware
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
-                    // 'direct_public' disk = file disimpan langsung di public/avatars,
-                    // bukan lewat symlink storage (yang kena 403 di php artisan serve
-                    // pada Windows).
+                    'verification_status' => $user->verification_status,
+                    'is_verified' => $isVerified,
                     'avatar' => (function () use ($user) {
                         $raw = $user->foto ?: $user->avatar;
 
@@ -36,20 +38,15 @@ class HandleInertiaRequests extends Middleware
                             return null;
                         }
 
-                        // Kalau nilainya sudah berupa path/URL lengkap (mis. '/storage/avatars/x.jpg',
-                        // hasil upload dari halaman Edit Profil customer), pakai apa adanya.
                         if (str_starts_with($raw, '/') || str_starts_with($raw, 'http')) {
                             return $raw;
                         }
 
-                        // Kalau nilainya path relatif polos (mis. 'avatars/x.jpg'), baru resolve
-                        // lewat disk direct_public.
                         return Storage::disk('direct_public')->url($raw);
                     })(),
                 ] : null,
             ],
 
-            // 💡 DATA CUACA GLOBAL (Bisa diakses dari seluruh halaman JSX/React via usePage().props)
             'cuaca' => [
                 'kota' => 'Semarang',
                 'suhu' => '30°C',

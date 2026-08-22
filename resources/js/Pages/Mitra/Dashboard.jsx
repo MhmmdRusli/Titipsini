@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { History, AlertTriangle, Package, Car, Building2, Truck, ChevronRight, MapPin, User, LogOut, BadgeCheck, Clock, ArrowDownToLine } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
@@ -10,15 +10,6 @@ const LAYANAN_ICON = {
     pindahan: Truck,
 };
 
-const LAYANAN_LABEL = {
-    barang: 'Titip Barang',
-    kendaraan: 'Titip Kendaraan',
-    bangunan: 'Titip Bangunan',
-    pindahan: 'Layanan Pindahan',
-};
-
-// Konfigurasi tiap card "Jumlah Pesanan" - dipisah biar gampang nambah
-// kategori baru tanpa duplikasi JSX.
 const PESANAN_CARDS = [
     { key: 'barang', label: 'Barang', icon: Package },
     { key: 'kendaraan', label: 'Kendaraan', icon: Car },
@@ -30,30 +21,68 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
-export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [], pesanan = {} }) {
+export default function Dashboard({ partner = {}, saldo = 0, toko = {}, layanan = [], pesanan = {}, just_logged_in = false }) {
+    const { auth } = usePage().props;
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
+    // 1. Ambil status mentah dari props partner atau auth.user
+    const rawStatus = partner?.verification_status ?? auth?.user?.verification_status ?? partner?.is_verified ?? auth?.user?.is_verified;
+
+    // 2. Logika pemeriksaan ketat: Hanya dianggap terverifikasi jika nilainya eksplisit 'terverifikasi', 'verified', atau true
+    const isVerified = (() => {
+        if (typeof rawStatus === 'boolean') return rawStatus;
+        if (typeof rawStatus === 'number') return rawStatus === 1;
+        if (typeof rawStatus === 'string') {
+            const cleanStatus = rawStatus.trim().toLowerCase();
+            return cleanStatus === 'terverifikasi' || cleanStatus === 'verified' || cleanStatus === '1' || cleanStatus === 'true';
+        }
+        return false;
+    })();
+
+    // Modal cuma terbuka otomatis kalau baru saja login/daftar DAN belum terverifikasi
+    const [showKtpModal, setShowKtpModal] = useState(just_logged_in && !isVerified);
 
     return (
         <MitraLayout>
             <Head title="Beranda Mitra" />
 
-            <div className="px-4 py-4 pb-8 space-y-4">
-                {/* Banner verifikasi KTP - hanya muncul kalau belum verified */}
-                {!partner?.is_verified && (
-                    <Link
-                        href="/mitra/legalitas"
-                        className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-3.5 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/40"
-                    >
-                        <AlertTriangle size={20} className="shrink-0 text-red-600 dark:text-red-400" />
-                        <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-red-700 dark:text-red-300">Kamu belum melakukan Verifikasi KTP</p>
-                            <p className="text-xs text-red-600 dark:text-red-400">Verifikasi Sekarang</p>
+            {/* MODAL POP-UP VERIFIKASI KTP */}
+            {!isVerified && showKtpModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
+                                <AlertTriangle size={32} />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                Verifikasi KTP
+                            </h3>
+                            <p className="mt-2 text-xs leading-relaxed text-gray-600 dark:text-gray-300">
+                                Kamu belum melakukan Verifikasi KTP. Silahkan Melakukan Verifikasi Terlebih dahulu
+                            </p>
                         </div>
-                        <ChevronRight size={16} className="shrink-0 text-red-400" />
-                    </Link>
-                )}
 
-                {/* Header disatukan: avatar, nama toko, pemilik, status buka/tutup, alamat - semua satu kartu */}
+                        <div className="mt-6 flex items-center justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowKtpModal(false)}
+                                className="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            >
+                                Batal
+                            </button>
+                            <Link
+                                href="/mitra/legalitas"
+                                className="rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-red-700 transition"
+                            >
+                                Verifikasi Sekarang
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="px-4 py-4 pb-8 space-y-4">
+                {/* Header User/Toko */}
                 <div className="relative rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <div className="flex items-start gap-3">
                         <button
@@ -75,12 +104,12 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                                 <p className="truncate text-base font-bold text-gray-900 dark:text-gray-100">
                                     {toko?.nama ?? 'Titipsini Partner Outlet'}
                                 </p>
-                                {partner?.is_verified && (
+                                {isVerified && (
                                     <BadgeCheck size={15} className="shrink-0 text-green-600 dark:text-[#4ade80]" />
                                 )}
                             </div>
                             <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                                Hello, {partner?.name ?? 'Mitra'} 👋
+                                Hello 👋 {partner?.name ?? 'Mitra'}
                             </p>
                             <p className="mt-1 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
                                 <MapPin size={12} className="shrink-0 text-gray-400" />
@@ -89,31 +118,59 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                         </div>
                     </div>
 
-                    {/* Status buka/tutup - sekarang jadi link ke pengaturan jam operasional */}
+                    {/* BANNER MERAH VERIFIKASI KTP (DITAROH DI BAWAH ALAMAT) */}
+                    {!isVerified && (
+                        <div className="mt-3 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-900/50 dark:bg-red-950/40">
+                            <AlertTriangle size={18} className="shrink-0 text-red-600 dark:text-red-400" />
+                            <div className="min-w-0 flex-1">
+                                <p className="text-xs font-semibold text-red-700 dark:text-red-300">
+                                    Kamu belum melakukan Verifikasi KTP.
+                                </p>
+                                <Link
+                                    href="/mitra/legalitas"
+                                    className="text-xs font-bold text-red-600 underline hover:text-red-800 dark:text-red-400"
+                                >
+                                    Verifikasi Sekarang
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Status Toko */}
                     <Link
                         href="/mitra/layanan/jam-operasional"
-                        className={`mt-3 flex items-center justify-between rounded-lg px-3 py-2 transition ${toko?.buka
-                            ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40'
-                            : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40'
-                            }`}
+                        className={`mt-3 flex items-center justify-between rounded-lg px-3 py-2 transition ${
+                            toko?.buka
+                                ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40'
+                                : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40'
+                        }`}
                     >
                         <div className="flex items-center gap-1.5">
                             <span
-                                className={`h-1.5 w-1.5 rounded-full ${toko?.buka ? 'bg-green-700 dark:bg-green-400' : 'bg-red-700 dark:bg-red-400'
-                                    }`}
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                    toko?.buka ? 'bg-green-700 dark:bg-green-400' : 'bg-red-700 dark:bg-red-400'
+                                }`}
                             />
                             <span
-                                className={`text-xs font-semibold ${toko?.buka ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'
-                                    }`}
+                                className={`text-xs font-semibold ${
+                                    toko?.buka ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'
+                                }`}
                             >
                                 {toko?.buka ? 'Buka' : 'Tutup'}
                             </span>
-                            <span
-                                className={`text-xs ${toko?.buka ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
+                            {toko?.jam_buka && toko?.jam_tutup ? (
+                                <span
+                                    className={`text-xs ${
+                                        toko?.buka ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
                                     }`}
-                            >
-                                {toko?.jam_buka && toko?.jam_tutup ? `${toko.jam_buka} - ${toko.jam_tutup}` : '08.00 - 20.00'}
-                            </span>
+                                >
+                                    {toko.jam_buka} - {toko.jam_tutup}
+                                </span>
+                            ) : (
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    Jam operasional belum diatur
+                                </span>
+                            )}
                         </div>
                         <Clock size={13} className={toko?.buka ? 'text-green-600' : 'text-red-500'} />
                     </Link>
@@ -143,7 +200,7 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                     )}
                 </div>
 
-                {/* Kartu Saldo (Full Hijau) */}
+                {/* Saldo */}
                 <div className="rounded-2xl bg-green-600 dark:bg-green-700 p-4 text-white shadow-sm relative overflow-hidden">
                     <div className="flex items-start justify-between">
                         <div>
@@ -169,7 +226,7 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                     </div>
                 </div>
 
-                {/* Layanan Vendors dengan Tombol Kelola di Kanan & Bisa Diklik */}
+                {/* Layanan Vendors */}
                 <div>
                     <div className="mb-2 flex items-center justify-between">
                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Layanan Vendors</p>
@@ -182,40 +239,23 @@ export default function Dashboard({ partner, saldo = 0, toko = {}, layanan = [],
                         </Link>
                     </div>
 
-                    {!Array.isArray(layanan) || layanan.length === 0 ? (
-                        <div className="grid grid-cols-4 gap-2">
-                            {['barang', 'kendaraan', 'bangunan', 'pindahan'].map((key) => {
-                                const Icon = LAYANAN_ICON[key] ?? Package;
-                                return (
-                                    <Link
-                                        key={key}
-                                        href="/mitra/layanan"
-                                        className="flex flex-col items-center justify-center rounded-2xl border border-black-600/40 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-black-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
-                                    >
-                                        <Icon size={22} className="text-green-600 dark:text-[#4ade80]" strokeWidth={1.75} />
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-4 gap-2">
-                            {layanan.map((key) => {
-                                const Icon = LAYANAN_ICON[key] ?? Package;
-                                return (
-                                    <Link
-                                        key={key}
-                                        href="/mitra/layanan"
-                                        className="flex flex-col items-center justify-center rounded-2xl border border-black-600/40 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-black-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
-                                    >
-                                        <Icon size={22} className="text-green-600 dark:text-[#4ade80]" strokeWidth={1.75} />
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    )}
+                    <div className="grid grid-cols-4 gap-2">
+                        {(Array.isArray(layanan) && layanan.length > 0 ? layanan : ['barang', 'kendaraan', 'bangunan', 'pindahan']).map((key) => {
+                            const Icon = LAYANAN_ICON[key] ?? Package;
+                            return (
+                                <Link
+                                    key={key}
+                                    href="/mitra/layanan"
+                                    className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
+                                >
+                                    <Icon size={22} className="text-green-600 dark:text-[#4ade80]" strokeWidth={1.75} />
+                                </Link>
+                            );
+                        })}
+                    </div>
                 </div>
 
-                {/* Jumlah Pesanan (Barang, Kendaraan, Bangunan, Pindahan) */}
+                {/* Jumlah Pesanan */}
                 <div>
                     <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-gray-100">Jumlah Pesanan</p>
                     <div className="grid grid-cols-2 gap-3">

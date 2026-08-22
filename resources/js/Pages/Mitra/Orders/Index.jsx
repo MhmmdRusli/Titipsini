@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Package, Car, Building2, Truck, MapPin, ClipboardList } from 'lucide-react';
+import { Package, Car, Building2, Truck, MapPin, ClipboardList, ChevronLeft } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const TABS = [
@@ -43,9 +43,17 @@ export default function Index({ orders, counts, filters }) {
             {/* Header Hijau Melengkung */}
             <div className="bg-[#15803d] dark:bg-green-700 px-4 pt-3 pb-6 rounded-b-[32px] shadow-sm">
                 <div className="flex items-center justify-between">
-                    <h1 className="flex items-center gap-1.5 text-base font-bold text-white">
-                        Daftar Pesanan <ClipboardList size={18} />
-                    </h1>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href="/mitra/dashboard"
+                            className="flex h-8 w-8 items-center justify-center text-white/90 hover:text-white transition"
+                        >
+                            <ChevronLeft size={20} />
+                        </Link>
+                        <h1 className="flex items-center gap-1.5 text-base font-bold text-white">
+                            Daftar Pesanan <ClipboardList size={18} />
+                        </h1>
+                    </div>
                 </div>
             </div>
 
