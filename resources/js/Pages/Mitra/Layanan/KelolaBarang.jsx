@@ -18,15 +18,16 @@ export default function KelolaBarang({ layanan = [], daftarKota = [], menungguVe
     return (
         <>
             <Head title="Kelola Gudang" />
-            <KategoriLayananView
+                <KategoriLayananView
                 kategori="barang"
-                title="Kelola Gudang"
+                title="Kelola Barang"
                 ilustrasi={<IlustrasiBarang />}
                 judulKosong="Layanan Barang Masih Kosong"
                 subjudulKosong="Daftarkan Gudang anda dengan mengisi data Alamat Gudang"
-                subheading="Daftar Gudang anda dan isi data gudang"
-                labelBox="Gudang Barang"
-                labelTambah="Tambah Gudang"
+                judulHub="Tambah Layanan Gudang"
+                subheading="Daftarkan tempat parkir dengan mengisi data dibawah ini"
+                labelBox="Alamat gudang"
+                labelTambah="Tambah Alamat Lahan Gudang"
                 layanan={layanan}
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}

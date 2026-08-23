@@ -67,9 +67,16 @@ class ServiceController extends Controller
     /**
      * POST /mitra/layanan
      */
-    public function store(Request $request): RedirectResponse
+        public function store(Request $request): RedirectResponse
     {
         $validated = $this->validated($request);
+
+        // Kategori 'barang' tidak punya field 'nama' terpisah di form -
+        // pakai nama_usaha sebagai nilainya, karena kolom 'nama' di
+        // tabel services wajib diisi (NOT NULL).
+        if ($validated['kategori'] === 'barang') {
+            $validated['nama'] = $validated['nama_usaha'];
+        }
 
         if ($request->hasFile('foto')) {
             $validated['foto'] = $request->file('foto')->store('services', 'public');
@@ -88,6 +95,10 @@ class ServiceController extends Controller
         $this->authorizeOwnership($request, $layanan);
 
         $validated = $this->validated($request);
+
+        if ($validated['kategori'] === 'barang') {
+            $validated['nama'] = $validated['nama_usaha'];
+        }
 
         if ($request->hasFile('foto')) {
             if ($layanan->foto) {

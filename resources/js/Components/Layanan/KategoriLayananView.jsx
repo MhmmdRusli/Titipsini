@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { router, useForm } from '@inertiajs/react';
 import MitraLayout from '@/Layouts/MitraLayout';
-import { Plus, Pencil, Trash2, X, MapPin, AlertCircle, ChevronLeft } from 'lucide-react';
-
+import { Plus, Pencil, Trash2, X, MapPin, AlertCircle, ChevronLeft, Home, Info, CheckCircle2 } from 'lucide-react';
 const JENIS_KENDARAAN_OPTIONS = [
     { value: 'motor', label: 'Motor' },
     { value: 'mobil', label: 'Mobil' },
@@ -33,6 +32,7 @@ export default function KategoriLayananView({
     judulKosong,
     subjudulKosong,
     subheading,
+    judulHub = null,
     labelBox,
     labelTambah,
     layanan = [],
@@ -137,6 +137,15 @@ export default function KategoriLayananView({
     // Alur form kustom (mis. FormIdentitasGudang) sudah punya header + tombol
     // back sendiri di dalam komponennya, jadi di sini title dikosongkan
     // supaya tidak dobel dengan header "Titipsini.com" dari MitraLayout.
+
+    if (tahap === 'sukses') {
+        return (
+            <MitraLayout title="">
+                <TahapSukses labelBox={labelBox} onKembali={() => setTahap('hub')} />
+            </MitraLayout>
+        );
+    }
+
     if (tahap === 'form-kustom' && FormKustom) {
         return (
             <MitraLayout title="">
@@ -150,7 +159,7 @@ export default function KategoriLayananView({
                     }}
                     onSukses={() => {
                         setEditingItem(null);
-                        setTahap('hub');
+                        setTahap('sukses');
                     }}
                 />
             </MitraLayout>
@@ -186,11 +195,13 @@ export default function KategoriLayananView({
 
                 {tahap === 'hub' && (
                     <TahapHub
+                        judulHub={judulHub}
                         subheading={subheading}
                         labelBox={labelBox}
                         labelTambah={labelTambah}
                         layanan={layanan}
                         menungguVerifikasi={menungguVerifikasi}
+                        modeDetail={!!FormKustom}
                         onTambah={() => openTambah()}
                         onUbah={(item) => openTambah(item)}
                         onHapus={setDeleteTarget}
@@ -221,11 +232,10 @@ export default function KategoriLayananView({
                                                 key={opt.value}
                                                 type="button"
                                                 onClick={() => setData('jenis_kendaraan', opt.value)}
-                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                                                    data.jenis_kendaraan === opt.value
-                                                        ? 'border-green-600 bg-green-600 text-white'
-                                                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                                                }`}
+                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${data.jenis_kendaraan === opt.value
+                                                    ? 'border-green-600 bg-green-600 text-white'
+                                                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                                                    }`}
                                             >
                                                 {opt.label}
                                             </button>
@@ -244,11 +254,10 @@ export default function KategoriLayananView({
                                                 key={opt.value}
                                                 type="button"
                                                 onClick={() => setData('jenis_bangunan', opt.value)}
-                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                                                    data.jenis_bangunan === opt.value
-                                                        ? 'border-green-600 bg-green-600 text-white'
-                                                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                                                }`}
+                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${data.jenis_bangunan === opt.value
+                                                    ? 'border-green-600 bg-green-600 text-white'
+                                                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                                                    }`}
                                             >
                                                 {opt.label}
                                             </button>
@@ -331,14 +340,12 @@ export default function KategoriLayananView({
                                 <button
                                     type="button"
                                     onClick={() => setData('is_active', !data.is_active)}
-                                    className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-                                        data.is_active ? 'bg-green-600' : 'bg-gray-300'
-                                    }`}
+                                    className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${data.is_active ? 'bg-green-600' : 'bg-gray-300'
+                                        }`}
                                 >
                                     <span
-                                        className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                                            data.is_active ? 'translate-x-5' : 'translate-x-0'
-                                        }`}
+                                        className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${data.is_active ? 'translate-x-5' : 'translate-x-0'
+                                            }`}
                                     />
                                 </button>
                             </div>
@@ -409,10 +416,44 @@ function TahapKosong({ ilustrasi, judul, subjudul, menungguVerifikasi, onTambah 
     );
 }
 
-function TahapHub({ subheading, labelBox, labelTambah, layanan, menungguVerifikasi, onTambah, onUbah, onHapus }) {
+function TahapSukses({ labelBox, onKembali }) {
     return (
-        <div className="pb-6 pt-4">
-            <p className="mt-1 text-center text-xs text-gray-400">{subheading}</p>
+        <div className="flex h-full flex-col items-center justify-center px-8 py-10 text-center">
+            <div className="relative flex h-28 w-28 items-center justify-center">
+                <span className="absolute inset-0 animate-ping rounded-full bg-green-200 opacity-75" />
+                <span className="absolute inset-2 rounded-full bg-green-100" />
+                <CheckCircle2 size={44} className="relative text-green-600" strokeWidth={2.2} />
+            </div>
+
+            <p className="mt-8 text-sm leading-relaxed text-gray-500">
+                Terimakasih telah mengisi kelola layanan, Silahkan Tunggu Verifikasi selanjutnya
+            </p>
+
+            <button
+                type="button"
+                onClick={onKembali}
+                className="mt-10 w-full rounded-xl bg-green-600 py-3 text-sm font-bold text-white hover:bg-green-700"
+            >
+                Kembali ke {labelBox ?? 'Kelola Layanan'}
+            </button>
+        </div>
+    );
+}
+
+function TahapHub({ judulHub, subheading, labelBox, labelTambah, layanan, menungguVerifikasi, modeDetail, onTambah, onUbah, onHapus }) {
+    const [fiturPenuh, setFiturPenuh] = useState(false);
+    const [showPerhatian, setShowPerhatian] = useState(false);
+
+    function toggleFiturPenuh() {
+        const next = !fiturPenuh;
+        setFiturPenuh(next);
+        if (next) setShowPerhatian(true);
+    }
+
+    return (
+        <div className="relative pb-6 pt-4">
+            {judulHub && <p className="text-base font-bold text-gray-900">{judulHub}</p>}
+            <p className="mt-1 text-xs text-gray-400">{subheading}</p>
 
             {menungguVerifikasi && (
                 <div className="mt-4 flex items-center gap-2 rounded-xl bg-green-700 px-4 py-2.5 text-xs font-medium text-white">
@@ -421,40 +462,85 @@ function TahapHub({ subheading, labelBox, labelTambah, layanan, menungguVerifika
                 </div>
             )}
 
-            <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-gray-50/60">
-                <p className="border-b border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-800">{labelBox}</p>
+            {/* Toggle Fitur Penuh */}
+            <div className="mt-4 flex items-center justify-between">
+                <p className="flex items-center gap-1.5 text-sm font-bold text-gray-900">
+                    Mengaktifkan Fitur Penuh
+                    <button type="button" onClick={() => setShowPerhatian(true)} className="text-gray-400">
+                        <Info size={14} />
+                    </button>
+                </p>
+            </div>
+            <button
+                type="button"
+                onClick={toggleFiturPenuh}
+                className={`mt-2 flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    fiturPenuh
+                        ? 'border-green-600 bg-green-600 text-white'
+                        : 'border-gray-300 bg-gray-100 text-gray-500'
+                }`}
+            >
+                <span
+                    className={`h-4 w-7 shrink-0 rounded-full transition-colors ${fiturPenuh ? 'bg-white/30' : 'bg-gray-300'}`}
+                >
+                    <span
+                        className={`block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                            fiturPenuh ? 'translate-x-3' : 'translate-x-0'
+                        }`}
+                    />
+                </span>
+                {fiturPenuh ? 'Aktifkan' : 'Nonaktifkan'}
+            </button>
+
+            {/* Box Alamat/List */}
+            <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
+                <p className="border-b border-gray-100 px-4 py-2.5 text-sm font-bold text-gray-800">{labelBox}</p>
 
                 {layanan.length > 0 && (
                     <div className="divide-y divide-gray-100">
-                        {layanan.model ?? layanan.map((item) => (
-                            <div key={item.id} className="flex items-start justify-between gap-2 bg-white px-4 py-3">
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold text-gray-900">{item.nama}</p>
-                                    <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-                                        <MapPin size={11} />
-                                        {item.kecamatan}, {item.kota}
-                                    </p>
-                                    <p className="mt-1 text-xs font-medium text-gray-700">{formatRupiah(item.harga)}</p>
-                                    {!item.is_active && (
-                                        <span className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
-                                            Nonaktif
-                                        </span>
-                                    )}
+                        {layanan.map((item) => (
+                            <div key={item.id} className="flex items-start justify-between gap-2 px-4 py-3">
+                                <div className="flex min-w-0 items-start gap-2.5">
+                                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500">
+                                        <Home size={16} />
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold text-gray-900">{item.nama}</p>
+                                        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                                            <MapPin size={11} />
+                                            {item.kecamatan}, {item.kota}
+                                        </p>
+                                        {!item.is_active && (
+                                            <span className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
+                                                Nonaktif
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex shrink-0 items-center gap-1">
+
+                                {modeDetail ? (
                                     <button
                                         onClick={() => onUbah(item)}
-                                        className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-green-700"
+                                        className="shrink-0 text-xs font-semibold text-green-600 hover:underline"
                                     >
-                                        <Pencil size={14} />
+                                        Detail
                                     </button>
-                                    <button
-                                        onClick={() => onHapus(item)}
-                                        className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
+                                ) : (
+                                    <div className="flex shrink-0 items-center gap-1">
+                                        <button
+                                            onClick={() => onUbah(item)}
+                                            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-green-700"
+                                        >
+                                            <Pencil size={14} />
+                                        </button>
+                                        <button
+                                            onClick={() => onHapus(item)}
+                                            className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -463,15 +549,36 @@ function TahapHub({ subheading, labelBox, labelTambah, layanan, menungguVerifika
                 <div className="p-3">
                     <button
                         onClick={onTambah}
-                        className="flex items-center gap-2 rounded-full bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                        className="flex items-center gap-2 text-sm font-medium text-green-700 hover:underline"
                     >
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-white">
-                            <Plus size={14} strokeWidth={3} />
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-white">
+                            <Plus size={12} strokeWidth={3} />
                         </span>
                         {labelTambah}
                     </button>
                 </div>
             </div>
+
+            {/* Popup Perhatian */}
+            {showPerhatian && (
+                <div className="absolute left-0 right-0 top-24 z-30 rounded-xl border border-green-200 bg-green-50 p-4 shadow-lg">
+                    <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-2">
+                            <Info size={16} className="mt-0.5 shrink-0 text-green-700" />
+                            <div>
+                                <p className="text-xs font-bold text-gray-900">Perhatian</p>
+                                <p className="mt-1 text-xs leading-relaxed text-gray-600">
+                                    Saat aktif, fitur ini berguna untuk menutup layanan secara otomatis apabila
+                                    jumlah tampung sudah terpenuhi, Dan berlaku hanya untuk layanan yang diaktifkan
+                                </p>
+                            </div>
+                        </div>
+                        <button onClick={() => setShowPerhatian(false)} className="shrink-0 text-gray-400 hover:text-gray-600">
+                            <X size={16} />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
-}   
+}
