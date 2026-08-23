@@ -54,6 +54,20 @@ const ACTION_LABEL_BY_KATEGORI = {
     bangunan: 'Pilih & Pesan',
 };
 
+// 👇 DITAMBAHKAN: tujuan navigasi tombol "Pilih & Pesan" per kategori.
+// 'kendaraan' sekarang diarahkan ke form Penitipan Kendaraan yang baru
+// (bukan lagi Show.jsx generik). 'bangunan' belum ada flow barunya, jadi
+// tetap ke Show.jsx seperti semula.
+function hrefForService(service) {
+    if (service.kategori === 'barang') {
+        return `/app/services/barang/paket-pilihan?service_id=${service.id}`;
+    }
+    if (service.kategori === 'kendaraan') {
+        return `/app/services/kendaraan?service_id=${service.id}`;
+    }
+    return `/app/services/${service.id}`;
+}
+
 export default function ServicesIndex({ services, filters }) {
     const kategori = filters?.kategori ?? '';
     const typeOptions = TYPE_OPTIONS_BY_KATEGORI[kategori] ?? null;
@@ -176,11 +190,7 @@ export default function ServicesIndex({ services, filters }) {
                                 </span>
 
                                 <Link
-                                    href={
-                                        service.kategori === 'barang'
-                                            ? `/app/services/barang/paket-pilihan?service_id=${service.id}`
-                                            : `/app/services/${service.id}`
-                                    }
+                                    href={hrefForService(service)}
                                     className="inline-flex items-center gap-1 rounded-full bg-[#15803d] px-3.5 py-1.5 text-xs font-bold text-white dark:bg-[#22c55e]"
                                 >
                                     {actionLabel}

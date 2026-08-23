@@ -167,6 +167,9 @@ export default function OrderShow({ order, qris_url }) {
         : order.payment_receipt
         ? 'Menunggu Verifikasi'
         : 'Belum Dibayar';
+    const paymentReceiptUrl = order.payment_receipt_url ?? (order.payment_receipt
+        ? `/storage/${order.payment_receipt.replace(/^\/?storage\//, '')}`
+        : null);
 
     return (
         <CustomerLayout>
@@ -227,9 +230,9 @@ export default function OrderShow({ order, qris_url }) {
                         {/* Untuk (data customer) */}
                         <div className="space-y-2">
                             <SectionTitle>Untuk</SectionTitle>
-                            <InfoRow label="Customer" value={order.customer?.name} />
-                            <InfoRow label="Nomor Telepon" value={order.customer?.phone} />
-                            <InfoRow label="Alamat Lengkap" value={order.customer?.address ?? order.city} />
+                            <InfoRow label="Customer" value={order.customer?.name ?? '-'} />
+                            <InfoRow label="Nomor Telepon" value={order.customer?.phone ?? '-'} />
+                            <InfoRow label="Alamat Lengkap" value={order.pickup_address ?? '-'} />
                         </div>
 
                         {/* Detail Pesanan */}
@@ -315,7 +318,7 @@ export default function OrderShow({ order, qris_url }) {
                             <div className="space-y-2">
                                 <SectionTitle>Bukti Transaksi</SectionTitle>
                                 <a
-                                    href={order.payment_receipt_url ?? order.payment_receipt}
+                                    href={paymentReceiptUrl}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 underline underline-offset-2 dark:text-blue-400"

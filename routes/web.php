@@ -361,6 +361,11 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/services/barang', [ServiceController::class, 'formBarang'])->name('services.barang.form');
     Route::post('/services/barang', [ServiceController::class, 'simpanBarang'])->name('services.barang.store');
     Route::get('/services/barang/{order}/invoice', [ServiceController::class, 'invoiceBarang'])->name('services.barang.invoice');
+
+    Route::get('/services/kendaraan', [ServiceController::class, 'formKendaraan'])->name('services.kendaraan.form');
+    Route::post('/services/kendaraan', [ServiceController::class, 'simpanKendaraan'])->name('services.kendaraan.store');
+    Route::get('/services/kendaraan/{order}/invoice', [ServiceController::class, 'invoiceKendaraan'])->name('services.kendaraan.invoice');
+
     Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
     Route::post('/services/{service}/pesan', [ServiceController::class, 'storePesanan'])->name('services.pesan');
     Route::get('/services/{service}/metode-pembayaran', [ServiceController::class, 'metodePembayaranLayanan'])->name('services.metodePembayaranLayanan');

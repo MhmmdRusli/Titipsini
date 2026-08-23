@@ -41,6 +41,28 @@ class ServiceController extends Controller
      * 'kamar_besar' masih karangan sementara - WAJIB diganti ke nominal
      * bisnis yang sebenarnya sebelum dipakai di production.
      */
+    /**
+     * Tarif per hari untuk tiap jenis kendaraan, dipakai form & invoice
+     * "Penitipan Kendaraan". Sama sekali terpisah dari UKURAN_BARANG (yang
+     * dipakai flow "Penitipan Barang") - jangan disatukan walau labelnya
+     * mirip.
+     *
+     * ⚠️ PLACEHOLDER - cuma 'mobil' yang saya samakan Rp15.000/hari supaya
+     * cocok sama contoh angka di mockup invoice ("Kijang pickup" / Mobil ->
+     * Nilai harga Rp15.000). Jenis lain (motor, truk, becak, sepeda, bus,
+     * mobil_pick_up) masih karangan sementara - WAJIB diganti ke nominal
+     * bisnis yang sebenarnya sebelum dipakai di production.
+     */
+    protected const JENIS_KENDARAAN = [
+        'motor' => ['label' => 'Motor', 'harga_per_hari' => 10000],
+        'mobil' => ['label' => 'Mobil', 'harga_per_hari' => 15000],
+        'truk' => ['label' => 'Truk', 'harga_per_hari' => 30000],
+        'becak' => ['label' => 'Becak', 'harga_per_hari' => 8000],
+        'sepeda' => ['label' => 'Sepeda', 'harga_per_hari' => 5000],
+        'bus' => ['label' => 'Bus', 'harga_per_hari' => 40000],
+        'mobil_pick_up' => ['label' => 'Mobil pick up', 'harga_per_hari' => 20000],
+    ];
+
     protected const UKURAN_BARANG = [
         'kecil' => [
             'label' => 'Barang Ukuran Kecil',
@@ -319,7 +341,7 @@ class ServiceController extends Controller
             'order' => [
                 'id' => $order->id,
                 'orderCode' => $order->order_code,
-                'tanggalDiterbitkan' => $order->created_at->translatedFormat('l, j F Y'),
+                'tanggalDiterbitkan' => Carbon::parse($order->created_at)->translatedFormat('l, j F Y'),
                 'mitraNama' => $order->partner?->name ?? '-',
                 'customerNama' => $order->customer->name,
                 'customerTelepon' => $order->customer->phone ?? '-',
@@ -327,8 +349,8 @@ class ServiceController extends Controller
                 'namaBarang' => $order->item_name,
                 'jumlahBarang' => $order->jumlah_barang,
                 'keterangan' => $order->item_description ?: '-',
-                'tanggalMasuk' => $order->start_date?->translatedFormat('j F Y'),
-                'tanggalKeluar' => $order->end_date?->translatedFormat('j F Y'),
+                'tanggalMasuk' => $order->start_date ? Carbon::parse($order->start_date)->translatedFormat('j F Y') : '-',
+                'tanggalKeluar' => $order->end_date ? Carbon::parse($order->end_date)->translatedFormat('j F Y') : '-',
                 'durasiHari' => $order->duration,
                 'isPickup' => $order->is_pickup,
                 'jamPickup' => $order->jam_pickup,
@@ -336,6 +358,141 @@ class ServiceController extends Controller
                 'nilaiHarga' => (float) $order->harga_per_hari,
                 'totalHarga' => (float) $order->subtotal,
                 'biayaPickup' => (float) $order->pickup_fee,
+                'biayaLayanan' => (float) $order->biaya_layanan,
+                'totalPembayaran' => (float) $order->total_price,
+                'sudahDibayar' => (bool) $order->payment_verified_at,
+            ],
+        ]);
+    }
+
+    /**
+     * GET /app/services/kendaraan
+     * Render form Penitipan Kendaraan. Beda dari Barang: tidak ada opsi
+     * pickup (mockup tidak menampilkan toggle/alamat penjemputan untuk
+     * kendaraan), jadi tidak perlu kirim daftar alamat.
+     */
+    public function formKendaraan(Request $request)
+    {
+        $jenisKendaraan = collect(self::JENIS_KENDARAAN)
+            ->map(fn ($tier, $key) => [
+                'value' => $key,
+                'label' => $tier['label'],
+                'hargaPerHari' => $tier['harga_per_hari'],
+            ])
+            ->values();
+
+        return Inertia::render('Customer/Services/Kendaraan/Form', [
+            'serviceId' => $request->query('service_id'),
+            'jenisKendaraanOptions' => $jenisKendaraan,
+            'persenBiayaLayanan' => self::PERSEN_BIAYA_LAYANAN,
+        ]);
+    }
+
+    /**
+     * POST /app/services/kendaraan
+     * Satu langkah, sama seperti simpanBarang() - submit langsung bikin
+     * Order & lempar ke halaman Invoice.
+     *
+     * CATATAN: kolom 'ukuran_barang' & 'harga_per_hari' dipakai ulang untuk
+     * menyimpan jenis kendaraan & tarifnya (bukan bikin migration/kolom
+     * baru khusus kendaraan) - kolom-kolom ini memang generik dipakai
+     * bareng across service_type ('barang' vs 'kendaraan'), sama seperti
+     * item_name/item_description yang sudah dipakai bersama sejak awal.
+     */
+    public function simpanKendaraan(Request $request)
+    {
+        $data = $request->validate([
+            'merekKendaraan' => 'required|string|max:255',
+            'jenisKendaraan' => ['required', Rule::in(array_keys(self::JENIS_KENDARAAN))],
+            'jumlahKendaraan' => 'required|integer|min:1',
+            'keterangan' => 'nullable|string|max:500',
+            'tanggalMasuk' => 'required|date',
+            'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
+            'service_id' => 'nullable|integer|exists:services,id',
+            'setuju' => ['accepted'],
+        ], [
+            'jenisKendaraan.required' => 'Pilih jenis kendaraan.',
+            'jenisKendaraan.in' => 'Jenis kendaraan tidak valid.',
+            'setuju.accepted' => 'Kamu harus menyetujui Syarat dan Ketentuan.',
+        ]);
+
+        $tier = self::JENIS_KENDARAAN[$data['jenisKendaraan']];
+
+        $customer = $request->user();
+        $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
+        $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
+
+        $hargaPerHari = (float) $tier['harga_per_hari'];
+        $subtotal = $hargaPerHari * $data['jumlahKendaraan'] * $jumlahHari;
+        $biayaLayanan = round($subtotal * self::PERSEN_BIAYA_LAYANAN / 100);
+        $total = $subtotal + $biayaLayanan;
+
+        $order = Order::create([
+            'order_code' => 'TS-'.strtoupper(uniqid()),
+            'customer_id' => $customer->id,
+            'partner_id' => $service?->user_id,
+            'service_type' => 'kendaraan',
+            'item_name' => $data['merekKendaraan'],
+            'item_description' => $data['keterangan'] ?? null,
+            'jumlah_barang' => $data['jumlahKendaraan'],
+            'ukuran_barang' => $data['jenisKendaraan'],
+            'harga_per_hari' => $hargaPerHari,
+            'start_date' => $data['tanggalMasuk'],
+            'end_date' => $data['tanggalKeluar'],
+            'duration' => $jumlahHari,
+            'is_pickup' => false,
+            'city' => $service->kota ?? $customer->city ?? '-',
+            'status' => 'baru',
+            'subtotal' => $subtotal,
+            'discount' => 0,
+            'pickup_fee' => 0,
+            'biaya_layanan' => $biayaLayanan,
+            'total_price' => $total,
+            'payment_method' => 'pending',
+            'payment_verified_at' => null,
+        ]);
+
+        $this->notifikasiPesananBaru($order);
+
+        return redirect()->route('customer.services.kendaraan.invoice', $order->id);
+    }
+
+    /**
+     * GET /app/services/kendaraan/{order}/invoice
+     *
+     * CATATAN: mockup invoice tetap menampilkan "Alamat Lengkap" walau form
+     * kendaraan tidak punya field pilih alamat (tidak ada opsi pickup) -
+     * asumsi saya, ini alamat utama dari address book customer (buat
+     * catatan/identitas, bukan alamat penjemputan). Kalau ternyata bukan
+     * itu maksudnya, kasih tau supaya saya sesuaikan sumbernya.
+     */
+    public function invoiceKendaraan(Order $order)
+    {
+        abort_unless($order->customer_id === auth()->id(), 403);
+
+        $tier = self::JENIS_KENDARAAN[$order->ukuran_barang] ?? null;
+
+        $alamatUtama = $order->customer->addresses()->where('is_primary', true)->first()
+            ?? $order->customer->addresses()->first();
+
+        return Inertia::render('Customer/Services/Kendaraan/Invoice', [
+            'order' => [
+                'id' => $order->id,
+                'orderCode' => $order->order_code,
+                'tanggalDiterbitkan' => Carbon::parse($order->created_at)->translatedFormat('l, j F Y'),
+                'mitraNama' => $order->partner?->name ?? '-',
+                'customerNama' => $order->customer->name,
+                'customerTelepon' => $order->customer->phone ?? '-',
+                'alamatLengkap' => $alamatUtama?->address ?? '-',
+                'merekKendaraan' => $order->item_name,
+                'jenisKendaraanLabel' => $tier['label'] ?? $order->ukuran_barang,
+                'jumlahKendaraan' => $order->jumlah_barang,
+                'keterangan' => $order->item_description ?: '-',
+                'tanggalMasuk' => $order->start_date ? Carbon::parse($order->start_date)->translatedFormat('j F Y') : '-',
+                'tanggalKeluar' => $order->end_date ? Carbon::parse($order->end_date)->translatedFormat('j F Y') : '-',
+                'durasiHari' => $order->duration,
+                'nilaiHarga' => (float) $order->harga_per_hari,
+                'totalHarga' => (float) $order->subtotal,
                 'biayaLayanan' => (float) $order->biaya_layanan,
                 'totalPembayaran' => (float) $order->total_price,
                 'sudahDibayar' => (bool) $order->payment_verified_at,
@@ -367,6 +524,12 @@ class ServiceController extends Controller
      */
     public function show(Service $service)
     {
+        if ($service->kategori === 'kendaraan') {
+            return redirect()->route('customer.services.kendaraan.form', [
+                'service_id' => $service->id,
+            ]);
+        }
+
         return Inertia::render('Customer/Services/Show', [
             'service' => [
                 'id' => $service->id,

@@ -60,6 +60,7 @@ class Order extends Model
             'payment_verified_at' => 'datetime',
             'tanggal_selesai_aktual' => 'datetime',
             'denda_paid_at' => 'datetime',
+            'start_date' => 'date',
             'end_date' => 'date',
             'extend_end_date' => 'date',
     'extend_requested_at' => 'datetime',

@@ -1,6 +1,19 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { Package, ShieldCheck, MapPin, Plus, Star } from 'lucide-react';
+import {
+    Package,
+    ShieldCheck,
+    MapPin,
+    Plus,
+    Star,
+    Calendar,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Info,
+    X,
+    Link2,
+} from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const BENEFITS = [
@@ -10,36 +23,272 @@ const BENEFITS = [
     'Konsultasi & Support',
 ];
 
-export default function FormBarang({ serviceId, addresses = [] }) {
+const NAMA_BULAN = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+];
+const NAMA_HARI = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+
+function toISODate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function parseISODate(iso) {
+    if (!iso) return null;
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d);
+}
+
+function formatShort(iso) {
+    const date = parseISODate(iso);
+    if (!date) return null;
+    return `${date.getDate()} ${NAMA_BULAN[date.getMonth()]}`;
+}
+
+function formatRupiah(value) {
+    return 'Rp' + Math.round(value || 0).toLocaleString('id-ID');
+}
+
+function getCalendarCells(viewDate) {
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const startOffset = (firstDay.getDay() + 6) % 7; // Senin = index 0
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const cells = [];
+    for (let i = 0; i < startOffset; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
+    return cells;
+}
+
+function isSameDay(a, b) {
+    return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function isBetween(date, start, end) {
+    if (!start || !end) return false;
+    return date > start && date < end;
+}
+
+/** Date-range picker custom: 1 field, buka kalender, klik 2 tanggal (masuk & keluar). */
+function DateRangeField({ tanggalMasuk, tanggalKeluar, onChange, error }) {
+    const [open, setOpen] = useState(false);
+    const [viewDate, setViewDate] = useState(() => parseISODate(tanggalMasuk) || new Date());
+
+    const startDate = parseISODate(tanggalMasuk);
+    const endDate = parseISODate(tanggalKeluar);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    function handlePick(date) {
+        if (date < today) return;
+
+        if (!tanggalMasuk || (tanggalMasuk && tanggalKeluar)) {
+            onChange(toISODate(date), '');
+            return;
+        }
+
+        if (date < startDate) {
+            onChange(toISODate(date), '');
+        } else {
+            onChange(tanggalMasuk, toISODate(date));
+            setOpen(false);
+        }
+    }
+
+    const label = tanggalMasuk && tanggalKeluar
+        ? `${formatShort(tanggalMasuk)} / ${formatShort(tanggalKeluar)}`
+        : tanggalMasuk
+            ? `${formatShort(tanggalMasuk)} / Pilih tanggal keluar`
+            : null;
+
+    return (
+        <div className="relative">
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className={`flex w-full items-center gap-2.5 rounded-xl border bg-white px-4 py-3 text-left text-sm shadow-sm transition dark:bg-gray-800 ${
+                    error ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'
+                }`}
+            >
+                <Calendar size={16} className="shrink-0 text-gray-400 dark:text-gray-500" />
+                <span className={label ? 'text-gray-700 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}>
+                    {label ?? 'Tentukan tanggal pesanan'}
+                </span>
+            </button>
+
+            {open && (
+                <>
+                    <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+                    <div className="absolute left-0 right-0 z-50 mt-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-center justify-between">
+                            <button
+                                type="button"
+                                onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
+                                className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                                <ChevronLeft size={16} />
+                            </button>
+                            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                {NAMA_BULAN[viewDate.getMonth()]} {viewDate.getFullYear()}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
+                                className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                                <ChevronRight size={16} />
+                            </button>
+                        </div>
+
+                        <div className="mt-3 grid grid-cols-7 gap-y-1 text-center">
+                            {NAMA_HARI.map((h) => (
+                                <span key={h} className="text-[10px] font-bold uppercase text-gray-400 dark:text-gray-500">
+                                    {h}
+                                </span>
+                            ))}
+
+                            {getCalendarCells(viewDate).map((date, i) => {
+                                if (!date) return <span key={`empty-${i}`} />;
+
+                                const disabled = date < today;
+                                const isStart = isSameDay(date, startDate);
+                                const isEnd = isSameDay(date, endDate);
+                                const inRange = isBetween(date, startDate, endDate);
+
+                                return (
+                                    <button
+                                        key={date.toISOString()}
+                                        type="button"
+                                        disabled={disabled}
+                                        onClick={() => handlePick(date)}
+                                        className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs transition ${
+                                            disabled
+                                                ? 'cursor-not-allowed text-gray-300 dark:text-gray-600'
+                                                : isStart || isEnd
+                                                    ? 'bg-[#15803d] font-bold text-white dark:bg-[#22c55e]'
+                                                    : inRange
+                                                        ? 'bg-green-100 text-[#15803d] dark:bg-green-950/50 dark:text-green-400'
+                                                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
+                                        }`}
+                                    >
+                                        {date.getDate()}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {error && <p className="mt-1.5 text-xs font-medium text-red-500">{error}</p>}
+        </div>
+    );
+}
+
+function UkuranBarangInfoModal({ options, onClose }) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-4 sm:items-center">
+            <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-gray-800">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[#15803d] dark:text-green-400">
+                        <Info size={18} />
+                        <p className="text-sm font-bold">Information</p>
+                    </div>
+                    <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <X size={18} />
+                    </button>
+                </div>
+
+                <div className="mt-3 space-y-3">
+                    {options.map((opt, i) => (
+                        <div key={opt.value}>
+                            <p className="text-xs font-bold text-gray-900 dark:text-gray-100">
+                                {i + 1}. {opt.label}
+                            </p>
+                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{opt.deskripsi}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function FormBarang({ serviceId, addresses = [], ukuranBarangOptions = [], biayaPickup = 0, persenBiayaLayanan = 10 }) {
     const [form, setForm] = useState({
         namaBarang: '',
+        jumlahBarang: '',
+        keterangan: '',
         pickup: false,
+        jamPickup: '09:00',
         tanggalMasuk: '',
         tanggalKeluar: '',
-        service_id: serviceId ?? '',
+        ukuranBarang: '',
+        fotoBarangUrl: '',
         address_id: addresses.find((a) => a.is_primary)?.id ?? addresses[0]?.id ?? '',
+        setuju: false,
+        service_id: serviceId ?? '',
     });
+    const [infoOpen, setInfoOpen] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [submitting, setSubmitting] = useState(false);
 
     function update(field, value) {
         setForm((prev) => ({ ...prev, [field]: value }));
     }
 
+    const tierTerpilih = ukuranBarangOptions.find((o) => o.value === form.ukuranBarang) ?? null;
+
+    const jumlahHari = useMemo(() => {
+        if (!form.tanggalMasuk || !form.tanggalKeluar) return 0;
+        const masuk = parseISODate(form.tanggalMasuk);
+        const keluar = parseISODate(form.tanggalKeluar);
+        const diff = Math.round((keluar - masuk) / (1000 * 60 * 60 * 24));
+        return Math.max(1, diff);
+    }, [form.tanggalMasuk, form.tanggalKeluar]);
+
+    const hitung = useMemo(() => {
+        const jumlahBarang = Number(form.jumlahBarang) || 0;
+        const hargaPerHari = tierTerpilih?.hargaPerHari ?? 0;
+        const subtotal = hargaPerHari * jumlahBarang * jumlahHari;
+        const pickupFee = form.pickup ? biayaPickup : 0;
+        const biayaLayanan = Math.round((subtotal * persenBiayaLayanan) / 100);
+        const total = subtotal + pickupFee + biayaLayanan;
+
+        return { subtotal, pickupFee, biayaLayanan, total };
+    }, [form.jumlahBarang, form.pickup, tierTerpilih, jumlahHari, biayaPickup, persenBiayaLayanan]);
+
+    const belumPunyaAlamat = addresses.length === 0;
+
+    const bisaSubmit =
+        form.namaBarang.trim() &&
+        Number(form.jumlahBarang) > 0 &&
+        form.tanggalMasuk &&
+        form.tanggalKeluar &&
+        form.ukuranBarang &&
+        (!form.pickup || (form.jamPickup && form.address_id)) &&
+        form.setuju &&
+        !submitting;
+
     function handleSubmit(e) {
         e.preventDefault();
-        router.post('/app/services/barang', {
-            ...form,
-            // Kalau pickup tidak aktif, alamat tidak relevan - jangan ikut dikirim
-            // supaya tidak nyangkut ke order sebagai pickup_address yang salah.
-            address_id: form.pickup ? (form.address_id || null) : null,
+        setSubmitting(true);
+        router.post('/app/services/barang', form, {
+            onError: (err) => {
+                setErrors(err);
+                setSubmitting(false);
+            },
         });
     }
 
-    const belumPunyaAlamat = addresses.length === 0;
-    const pickupButTanpaAlamat = form.pickup && !belumPunyaAlamat && !form.address_id;
-
     return (
-        <CustomerLayout title="Pilih Paket" backHref="/app/services/barang/paket-pilihan">
-            <Head title="Pilih Paket" />
+        <CustomerLayout title="Form Penitipan Barang" backHref="/app/services/barang/paket-pilihan">
+            <Head title="Form Penitipan Barang" />
 
             <div className="px-4 py-3">
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500 to-green-600 dark:from-green-700 dark:to-green-900 p-5 text-white shadow-md">
@@ -60,28 +309,64 @@ export default function FormBarang({ serviceId, addresses = [] }) {
                 </div>
 
                 <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-                    {/* service_id dibawa dari query string (?service_id=...) sewaktu
-                        customer memilih vendor/toko barang di halaman list layanan.
-                        Wajib ada - kalau kosong, backend akan menolak & redirect
-                        balik ke halaman pilih vendor. */}
                     <input type="hidden" value={form.service_id} readOnly />
 
                     <div>
-                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Barang</label>
+                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Nama Barang</label>
                         <input
                             type="text"
                             value={form.namaBarang}
                             onChange={(e) => update('namaBarang', e.target.value)}
-                            placeholder="Masukkan nama barang"
+                            placeholder="cth: Laptop, TV, Kulkas"
                             className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                         />
-                        <p className="mt-1.5 text-[11px] text-gray-400 dark:text-gray-500">
-                            *Jika jenis barang lebih dari satu, tulis dengan menggunakan tanda koma(,) (cont: lemari, kulkas)
-                        </p>
+                        <FieldError message={errors.namaBarang} />
+                    </div>
+
+                    <div>
+                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Jumlah Barang</label>
+                        <input
+                            type="number"
+                            min={1}
+                            value={form.jumlahBarang}
+                            onChange={(e) => update('jumlahBarang', e.target.value)}
+                            placeholder="Jumlah Barang"
+                            className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                        />
+                        {tierTerpilih && Number(form.jumlahBarang) > tierTerpilih.maksItem && (
+                            <p className="mt-1.5 text-xs font-medium text-red-500">
+                                Maksimal {tierTerpilih.maksItem} item untuk {tierTerpilih.label}.
+                            </p>
+                        )}
+                        <FieldError message={errors.jumlahBarang} />
+                    </div>
+
+                    <div>
+                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Keterangan</label>
+                        <textarea
+                            rows={2}
+                            value={form.keterangan}
+                            onChange={(e) => update('keterangan', e.target.value)}
+                            placeholder="Tulis keterangan barang kamu seperti warna, merek, dll."
+                            className="mt-2 w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                        />
+                        <FieldError message={errors.keterangan} />
+                    </div>
+
+                    <div>
+                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Tanggal Penitipan</label>
+                        <div className="mt-2">
+                            <DateRangeField
+                                tanggalMasuk={form.tanggalMasuk}
+                                tanggalKeluar={form.tanggalKeluar}
+                                onChange={(masuk, keluar) => setForm((prev) => ({ ...prev, tanggalMasuk: masuk, tanggalKeluar: keluar }))}
+                                error={errors.tanggalMasuk || errors.tanggalKeluar}
+                            />
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between">
-                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Pick up</label>
+                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Layanan Pick Up Barang</label>
                         <button
                             type="button"
                             onClick={() => update('pickup', !form.pickup)}
@@ -97,114 +382,185 @@ export default function FormBarang({ serviceId, addresses = [] }) {
                         </button>
                     </div>
 
-                    {/* Muncul cuma kalau Pick up aktif - customer perlu pilih dari
-                        mana barangnya mau dijemput. */}
                     {form.pickup && (
-                        <div>
-                            <label className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                                Alamat Penjemputan
-                            </label>
+                        <>
+                            <div>
+                                <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Jam Pick Up</label>
+                                <input
+                                    type="time"
+                                    value={form.jamPickup}
+                                    onChange={(e) => update('jamPickup', e.target.value)}
+                                    className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:[color-scheme:dark]"
+                                />
+                                <FieldError message={errors.jamPickup} />
+                            </div>
 
-                            {belumPunyaAlamat ? (
-                                <Link
-                                    href="/app/profile/alamat/tambah"
-                                    className="mt-2 flex items-center gap-3 rounded-xl border border-dashed border-green-300 bg-green-50 px-4 py-3.5 text-sm font-semibold text-[#15803d] transition hover:bg-green-100 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400"
-                                >
-                                    <Plus size={16} className="shrink-0" />
-                                    Tambah alamat penjemputan
-                                </Link>
-                            ) : (
-                                <div className="mt-2 space-y-2">
-                                    {addresses.map((address) => {
-                                        const selected = String(form.address_id) === String(address.id);
-                                        return (
-                                            <button
-                                                key={address.id}
-                                                type="button"
-                                                onClick={() => update('address_id', address.id)}
-                                                className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
-                                                    selected
-                                                        ? 'border-[#15803d] bg-green-50 ring-2 ring-[#15803d]/20 dark:border-green-500 dark:bg-green-950/30'
-                                                        : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
-                                                }`}
-                                            >
-                                                <MapPin
-                                                    size={16}
-                                                    className={`mt-0.5 shrink-0 ${
-                                                        selected ? 'text-[#15803d] dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
-                                                    }`}
-                                                />
-                                                <span className="flex-1">
-                                                    <span className="flex items-center gap-1.5">
-                                                        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                                            {address.name}
-                                                        </span>
-                                                        {address.is_primary && (
-                                                            <Star size={11} className="fill-amber-400 text-amber-400" />
-                                                        )}
-                                                    </span>
-                                                    <span className="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">
-                                                        {address.phone}
-                                                    </span>
-                                                    <span className="mt-0.5 block text-xs text-gray-400 dark:text-gray-500">
-                                                        {address.address}
-                                                    </span>
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
+                            <div>
+                                <label className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                    Alamat Penjemputan
+                                </label>
 
+                                {belumPunyaAlamat ? (
                                     <Link
                                         href="/app/profile/alamat/tambah"
-                                        className="flex items-center gap-2 px-1 py-1 text-xs font-semibold text-[#15803d] dark:text-green-400"
+                                        className="mt-2 flex items-center gap-3 rounded-xl border border-dashed border-green-300 bg-green-50 px-4 py-3.5 text-sm font-semibold text-[#15803d] transition hover:bg-green-100 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400"
                                     >
-                                        <Plus size={13} />
-                                        Tambah alamat lain
+                                        <Plus size={16} className="shrink-0" />
+                                        Tambah alamat penjemputan
                                     </Link>
-                                </div>
-                            )}
+                                ) : (
+                                    <div className="mt-2 space-y-2">
+                                        {addresses.map((address) => {
+                                            const selected = String(form.address_id) === String(address.id);
+                                            return (
+                                                <button
+                                                    key={address.id}
+                                                    type="button"
+                                                    onClick={() => update('address_id', address.id)}
+                                                    className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
+                                                        selected
+                                                            ? 'border-[#15803d] bg-green-50 ring-2 ring-[#15803d]/20 dark:border-green-500 dark:bg-green-950/30'
+                                                            : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
+                                                    }`}
+                                                >
+                                                    <MapPin
+                                                        size={16}
+                                                        className={`mt-0.5 shrink-0 ${
+                                                            selected ? 'text-[#15803d] dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
+                                                        }`}
+                                                    />
+                                                    <span className="flex-1">
+                                                        <span className="flex items-center gap-1.5">
+                                                            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                                                {address.name}
+                                                            </span>
+                                                            {address.is_primary && (
+                                                                <Star size={11} className="fill-amber-400 text-amber-400" />
+                                                            )}
+                                                        </span>
+                                                        <span className="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">
+                                                            {address.phone}
+                                                        </span>
+                                                        <span className="mt-0.5 block text-xs text-gray-400 dark:text-gray-500">
+                                                            {address.address}
+                                                        </span>
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
 
-                            {pickupButTanpaAlamat && (
-                                <p className="mt-1.5 text-xs font-medium text-red-500">
-                                    Pilih salah satu alamat penjemputan.
-                                </p>
-                            )}
-                        </div>
+                                        <Link
+                                            href="/app/profile/alamat/tambah"
+                                            className="flex items-center gap-2 px-1 py-1 text-xs font-semibold text-[#15803d] dark:text-green-400"
+                                        >
+                                            <Plus size={13} />
+                                            Tambah alamat lain
+                                        </Link>
+                                    </div>
+                                )}
+                                <FieldError message={errors.address_id} />
+                            </div>
+                        </>
                     )}
 
                     <div>
-                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Tanggal masuk</label>
-                        <div className="relative mt-2">
-                            <input
-                                type="date"
-                                value={form.tanggalMasuk}
-                                onChange={(e) => update('tanggalMasuk', e.target.value)}
-                                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:[color-scheme:dark]"
-                            />
+                        <div className="flex items-center gap-1.5">
+                            <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Ukuran Barang</label>
+                            <button
+                                type="button"
+                                onClick={() => setInfoOpen(true)}
+                                className="text-gray-400 hover:text-[#15803d] dark:hover:text-green-400"
+                            >
+                                <Info size={14} />
+                            </button>
                         </div>
+                        <div className="relative mt-2">
+                            <select
+                                value={form.ukuranBarang}
+                                onChange={(e) => update('ukuranBarang', e.target.value)}
+                                className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                            >
+                                <option value="">Pilih Ukuran Barang</option>
+                                {ukuranBarangOptions.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 dark:text-gray-500">
+                                <ChevronDown size={16} />
+                            </span>
+                        </div>
+                        <FieldError message={errors.ukuranBarang} />
                     </div>
 
                     <div>
-                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Tanggal Keluar</label>
+                        <div className="flex items-center gap-1.5">
+                            <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Tambah Foto Barang</label>
+                            <span className="text-gray-400 dark:text-gray-500">
+                                <Info size={14} />
+                            </span>
+                        </div>
                         <div className="relative mt-2">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
+                                <Link2 size={16} />
+                            </span>
                             <input
-                                type="date"
-                                value={form.tanggalKeluar}
-                                onChange={(e) => update('tanggalKeluar', e.target.value)}
-                                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:[color-scheme:dark]"
+                                type="url"
+                                value={form.fotoBarangUrl}
+                                onChange={(e) => update('fotoBarangUrl', e.target.value)}
+                                placeholder="Link Foto Barang"
+                                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pl-11 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                             />
                         </div>
+                        <FieldError message={errors.fotoBarangUrl} />
                     </div>
+
+                    <div className="rounded-2xl border border-gray-100 bg-slate-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                            Total Pembayaran
+                        </p>
+                        <p className="mt-1 text-xl font-extrabold text-gray-900 dark:text-gray-100">
+                            {formatRupiah(hitung.total)}
+                        </p>
+                    </div>
+
+                    <label className="flex items-start gap-2.5">
+                        <input
+                            type="checkbox"
+                            checked={form.setuju}
+                            onChange={(e) => update('setuju', e.target.checked)}
+                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-[#15803d] focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700"
+                        />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                            Saya menyetujui{' '}
+                            <Link href="/app/profile/tentang/syarat-ketentuan" className="font-semibold text-[#15803d] dark:text-green-400">
+                                Syarat
+                            </Link>{' '}
+                            dan{' '}
+                            <Link href="/app/profile/tentang/kebijakan-privasi" className="font-semibold text-[#15803d] dark:text-green-400">
+                                Ketentuan
+                            </Link>{' '}
+                            yang berlaku di Titipsini.com.
+                        </span>
+                    </label>
 
                     <button
                         type="submit"
-                        disabled={pickupButTanpaAlamat}
-                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={!bisaSubmit}
+                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                        Lanjutkan
+                        {submitting ? 'Memproses...' : 'Titip Sekarang'}
                     </button>
                 </form>
             </div>
+
+            {infoOpen && <UkuranBarangInfoModal options={ukuranBarangOptions} onClose={() => setInfoOpen(false)} />}
         </CustomerLayout>
     );
+}
+
+function FieldError({ message }) {
+    if (!message) return null;
+    return <p className="mt-1.5 text-xs font-medium text-red-500">{message}</p>;
 }

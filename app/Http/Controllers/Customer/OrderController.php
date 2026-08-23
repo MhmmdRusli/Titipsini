@@ -56,10 +56,17 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        $order->load('partner:id,name,phone');
+        $order->load([
+            'partner:id,name,phone',
+            'customer:id,name,phone',
+        ]);
 
         $setting = PaymentSetting::current();
         $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;
+
+        $order->payment_receipt_url = $order->payment_receipt
+            ? Storage::disk('public')->url(ltrim(str_replace('/storage/', '', $order->payment_receipt), '/'))
+            : null;
 
         return Inertia::render('Customer/Orders/Show', [
             'order' => $order,
