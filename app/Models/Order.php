@@ -169,5 +169,4 @@ class Order extends Model
  
     return round($hargaPerHari * $jumlahHariTambahan);
 }
-
 }

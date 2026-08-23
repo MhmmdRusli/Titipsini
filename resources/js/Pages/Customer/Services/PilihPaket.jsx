@@ -1,55 +1,52 @@
 import { Head, Link } from '@inertiajs/react';
-import { Package, PackagePlus, ChevronRight, ShieldCheck } from 'lucide-react';
+import { PackagePlus, ChevronRight, Boxes } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-
-const BENEFITS = [
-    'Keamanan terjaga 24 jam',
-    'Pengecekan barang berkala',
-    'Bisa diambil kapan saja',
-    'Asuransi kerusakan & kehilangan',
-    'Konsultasi & Support',
-];
 
 export default function PilihPaket({ serviceId }) {
     return (
         <CustomerLayout title="Pilih Paket" backHref="/app/dashboard">
             <Head title="Pilih Paket" />
 
-            <div className="px-4 py-3">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500 to-green-600 dark:from-green-700 dark:to-green-900 p-5 text-white shadow-md">
-                    <div className="absolute right-4 top-4 rounded-xl bg-white/15 p-2">
-                        <Package size={20} />
-                    </div>
+            <div className="flex flex-col items-center px-6 py-8 text-center">
+                {/* Logo / wordmark ala Titipsini.com */}
+                <div className="flex items-center gap-1.5">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#15803d] text-white dark:bg-[#22c55e]">
+                        <Boxes size={14} />
+                    </span>
+                    <p className="text-lg font-extrabold text-gray-900 dark:text-gray-100">
+                        Titipsini<span className="text-[#15803d] dark:text-[#4ade80]">•</span>Com
+                    </p>
+                </div>
+                <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                    Tempat Yang Aman Untuk Barang Berharga Kamu
+                </p>
 
-                    <p className="text-lg font-extrabold leading-none">Layanan Terbaik Kami</p>
-
-                    <ul className="mt-4 space-y-1.5">
-                        {BENEFITS.map((benefit) => (
-                            <li key={benefit} className="flex items-center gap-2 text-xs text-white/90">
-                                <ShieldCheck size={14} className="shrink-0 text-white" />
-                                {benefit}
-                            </li>
-                        ))}
-                    </ul>
-
-                    <Package size={96} className="pointer-events-none absolute -bottom-4 -right-4 text-white/15" />
+                {/* Ilustrasi sederhana */}
+                <div className="relative mt-8 flex h-40 w-40 items-center justify-center rounded-full bg-green-50 dark:bg-green-950/30">
+                    <Boxes size={72} strokeWidth={1.3} className="text-[#15803d] dark:text-[#4ade80]" />
                 </div>
 
-                <div className="mt-4 space-y-3">
-                    <Link
-                        href={`/app/services/barang?service_id=${serviceId ?? ''}`}
-                        className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-green-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-green-600"
-                    >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400">
-                            <PackagePlus size={20} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pilih barang</p>
-                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Kamu bisa titip barang apa aja di sini</p>
-                        </div>
-                        <ChevronRight size={18} className="text-gray-300 dark:text-gray-600" />
-                    </Link>
-                </div>
+                <h1 className="mt-6 text-lg font-bold text-gray-900 dark:text-gray-100">Pilih Paket</h1>
+                <p className="mt-1.5 max-w-xs text-sm text-gray-400 dark:text-gray-500">
+                    Titipkan barang berhargamu ke mitra terpercaya dengan keamanan terjamin.
+                </p>
+
+                {/* CTA utama ala tombol "Fitur Pencarian" di landing */}
+                <Link
+                    href={`/app/services/barang?service_id=${serviceId ?? ''}`}
+                    className="mt-8 flex w-full items-center gap-3 rounded-2xl bg-[#15803d] p-4 text-left text-white shadow-md transition hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600"
+                >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15">
+                        <PackagePlus size={20} />
+                    </span>
+                    <span className="flex-1">
+                        <span className="block text-sm font-bold">Pilih Barang</span>
+                        <span className="mt-0.5 block text-xs text-white/80">
+                            Kamu bisa titip barang apa aja di sini
+                        </span>
+                    </span>
+                    <ChevronRight size={18} className="text-white/70" />
+                </Link>
             </div>
         </CustomerLayout>
     );

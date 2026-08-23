@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
-import { Package, ShieldCheck } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Package, ShieldCheck, MapPin, Plus, Star } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const BENEFITS = [
@@ -10,13 +10,14 @@ const BENEFITS = [
     'Konsultasi & Support',
 ];
 
-export default function FormBarang({ serviceId }) {
+export default function FormBarang({ serviceId, addresses = [] }) {
     const [form, setForm] = useState({
         namaBarang: '',
         pickup: false,
         tanggalMasuk: '',
         tanggalKeluar: '',
         service_id: serviceId ?? '',
+        address_id: addresses.find((a) => a.is_primary)?.id ?? addresses[0]?.id ?? '',
     });
 
     function update(field, value) {
@@ -25,8 +26,16 @@ export default function FormBarang({ serviceId }) {
 
     function handleSubmit(e) {
         e.preventDefault();
-        router.post('/app/services/barang', form);
+        router.post('/app/services/barang', {
+            ...form,
+            // Kalau pickup tidak aktif, alamat tidak relevan - jangan ikut dikirim
+            // supaya tidak nyangkut ke order sebagai pickup_address yang salah.
+            address_id: form.pickup ? (form.address_id || null) : null,
+        });
     }
+
+    const belumPunyaAlamat = addresses.length === 0;
+    const pickupButTanpaAlamat = form.pickup && !belumPunyaAlamat && !form.address_id;
 
     return (
         <CustomerLayout title="Pilih Paket" backHref="/app/services/barang/paket-pilihan">
@@ -88,6 +97,81 @@ export default function FormBarang({ serviceId }) {
                         </button>
                     </div>
 
+                    {/* Muncul cuma kalau Pick up aktif - customer perlu pilih dari
+                        mana barangnya mau dijemput. */}
+                    {form.pickup && (
+                        <div>
+                            <label className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                Alamat Penjemputan
+                            </label>
+
+                            {belumPunyaAlamat ? (
+                                <Link
+                                    href="/app/profile/alamat/tambah"
+                                    className="mt-2 flex items-center gap-3 rounded-xl border border-dashed border-green-300 bg-green-50 px-4 py-3.5 text-sm font-semibold text-[#15803d] transition hover:bg-green-100 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400"
+                                >
+                                    <Plus size={16} className="shrink-0" />
+                                    Tambah alamat penjemputan
+                                </Link>
+                            ) : (
+                                <div className="mt-2 space-y-2">
+                                    {addresses.map((address) => {
+                                        const selected = String(form.address_id) === String(address.id);
+                                        return (
+                                            <button
+                                                key={address.id}
+                                                type="button"
+                                                onClick={() => update('address_id', address.id)}
+                                                className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
+                                                    selected
+                                                        ? 'border-[#15803d] bg-green-50 ring-2 ring-[#15803d]/20 dark:border-green-500 dark:bg-green-950/30'
+                                                        : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
+                                                }`}
+                                            >
+                                                <MapPin
+                                                    size={16}
+                                                    className={`mt-0.5 shrink-0 ${
+                                                        selected ? 'text-[#15803d] dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
+                                                    }`}
+                                                />
+                                                <span className="flex-1">
+                                                    <span className="flex items-center gap-1.5">
+                                                        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                                            {address.name}
+                                                        </span>
+                                                        {address.is_primary && (
+                                                            <Star size={11} className="fill-amber-400 text-amber-400" />
+                                                        )}
+                                                    </span>
+                                                    <span className="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">
+                                                        {address.phone}
+                                                    </span>
+                                                    <span className="mt-0.5 block text-xs text-gray-400 dark:text-gray-500">
+                                                        {address.address}
+                                                    </span>
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+
+                                    <Link
+                                        href="/app/profile/alamat/tambah"
+                                        className="flex items-center gap-2 px-1 py-1 text-xs font-semibold text-[#15803d] dark:text-green-400"
+                                    >
+                                        <Plus size={13} />
+                                        Tambah alamat lain
+                                    </Link>
+                                </div>
+                            )}
+
+                            {pickupButTanpaAlamat && (
+                                <p className="mt-1.5 text-xs font-medium text-red-500">
+                                    Pilih salah satu alamat penjemputan.
+                                </p>
+                            )}
+                        </div>
+                    )}
+
                     <div>
                         <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Tanggal masuk</label>
                         <div className="relative mt-2">
@@ -114,7 +198,8 @@ export default function FormBarang({ serviceId }) {
 
                     <button
                         type="submit"
-                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98]"
+                        disabled={pickupButTanpaAlamat}
+                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         Lanjutkan
                     </button>

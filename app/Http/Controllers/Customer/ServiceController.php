@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Service;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,9 +18,55 @@ class ServiceController extends Controller
     /**
      * Biaya tambahan flat kalau customer pilih opsi pickup (barang dijemput,
      * bukan diantar sendiri). Berlaku sekali per pesanan, bukan per hari
-     * atau per item. Ubah nilai ini kalau ternyata beda kebijakannya.
+     * atau per item.
+     *
+     * ⚠️ PLACEHOLDER - disesuaikan dari Rp20.000 ke Rp10.000 mengikuti
+     * contoh di invoice mockup ("Biaya Pick Up: Rp10.000"). Konfirmasi ke
+     * tim/desainer apakah ini angka final.
      */
-    protected const BIAYA_PICKUP = 20000;
+    protected const BIAYA_PICKUP = 10000;
+
+    /**
+     * Persentase biaya layanan yang dikenakan dari Total Harga (subtotal),
+     * sesuai invoice mockup ("Biaya Layanan 10%").
+     */
+    protected const PERSEN_BIAYA_LAYANAN = 10;
+
+    /**
+     * Tarif per hari & batas jumlah item untuk tiap kategori ukuran barang,
+     * sesuai popup "Information" di mockup Form Penitipan Barang.
+     *
+     * ⚠️ PLACEHOLDER - cuma tarif 'kecil' yang cocok dengan contoh di
+     * mockup (Rp15.000/hari). Tarif 'besar', 'kamar_kecil', dan
+     * 'kamar_besar' masih karangan sementara - WAJIB diganti ke nominal
+     * bisnis yang sebenarnya sebelum dipakai di production.
+     */
+    protected const UKURAN_BARANG = [
+        'kecil' => [
+            'label' => 'Barang Ukuran Kecil',
+            'harga_per_hari' => 15000,
+            'maks_item' => 2,
+            'deskripsi' => 'Khusus penitipan barang berdimensi kecil dengan jumlah maksimal 2 item seperti laptop, tas kecil, koper kecil, box kecil.',
+        ],
+        'besar' => [
+            'label' => 'Barang Ukuran Besar',
+            'harga_per_hari' => 25000, // ⚠️ placeholder
+            'maks_item' => 1,
+            'deskripsi' => 'Khusus penitipan barang berdimensi besar dengan jumlah maksimal 1 item seperti barang elektronik, mebel, koper besar, box besar.',
+        ],
+        'kamar_kecil' => [
+            'label' => 'Barang 1 Kamar Kost Kecil (3x2 m²)',
+            'harga_per_hari' => 50000, // ⚠️ placeholder
+            'maks_item' => 1,
+            'deskripsi' => 'Khusus penitipan barang 1 kamar kos dengan luas kamar 3x2 m².',
+        ],
+        'kamar_besar' => [
+            'label' => 'Barang 1 Kamar Kost Besar (6x4 m²)',
+            'harga_per_hari' => 75000, // ⚠️ placeholder
+            'maks_item' => 1,
+            'deskripsi' => 'Khusus penitipan barang 1 kamar kos dengan luas kamar 6x4 m².',
+        ],
+    ];
 
     /**
      * Hitung jumlah hari penitipan dari tanggal masuk ke tanggal keluar.
@@ -117,121 +164,135 @@ class ServiceController extends Controller
         ]);
     }
 
+    /**
+     * GET /app/services/barang
+     * Render form Penitipan Barang. Kirim juga daftar alamat customer
+     * (untuk alamat pickup) dan daftar kategori ukuran barang beserta
+     * tarif & deskripsinya, supaya frontend tidak perlu hardcode nilai ini
+     * sendiri-sendiri.
+     */
     public function formBarang(Request $request)
     {
-        return Inertia::render('Customer/Services/Barang/Form', [
-            'hargaMulai' => 100000,
-            'serviceId' => $request->query('service_id'),
-        ]);
-    }
+        $addresses = $request->user()
+            ->addresses()
+            ->latest('is_primary')
+            ->latest()
+            ->get(['id', 'name', 'phone', 'address', 'is_primary']);
 
-    public function simpanBarang(Request $request)
-    {
-        $data = $request->validate([
-            'namaBarang' => 'required|string',
-            'pickup' => 'boolean',
-            'tanggalMasuk' => 'required|date',
-            'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
-            'service_id' => 'nullable|integer|exists:services,id',
-        ]);
-
-        session(['pesanan_barang' => $data]);
-
-        return redirect()->route('customer.services.barang.pemesanan');
-    }
-
-    public function pemesanan()
-    {
-        $data = session('pesanan_barang');
-
-        if (!$data) {
-            return redirect()->route('customer.services.barang.pilihPaket');
-        }
-
-        // Harga per item diambil dari vendor (Service->harga) yang dipilih customer,
-        // bukan angka tetap di kode. Fallback 100000 hanya kalau service_id kosong
-        // (customer belum sempat memilih vendor tertentu).
-        $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
-        $hargaPerItem = $service ? (float) $service->harga : 100000;
-        $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
-
-        $items = collect(explode(',', $data['namaBarang']))
-            ->map(fn ($nama) => trim($nama))
-            ->filter()
-            ->map(fn ($nama) => ['nama' => $nama, 'harga' => $hargaPerItem, 'qty' => 1])
+        $ukuranBarang = collect(self::UKURAN_BARANG)
+            ->map(fn ($tier, $key) => [
+                'value' => $key,
+                'label' => $tier['label'],
+                'hargaPerHari' => $tier['harga_per_hari'],
+                'maksItem' => $tier['maks_item'],
+                'deskripsi' => $tier['deskripsi'],
+            ])
             ->values();
 
-        $customer = auth()->user();
-        $isPickup = (bool) $data['pickup'];
-        $pickupFee = $isPickup ? self::BIAYA_PICKUP : 0;
-
-        return Inertia::render('Customer/Services/Barang/Pemesanan', [
-            'customer' => [
-                'nama' => $customer->name,
-                'telepon' => $customer->phone ?? '-',
-                'alamat' => $customer->alamat ?? '-',
-            ],
-            'items' => $items,
-            'detail' => [
-                'checkIn' => $data['tanggalMasuk'],
-                'checkOut' => $data['tanggalKeluar'],
-                'pickup' => $isPickup,
-                'jumlahHari' => $jumlahHari,
-                'pickupFee' => $pickupFee,
-            ],
+        return Inertia::render('Customer/Services/Barang/Form', [
+            'serviceId' => $request->query('service_id'),
+            'addresses' => $addresses,
+            'ukuranBarangOptions' => $ukuranBarang,
+            'biayaPickup' => self::BIAYA_PICKUP,
+            'persenBiayaLayanan' => self::PERSEN_BIAYA_LAYANAN,
         ]);
     }
 
     /**
-     * POST /app/services/barang/simpan-item
-     * Dipanggil dari tombol "Buat Pesanan" di halaman Pemesanan.
-     * LANGSUNG membuat Order (tanpa halaman pilih metode bayar terpisah).
-     * payment_method diisi 'pending' dulu - metode bayar aktual (termasuk
-     * saldo) baru ditentukan di halaman Success/Pembayaran setelah ini.
+     * POST /app/services/barang
+     * DIREDESAIN: sebelumnya cuma nyimpen data ke session lalu lempar ke
+     * halaman "Pemesanan" (review qty) yang baru bikin Order di step
+     * terpisah (simpanItemsBarang). Sekarang satu langkah - submit form
+     * langsung bikin Order & lempar ke halaman Invoice, sesuai alur baru
+     * di mockup ("Form Penitipan Barang" -> langsung "Invoice Belum di
+     * bayar", tanpa halaman atur-ulang item di antaranya).
      */
-    public function simpanItemsBarang(Request $request)
+    public function simpanBarang(Request $request)
     {
-        $data = session('pesanan_barang');
-
-        if (!$data) {
-            return redirect()->route('customer.services.barang.pilihPaket');
-        }
-
-        $validated = $request->validate([
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.nama' => ['required', 'string'],
-            'items.*.qty' => ['required', 'integer', 'min:1'],
+        $data = $request->validate([
+            'namaBarang' => 'required|string|max:255',
+            'jumlahBarang' => 'required|integer|min:1',
+            'keterangan' => 'nullable|string|max:500',
+            'tanggalMasuk' => 'required|date',
+            'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
+            'pickup' => 'boolean',
+            'jamPickup' => ['nullable', 'date_format:H:i'],
+            'ukuranBarang' => ['required', Rule::in(array_keys(self::UKURAN_BARANG))],
+            'fotoBarangUrl' => 'nullable|url|max:500',
+            'service_id' => 'nullable|integer|exists:services,id',
+            'address_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('addresses', 'id')->where('user_id', $request->user()->id),
+            ],
+            'setuju' => ['accepted'],
+        ], [
+            'ukuranBarang.required' => 'Pilih ukuran barang.',
+            'ukuranBarang.in' => 'Ukuran barang tidak valid.',
+            'address_id.exists' => 'Alamat yang dipilih tidak valid.',
+            'setuju.accepted' => 'Kamu harus menyetujui Syarat dan Ketentuan.',
         ]);
 
-        $customer = auth()->user();
+        $isPickup = (bool) ($data['pickup'] ?? false);
+
+        if ($isPickup && empty($data['jamPickup'])) {
+            throw ValidationException::withMessages([
+                'jamPickup' => 'Jam pick up harus diisi kalau Layanan Pick Up aktif.',
+            ]);
+        }
+
+        if ($isPickup && empty($data['address_id'])) {
+            throw ValidationException::withMessages([
+                'address_id' => 'Pilih alamat penjemputan.',
+            ]);
+        }
+
+        $tier = self::UKURAN_BARANG[$data['ukuranBarang']];
+
+        if ($data['jumlahBarang'] > $tier['maks_item']) {
+            throw ValidationException::withMessages([
+                'jumlahBarang' => "Maksimal {$tier['maks_item']} item untuk {$tier['label']}.",
+            ]);
+        }
+
+        $customer = $request->user();
         $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
-        $hargaPerItem = $service ? (float) $service->harga : 100000;
         $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
 
-        $items = collect($validated['items']);
-        $totalQty = $items->sum('qty');
-        $isPickup = (bool) ($data['pickup'] ?? false);
+        $hargaPerHari = (float) $tier['harga_per_hari'];
+        $subtotal = $hargaPerHari * $data['jumlahBarang'] * $jumlahHari;
         $pickupFee = $isPickup ? self::BIAYA_PICKUP : 0;
+        $biayaLayanan = round($subtotal * self::PERSEN_BIAYA_LAYANAN / 100);
+        $total = $subtotal + $pickupFee + $biayaLayanan;
 
-        // Harga = (qty x harga per item x jumlah hari penitipan) + biaya pickup (kalau ada).
-        $subtotal = $totalQty * $hargaPerItem * $jumlahHari;
-        $total = $subtotal + $pickupFee;
-        $itemNames = $items->map(fn ($item) => $item['nama'].' x'.$item['qty'])->implode(', ');
+        $address = !empty($data['address_id'])
+            ? $customer->addresses()->find($data['address_id'])
+            : null;
 
         $order = Order::create([
             'order_code' => 'TS-'.strtoupper(uniqid()),
             'customer_id' => $customer->id,
+            'address_id' => $address?->id,
             'partner_id' => $service?->user_id,
             'service_type' => 'barang',
-            'item_name' => $itemNames,
+            'item_name' => $data['namaBarang'],
+            'item_description' => $data['keterangan'] ?? null,
+            'jumlah_barang' => $data['jumlahBarang'],
+            'ukuran_barang' => $data['ukuranBarang'],
+            'harga_per_hari' => $hargaPerHari,
+            'foto_barang_url' => $data['fotoBarangUrl'] ?? null,
             'start_date' => $data['tanggalMasuk'],
             'end_date' => $data['tanggalKeluar'],
+            'duration' => $jumlahHari,
             'is_pickup' => $isPickup,
+            'jam_pickup' => $isPickup ? $data['jamPickup'] : null,
+            'pickup_address' => $isPickup ? $address?->address : null,
             'city' => $service->kota ?? $customer->city ?? '-',
             'status' => 'baru',
             'subtotal' => $subtotal,
             'discount' => 0,
             'pickup_fee' => $pickupFee,
+            'biaya_layanan' => $biayaLayanan,
             'total_price' => $total,
             'payment_method' => 'pending',
             'payment_verified_at' => null,
@@ -239,9 +300,47 @@ class ServiceController extends Controller
 
         $this->notifikasiPesananBaru($order);
 
-        session()->forget(['pesanan_barang', 'pesanan_barang_items']);
+        return redirect()->route('customer.services.barang.invoice', $order->id);
+    }
 
-        return redirect()->route('customer.orders.success', $order->id);
+    /**
+     * GET /app/services/barang/{order}/invoice
+     * BARU: halaman "Invoice Belum di bayar" sesuai mockup - breakdown
+     * harga + tombol "Bayar Langsung" (lempar ke flow pembayaran order
+     * yang sudah ada, customer.orders.pembayaran) dan "Kembali Ke Beranda".
+     */
+    public function invoiceBarang(Order $order)
+    {
+        abort_unless($order->customer_id === auth()->id(), 403);
+
+        $tier = self::UKURAN_BARANG[$order->ukuran_barang] ?? null;
+
+        return Inertia::render('Customer/Services/Barang/Invoice', [
+            'order' => [
+                'id' => $order->id,
+                'orderCode' => $order->order_code,
+                'tanggalDiterbitkan' => $order->created_at->translatedFormat('l, j F Y'),
+                'mitraNama' => $order->partner?->name ?? '-',
+                'customerNama' => $order->customer->name,
+                'customerTelepon' => $order->customer->phone ?? '-',
+                'alamatLengkap' => $order->pickup_address ?: '-',
+                'namaBarang' => $order->item_name,
+                'jumlahBarang' => $order->jumlah_barang,
+                'keterangan' => $order->item_description ?: '-',
+                'tanggalMasuk' => $order->start_date?->translatedFormat('j F Y'),
+                'tanggalKeluar' => $order->end_date?->translatedFormat('j F Y'),
+                'durasiHari' => $order->duration,
+                'isPickup' => $order->is_pickup,
+                'jamPickup' => $order->jam_pickup,
+                'ukuranBarangLabel' => $tier['label'] ?? $order->ukuran_barang,
+                'nilaiHarga' => (float) $order->harga_per_hari,
+                'totalHarga' => (float) $order->subtotal,
+                'biayaPickup' => (float) $order->pickup_fee,
+                'biayaLayanan' => (float) $order->biaya_layanan,
+                'totalPembayaran' => (float) $order->total_price,
+                'sudahDibayar' => (bool) $order->payment_verified_at,
+            ],
+        ]);
     }
 
 
@@ -389,4 +488,18 @@ class ServiceController extends Controller
 
         return redirect()->route('customer.orders.success', $order->id);
     }
+    public function search(Request $request, string $kategori)
+{
+    return Inertia::render('Customer/Services/Search', [
+        'kategori' => $kategori,
+        'detectedKota' => $this->detectKotaFromIp($request), // atau null dulu
+        'filters' => $request->only(['kota', 'search']),
+        'mitras' => $request->filled('kota')
+            ? Mitra::query()
+                ->where('kota', $request->kota)
+                ->when($request->search, fn($q) => $q->where('nama', 'like', "%{$request->search}%"))
+                ->paginate(10)
+            : null,
+    ]);
+}
 }

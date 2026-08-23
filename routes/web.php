@@ -338,14 +338,11 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/services/barang/paket-pilihan', [ServiceController::class, 'pilihPaket'])->name('services.barang.pilihPaket');
     Route::get('/services/barang', [ServiceController::class, 'formBarang'])->name('services.barang.form');
     Route::post('/services/barang', [ServiceController::class, 'simpanBarang'])->name('services.barang.store');
-    Route::get('/services/barang/pemesanan', [ServiceController::class, 'pemesanan'])->name('services.barang.pemesanan');
-    Route::get('/services/barang/metode-pembayaran', [ServiceController::class, 'metodePembayaran'])->name('services.barang.metodePembayaran');
-    Route::post('/services/barang/konfirmasi', [ServiceController::class, 'konfirmasiPesanan'])->name('services.barang.konfirmasi');
+    Route::get('/services/barang/{order}/invoice', [ServiceController::class, 'invoiceBarang'])->name('services.barang.invoice');
     Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
     Route::post('/services/{service}/pesan', [ServiceController::class, 'storePesanan'])->name('services.pesan');
     Route::get('/services/{service}/metode-pembayaran', [ServiceController::class, 'metodePembayaranLayanan'])->name('services.metodePembayaranLayanan');
     Route::post('/services/{service}/konfirmasi', [ServiceController::class, 'konfirmasiLayanan'])->name('services.konfirmasiLayanan');
-    Route::post('/services/barang/simpan-item', [ServiceController::class, 'simpanItemsBarang'])->name('services.barang.simpanItem');
 
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
     Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('berita.show');
@@ -365,10 +362,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::post('/orders/{order}/bayar-denda', [CustomerOrderController::class, 'bayarDenda'])->name('orders.bayarDenda');
     Route::post('/orders/{order}/upload-bukti-denda', [CustomerOrderController::class, 'uploadBuktiDenda'])->name('orders.uploadBuktiDenda');
 
-    // 👇 DITAMBAHKAN: fitur Perpanjang Penitipan.
-    // Alur: form (pilih tanggal keluar baru) -> invoice -> bayar saldo
-    // (langsung lunas) atau upload bukti transfer (menunggu verifikasi
-    // mitra lewat mitra.orders.verifikasiPerpanjangan di atas).
+
     Route::get('/orders/{order}/extend', [CustomerOrderController::class, 'extendForm'])->name('orders.extend.form');
     Route::post('/orders/{order}/extend', [CustomerOrderController::class, 'extendStore'])->name('orders.extend.store');
     Route::get('/orders/{order}/extend/invoice', [CustomerOrderController::class, 'extendInvoice'])->name('orders.extend.invoice');
@@ -390,19 +384,14 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
 
     Route::get('/profile/keamanan', [SecurityController::class, 'edit'])->name('profile.keamanan');
 
-    // 👇 DITAMBAHKAN: route GET untuk merender sub-halaman "Ubah Kata Sandi"
-    // dan "Ubah PIN". Sebelumnya path ini hanya punya route PUT (untuk
-    // submit form), sehingga navigasi <Link> dari menu Keamanan.jsx
-    // (yang selalu GET) menghasilkan error 405 Method Not Allowed.
+
     Route::get('/profile/keamanan/password', [SecurityController::class, 'editPassword'])->name('profile.keamanan.password.edit');
     Route::put('/profile/keamanan/password', [SecurityController::class, 'updatePassword'])->name('profile.keamanan.password');
 
     Route::get('/profile/keamanan/pin', [SecurityController::class, 'editPin'])->name('profile.keamanan.pin.edit');
     Route::put('/profile/keamanan/pin', [SecurityController::class, 'updatePin'])->name('profile.keamanan.pin');
 
-    // 👇 DITAMBAHKAN: Alamat Saya (Address Book) - CRUD alamat pengiriman /
-    // penitipan milik customer. Dipakai oleh AddressController + Pages
-    // Customer/Address/Index.jsx & Customer/Address/Form.jsx.
+
     Route::prefix('profile/alamat')->name('profile.alamat.')->group(function () {
         Route::get('/', [AddressController::class, 'index'])->name('index');
         Route::get('/tambah', [AddressController::class, 'create'])->name('create');
@@ -419,6 +408,8 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/saldo/topup/{topup}/menunggu', [TopUpController::class, 'menunggu'])->name('topup.menunggu');
     Route::get('/saldo/topup/{topup}/sukses', [TopUpController::class, 'sukses'])->name('topup.sukses');
     Route::get('/saldo/riwayat', [TopUpController::class, 'riwayat'])->name('topup.riwayat');
+
+    
 });
 
 Route::middleware(['auth'])->prefix('lengkapi-data')->name('customer.lengkapi-data.')->group(function () {
@@ -427,13 +418,7 @@ Route::middleware(['auth'])->prefix('lengkapi-data')->name('customer.lengkapi-da
     Route::post('/', [LengkapiDataController::class, 'store'])->name('store');
 });
 
-// 👇 DIPERBAIKI: sebelumnya "regencies/{provinceId}" dan
-// "districts/{regencyId}" pakai path-param, sementara
-// WilayahController@cities/@districts sekarang membaca province_id /
-// city_id dari QUERY STRING (?province_id=... , ?city_id=...) sesuai
-// yang dipanggil AddressForm.jsx. Path-param lama membuat endpoint
-// "cities" tidak pernah cocok -> selalu 404 -> dropdown Kabupaten/Kota
-// dan Kecamatan tidak pernah terisi.
+
 Route::get('/api/wilayah/provinces', [WilayahController::class, 'provinces']);
 Route::get('/api/wilayah/cities', [WilayahController::class, 'cities']);
 Route::get('/api/wilayah/districts', [WilayahController::class, 'districts']);

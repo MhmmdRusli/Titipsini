@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { Search, MapPin, X, Car, Building2 } from 'lucide-react';
+import { Search, MapPin, Clock, X, Car, Building2, ChevronRight } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const VEHICLE_TYPES = [
@@ -46,6 +46,14 @@ const KATEGORI_LABEL = {
     pindahan: 'Pindahan',
 };
 
+// Label tombol aksi utama disesuaikan per kategori, tapi tujuan navigasinya
+// tetap persis sama seperti kode aslinya (barang -> paket-pilihan, lainnya -> show()).
+const ACTION_LABEL_BY_KATEGORI = {
+    barang: 'Titip Disini',
+    kendaraan: 'Pilih & Pesan',
+    bangunan: 'Pilih & Pesan',
+};
+
 export default function ServicesIndex({ services, filters }) {
     const kategori = filters?.kategori ?? '';
     const typeOptions = TYPE_OPTIONS_BY_KATEGORI[kategori] ?? null;
@@ -77,6 +85,7 @@ export default function ServicesIndex({ services, filters }) {
 
     const pageTitle = KATEGORI_LABEL[kategori] ?? 'Layanan';
     const ModalIcon = modalLabel?.icon ?? Car;
+    const actionLabel = ACTION_LABEL_BY_KATEGORI[kategori] ?? 'Pilih';
 
     return (
         <CustomerLayout title={pageTitle} backHref="/app/dashboard">
@@ -105,39 +114,80 @@ export default function ServicesIndex({ services, filters }) {
                     </button>
                 )}
 
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                {/* List style ala Detail Mitra, ganti dari grid thumbnail */}
+                <div className="mt-4 space-y-3">
                     {services.data.length === 0 && (
-                        <div className="col-span-2 rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400 dark:border-gray-700 dark:text-gray-500">
+                        <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400 dark:border-gray-700 dark:text-gray-500">
                             Belum ada layanan yang cocok di area ini.
                         </div>
                     )}
                     {services.data.map((service) => (
-                        <Link
+                        <div
                             key={service.id}
-                            href={service.kategori === 'barang' ? `/app/services/barang/paket-pilihan?service_id=${service.id}` : `/app/services/${service.id}`}
-                            className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition hover:border-green-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-green-700"
+                            className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
                         >
-                            <div className="h-24 w-full bg-gray-100 dark:bg-gray-700">
-                                {service.foto ? (
-                                    <img src={service.foto} alt={service.nama} className="h-full w-full object-cover" />
-                                ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-gray-300 dark:text-gray-600">
-                                        <ModalIcon size={28} />
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-900/30 dark:text-[#4ade80]">
+                                        <ModalIcon size={16} />
                                     </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{service.kota}</p>
+                                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                            <MapPin size={11} />
+                                            Kecamatan {service.kecamatan}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {typeof service.is_buka === 'boolean' && (
+                                    <span
+                                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                            service.is_buka
+                                                ? 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]'
+                                                : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'
+                                        }`}
+                                    >
+                                        {service.is_buka ? 'Buka' : 'Tutup'}
+                                    </span>
                                 )}
                             </div>
-                            <div className="p-2.5">
-                                <p className="truncate text-xs font-semibold text-gray-900 dark:text-gray-100">{service.kota}</p>
-                                <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-gray-500 dark:text-gray-400">
-                                    <MapPin size={10} />
-                                    Kecamatan {service.kecamatan}
-                                </p>
-                                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
+
+                            {(service.jam_buka || service.alamat_lengkap) && (
+                                <div className="mt-2.5 space-y-1 border-t border-gray-50 pt-2.5 dark:border-gray-700/60">
+                                    {service.jam_buka && service.jam_tutup && (
+                                        <p className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+                                            <Clock size={11} />
+                                            {service.jam_buka} - {service.jam_tutup}
+                                        </p>
+                                    )}
+                                    {service.alamat_lengkap && (
+                                        <p className="truncate text-[11px] text-gray-500 dark:text-gray-400">
+                                            {service.alamat_lengkap}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="mt-3 flex items-center justify-between">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-gray-900/40 dark:text-gray-400">
                                     <ModalIcon size={10} />
                                     {KATEGORI_LABEL[service.kategori]}
                                 </span>
+
+                                <Link
+                                    href={
+                                        service.kategori === 'barang'
+                                            ? `/app/services/barang/paket-pilihan?service_id=${service.id}`
+                                            : `/app/services/${service.id}`
+                                    }
+                                    className="inline-flex items-center gap-1 rounded-full bg-[#15803d] px-3.5 py-1.5 text-xs font-bold text-white dark:bg-[#22c55e]"
+                                >
+                                    {actionLabel}
+                                    <ChevronRight size={13} />
+                                </Link>
                             </div>
-                        </Link>
+                        </div>
                     ))}
                 </div>
             </div>
