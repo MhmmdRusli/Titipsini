@@ -3,8 +3,7 @@ import { useForm, router, Head } from '@inertiajs/react';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 
 const inputClass = (hasError) =>
-    `mt-1 w-full rounded-lg border-none bg-gray-100 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 disabled:opacity-50 ${
-        hasError ? 'ring-2 ring-red-400' : 'focus:ring-green-500'
+    `mt-1 w-full rounded-lg border-none bg-gray-100 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 disabled:opacity-50 ${hasError ? 'ring-2 ring-red-400' : 'focus:ring-green-500'
     }`;
 
 export default function FormIdentitasGudang({ kategori, editingItem, onBatal, onSukses }) {
@@ -19,6 +18,7 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
         foto_lahan: editingItem?.foto_lahan ?? '',
         panjang: editingItem?.panjang ?? '',
         lebar: editingItem?.lebar ?? '',
+        jumlah_tampung: editingItem?.jumlah_tampung ?? '',
     });
 
     // Data wilayah bertingkat: provinsi -> kabupaten/kota -> kecamatan.
@@ -248,6 +248,19 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
                     {(errors.panjang || errors.lebar) && (
                         <p className="mt-1 text-xs text-red-600">{errors.panjang || errors.lebar}</p>
                     )}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Jumlah Tampung</label>
+                    <p className="text-xs text-gray-400">Perkiraan jumlah barang/kendaraan yang bisa ditampung</p>
+                    <input
+                        type="number"
+                        placeholder="200"
+                        value={data.jumlah_tampung}
+                        onChange={(e) => setData('jumlah_tampung', e.target.value)}
+                        className={inputClass(errors.jumlah_tampung)}
+                    />
+                    {errors.jumlah_tampung && <p className="mt-1 text-xs text-red-600">{errors.jumlah_tampung}</p>}
                 </div>
 
                 <button

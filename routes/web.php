@@ -288,7 +288,8 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::get('/layanan/kendaraan', [MitraServiceController::class, 'kategori'])->name('layanan.kendaraan')->defaults('kategori', 'kendaraan');
     Route::get('/layanan/bangunan', [MitraServiceController::class, 'kategori'])->name('layanan.bangunan')->defaults('kategori', 'bangunan');
     Route::get('/layanan/pindahan', [MitraServiceController::class, 'kategori'])->name('layanan.pindahan')->defaults('kategori', 'pindahan');
-        Route::patch('/layanan/{kategori}/fitur-penuh', [MitraServiceController::class, 'toggleFiturPenuh'])->name('layanan.fiturPenuh');
+    Route::patch('/layanan/{kategori}/fitur-penuh', [MitraServiceController::class, 'toggleFiturPenuh'])->name('layanan.fiturPenuh');
+    Route::get('/layanan/{layanan}', [MitraServiceController::class, 'show'])->name('layanan.show');
 
     /* Rekening Bank Mitra */
     Route::get('/rekening', [RekeningController::class, 'edit'])->name('rekening.edit');

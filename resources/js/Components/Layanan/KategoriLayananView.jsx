@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { router, useForm } from '@inertiajs/react';
+import { Link, router, useForm } from '@inertiajs/react';
 import MitraLayout from '@/Layouts/MitraLayout';
 import { Plus, Pencil, Trash2, X, MapPin, AlertCircle, ChevronLeft, Home, Info, CheckCircle2 } from 'lucide-react';
 const JENIS_KENDARAAN_OPTIONS = [
@@ -156,7 +156,7 @@ export default function KategoriLayananView({
                     daftarKota={daftarKota}
                     onBatal={() => {
                         setEditingItem(null);
-                        setTahap('hub');
+                        setTahap(layanan.length > 0 ? 'hub' : 'kosong');
                     }}
                     onSukses={() => {
                         setEditingItem(null);
@@ -190,7 +190,7 @@ export default function KategoriLayananView({
                         judul={judulKosong}
                         subjudul={subjudulKosong}
                         menungguVerifikasi={menungguVerifikasi}
-                        onTambah={() => setTahap('hub')}
+                        onTambah={() => openTambah()}
                     />
                 )}
 
@@ -488,8 +488,8 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
                 onClick={toggleFiturPenuh}
                 disabled={savingFitur}
                 className={`mt-2 flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${fiturPenuh
-                        ? 'border-green-600 bg-green-600 text-white'
-                        : 'border-gray-300 bg-gray-100 text-gray-500'
+                    ? 'border-green-600 bg-green-600 text-white'
+                    : 'border-gray-300 bg-gray-100 text-gray-500'
                     }`}
             >
                 <span
@@ -529,13 +529,13 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
                                     </div>
                                 </div>
 
-                                {modeDetail ? (
-                                    <button
-                                        onClick={() => onUbah(item)}
+                                    {modeDetail ? (
+                                    <Link
+                                        href={`/mitra/layanan/${item.id}`}
                                         className="shrink-0 text-xs font-semibold text-green-600 hover:underline"
                                     >
                                         Detail
-                                    </button>
+                                    </Link>
                                 ) : (
                                     <div className="flex shrink-0 items-center gap-1">
                                         <button

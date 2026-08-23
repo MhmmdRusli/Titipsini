@@ -27,15 +27,19 @@ class Service extends Model
         'foto_lahan',
         'panjang',
         'lebar',
+        'jumlah_tampung',
+        'verification_status',
+        'rejection_reason',
     ];
 
-    protected function casts(): array
+        protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
             'harga' => 'decimal:2',
             'panjang' => 'integer',
             'lebar' => 'integer',
+            'jumlah_tampung' => 'integer',
         ];
     }
 

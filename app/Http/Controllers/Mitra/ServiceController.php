@@ -32,6 +32,21 @@ class ServiceController extends Controller
         ]);
     }
 
+
+        /**
+     * GET /mitra/layanan/{layanan}
+     */
+    public function show(Request $request, Service $layanan): Response
+    {
+        $this->authorizeOwnership($request, $layanan);
+
+        $layanan->foto_url = $layanan->foto ? Storage::url($layanan->foto) : null;
+
+        return Inertia::render('Mitra/Layanan/Detail', [
+            'layanan' => $layanan,
+        ]);
+    }
+
     /**
      * GET /mitra/layanan/{kategori}
      * Menampilkan halaman kelola khusus 1 kategori (barang/kendaraan/bangunan/pindahan)
@@ -121,6 +136,9 @@ class ServiceController extends Controller
             $validated['nama'] = $validated['nama_usaha'];
         }
 
+        $validated['verification_status'] = 'pending';
+        $validated['rejection_reason'] = null;
+
         if ($request->hasFile('foto')) {
             if ($layanan->foto) {
                 Storage::delete($layanan->foto);
@@ -158,7 +176,7 @@ class ServiceController extends Controller
     {
         $kategori = $request->input('kategori');
 
-        if ($kategori === 'barang') {
+            if ($kategori === 'barang') {
             return $request->validate([
                 'kategori' => ['required', 'in:barang,bangunan,kendaraan,pindahan'],
                 'nama_usaha' => ['required', 'string', 'max:150'],
@@ -170,6 +188,7 @@ class ServiceController extends Controller
                 'foto_lahan' => ['required', 'string', 'max:500'],
                 'panjang' => ['required', 'integer', 'min:1'],
                 'lebar' => ['required', 'integer', 'min:1'],
+                'jumlah_tampung' => ['required', 'integer', 'min:1'],
             ]);
         }
 
