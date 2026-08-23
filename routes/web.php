@@ -17,6 +17,9 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\TopupVerifikasiController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Finance\DashboardController as FinanceDashboardController;
+use App\Http\Controllers\Finance\PayoutController as FinancePayoutController;
+use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\AddressController;
@@ -69,6 +72,8 @@ Route::get('/', function () {
     if (auth()->check()) {
         return match (auth()->user()->role) {
             'admin' => redirect()->route('admin.dashboard'),
+            'finance' => redirect('/finance/dashboard'),
+            'super_admin' => redirect('/super-admin/dashboard'),
             'partner' => redirect()->route('mitra.dashboard'),
             default => redirect()->route('customer.dashboard'),
         };
@@ -85,6 +90,8 @@ Route::get('/mulai', function () {
     if (auth()->check()) {
         return match (auth()->user()->role) {
             'admin' => redirect()->route('admin.dashboard'),
+            'finance' => redirect('/finance/dashboard'),
+            'super_admin' => redirect('/super-admin/dashboard'),
             'partner' => redirect()->route('mitra.dashboard'),
             default => redirect()->route('customer.dashboard'),
         };
@@ -157,6 +164,17 @@ Route::middleware(['auth'])->prefix('mitra')->name('mitra.')->group(function () 
 Route::get('/mitra/verifikasi-email/{id}/{hash}', [MitraVerifyEmailController::class, 'verify'])
     ->middleware(['auth', 'signed'])
     ->name('verification.verify');
+
+Route::middleware(['auth', 'role:finance,super_admin'])->prefix('finance')->name('finance.')->group(function () {
+    Route::get('/dashboard', [FinanceDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/payouts', [FinancePayoutController::class, 'index'])->name('payouts.index');
+    Route::post('/payouts/{payout}/approve', [FinancePayoutController::class, 'approve'])->name('payouts.approve');
+    Route::post('/payouts/{payout}/reject', [FinancePayoutController::class, 'reject'])->name('payouts.reject');
+});
+
+Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
+    Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
+});
 
 /*
 |--------------------------------------------------------------------------

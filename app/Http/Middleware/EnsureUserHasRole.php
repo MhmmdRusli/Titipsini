@@ -17,10 +17,18 @@ class EnsureUserHasRole
         $user = $request->user();
 
         if (! $user) {
+            if ($request->expectsJson()) {
+                abort(401, 'Unauthenticated.');
+            }
+
             return redirect()->route('login');
         }
 
         if (! in_array($user->role, $roles, true)) {
+            if ($request->expectsJson()) {
+                abort(403, 'Anda tidak memiliki akses ke resource ini.');
+            }
+
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 

@@ -29,16 +29,20 @@ class AuthenticatedSessionController extends Controller
             ])->onlyInput('email');
         }
 
-        if (Auth::user()->role !== 'admin') {
+        if (! in_array(Auth::user()->role, ['admin', 'finance', 'super_admin'], true)) {
             Auth::logout();
 
             return back()->withErrors([
-                'email' => 'Akun ini tidak memiliki akses ke panel admin.',
+                'email' => 'Akun ini tidak memiliki akses ke portal internal.',
             ])->onlyInput('email');
         }
 
         $request->session()->regenerate();
 
-        return redirect()->intended('/admin/dashboard');
+        return redirect()->intended(match (Auth::user()->role) {
+            'finance' => '/finance/dashboard',
+            'super_admin' => '/super-admin/dashboard',
+            default => '/admin/dashboard',
+        });
     }
 }
