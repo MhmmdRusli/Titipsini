@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import KategoriLayananView from '@/Components/Layanan/KategoriLayananView';
+import FormIdentitasKendaraan from '@/Components/Layanan/FormIdentitasKendaraan';
 import { Truck, CheckCircle2 } from 'lucide-react';
 
 function IlustrasiPickUp() {
@@ -33,6 +34,7 @@ export default function KelolaPickUp({ layanan = [], daftarKota = [], menungguVe
                 layanan={layanan}
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
+                FormKustom={FormIdentitasKendaraan}
             />
         </>
     );

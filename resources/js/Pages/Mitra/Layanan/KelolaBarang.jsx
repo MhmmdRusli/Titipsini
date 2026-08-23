@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import KategoriLayananView from '@/Components/Layanan/KategoriLayananView';
+import FormIdentitasGudang from '@/Components/Layanan/FormIdentitasGudang';
 import { BookMarked, Plus } from 'lucide-react';
 
 function IlustrasiBarang() {
@@ -16,20 +17,20 @@ function IlustrasiBarang() {
 export default function KelolaBarang({ layanan = [], daftarKota = [], menungguVerifikasi = false }) {
     return (
         <>
-            <Head title="Kelola Barang" />
+            <Head title="Kelola Gudang" />
             <KategoriLayananView
                 kategori="barang"
-                title="Kelola Barang"
+                title="Kelola Gudang"
                 ilustrasi={<IlustrasiBarang />}
                 judulKosong="Layanan Barang Masih Kosong"
                 subjudulKosong="Daftarkan Gudang anda dengan mengisi data Alamat Gudang"
-                heading="Layanan Barang"
                 subheading="Daftar Gudang anda dan isi data gudang"
                 labelBox="Gudang Barang"
                 labelTambah="Tambah Gudang"
                 layanan={layanan}
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
+                FormKustom={FormIdentitasGudang}
             />
         </>
     );

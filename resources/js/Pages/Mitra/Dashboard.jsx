@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { History, AlertTriangle, Package, Car, Building2, Truck, ChevronRight, MapPin, User, LogOut, BadgeCheck, Clock, ArrowDownToLine } from 'lucide-react';
+import { History, AlertTriangle, Package, Car, Building2, Truck, MapPin, User, LogOut, BadgeCheck, Clock, ArrowDownToLine } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const LAYANAN_ICON = {
@@ -234,17 +234,10 @@ export default function Dashboard({ partner = {}, saldo = 0, toko = {}, layanan 
                     </div>
                 </div>
 
-                {/* Layanan Vendors - sekarang tiap ikon menuju halaman kategori masing-masing */}
+                {/* Layanan Vendors - Tautan "Kelola" telah dihapus */}
                 <div>
-                    <div className="mb-2 flex items-center justify-between">
+                    <div className="mb-2">
                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Layanan Vendors</p>
-                        <Link
-                            href="/mitra/layanan"
-                            className="flex items-center gap-0.5 text-xs font-bold text-green-600 hover:underline dark:text-[#4ade80]"
-                        >
-                            Kelola
-                            <ChevronRight size={14} />
-                        </Link>
                     </div>
 
                     <div className="grid grid-cols-4 gap-2">

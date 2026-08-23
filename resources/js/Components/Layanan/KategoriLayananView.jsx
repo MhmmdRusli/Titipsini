@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { router, useForm } from '@inertiajs/react';
 import MitraLayout from '@/Layouts/MitraLayout';
-import { Plus, Pencil, Trash2, X, MapPin, AlertCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, MapPin, AlertCircle, ChevronLeft } from 'lucide-react';
 
 const JENIS_KENDARAAN_OPTIONS = [
     { value: 'motor', label: 'Motor' },
@@ -26,38 +26,20 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
 }
 
-function labelFor(options, value) {
-    return options.find((o) => o.value === value)?.label ?? value;
-}
-
-/**
- * Komponen dipakai bersama oleh 4 halaman kategori layanan (Barang, Kendaraan,
- * Bangunan, Pindahan/Pick Up).
- *
- * Alurnya 3 tahap:
- * 1. "kosong"  -> ilustrasi besar + tombol "Tambah Layanan" (kalau belum ada data SAMA SEKALI)
- * 2. "hub"     -> judul + subjudul + kotak berisi daftar item (kalau ada) + tombol "+ Tambah [label]"
- * 3. modal     -> form input (dipicu dari tombol di dalam kotak hub)
- *
- * Begitu sudah ada minimal 1 layanan tersimpan, tahap "kosong" dilewati dan
- * langsung tampil tahap "hub".
- */
 export default function KategoriLayananView({
     kategori,
     title,
     ilustrasi,
     judulKosong,
     subjudulKosong,
-    heading,
     subheading,
     labelBox,
     labelTambah,
     layanan = [],
     daftarKota = [],
     menungguVerifikasi = false,
+    FormKustom = null,
 }) {
-    // Kalau sudah ada data, langsung ke tahap "hub". Kalau belum ada sama
-    // sekali, mulai dari tahap "kosong" (ilustrasi besar).
     const [tahap, setTahap] = useState(layanan.length > 0 ? 'hub' : 'kosong');
     const [modalOpen, setModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
@@ -76,11 +58,33 @@ export default function KategoriLayananView({
         foto: null,
     });
 
-    function openCreateModal() {
-        reset();
+    function openTambah(item = null) {
+        if (FormKustom) {
+            setEditingItem(item);
+            setTahap('form-kustom');
+            return;
+        }
+
+        if (item) {
+            setEditingItem(item);
+            setData({
+                kategori,
+                jenis_kendaraan: item.jenis_kendaraan ?? '',
+                jenis_bangunan: item.jenis_bangunan ?? '',
+                nama: item.nama,
+                kota: item.kota,
+                kecamatan: item.kecamatan,
+                harga: item.harga ?? '',
+                is_active: item.is_active,
+                foto: null,
+            });
+            setFotoPreview(item.foto_url ?? null);
+        } else {
+            reset();
+            setEditingItem(null);
+            setFotoPreview(null);
+        }
         clearErrors();
-        setEditingItem(null);
-        setFotoPreview(null);
         setModalOpen(true);
     }
 
@@ -90,24 +94,6 @@ export default function KategoriLayananView({
             setData('foto', file);
             setFotoPreview(URL.createObjectURL(file));
         }
-    }
-
-    function openEditModal(item) {
-        setEditingItem(item);
-        setData({
-            kategori,
-            jenis_kendaraan: item.jenis_kendaraan ?? '',
-            jenis_bangunan: item.jenis_bangunan ?? '',
-            nama: item.nama,
-            kota: item.kota,
-            kecamatan: item.kecamatan,
-            harga: item.harga ?? '',
-            is_active: item.is_active,
-            foto: null,
-        });
-        setFotoPreview(item.foto_url ?? null);
-        clearErrors();
-        setModalOpen(true);
     }
 
     function closeModal() {
@@ -148,8 +134,45 @@ export default function KategoriLayananView({
     const tampilkanJenisKendaraan = kategori === 'kendaraan';
     const tampilkanJenisBangunan = kategori === 'bangunan';
 
+    // Alur form kustom (mis. FormIdentitasGudang) sudah punya header + tombol
+    // back sendiri di dalam komponennya, jadi di sini title dikosongkan
+    // supaya tidak dobel dengan header "Titipsini.com" dari MitraLayout.
+    if (tahap === 'form-kustom' && FormKustom) {
+        return (
+            <MitraLayout title="">
+                <FormKustom
+                    kategori={kategori}
+                    editingItem={editingItem}
+                    daftarKota={daftarKota}
+                    onBatal={() => {
+                        setEditingItem(null);
+                        setTahap('hub');
+                    }}
+                    onSukses={() => {
+                        setEditingItem(null);
+                        setTahap('hub');
+                    }}
+                />
+            </MitraLayout>
+        );
+    }
+
     return (
-        <MitraLayout title={title} backHref="/mitra/dashboard">
+        <MitraLayout title="">
+            {/* Header sendiri: tombol panah kembali ke halaman SEBELUMNYA (browser
+                history), bukan selalu ke satu URL tetap - menggantikan header
+                "Titipsini.com" bawaan MitraLayout */}
+            <div className="flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-3">
+                <button
+                    type="button"
+                    onClick={() => window.history.back()}
+                    className="text-gray-500 hover:text-gray-700"
+                >
+                    <ChevronLeft size={20} />
+                </button>
+                <h1 className="text-base font-semibold text-gray-900">{title}</h1>
+            </div>
+
             <div className="px-4 py-3">
                 {tahap === 'kosong' && (
                     <TahapKosong
@@ -163,28 +186,27 @@ export default function KategoriLayananView({
 
                 {tahap === 'hub' && (
                     <TahapHub
-                        heading={heading}
                         subheading={subheading}
                         labelBox={labelBox}
                         labelTambah={labelTambah}
                         layanan={layanan}
                         menungguVerifikasi={menungguVerifikasi}
-                        onTambah={openCreateModal}
-                        onUbah={openEditModal}
+                        onTambah={() => openTambah()}
+                        onUbah={(item) => openTambah(item)}
                         onHapus={setDeleteTarget}
                     />
                 )}
             </div>
 
-            {/* Modal Tambah/Edit */}
-            {modalOpen && (
-                <div className="fixed inset-0 z-20 flex items-end bg-black/40">
-                    <div className="max-h-[85%] w-full overflow-y-auto rounded-t-2xl bg-white p-5 pb-8">
-                        <div className="mb-4 flex items-center justify-between">
+            {/* Modal Bottom-Sheet dengan Penyesuaian Wrapper Mobile */}
+            {modalOpen && !FormKustom && (
+                <div className="absolute inset-0 z-50 flex items-end bg-black/50 backdrop-blur-xs">
+                    <div className="max-h-[90%] w-full overflow-y-auto rounded-t-2xl bg-white p-5 pb-8 shadow-2xl">
+                        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
                             <h2 className="text-base font-bold text-gray-900">
                                 {editingItem ? `Edit ${labelBox}` : labelTambah}
                             </h2>
-                            <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                            <button onClick={closeModal} className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
                                 <X size={18} />
                             </button>
                         </div>
@@ -199,10 +221,10 @@ export default function KategoriLayananView({
                                                 key={opt.value}
                                                 type="button"
                                                 onClick={() => setData('jenis_kendaraan', opt.value)}
-                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                                                     data.jenis_kendaraan === opt.value
                                                         ? 'border-green-600 bg-green-600 text-white'
-                                                        : 'border-gray-200 text-gray-600'
+                                                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
                                                 }`}
                                             >
                                                 {opt.label}
@@ -222,10 +244,10 @@ export default function KategoriLayananView({
                                                 key={opt.value}
                                                 type="button"
                                                 onClick={() => setData('jenis_bangunan', opt.value)}
-                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+                                                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                                                     data.jenis_bangunan === opt.value
                                                         ? 'border-green-600 bg-green-600 text-white'
-                                                        : 'border-gray-200 text-gray-600'
+                                                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
                                                 }`}
                                             >
                                                 {opt.label}
@@ -240,7 +262,7 @@ export default function KategoriLayananView({
                                 <label className="mb-1.5 block text-xs font-medium text-gray-600">Foto Layanan</label>
                                 <label
                                     htmlFor="foto-layanan"
-                                    className="flex h-32 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 bg-gray-50"
+                                    className="flex h-32 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100"
                                 >
                                     {fotoPreview ? (
                                         <img src={fotoPreview} alt="Preview" className="h-full w-full object-cover" />
@@ -278,9 +300,6 @@ export default function KategoriLayananView({
                                         ))}
                                     </select>
                                     {errors.kota && <p className="mt-1 text-xs text-red-500">{errors.kota}</p>}
-                                    {daftarKota.length === 0 && (
-                                        <p className="mt-1 text-xs text-amber-600">Belum ada kota aktif dari Admin. Hubungi Admin dulu.</p>
-                                    )}
                                 </div>
                                 <div>
                                     <label className="mb-1 block text-xs font-medium text-gray-600">Kecamatan</label>
@@ -327,7 +346,7 @@ export default function KategoriLayananView({
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full rounded-xl bg-green-600 py-3 text-sm font-bold text-white disabled:opacity-50"
+                                className="w-full rounded-xl bg-green-600 py-3 text-sm font-bold text-white shadow-md hover:bg-green-700 disabled:opacity-50"
                             >
                                 {editingItem ? 'Simpan Perubahan' : labelTambah}
                             </button>
@@ -338,8 +357,8 @@ export default function KategoriLayananView({
 
             {/* Konfirmasi Hapus */}
             {deleteTarget && (
-                <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/40 px-6">
-                    <div className="w-full max-w-xs rounded-xl bg-white p-5">
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 px-6 backdrop-blur-xs">
+                    <div className="w-full max-w-xs rounded-xl bg-white p-5 shadow-2xl">
                         <h2 className="text-sm font-bold text-gray-900">Hapus Layanan?</h2>
                         <p className="mt-2 text-xs text-gray-500">
                             "{deleteTarget.nama}" akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
@@ -365,18 +384,12 @@ export default function KategoriLayananView({
     );
 }
 
-/* ---------------------------------------------------------------------- */
-/* Tahap 1: kosong total - ilustrasi besar + tombol "Tambah Layanan"       */
-/* ---------------------------------------------------------------------- */
-
 function TahapKosong({ ilustrasi, judul, subjudul, menungguVerifikasi, onTambah }) {
     return (
         <div className="flex flex-col items-center px-2 pb-4 pt-10 text-center">
             <div className="mb-6 flex h-40 w-40 items-center justify-center">{ilustrasi}</div>
-
             <p className="text-base font-bold text-gray-900">{judul}</p>
             <p className="mt-1.5 max-w-[260px] text-sm font-medium text-green-600">{subjudul}</p>
-
             <div className="mt-10 w-full space-y-3">
                 {menungguVerifikasi && (
                     <div className="flex items-center justify-center gap-2 rounded-xl bg-green-700 px-4 py-2.5 text-xs font-medium text-white">
@@ -384,7 +397,6 @@ function TahapKosong({ ilustrasi, judul, subjudul, menungguVerifikasi, onTambah 
                         Tunggu verifikasi dalam waktu 3 hari Kerja
                     </div>
                 )}
-
                 <button
                     onClick={onTambah}
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-700 py-3 text-sm font-semibold text-white hover:bg-green-600"
@@ -397,14 +409,9 @@ function TahapKosong({ ilustrasi, judul, subjudul, menungguVerifikasi, onTambah 
     );
 }
 
-/* ---------------------------------------------------------------------- */
-/* Tahap 2: hub - judul + subjudul + kotak daftar item + tombol tambah     */
-/* ---------------------------------------------------------------------- */
-
-function TahapHub({ heading, subheading, labelBox, labelTambah, layanan, menungguVerifikasi, onTambah, onUbah, onHapus }) {
+function TahapHub({ subheading, labelBox, labelTambah, layanan, menungguVerifikasi, onTambah, onUbah, onHapus }) {
     return (
         <div className="pb-6 pt-4">
-            <p className="text-center text-lg font-bold text-gray-900">{heading}</p>
             <p className="mt-1 text-center text-xs text-gray-400">{subheading}</p>
 
             {menungguVerifikasi && (
@@ -419,7 +426,7 @@ function TahapHub({ heading, subheading, labelBox, labelTambah, layanan, menungg
 
                 {layanan.length > 0 && (
                     <div className="divide-y divide-gray-100">
-                        {layanan.map((item) => (
+                        {layanan.model ?? layanan.map((item) => (
                             <div key={item.id} className="flex items-start justify-between gap-2 bg-white px-4 py-3">
                                 <div className="min-w-0">
                                     <p className="truncate text-sm font-semibold text-gray-900">{item.nama}</p>
@@ -467,4 +474,4 @@ function TahapHub({ heading, subheading, labelBox, labelTambah, layanan, menungg
             </div>
         </div>
     );
-}
+}   

@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import KategoriLayananView from '@/Components/Layanan/KategoriLayananView';
+import FormIdentitasPenjaga from '@/Components/Layanan/FormIdentitasPenjaga';
 import { Home, Plus } from 'lucide-react';
 
 function IlustrasiBangunan() {
@@ -30,6 +31,7 @@ export default function KelolaBangunan({ layanan = [], daftarKota = [], menunggu
                 layanan={layanan}
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
+                FormKustom={FormIdentitasPenjaga}
             />
         </>
     );
