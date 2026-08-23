@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import KategoriLayananView from '@/Components/Layanan/KategoriLayananView';
+import FormAlamatLahanParkir from '@/Components/Layanan/FormAlamatLahanParkir';
 import { Car, ParkingSquare } from 'lucide-react';
 
 function IlustrasiKendaraan() {
@@ -38,7 +39,8 @@ export default function KelolaKendaraan({ layanan = [], daftarKota = [], menungg
                 layanan={layanan}
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
+                FormKustom={FormAlamatLahanParkir}
             />
         </>
     );
-}
+}   

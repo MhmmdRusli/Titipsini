@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { History, AlertTriangle, Package, Car, Building2, Truck, ChevronRight, MapPin, User, LogOut, BadgeCheck, Clock, ArrowDownToLine } from 'lucide-react';
+import { History, AlertTriangle, Package, Car, Building2, Truck, MapPin, User, LogOut, BadgeCheck, Clock, ArrowDownToLine } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const LAYANAN_ICON = {
@@ -9,6 +9,8 @@ const LAYANAN_ICON = {
     bangunan: Building2,
     pindahan: Truck,
 };
+
+const KATEGORI_LAYANAN = ['barang', 'kendaraan', 'bangunan', 'pindahan'];
 
 // Href per kategori - masing-masing sekarang punya halaman kelola sendiri
 const LAYANAN_HREF = {
@@ -147,30 +149,26 @@ export default function Dashboard({ partner = {}, saldo = 0, toko = {}, layanan 
                     {/* Status Toko */}
                     <Link
                         href="/mitra/layanan/jam-operasional"
-                        className={`mt-3 flex items-center justify-between rounded-lg px-3 py-2 transition ${
-                            toko?.buka
+                        className={`mt-3 flex items-center justify-between rounded-lg px-3 py-2 transition ${toko?.buka
                                 ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40'
                                 : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40'
-                        }`}
+                            }`}
                     >
                         <div className="flex items-center gap-1.5">
                             <span
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                    toko?.buka ? 'bg-green-700 dark:bg-green-400' : 'bg-red-700 dark:bg-red-400'
-                                }`}
+                                className={`h-1.5 w-1.5 rounded-full ${toko?.buka ? 'bg-green-700 dark:bg-green-400' : 'bg-red-700 dark:bg-red-400'
+                                    }`}
                             />
                             <span
-                                className={`text-xs font-semibold ${
-                                    toko?.buka ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'
-                                }`}
+                                className={`text-xs font-semibold ${toko?.buka ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'
+                                    }`}
                             >
                                 {toko?.buka ? 'Buka' : 'Tutup'}
                             </span>
                             {toko?.jam_buka && toko?.jam_tutup ? (
                                 <span
-                                    className={`text-xs ${
-                                        toko?.buka ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
-                                    }`}
+                                    className={`text-xs ${toko?.buka ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
+                                        }`}
                                 >
                                     {toko.jam_buka} - {toko.jam_tutup}
                                 </span>
@@ -234,28 +232,25 @@ export default function Dashboard({ partner = {}, saldo = 0, toko = {}, layanan 
                     </div>
                 </div>
 
-                {/* Layanan Vendors - sekarang tiap ikon menuju halaman kategori masing-masing */}
+                {/* Layanan Vendors - Tautan "Kelola" telah dihapus */}
                 <div>
-                    <div className="mb-2 flex items-center justify-between">
+                    <div className="mb-2">
                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Layanan Vendors</p>
-                        <Link
-                            href="/mitra/layanan"
-                            className="flex items-center gap-0.5 text-xs font-bold text-green-600 hover:underline dark:text-[#4ade80]"
-                        >
-                            Kelola
-                            <ChevronRight size={14} />
-                        </Link>
                     </div>
 
                     <div className="grid grid-cols-4 gap-2">
-                        {(Array.isArray(layanan) && layanan.length > 0 ? layanan : ['barang', 'kendaraan', 'bangunan', 'pindahan']).map((key) => {
+                        {KATEGORI_LAYANAN.map((key) => {
                             const Icon = LAYANAN_ICON[key] ?? Package;
+                            const aktif = Array.isArray(layanan) && layanan.includes(key);
                             return (
                                 <Link
                                     key={key}
-                                    href={LAYANAN_HREF[key] ?? '/mitra/layanan'}
-                                    className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
+                                    href={`/mitra/layanan/${key}`}
+                                    className="relative flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-4 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700/50"
                                 >
+                                    {aktif && (
+                                        <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-green-500" />
+                                    )}
                                     <Icon size={22} className="text-green-600 dark:text-[#4ade80]" strokeWidth={1.75} />
                                 </Link>
                             );

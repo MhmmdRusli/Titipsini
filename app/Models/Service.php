@@ -8,23 +8,38 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Service extends Model
 {
     protected $fillable = [
-    'user_id',
-    'kategori',
-    'jenis_kendaraan',
-    'jenis_bangunan',
-    'nama',
-    'foto',
-    'kota',
-    'kecamatan',
-    'harga',
-    'is_active',
-];
+        'user_id',
+        'kategori',
+        'jenis_kendaraan',
+        'jenis_bangunan',
+        'nama',
+        'foto',
+        'kota',
+        'kecamatan',
+        'harga',
+        'is_active',
+        // Kolom baru khusus kategori Barang (alamat gudang)
+        'nama_usaha',
+        'provinsi',
+        'kabupaten_kota',
+        'alamat_lengkap',
+        'catatan_alamat',
+        'foto_lahan',
+        'panjang',
+        'lebar',
+        'jumlah_tampung',
+        'verification_status',
+        'rejection_reason',
+    ];
 
-    protected function casts(): array
+        protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
             'harga' => 'decimal:2',
+            'panjang' => 'integer',
+            'lebar' => 'integer',
+            'jumlah_tampung' => 'integer',
         ];
     }
 
