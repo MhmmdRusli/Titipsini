@@ -442,8 +442,8 @@ Route::middleware(['auth'])->prefix('lengkapi-data')->name('customer.lengkapi-da
 
 
 Route::get('/api/wilayah/provinces', [WilayahController::class, 'provinces']);
-Route::get('/api/wilayah/cities', [WilayahController::class, 'cities']);
-Route::get('/api/wilayah/districts', [WilayahController::class, 'districts']);
+Route::get('/api/wilayah/regencies/{provinceId}', [WilayahController::class, 'regencies']);
+Route::get('/api/wilayah/districts/{regencyId}', [WilayahController::class, 'districts']);
 
 Route::middleware(['auth', 'role:customer'])->prefix('buat-pin')->name('customer.pin.')->group(function () {
     Route::get('/', [PinController::class, 'create'])->name('create');

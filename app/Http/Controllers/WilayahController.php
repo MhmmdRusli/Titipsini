@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -22,34 +21,22 @@ class WilayahController extends Controller
     }
 
     /**
-     * GET /api/wilayah/cities?province_id=ID
+     * GET /api/wilayah/regencies/{provinceId}
      */
-    public function cities(Request $request): JsonResponse
+    public function regencies(string $provinceId): JsonResponse
     {
-        $request->validate([
-            'province_id' => ['required'],
-        ]);
-
-        $provinceId = $request->query('province_id');
-
         return response()->json(
             $this->fetch("regencies/{$provinceId}.json")
         );
     }
 
     /**
-     * GET /api/wilayah/districts?city_id=ID
+     * GET /api/wilayah/districts/{regencyId}
      */
-    public function districts(Request $request): JsonResponse
+    public function districts(string $regencyId): JsonResponse
     {
-        $request->validate([
-            'city_id' => ['required'],
-        ]);
-
-        $cityId = $request->query('city_id');
-
         return response()->json(
-            $this->fetch("districts/{$cityId}.json")
+            $this->fetch("districts/{$regencyId}.json")
         );
     }
 
