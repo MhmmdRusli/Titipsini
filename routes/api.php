@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\InternalAuthController;
+use App\Http\Controllers\Customer\CityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,3 +27,5 @@ Route::prefix('internal')->group(function () {
         })->middleware('role:finance,super_admin');
     });
 });
+
+Route::get('/cities', [CityController::class, 'search']);

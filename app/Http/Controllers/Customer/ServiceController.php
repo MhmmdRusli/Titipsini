@@ -7,6 +7,7 @@ use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\Service;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -142,11 +143,15 @@ class ServiceController extends Controller
     /**
      * GET /app/services?kategori=kendaraan&jenis=mobil&search=Yogyakarta
      */
-    public function index(Request $request): Response
+    public function index(Request $request): Response|RedirectResponse
     {
         $kategori = $request->string('kategori')->toString();
         $jenis = $request->string('jenis')->toString();
         $search = $request->string('search')->toString();
+
+        if ($kategori === 'kendaraan') {
+            return redirect()->route('customer.services.kendaraan.form');
+        }
 
         $services = Service::query()
             ->where('is_active', true)
@@ -373,18 +378,42 @@ class ServiceController extends Controller
      */
     public function formKendaraan(Request $request)
     {
+        return Inertia::render('Customer/Services/Kendaraan/Landing', [
+            'detectedKota' => 'Yogyakarta',
+        ]);
+    }
+
+    public function detailKendaraan(Service $service)
+    {
+        abort_unless($service->kategori === 'kendaraan' && $service->is_active, 404);
+
+        return Inertia::render('Customer/Services/Kendaraan/Detail', [
+            'mitra' => $this->formatMitraKendaraan($service),
+        ]);
+    }
+
+    public function formPesanKendaraan(Request $request)
+    {
         $jenisKendaraan = collect(self::JENIS_KENDARAAN)
             ->map(fn ($tier, $key) => [
                 'value' => $key,
                 'label' => $tier['label'],
                 'hargaPerHari' => $tier['harga_per_hari'],
-            ])
-            ->values();
+            ])->values();
 
         return Inertia::render('Customer/Services/Kendaraan/Form', [
             'serviceId' => $request->query('service_id'),
             'jenisKendaraanOptions' => $jenisKendaraan,
             'persenBiayaLayanan' => self::PERSEN_BIAYA_LAYANAN,
+        ]);
+    }
+
+    public function pesanKendaraan(Service $service)
+    {
+        abort_unless($service->kategori === 'kendaraan' && $service->is_active, 404);
+
+        return redirect()->route('customer.services.kendaraan.form.pesan', [
+            'service_id' => $service->id,
         ]);
     }
 
@@ -651,18 +680,44 @@ class ServiceController extends Controller
 
         return redirect()->route('customer.orders.success', $order->id);
     }
-    public function search(Request $request, string $kategori)
-{
-    return Inertia::render('Customer/Services/Search', [
-        'kategori' => $kategori,
-        'detectedKota' => $this->detectKotaFromIp($request), // atau null dulu
-        'filters' => $request->only(['kota', 'search']),
-        'mitras' => $request->filled('kota')
-            ? Mitra::query()
-                ->where('kota', $request->kota)
-                ->when($request->search, fn($q) => $q->where('nama', 'like', "%{$request->search}%"))
-                ->paginate(10)
-            : null,
-    ]);
-}
+    public function search(Request $request, string $kategori = 'kendaraan')
+    {
+        $services = Service::query()
+            ->where('kategori', $kategori)
+            ->where('is_active', true)
+            ->when($request->filled('kota'), fn ($query) => $query->where('kota', $request->string('kota')))
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                        ->orWhere('kota', 'like', "%{$search}%")
+                        ->orWhere('kecamatan', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->through(fn ($service) => $this->formatMitraKendaraan($service));
+
+        return Inertia::render('Customer/Services/Search', [
+            'kategori' => $kategori,
+            'detectedKota' => 'Yogyakarta',
+            'openCityPicker' => $request->boolean('pilih_kota'),
+            'filters' => $request->only(['kota', 'search']),
+            'mitras' => $request->filled('kota') ? $services : null,
+        ]);
+    }
+
+    protected function formatMitraKendaraan(Service $service): array
+    {
+        return [
+            'id' => $service->id,
+            'nama' => $service->nama,
+            'alamat' => $service->alamat_lengkap ?: $service->kecamatan,
+            'kota' => $service->kota,
+            'kecamatan' => $service->kecamatan,
+            'jam_buka' => $service->jam_buka ? Carbon::parse($service->jam_buka)->format('H.i') : '08.00',
+            'jam_tutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
+            'is_buka' => (bool) $service->is_active,
+        ];
+    }
 }

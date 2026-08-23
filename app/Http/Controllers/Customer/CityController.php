@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
-use App\Models\Mitra;
+use App\Http\Controllers\Controller;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class CityController extends Controller
@@ -11,8 +12,10 @@ class CityController extends Controller
     {
         $search = $request->input('search', '');
 
-        return Mitra::query()
-            ->select('kota', 'provinsi')
+        return Service::query()
+            ->where('kategori', 'kendaraan')
+            ->where('is_active', true)
+            ->select('kota')
             ->when($search, fn ($q) => $q->where('kota', 'like', "%{$search}%"))
             ->distinct()
             ->orderBy('kota')
@@ -20,7 +23,7 @@ class CityController extends Controller
             ->get()
             ->map(fn ($row) => [
                 'nama' => $row->kota,
-                'provinsi' => $row->provinsi,
+                'provinsi' => null,
             ]);
     }
 }

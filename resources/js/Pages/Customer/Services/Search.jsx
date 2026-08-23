@@ -24,7 +24,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const LOCAL_STORAGE_KEY = 'titipsini:last_kota';
 
-export default function Search({ kategori = 'barang', detectedKota = null, filters = {}, mitras = null }) {
+export default function Search({ kategori = 'barang', detectedKota = null, openCityPicker = false, filters = {}, mitras = null }) {
     const [search, setSearch] = useState(filters?.search ?? '');
     const [kota, setKota] = useState(filters?.kota ?? null);
 
@@ -48,7 +48,9 @@ export default function Search({ kategori = 'barang', detectedKota = null, filte
             return;
         }
 
-        if (detectedKota) {
+        if (openCityPicker) {
+            setSheet('picker');
+        } else if (detectedKota) {
             setSheet('confirm');
         } else {
             // No guess available at all — send straight to the picker instead of
@@ -56,7 +58,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, filte
             setSheet('picker');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [openCityPicker]);
 
     function fetchMitras(nextKota, nextSearch) {
         router.get(
@@ -184,7 +186,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, filte
                                         Titip Disini
                                     </button>
                                     <Link
-                                        href={`/app/services/${kategori}/${m.id}`}
+                                        href={`/app/services/${kategori}/${m.id}/detail`}
                                         className="flex-1 rounded-lg border border-[#15803d] py-2 text-center text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
                                     >
                                         Detail Mitra
