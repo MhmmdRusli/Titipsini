@@ -38,6 +38,7 @@ export default function KategoriLayananView({
     layanan = [],
     daftarKota = [],
     menungguVerifikasi = false,
+    fiturPenuhAktif = false,
     FormKustom = null,
 }) {
     const [tahap, setTahap] = useState(layanan.length > 0 ? 'hub' : 'kosong');
@@ -195,12 +196,14 @@ export default function KategoriLayananView({
 
                 {tahap === 'hub' && (
                     <TahapHub
+                        kategori={kategori}
                         judulHub={judulHub}
                         subheading={subheading}
                         labelBox={labelBox}
                         labelTambah={labelTambah}
                         layanan={layanan}
                         menungguVerifikasi={menungguVerifikasi}
+                        fiturPenuhAktif={fiturPenuhAktif}
                         modeDetail={!!FormKustom}
                         onTambah={() => openTambah()}
                         onUbah={(item) => openTambah(item)}
@@ -440,14 +443,23 @@ function TahapSukses({ labelBox, onKembali }) {
     );
 }
 
-function TahapHub({ judulHub, subheading, labelBox, labelTambah, layanan, menungguVerifikasi, modeDetail, onTambah, onUbah, onHapus }) {
-    const [fiturPenuh, setFiturPenuh] = useState(false);
+function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layanan, menungguVerifikasi, fiturPenuhAktif, modeDetail, onTambah, onUbah, onHapus }) {
+    const [fiturPenuh, setFiturPenuh] = useState(fiturPenuhAktif);
     const [showPerhatian, setShowPerhatian] = useState(false);
+    const [savingFitur, setSavingFitur] = useState(false);
 
     function toggleFiturPenuh() {
         const next = !fiturPenuh;
         setFiturPenuh(next);
         if (next) setShowPerhatian(true);
+
+        setSavingFitur(true);
+        router.patch(`/mitra/layanan/${kategori}/fitur-penuh`, { aktif: next }, {
+            preserveScroll: true,
+            preserveState: true,
+            onError: () => setFiturPenuh(!next), // rollback tampilan kalau gagal disimpan
+            onFinish: () => setSavingFitur(false),
+        });
     }
 
     return (
@@ -474,19 +486,18 @@ function TahapHub({ judulHub, subheading, labelBox, labelTambah, layanan, menung
             <button
                 type="button"
                 onClick={toggleFiturPenuh}
-                className={`mt-2 flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    fiturPenuh
+                disabled={savingFitur}
+                className={`mt-2 flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${fiturPenuh
                         ? 'border-green-600 bg-green-600 text-white'
                         : 'border-gray-300 bg-gray-100 text-gray-500'
-                }`}
+                    }`}
             >
                 <span
                     className={`h-4 w-7 shrink-0 rounded-full transition-colors ${fiturPenuh ? 'bg-white/30' : 'bg-gray-300'}`}
                 >
                     <span
-                        className={`block h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                            fiturPenuh ? 'translate-x-3' : 'translate-x-0'
-                        }`}
+                        className={`block h-4 w-4 rounded-full bg-white shadow transition-transform ${fiturPenuh ? 'translate-x-3' : 'translate-x-0'
+                            }`}
                     />
                 </span>
                 {fiturPenuh ? 'Aktifkan' : 'Nonaktifkan'}

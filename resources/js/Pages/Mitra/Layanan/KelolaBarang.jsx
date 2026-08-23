@@ -14,7 +14,7 @@ function IlustrasiBarang() {
     );
 }
 
-export default function KelolaBarang({ layanan = [], daftarKota = [], menungguVerifikasi = false }) {
+export default function KelolaBarang({ layanan = [], daftarKota = [], menungguVerifikasi = false, fiturPenuhAktif = false }) {
     return (
         <>
             <Head title="Kelola Gudang" />
@@ -32,6 +32,7 @@ export default function KelolaBarang({ layanan = [], daftarKota = [], menungguVe
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
                 FormKustom={FormIdentitasGudang}
+                fiturPenuhAktif={fiturPenuhAktif}
             />
         </>
     );

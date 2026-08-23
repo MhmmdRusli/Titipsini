@@ -57,11 +57,32 @@ class ServiceController extends Controller
                 return $item;
             });
 
-        return Inertia::render($halamanPerKategori[$kategori], [
+            return Inertia::render($halamanPerKategori[$kategori], [
             'layanan' => $layanan,
             'daftarKota' => \App\Models\Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
             'menungguVerifikasi' => false,
+            'fiturPenuhAktif' => (bool) (($request->user()->fitur_penuh_kategori ?? [])[$kategori] ?? false),
         ]);
+    }
+
+        /**
+     * PATCH /mitra/layanan/{kategori}/fitur-penuh
+     * Aktif/nonaktifkan fitur "tutup otomatis saat penuh" untuk 1 kategori layanan.
+     */
+    public function toggleFiturPenuh(Request $request, string $kategori): RedirectResponse
+    {
+        abort_unless(in_array($kategori, ['barang', 'kendaraan', 'bangunan', 'pindahan']), 404);
+
+        $validated = $request->validate([
+            'aktif' => ['required', 'boolean'],
+        ]);
+
+        $user = $request->user();
+        $pengaturan = $user->fitur_penuh_kategori ?? [];
+        $pengaturan[$kategori] = $validated['aktif'];
+        $user->update(['fitur_penuh_kategori' => $pengaturan]);
+
+        return back()->with('success', 'Pengaturan fitur berhasil diperbarui.');
     }
 
     /**
