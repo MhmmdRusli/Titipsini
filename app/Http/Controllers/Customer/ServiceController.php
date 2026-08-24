@@ -729,7 +729,7 @@ class ServiceController extends Controller
 
         $this->notifikasiPesananBaru($order);
 
-        return redirect()->route('customer.orders.success', $order->id);
+        return redirect()->route('customer.orders.show', $order->id);
     }
 
     /**

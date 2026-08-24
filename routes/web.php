@@ -382,6 +382,9 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::post('/services/kendaraan', [ServiceController::class, 'simpanKendaraan'])->name('services.kendaraan.store');
     Route::get('/services/kendaraan/{order}/invoice', [ServiceController::class, 'invoiceKendaraan'])->name('services.kendaraan.invoice');
 
+    Route::get('/services/pindahan/{service}/detail', fn (\App\Models\Service $service) => redirect()->route('customer.services.show', $service->id))->name('services.pindahan.detail');
+    Route::get('/services/pindahan/{service}/titip', fn (\App\Models\Service $service) => redirect()->route('customer.services.show', $service->id))->name('services.pindahan.pesan');
+
     Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
     Route::post('/services/{service}/pesan', [ServiceController::class, 'storePesanan'])->name('services.pesan');
     Route::get('/services/{service}/metode-pembayaran', [ServiceController::class, 'metodePembayaranLayanan'])->name('services.metodePembayaranLayanan');
