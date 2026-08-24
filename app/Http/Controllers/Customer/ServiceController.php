@@ -656,7 +656,7 @@ class ServiceController extends Controller
     /**
      * GET /app/services/{service}
      */
-    public function show(Service $service)
+    public function show(Request $request, Service $service)
     {
         if ($service->kategori === 'kendaraan') {
             return redirect()->route('customer.services.kendaraan.form', [
@@ -678,6 +678,12 @@ class ServiceController extends Controller
                 'jenisLabel' => $this->jenisLabel($service),
                 'harga' => (float) $service->harga,
             ],
+            'addresses' => $request->user()
+                ->addresses()
+                ->latest('is_primary')
+                ->latest()
+                ->get(['id', 'name', 'phone', 'address', 'is_primary']),
+            'persenBiayaLayanan' => self::PERSEN_BIAYA_LAYANAN,
         ]);
     }
 
@@ -692,9 +698,12 @@ class ServiceController extends Controller
         $data = $request->validate([
             'tanggalMasuk' => 'required|date',
             'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
+            'address_id' => ['required', 'integer', Rule::exists('addresses', 'id')->where('user_id', $request->user()->id)],
+            'setuju' => ['accepted'],
         ]);
 
-        $customer = auth()->user();
+        $customer = $request->user();
+        $address = $customer->addresses()->findOrFail($data['address_id']);
         $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
         $total = (float) $service->harga * $jumlahHari;
 
@@ -707,6 +716,8 @@ class ServiceController extends Controller
             'start_date' => $data['tanggalMasuk'],
             'end_date' => $data['tanggalKeluar'],
             'is_pickup' => false,
+            'address_id' => $address->id,
+            'pickup_address' => $address->address,
             'city' => $service->kota,
             'status' => 'baru',
             'subtotal' => $total,

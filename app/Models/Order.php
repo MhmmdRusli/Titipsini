@@ -23,6 +23,7 @@ class Order extends Model
         'end_date',
         'duration',
         'is_pickup',
+        'address_id',
         'pickup_status',
         'jam_pickup',
         'foto_barang_url',

@@ -11,6 +11,7 @@ import {
     Loader2,
 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+import GoogleMapAddressPicker from '@/Components/GoogleMapAddressPicker';
 
 // Endpoint API wilayah — sesuaikan dengan route yang tersedia di backend Laravel.
 // GET  /api/wilayah/provinces                      -> [{ id, name }]
@@ -85,6 +86,25 @@ function SelectField({ icon, value, onChange, placeholder, options, disabled, er
     );
 }
 
+function normalizeRegionName(value) {
+    return String(value ?? '')
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]/g, ' ')
+        .replace(/\b(kabupaten|kota|kecamatan|kapanewon|daerah istimewa)\b/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function findRegionOption(options, value) {
+    const target = normalizeRegionName(value);
+    if (!target) return null;
+
+    return options.find((option) => {
+        const name = normalizeRegionName(option.name);
+        return name === target || name.includes(target) || target.includes(name);
+    });
+}
+
 // --- Main Component ---
 export default function AddressForm({ address = null }) {
     const isEdit = Boolean(address);
@@ -105,42 +125,113 @@ export default function AddressForm({ address = null }) {
     const [districts, setDistricts] = useState([]);
     const [loadingCities, setLoadingCities] = useState(false);
     const [loadingDistricts, setLoadingDistricts] = useState(false);
+    const [pendingRegion, setPendingRegion] = useState(null);
 
     // Muat daftar provinsi sekali di awal
     useEffect(() => {
+        const controller = new AbortController();
+
         fetch(REGION_ENDPOINTS.provinces)
-            .then((res) => res.json())
-            .then(setProvinces)
-            .catch(() => setProvinces([]));
+            .then((res) => {
+                if (!res.ok) throw new Error('Gagal memuat provinsi');
+                return res.json();
+            })
+            .then((options) => {
+                if (!controller.signal.aborted) setProvinces(options);
+            })
+            .catch((reason) => {
+                if (reason.name !== 'AbortError') setProvinces([]);
+            });
+
+        return () => controller.abort();
     }, []);
 
     // Muat kabupaten/kota setiap kali provinsi berubah
     useEffect(() => {
+        const controller = new AbortController();
+
         if (!data.province_id) {
             setCities([]);
             return;
         }
         setLoadingCities(true);
-        fetch(REGION_ENDPOINTS.cities(data.province_id))
-            .then((res) => res.json())
-            .then(setCities)
-            .catch(() => setCities([]))
-            .finally(() => setLoadingCities(false));
+        fetch(REGION_ENDPOINTS.cities(data.province_id), { signal: controller.signal })
+            .then((res) => {
+                if (!res.ok) throw new Error('Gagal memuat kabupaten/kota');
+                return res.json();
+            })
+            .then((options) => {
+                if (!controller.signal.aborted) setCities(options);
+            })
+            .catch((reason) => {
+                if (reason.name !== 'AbortError') setCities([]);
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) setLoadingCities(false);
+            });
+
+        return () => controller.abort();
     }, [data.province_id]);
 
     // Muat kecamatan setiap kali kabupaten/kota berubah
     useEffect(() => {
+        const controller = new AbortController();
+
         if (!data.city_id) {
             setDistricts([]);
             return;
         }
         setLoadingDistricts(true);
-        fetch(REGION_ENDPOINTS.districts(data.city_id))
-            .then((res) => res.json())
-            .then(setDistricts)
-            .catch(() => setDistricts([]))
-            .finally(() => setLoadingDistricts(false));
+        fetch(REGION_ENDPOINTS.districts(data.city_id), { signal: controller.signal })
+            .then((res) => {
+                if (!res.ok) throw new Error('Gagal memuat kecamatan');
+                return res.json();
+            })
+            .then((options) => {
+                if (!controller.signal.aborted) setDistricts(options);
+            })
+            .catch((reason) => {
+                if (reason.name !== 'AbortError') setDistricts([]);
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) setLoadingDistricts(false);
+            });
+
+        return () => controller.abort();
     }, [data.city_id]);
+
+    useEffect(() => {
+        if (!pendingRegion?.province || !provinces.length) return;
+
+        const province = findRegionOption(provinces, pendingRegion.province);
+        if (!province) return;
+
+        setData((prev) => ({ ...prev, province_id: province.id, city_id: '', district_id: '' }));
+        setCities([]);
+        setDistricts([]);
+        setPendingRegion((prev) => ({ ...prev, province: '' }));
+    }, [provinces, pendingRegion?.province]);
+
+    useEffect(() => {
+        if (!pendingRegion?.city || pendingRegion.province || !cities.length) return;
+
+        const city = findRegionOption(cities, pendingRegion.city);
+        if (!city) return;
+
+        setData((prev) => ({ ...prev, city_id: city.id, district_id: '' }));
+        setDistricts([]);
+        setPendingRegion((prev) => ({ ...prev, city: '' }));
+    }, [cities, pendingRegion?.city, pendingRegion?.province]);
+
+    useEffect(() => {
+        if (!pendingRegion?.district || pendingRegion.city || !districts.length) return;
+
+        const district = findRegionOption(districts, pendingRegion.district);
+        if (!district) return;
+
+        setData('district_id', district.id);
+        setPendingRegion((prev) => ({ ...prev, district: '' }));
+    }, [districts, pendingRegion?.district, pendingRegion?.city]);
 
     function handleProvinceChange(e) {
         setData((prev) => ({
@@ -157,6 +248,11 @@ export default function AddressForm({ address = null }) {
             city_id: e.target.value,
             district_id: '',
         }));
+    }
+
+    function handleMapAddressSelect({ address, province, city, district }) {
+        setData('address', address);
+        setPendingRegion({ province, city, district });
     }
 
     function submit(e) {
@@ -274,6 +370,7 @@ export default function AddressForm({ address = null }) {
                                     className={`${inputClass} resize-none`}
                                 />
                             </div>
+                            <GoogleMapAddressPicker onAddressSelect={handleMapAddressSelect} />
                             <FieldError message={errors.address} />
                         </div>
 
