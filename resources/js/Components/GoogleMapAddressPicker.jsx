@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Loader2, MapPinned } from 'lucide-react';
+import { Crosshair, Loader2, MapPinned } from 'lucide-react';
 
 let googleMapsPromise;
 const GOOGLE_MAPS_CALLBACK = '__titipsiniGoogleMapsReady';
@@ -51,17 +51,24 @@ async function reverseGeocodeFallback(lat, lng) {
     return {
         address: result.display_name,
         province: result.address?.state ?? '',
-        city: result.address?.city ?? result.address?.town ?? result.address?.county ?? '',
+        city: result.address?.city
+            ?? result.address?.county
+            ?? result.address?.municipality
+            ?? result.address?.town
+            ?? '',
         district: result.address?.city_district
             ?? result.address?.district
             ?? result.address?.suburb
             ?? result.address?.village
+            ?? (result.address?.county && result.address?.town ? result.address.town : '')
             ?? '',
     };
 }
 
 export default function GoogleMapAddressPicker({ onAddressSelect }) {
     const mapElement = useRef(null);
+    const mapInstance = useRef(null);
+    const geocoderInstance = useRef(null);
     const marker = useRef(null);
     const onAddressSelectRef = useRef(onAddressSelect);
     const [loading, setLoading] = useState(true);
@@ -69,6 +76,86 @@ export default function GoogleMapAddressPicker({ onAddressSelect }) {
     const [error, setError] = useState('');
 
     onAddressSelectRef.current = onAddressSelect;
+
+    function selectLocation(lat, lng) {
+        const maps = window.google?.maps;
+        if (!maps || !mapInstance.current || !geocoderInstance.current) return;
+
+        setPicking(true);
+        const position = new maps.LatLng(lat, lng);
+        mapInstance.current.panTo(position);
+        mapInstance.current.setZoom(17);
+        geocoderInstance.current.geocode({ location: position }, async (results, status) => {
+            let selectedAddress;
+            if (status === 'OK' && results?.[0]) {
+                const result = results[0];
+                selectedAddress = {
+                    address: result.formatted_address,
+                    province: getComponent(result, 'administrative_area_level_1'),
+                    city: getFirstComponent(result, [
+                        'administrative_area_level_2',
+                        'locality',
+                    ]),
+                    district: getFirstComponent(result, [
+                        'administrative_area_level_3',
+                        'administrative_area_level_4',
+                        'sublocality_level_1',
+                        'sublocality',
+                    ]),
+                };
+
+                if (!selectedAddress.province || !selectedAddress.city || !selectedAddress.district) {
+                    try {
+                        const fallback = await reverseGeocodeFallback(lat, lng);
+                        selectedAddress = {
+                            address: selectedAddress.address || fallback.address,
+                            province: selectedAddress.province || fallback.province,
+                            city: selectedAddress.city || fallback.city,
+                            district: selectedAddress.district || fallback.district,
+                        };
+                    } catch {
+                        // Google address remains usable even if the fallback is unavailable.
+                    }
+                }
+            } else {
+                try {
+                    selectedAddress = await reverseGeocodeFallback(lat, lng);
+                } catch (reason) {
+                    setError(`${reason.message} Cek izin lokasi dan koneksi internet.`);
+                    setPicking(false);
+                    return;
+                }
+            }
+
+            marker.current?.setMap(null);
+            marker.current = new maps.Marker({
+                map: mapInstance.current,
+                position,
+                title: 'Lokasi saya',
+            });
+            onAddressSelectRef.current(selectedAddress);
+            setError('');
+            setPicking(false);
+        });
+    }
+
+    function useCurrentLocation() {
+        if (!navigator.geolocation) {
+            setError('Browser ini tidak mendukung GPS.');
+            return;
+        }
+
+        setError('');
+        setPicking(true);
+        navigator.geolocation.getCurrentPosition(
+            ({ coords }) => selectLocation(coords.latitude, coords.longitude),
+            () => {
+                setError('Lokasi tidak bisa diakses. Izinkan GPS pada browser, lalu coba lagi.');
+                setPicking(false);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+        );
+    }
 
     useEffect(() => {
         let cancelled = false;
@@ -85,44 +172,11 @@ export default function GoogleMapAddressPicker({ onAddressSelect }) {
                     fullscreenControl: false,
                 });
                 const geocoder = new maps.Geocoder();
+                mapInstance.current = map;
+                geocoderInstance.current = geocoder;
 
                 map.addListener('click', ({ latLng }) => {
-                    setPicking(true);
-                    geocoder.geocode({ location: latLng }, async (results, status) => {
-                        let selectedAddress;
-                        if (status === 'OK' && results?.[0]) {
-                            const result = results[0];
-                            selectedAddress = {
-                                address: result.formatted_address,
-                                province: getComponent(result, 'administrative_area_level_1'),
-                                city: getComponent(result, 'administrative_area_level_2'),
-                                district: getFirstComponent(result, [
-                                    'administrative_area_level_3',
-                                    'administrative_area_level_4',
-                                    'sublocality_level_1',
-                                    'sublocality',
-                                ]),
-                            };
-                        } else {
-                            try {
-                                selectedAddress = await reverseGeocodeFallback(latLng.lat(), latLng.lng());
-                            } catch (reason) {
-                                setError(`${reason.message} Cek Billing dan Geocoding API Google Cloud jika ingin memakai pencarian Google.`);
-                                setPicking(false);
-                                return;
-                            }
-                        }
-
-                        marker.current?.setMap(null);
-                        marker.current = new maps.Marker({
-                            map,
-                            position: latLng,
-                            title: 'Lokasi alamat',
-                        });
-                        onAddressSelectRef.current(selectedAddress);
-                        setError('');
-                        setPicking(false);
-                    });
+                    selectLocation(latLng.lat(), latLng.lng());
                 });
                 setLoading(false);
             })
@@ -136,6 +190,8 @@ export default function GoogleMapAddressPicker({ onAddressSelect }) {
         return () => {
             cancelled = true;
             marker.current?.setMap(null);
+            mapInstance.current = null;
+            geocoderInstance.current = null;
         };
     }, []);
 
@@ -143,6 +199,15 @@ export default function GoogleMapAddressPicker({ onAddressSelect }) {
         <div className="mt-3 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700">
             <div className="relative h-64 bg-slate-100 dark:bg-gray-800">
                 <div ref={mapElement} className="h-full w-full" />
+                <button
+                    type="button"
+                    onClick={useCurrentLocation}
+                    disabled={loading || picking}
+                    className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-bold text-gray-700 shadow-md transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
+                >
+                    <Crosshair size={15} className="text-[#008736]" />
+                    Gunakan lokasi saya
+                </button>
                 {loading && (
                     <div className="absolute inset-0 flex items-center justify-center gap-2 bg-slate-100 text-xs font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-300">
                         <Loader2 size={16} className="animate-spin" /> Memuat peta...
