@@ -106,7 +106,7 @@ export default function Invoice({ order }) {
                             <Row label="Durasi Waktu" value={formatDurasi(order.durasiHari)} />
                             <Row label="Layanan Pick Up" value={order.isPickup ? 'Ya' : 'Tidak'} />
                             {order.isPickup && <Row label="Jam Pick Up" value={order.jamPickup ? `${order.jamPickup} WIB` : '-'} />}
-                            <Row label="Ukuran Barang" value={order.ukuranBarangLabel} />
+                            <Row label="Ukuran" value={order.ukuranBarangLabel} />
                         </div>
                     </div>
 

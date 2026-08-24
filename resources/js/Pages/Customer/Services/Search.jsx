@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
-import { Search as SearchIcon, MapPin, X, Clock, PackageX, ChevronLeft } from 'lucide-react';
+import { Search as SearchIcon, MapPin, X, Clock, PackageX, Package, Car, Building2, Truck, ChevronLeft } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 /**
@@ -23,6 +23,13 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
  */
 
 const LOCAL_STORAGE_KEY = 'titipsini:last_kota';
+
+const CATEGORY_ICON = {
+    barang: Package,
+    kendaraan: Car,
+    bangunan: Building2,
+    pindahan: Truck,
+};
 
 export default function Search({ kategori = 'barang', detectedKota = null, openCityPicker = false, filters = {}, mitras = null }) {
     const [search, setSearch] = useState(filters?.search ?? '');
@@ -121,6 +128,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
     }, [cityResults]);
 
     const hasNoResults = kota && mitras && mitras.data.length === 0;
+    const CategoryIcon = CATEGORY_ICON[kategori] ?? Package;
 
     return (
         <CustomerLayout title="Pencarian" backHref="/app/dashboard">
@@ -161,8 +169,13 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                         : 'border-gray-100 bg-gray-50 opacity-60 dark:border-gray-800 dark:bg-gray-900'
                                 }`}
                             >
-                                <div className="flex items-start justify-between">
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{m.nama}</p>
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex min-w-0 items-center gap-2">
+                                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-green-400">
+                                            <CategoryIcon size={15} />
+                                        </span>
+                                        <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{m.nama}</p>
+                                    </div>
                                     {!m.is_buka && (
                                         <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-500 dark:bg-red-950/40 dark:text-red-400">
                                             Tutup

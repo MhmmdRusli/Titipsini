@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
-    ShieldCheck, Truck, XCircle, X, Clock, AlertTriangle,
+    ShieldCheck, Truck, Car, Building2, Package, XCircle, X, Clock, AlertTriangle,
     QrCode, WalletMinimal, Upload, CheckCircle2, ArrowLeft, FileText,
 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
@@ -40,6 +40,14 @@ const SERVICE_LABEL = {
     kendaraan: 'Titip Kendaraan',
     bangunan: 'Sewa Bangunan',
     pindahan: 'Jasa Pindahan',
+};
+
+const UKURAN_BARANG_LABEL = {
+    kecil: 'S',
+    besar: 'M',
+    kamar_kecil: 'L',
+    kamar_besar: 'XL',
+    ekstra_besar: 'XXL',
 };
 
 function formatRupiah(value) {
@@ -170,6 +178,30 @@ export default function OrderShow({ order, qris_url }) {
     const paymentReceiptUrl = order.payment_receipt_url ?? (order.payment_receipt
         ? `/storage/${order.payment_receipt.replace(/^\/?storage\//, '')}`
         : null);
+    const ukuranDetail = order.service_type === 'barang'
+        ? UKURAN_BARANG_LABEL[order.ukuran_barang] ?? order.ukuran_barang
+        : order.service_type === 'bangunan' && order.ukuran_panjang && order.ukuran_lebar
+            ? `${order.ukuran_panjang} x ${order.ukuran_lebar} m`
+            : order.ukuran_barang;
+    const ukuranLabel = order.service_type === 'barang'
+        ? 'Ukuran'
+        : order.service_type === 'bangunan'
+            ? 'Ukuran Bangunan'
+            : 'Jenis Kendaraan';
+    const ServiceIcon = order.service_type === 'barang'
+        ? Package
+        : order.service_type === 'kendaraan'
+            ? Car
+            : order.service_type === 'bangunan'
+                ? Building2
+                : Truck;
+    const itemLabel = order.service_type === 'barang'
+        ? 'Barang'
+        : order.service_type === 'kendaraan'
+            ? 'Merek Kendaraan'
+            : order.service_type === 'bangunan'
+                ? 'Nama Bangunan'
+                : 'Layanan Pindahan';
 
     return (
         <CustomerLayout>
@@ -193,7 +225,7 @@ export default function OrderShow({ order, qris_url }) {
                     <div className="flex items-center justify-between gap-3 bg-[#15803d] px-5 py-4 dark:bg-[#0f5c2c]">
                         <div className="flex items-center gap-2">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15">
-                                <ShieldCheck size={18} className="text-white" />
+                                <ServiceIcon size={18} className="text-white" />
                             </div>
                             <div>
                                 <p className="text-sm font-extrabold leading-tight text-white">Titipsini&nbsp;•&nbsp;Com</p>
@@ -238,8 +270,9 @@ export default function OrderShow({ order, qris_url }) {
                         {/* Detail Pesanan */}
                         <div className="space-y-2">
                             <SectionTitle>Detail Pesanan</SectionTitle>
-                            <InfoRow label="Barang" value={namaBarang} />
+                            <InfoRow label={itemLabel} value={namaBarang} />
                             <InfoRow label="Layanan" value={SERVICE_LABEL[order.service_type] ?? order.service_type} />
+                            <InfoRow label={ukuranLabel} value={ukuranDetail} />
                             <InfoRow label="Tanggal Masuk" value={formatTanggalPendek(order.start_date)} />
                             <InfoRow label="Tanggal Keluar" value={formatTanggalPendek(order.end_date)} />
                             <InfoRow label="Durasi Waktu" value={durasi} />

@@ -94,6 +94,10 @@ export default function InvoiceBangunan({ order }) {
                         <div className="mt-1.5">
                             <Row label="Nama Bangunan" value={order.namaBangunan} />
                             <Row label="Jenis Bangunan" value={order.jenisBangunanLabel} />
+                            <Row
+                                label="Ukuran Bangunan"
+                                value={order.ukuranPanjang && order.ukuranLebar ? `${order.ukuranPanjang} x ${order.ukuranLebar} m` : null}
+                            />
                             <Row label="Jumlah Bangunan" value={order.jumlahBangunan} />
                             <Row label="Keterangan" value={order.keterangan} />
                             <Row label="Tanggal Masuk" value={order.tanggalMasuk} />
