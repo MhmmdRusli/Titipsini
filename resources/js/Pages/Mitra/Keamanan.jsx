@@ -1,12 +1,13 @@
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import { ChevronLeft, Eye, EyeOff, Lock, KeyRound } from 'lucide-react';
+import { ChevronRight, Eye, EyeOff, Lock, KeyRound } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 export default function Keamanan() {
     const [showOld, setShowOld] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [activeSection, setActiveSection] = useState(null);
 
     // Ganti password (form yang sudah ada, tidak diubah)
     const { data, setData, put, processing, errors, reset } = useForm({
@@ -64,15 +65,34 @@ export default function Keamanan() {
             <Head title="Keamanan" />
 
             <div className="px-4 py-3 space-y-4">
-                <Link
-                    href="/mitra/profil"
-                    className="mb-1 inline-flex items-center gap-1 text-sm font-medium text-gray-600"
-                >
-                    <ChevronLeft size={18} />
-                    Kembali
-                </Link>
+                {!activeSection && (
+                    <div className="space-y-2">
+                        <button
+                            type="button"
+                            onClick={() => setActiveSection('password')}
+                            className="flex w-full items-center justify-between rounded-xl border border-gray-100 bg-[#f1f5fd] px-4 py-4 text-left shadow-sm transition hover:bg-[#eaf0fb]"
+                        >
+                            <span className="flex items-center gap-3 text-base font-semibold text-slate-500">
+                                <Lock size={21} className="text-slate-500" />
+                                Ubah Kata Sandi
+                            </span>
+                            <ChevronRight size={22} className="text-slate-500" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveSection('pin')}
+                            className="flex w-full items-center justify-between rounded-xl border border-gray-100 bg-[#f1f5fd] px-4 py-4 text-left shadow-sm transition hover:bg-[#eaf0fb]"
+                        >
+                            <span className="flex items-center gap-3 text-base font-semibold text-slate-500">
+                                <KeyRound size={21} className="text-slate-500" />
+                                Ubah PIN
+                            </span>
+                            <ChevronRight size={22} className="text-slate-500" />
+                        </button>
+                    </div>
+                )}
 
-                {/* Ganti Kata Sandi — tidak diubah */}
+                {activeSection === 'password' && (
                 <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
                     <h2 className="text-sm font-semibold text-gray-900">Ubah Kata Sandi</h2>
                     <p className="mt-1 text-xs text-gray-500">
@@ -122,8 +142,10 @@ export default function Keamanan() {
                         </button>
                     </form>
                 </div>
+                )}
 
                 {/* PIN Keamanan — baru */}
+                {activeSection === 'pin' && (
                 <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div>
@@ -213,6 +235,7 @@ export default function Keamanan() {
                         </form>
                     )}
                 </div>
+                )}
             </div>
         </MitraLayout>
     );
