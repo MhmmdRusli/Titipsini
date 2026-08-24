@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { ChevronLeft, Delete, Plus, Pencil, X, CheckCircle2 } from 'lucide-react';
+import MitraLayout from '@/Layouts/MitraLayout';
 
 const PRESETS = [100000, 150000, 300000, 250000, 500000, 1000000];
 const PIN_LENGTH = 6;
@@ -197,9 +198,9 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
     // =========================================================================
     if (step === 'pin') {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-gray-100">
+            <MitraLayout title="Verifikasi PIN">
                 <Head title="Verifikasi PIN" />
-                <div className="relative flex h-[812px] w-[375px] flex-col justify-between overflow-hidden bg-white px-5 py-4 shadow-xl">
+                <div className="flex min-h-full flex-col justify-between bg-white px-5 py-4">
                     
                     {/* Header */}
                     <div>
@@ -279,7 +280,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                         </div>
                     </div>
                 </div>
-            </div>
+            </MitraLayout>
         );
     }
 
@@ -287,22 +288,11 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
     // STEP 1: FORM PENARIKAN
     // =========================================================================
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-100">
+        <MitraLayout title="Penarikan">
             <Head title="Penarikan" />
-            <div className="relative flex h-[812px] w-[375px] flex-col justify-between overflow-hidden bg-white px-5 py-4 shadow-xl">
+            <div className="relative flex min-h-full flex-col justify-between bg-white px-5 py-4">
                 
-                <div className="overflow-y-auto max-h-[700px] pr-1">
-                    {/* Header Navigasi */}
-                    <div className="relative flex items-center justify-center border-b border-gray-100 pb-3">
-                        <Link 
-                            href={typeof route !== 'undefined' ? route('mitra.dashboard') : '/mitra/dashboard'} 
-                            className="absolute left-0 text-gray-600"
-                        >
-                            <ChevronLeft size={20} />
-                        </Link>
-                        <h1 className="text-xs font-bold text-gray-800">Penarikan</h1>
-                    </div>
-
+                <div className="overflow-y-auto pr-1">
                     {/* Card Saldo Aktif */}
                     <div className="mt-4 rounded-xl border border-gray-100 bg-white p-3 shadow-xs">
                         <p className="text-[10px] text-gray-400">Total Saldo Aktif <span className="text-[8px]">▼</span></p>
@@ -518,6 +508,6 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                 )}
 
             </div>
-        </div>
+        </MitraLayout>
     );
 }

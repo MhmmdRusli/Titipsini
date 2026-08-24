@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, Package, Car, Building2, Truck, Wallet } from 'lucide-react';
+import { Package, Car, Building2, Truck, Wallet } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 const SERVICE_ICON = {
@@ -26,11 +26,6 @@ export default function Riwayat({ riwayat, totalPendapatan = 0 }) {
             <Head title="Riwayat Pendapatan" />
 
             <div className="px-4 py-4">
-                <button type="button" onClick={() => window.history.back()} className="mb-3 flex items-center gap-1 text-sm text-gray-500 hover:text-green-700">
-                    <ChevronLeft size={16} />
-                    Riwayat Pendapatan
-                </button>
-
                 {/* Ringkasan total */}
                 <div className="rounded-2xl bg-green-600 p-4 text-white shadow-sm">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-white/80">
