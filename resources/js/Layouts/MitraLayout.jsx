@@ -65,6 +65,7 @@ export default function MitraLayout({ children, title }) {
         .find(([pagePath]) => pathname === pagePath || pathname.startsWith(`${pagePath}/`))?.[1];
     const isDashboard = pathname === '/mitra/dashboard';
     const hideBackButton = ['/mitra/pesanan', '/mitra/notifikasi', '/mitra/profil'].includes(pathname);
+    const centerNavbarTitle = ['/mitra/pesanan', '/mitra/notifikasi', '/mitra/profil'].includes(pathname);
     const navbarTitle = title || (isDashboard ? 'Titipsini.com' : matchedTitle || 'Mitra');
 
     useEffect(() => {
@@ -80,7 +81,7 @@ export default function MitraLayout({ children, title }) {
             <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-gray-50 sm:h-[850px] sm:shadow-xl">
                 <header className="z-10 shrink-0 border-b border-gray-200 bg-white">
                     <div
-                        className="flex items-center px-4 pb-3"
+                        className="flex min-h-14 items-center px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
                     >
                         {!isDashboard && !hideBackButton && (
@@ -93,7 +94,10 @@ export default function MitraLayout({ children, title }) {
                                 <ArrowLeft size={20} />
                             </button>
                         )}
-                        <Link href="/mitra/dashboard" className="flex items-center gap-1.5">
+                        <Link
+                            href="/mitra/dashboard"
+                            className={`flex items-center gap-1.5 ${centerNavbarTitle ? 'absolute left-1/2 -translate-x-1/2' : ''}`}
+                        >
                             {isDashboard ? (
                                 <>
                                     <img
