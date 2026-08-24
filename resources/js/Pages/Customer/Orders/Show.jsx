@@ -232,7 +232,7 @@ export default function OrderShow({ order, qris_url }) {
                             <SectionTitle>Untuk</SectionTitle>
                             <InfoRow label="Customer" value={order.customer?.name ?? '-'} />
                             <InfoRow label="Nomor Telepon" value={order.customer?.phone ?? '-'} />
-                            <InfoRow label="Alamat Lengkap" value={order.pickup_address ?? '-'} />
+                            <InfoRow label="Alamat Lengkap" value={order.alamat_lengkap ?? '-'} />
                         </div>
 
                         {/* Detail Pesanan */}

@@ -5,7 +5,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const CATEGORIES = [
     { key: 'barang', label: 'Barang', icon: Package, href: '/app/services?kategori=barang' },
-    { key: 'bangunan', label: 'Bangunan', icon: Building2, href: '/app/services?kategori=bangunan' },
+    { key: 'bangunan', label: 'Bangunan', icon: Building2, href: '/app/services/bangunan' },
     { key: 'kendaraan', label: 'Kendaraan', icon: Car, href: '/app/services/kendaraan' },
     { key: 'pindahan', label: 'Pindahan', icon: Truck, href: '/app/services?kategori=pindahan' },
 ];

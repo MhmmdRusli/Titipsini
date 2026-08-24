@@ -65,6 +65,9 @@ function hrefForService(service) {
     if (service.kategori === 'kendaraan') {
         return `/app/services/kendaraan?service_id=${service.id}`;
     }
+    if (service.kategori === 'bangunan') {
+        return `/app/services/bangunan/search?kota=${encodeURIComponent(service.kota)}`;
+    }
     return `/app/services/${service.id}`;
 }
 

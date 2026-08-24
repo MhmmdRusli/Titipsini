@@ -59,7 +59,12 @@ class OrderController extends Controller
         $order->load([
             'partner:id,name,phone',
             'customer:id,name,phone',
+            'customer.addresses:id,user_id,address,is_primary',
         ]);
+
+        $alamatUtama = $order->customer->addresses->firstWhere('is_primary', true)
+            ?? $order->customer->addresses->first();
+        $order->alamat_lengkap = $order->pickup_address ?: $alamatUtama?->address;
 
         $setting = PaymentSetting::current();
         $qrisUrl = ($setting && $setting->qris_image) ? Storage::url($setting->qris_image) : null;

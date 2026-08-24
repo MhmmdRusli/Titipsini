@@ -44,7 +44,7 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
                             Pilih kota : <span className="font-bold">{detectedKota}</span>
                         </p>
                         <div className="mt-7 grid grid-cols-3 gap-2">
-                            <Link href="/app/services/kendaraan/search?pilih_kota=1" className="rounded-xl border border-[#15803d] py-3 text-center text-xs font-bold text-[#15803d] dark:border-green-400 dark:text-green-400">
+                            <Link href="/app/services/kendaraan/search" className="rounded-xl border border-[#15803d] py-3 text-center text-xs font-bold text-[#15803d] dark:border-green-400 dark:text-green-400">
                                 KOTA LAIN
                             </Link>
                             <button type="button" onClick={() => setOpen(false)} className="rounded-xl border border-gray-200 py-3 text-xs font-bold text-gray-500 dark:border-gray-700">
