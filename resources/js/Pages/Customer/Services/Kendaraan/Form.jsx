@@ -81,22 +81,20 @@ export default function FormKendaraan({ serviceId, jenisKendaraanOptions = [], p
         <CustomerLayout title="Form Penitipan Kendaraan" backHref="/app/services/barang/paket-pilihan">
             <Head title="Form Penitipan Kendaraan" />
 
-            <div className="px-4 py-3">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500 to-green-600 dark:from-green-700 dark:to-green-900 p-5 text-white shadow-md">
-                    <div className="absolute right-4 top-4 rounded-xl bg-white/15 p-2">
-                        <Car size={20} />
+             <div className="px-4 py-6">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#15803d] to-emerald-600 p-5 text-white">
+                    <div className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/15">
+                        <Car size={22} />
                     </div>
-
-                    <p className="text-lg font-extrabold leading-none">Our Best Service</p>
-
-                    <ul className="mt-4 space-y-1.5">
-                        {BENEFITS.map((benefit) => (
-                            <li key={benefit} className="flex items-center gap-2 text-xs text-white/90">
-                                <ShieldCheck size={14} className="shrink-0 text-white" />
-                                {benefit}
-                            </li>
+                    <h1 className="text-xl font-extrabold">Our Best Service</h1>
+                    <div className="mt-3 space-y-2">
+                        {BENEFITS.map((feature) => (
+                            <div key={feature} className="flex items-center gap-2 text-sm text-white/90">
+                                <ShieldCheck size={16} className="shrink-0" />
+                                <span>{feature}</span>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="mt-6 space-y-5">

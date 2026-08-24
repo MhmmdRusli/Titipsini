@@ -153,6 +153,10 @@ class ServiceController extends Controller
             return redirect()->route('customer.services.kendaraan.form');
         }
 
+        if ($kategori === 'bangunan') {
+            return redirect()->route('customer.services.bangunan.form');
+        }
+
         $services = Service::query()
             ->where('is_active', true)
             ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
@@ -223,6 +227,99 @@ class ServiceController extends Controller
             'biayaPickup' => self::BIAYA_PICKUP,
             'persenBiayaLayanan' => self::PERSEN_BIAYA_LAYANAN,
         ]);
+    }
+
+    public function formBangunan()
+    {
+        return Inertia::render('Customer/Services/Bangunan/Landing', [
+            'detectedKota' => 'Yogyakarta',
+        ]);
+    }
+
+    public function formPesanBangunan(Request $request)
+    {
+        $service = $request->filled('service_id')
+            ? Service::where('kategori', 'bangunan')->whereKey($request->service_id)->firstOrFail()
+            : null;
+
+        return Inertia::render('Customer/Services/Bangunan/Form', [
+            'service' => $service?->only(['id', 'nama', 'harga', 'jenis_bangunan']),
+            'buildingOptions' => collect(['rumah', 'apartemen', 'kosan', 'gudang', 'kamar'])
+                ->map(fn ($value) => ['value' => $value, 'label' => ucfirst($value)])->values(),
+            'addresses' => $request->user()->addresses()->latest('is_primary')->latest()->get(['id', 'address', 'is_primary']),
+        ]);
+    }
+
+    public function simpanBangunan(Request $request)
+    {
+        $data = $request->validate([
+            'service_id' => 'required|integer|exists:services,id',
+            'namaBangunan' => 'required|string|max:255',
+            'jumlahBangunan' => 'required|integer|min:1',
+            'keterangan' => 'nullable|string|max:500',
+            'tanggalMasuk' => 'required|date',
+            'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
+            'address_id' => ['required', 'integer', Rule::exists('addresses', 'id')->where('user_id', $request->user()->id)],
+            'setuju' => ['accepted'],
+        ]);
+
+        $service = Service::where('kategori', 'bangunan')->findOrFail($data['service_id']);
+        $address = $request->user()->addresses()->findOrFail($data['address_id']);
+        $duration = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
+        $subtotal = (float) $service->harga * $data['jumlahBangunan'] * $duration;
+        $fee = round($subtotal * self::PERSEN_BIAYA_LAYANAN / 100);
+
+        $order = Order::create([
+            'order_code' => 'TS-'.strtoupper(uniqid()), 'customer_id' => $request->user()->id,
+            'partner_id' => $service->user_id, 'service_type' => 'bangunan',
+            'item_name' => $data['namaBangunan'], 'item_description' => $data['keterangan'] ?? null,
+            'jumlah_barang' => $data['jumlahBangunan'], 'ukuran_barang' => $service->jenis_bangunan ?: 'bangunan',
+            'harga_per_hari' => $service->harga, 'start_date' => $data['tanggalMasuk'], 'end_date' => $data['tanggalKeluar'],
+            'duration' => $duration, 'is_pickup' => false, 'pickup_address' => $address->address,
+            'city' => $service->kota, 'status' => 'baru', 'subtotal' => $subtotal, 'discount' => 0,
+            'pickup_fee' => 0, 'biaya_layanan' => $fee, 'total_price' => $subtotal + $fee,
+            'payment_method' => 'pending', 'payment_verified_at' => null,
+        ]);
+
+        $this->notifikasiPesananBaru($order);
+        return redirect()->route('customer.services.bangunan.invoice', $order->id);
+    }
+
+    public function detailBangunan(Service $service)
+    {
+        abort_unless($service->kategori === 'bangunan' && $service->is_active, 404);
+
+        return Inertia::render('Customer/Services/Bangunan/Detail', [
+            'mitra' => $this->formatMitraKendaraan($service),
+        ]);
+    }
+
+    public function pesanBangunan(Service $service)
+    {
+        abort_unless($service->kategori === 'bangunan' && $service->is_active, 404);
+
+        return redirect()->route('customer.services.bangunan.form.pesan', [
+            'service_id' => $service->id,
+        ]);
+    }
+
+    public function invoiceBangunan(Order $order)
+    {
+        abort_unless($order->customer_id === auth()->id() && $order->service_type === 'bangunan', 403);
+        $customer = $order->customer;
+
+        return Inertia::render('Customer/Services/Bangunan/Invoice', ['order' => [
+            'id' => $order->id, 'orderCode' => $order->order_code,
+            'tanggalDiterbitkan' => $order->created_at->translatedFormat('l, j F Y'),
+            'mitraNama' => $order->partner?->name ?? '-', 'customerNama' => $customer->name,
+            'customerTelepon' => $customer->phone ?? '-', 'alamatLengkap' => $order->pickup_address ?: '-',
+            'namaBangunan' => $order->item_name, 'jenisBangunanLabel' => ucfirst(str_replace('_', ' ', $order->ukuran_barang)),
+            'jumlahBangunan' => $order->jumlah_barang, 'keterangan' => $order->item_description ?: '-',
+            'tanggalMasuk' => $order->start_date?->translatedFormat('j F Y'), 'tanggalKeluar' => $order->end_date?->translatedFormat('j F Y'),
+            'durasiHari' => $order->duration, 'nilaiHarga' => (float) $order->harga_per_hari,
+            'totalHarga' => (float) $order->subtotal, 'biayaLayanan' => (float) $order->biaya_layanan,
+            'totalPembayaran' => (float) $order->total_price, 'sudahDibayar' => (bool) $order->payment_verified_at,
+        ]]);
     }
 
     /**
@@ -559,6 +656,10 @@ class ServiceController extends Controller
             ]);
         }
 
+        if ($service->kategori === 'bangunan') {
+            return redirect()->route('customer.services.bangunan.form', ['service_id' => $service->id]);
+        }
+
         return Inertia::render('Customer/Services/Show', [
             'service' => [
                 'id' => $service->id,
@@ -705,6 +806,11 @@ class ServiceController extends Controller
             'filters' => $request->only(['kota', 'search']),
             'mitras' => $request->filled('kota') ? $services : null,
         ]);
+    }
+
+    public function searchBangunan(Request $request)
+    {
+        return $this->search($request, 'bangunan');
     }
 
     protected function formatMitraKendaraan(Service $service): array

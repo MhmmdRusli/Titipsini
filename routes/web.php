@@ -364,6 +364,14 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::post('/services/barang', [ServiceController::class, 'simpanBarang'])->name('services.barang.store');
     Route::get('/services/barang/{order}/invoice', [ServiceController::class, 'invoiceBarang'])->name('services.barang.invoice');
 
+    Route::get('/services/bangunan', [ServiceController::class, 'formBangunan'])->name('services.bangunan.form');
+    Route::get('/services/bangunan/search', [ServiceController::class, 'searchBangunan'])->name('services.bangunan.search');
+    Route::get('/services/bangunan/pesan', [ServiceController::class, 'formPesanBangunan'])->name('services.bangunan.form.pesan');
+    Route::get('/services/bangunan/{service}/detail', [ServiceController::class, 'detailBangunan'])->name('services.bangunan.detail');
+    Route::get('/services/bangunan/{service}/titip', [ServiceController::class, 'pesanBangunan'])->name('services.bangunan.pesan');
+    Route::post('/services/bangunan', [ServiceController::class, 'simpanBangunan'])->name('services.bangunan.store');
+    Route::get('/services/bangunan/{order}/invoice', [ServiceController::class, 'invoiceBangunan'])->name('services.bangunan.invoice');
+
     Route::get('/services/kendaraan', [ServiceController::class, 'formKendaraan'])->name('services.kendaraan.form');
     Route::get('/services/kendaraan/search', [ServiceController::class, 'search'])->name('services.kendaraan.search');
     Route::get('/services/kendaraan/pesan', [ServiceController::class, 'formPesanKendaraan'])->name('services.kendaraan.form.pesan');
