@@ -14,12 +14,12 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 
 // Endpoint API wilayah — sesuaikan dengan route yang tersedia di backend Laravel.
 // GET  /api/wilayah/provinces                      -> [{ id, name }]
-// GET  /api/wilayah/cities?province_id=ID           -> [{ id, name }]
-// GET  /api/wilayah/districts?city_id=ID            -> [{ id, name }]
+// GET  /api/wilayah/regencies/PROVINCE_ID           -> [{ id, name }]
+// GET  /api/wilayah/districts/REGENCY_ID            -> [{ id, name }]
 const REGION_ENDPOINTS = {
     provinces: '/api/wilayah/provinces',
-    cities: (provinceId) => `/api/wilayah/cities?province_id=${provinceId}`,
-    districts: (cityId) => `/api/wilayah/districts?city_id=${cityId}`,
+    cities: (provinceId) => `/api/wilayah/regencies/${provinceId}`,
+    districts: (cityId) => `/api/wilayah/districts/${cityId}`,
 };
 
 // --- Shared styling helpers (konsisten dengan ProfileEdit.jsx) ---
