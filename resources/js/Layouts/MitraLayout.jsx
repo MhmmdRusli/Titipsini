@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Package, Bell, User, CheckCircle2, XCircle, X } from 'lucide-react';
+import { LayoutGrid, Package, Bell, User, CheckCircle2, XCircle, X, ArrowLeft } from 'lucide-react';
 
 const navItems = [
     { label: 'Beranda', href: '/mitra/dashboard', icon: LayoutGrid },
@@ -8,6 +8,26 @@ const navItems = [
     { label: 'Notifikasi', href: '/mitra/notifikasi', icon: Bell },
     { label: 'Profil', href: '/mitra/profil', icon: User },
 ];
+
+const pageTitles = {
+    '/mitra/alamat': 'Alamat',
+    '/mitra/layanan': 'Kelola Layanan',
+    '/mitra/layanan/barang': 'Kelola Barang',
+    '/mitra/layanan/kendaraan': 'Kelola Kendaraan',
+    '/mitra/layanan/bangunan': 'Kelola Bangunan',
+    '/mitra/layanan/pindahan': 'Kelola Pick Up',
+    '/mitra/legalitas': 'Legalitas',
+    '/mitra/notifikasi': 'Notifikasi',
+    '/mitra/pesanan': 'Pesanan',
+    '/mitra/penarikan': 'Penarikan Dana',
+    '/mitra/pendapatan': 'Riwayat Pendapatan',
+    '/mitra/profil': 'Profil Mitra',
+    '/mitra/rekening': 'Rekening Bank',
+    '/mitra/verifikasi-rekening': 'Verifikasi Rekening',
+    '/mitra/keamanan': 'Keamanan',
+    '/mitra/kebijakan-privasi': 'Kebijakan Privasi',
+    '/mitra/bantuan': 'Pusat Bantuan',
+};
 
 function Toast({ type, message, onClose }) {
     useEffect(() => {
@@ -39,6 +59,12 @@ function Toast({ type, message, onClose }) {
 export default function MitraLayout({ children, title }) {
     const { url, props } = usePage();
     const [toast, setToast] = useState(null);
+    const pathname = url.split('?')[0];
+    const matchedTitle = Object.entries(pageTitles)
+        .sort(([firstPath], [secondPath]) => secondPath.length - firstPath.length)
+        .find(([pagePath]) => pathname === pagePath || pathname.startsWith(`${pagePath}/`))?.[1];
+    const isDashboard = pathname === '/mitra/dashboard';
+    const navbarTitle = title || (isDashboard ? 'Titipsini.com' : matchedTitle || 'Mitra');
 
     useEffect(() => {
         if (props.flash?.success) {
@@ -56,15 +82,31 @@ export default function MitraLayout({ children, title }) {
                         className="flex items-center px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
                     >
+                        {!isDashboard && (
+                            <button
+                                type="button"
+                                onClick={() => window.history.back()}
+                                aria-label="Kembali ke halaman sebelumnya"
+                                className="mr-3 flex shrink-0 items-center text-gray-600 hover:text-gray-900"
+                            >
+                                <ArrowLeft size={20} />
+                            </button>
+                        )}
                         <Link href="/mitra/dashboard" className="flex items-center gap-1.5">
-                            <img
-                                src="/images/logo-titipsini.png"
-                                alt="Logo"
-                                className="h-6 w-auto object-contain"
-                            />
-                            <span className="text-base font-bold tracking-tight text-[#15803d]">
-                                Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
-                            </span>
+                            {isDashboard ? (
+                                <>
+                                    <img
+                                        src="/images/logo-titipsini.png"
+                                        alt="Logo"
+                                        className="h-6 w-auto object-contain"
+                                    />
+                                    <span className="text-base font-bold tracking-tight text-[#15803d]">
+                                        Titipsini<span className="mx-0.5 text-[#fbbf24]">•</span>Com
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="text-base font-bold tracking-tight text-gray-900">{navbarTitle}</span>
+                            )}
                         </Link>
                     </div>
                 </header>
@@ -75,14 +117,7 @@ export default function MitraLayout({ children, title }) {
                     </div>
                 )}
 
-                <main className="flex-1 overflow-y-auto pb-20">
-                    {title && (
-                        <div className="px-4 pt-4">
-                            <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-                        </div>
-                    )}
-                    {children}
-                </main>
+                <main className="flex-1 overflow-y-auto pb-20">{children}</main>
 
                 <nav
                     className="absolute inset-x-0 bottom-0 z-10 flex justify-around border-t border-gray-200 bg-white py-2"

@@ -72,15 +72,16 @@ class OrderController extends Controller
         $tab = $request->query('tab', 'baru'); // baru | selesai | dibatalkan
         $kategori = $request->query('kategori'); // barang | kendaraan | bangunan | null
 
-        $statusMap = [
-            'baru' => 'diproses',
-            'selesai' => 'selesai',
-            'dibatalkan' => 'dibatalkan',
-        ];
+        $query = Order::with('customer')->where('partner_id', $partner->id);
 
-        $query = Order::with('customer')
-            ->where('partner_id', $partner->id)
-            ->where('status', $statusMap[$tab] ?? $statusMap['baru']);
+        if ($tab === 'baru') {
+            // "Baru" mencakup order yang belum di-accept (baru) DAN yang
+            // sudah di-accept & sedang berjalan (diproses) - keduanya
+            // masih dianggap "aktif" dari sudut pandang mitra.
+            $query->whereIn('status', ['baru', 'diproses']);
+        } else {
+            $query->where('status', $tab === 'dibatalkan' ? 'dibatalkan' : 'selesai');
+        }
 
         if ($kategori) {
             $query->where('service_type', $kategori);
@@ -102,8 +103,8 @@ class OrderController extends Controller
             ];
         });
 
-        $counts = [
-            'baru' => Order::where('partner_id', $partner->id)->where('status', 'diproses')->count(),
+            $counts = [
+            'baru' => Order::where('partner_id', $partner->id)->whereIn('status', ['baru', 'diproses'])->count(),
             'selesai' => Order::where('partner_id', $partner->id)->where('status', 'selesai')->count(),
             'dibatalkan' => Order::where('partner_id', $partner->id)->where('status', 'dibatalkan')->count(),
         ];
@@ -140,12 +141,14 @@ class OrderController extends Controller
                 'customer' => [
                     'name' => $order->customer->name ?? '-',
                     'phone' => $order->customer->phone ?? '-',
+                    'code' => $order->customer?->customer_code,
                 ],
                 'pickup_address' => $order->pickup_address,
                 'dropoff_address' => $order->dropoff_address,
                 'item_description' => $order->item_name,
                 'duration' => $this->hitungDurasi($order),
                 'pickup_status' => $order->is_pickup ? 'Dijemput oleh mitra' : 'Diantar sendiri oleh customer',
+                'jam_pickup' => $order->jam_pickup ? \Illuminate\Support\Carbon::parse($order->jam_pickup)->format('H:i') : null,
                 'subtotal' => (float) $subtotal,
                 'discount' => (float) $discount,
                 'pickup_fee' => (float) $pickupFee,
@@ -164,6 +167,7 @@ class OrderController extends Controller
                 'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
                 'next_fase_action_label' => $nextFaseAction,
                 'can_advance_fase' => $order->status === 'diproses' && $nextFaseAction !== null,
+                'can_accept' => $order->status === 'baru',
             ],
         ]);
     }
@@ -228,6 +232,49 @@ class OrderController extends Controller
         ]);
 
         return back()->with('success', 'Status pesanan berhasil diperbarui menjadi "'.$label.'".');
+    }
+
+        public function ambilPesanan(Order $order)
+    {
+        abort_unless($order->partner_id === Auth::id(), 403);
+        abort_unless($order->status === 'baru', 400, 'Pesanan ini sudah tidak berstatus baru.');
+
+        $order->update(['status' => 'diproses']);
+
+        Notifikasi::create([
+            'user_id' => $order->customer_id,
+            'order_id' => $order->id,
+            'type' => 'transaksi_masuk',
+            'judul' => 'Pesanan Diambil Mitra',
+            'pesan' => 'Pesanan '.$order->order_code.' telah diambil oleh mitra dan sedang diproses.',
+        ]);
+
+        return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil diambil.');
+    }
+
+    public function tolakPesanan(Request $request, Order $order)
+    {
+        abort_unless($order->partner_id === Auth::id(), 403);
+        abort_unless($order->status === 'baru', 400, 'Pesanan ini sudah tidak bisa ditolak.');
+
+        $validated = $request->validate([
+            'cancel_reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $order->update([
+            'status' => 'dibatalkan',
+            'cancel_reason' => $validated['cancel_reason'] ?? 'Ditolak oleh mitra.',
+        ]);
+
+        Notifikasi::create([
+            'user_id' => $order->customer_id,
+            'order_id' => $order->id,
+            'type' => 'transaksi_masuk',
+            'judul' => 'Pesanan Ditolak Mitra',
+            'pesan' => 'Mohon maaf, pesanan '.$order->order_code.' ditolak oleh mitra.',
+        ]);
+
+        return redirect()->route('mitra.orders.index')->with('success', 'Pesanan berhasil ditolak.');
     }
 
     private function hitungDurasi(Order $order): ?string

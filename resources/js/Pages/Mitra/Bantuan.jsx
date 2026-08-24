@@ -32,13 +32,14 @@ export default function Bantuan() {
             <div className="max-w-xl mx-auto px-4 py-5 space-y-4">
                 {/* Tombol Kembali Saja (Judul di sampingnya dihapus) */}
                 <div>
-                    <Link
-                        href="/mitra/profil"
+                    <button
+                        type="button"
+                        onClick={() => window.history.back()}
                         className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900"
                     >
                         <ChevronLeft size={18} />
                         Kembali
-                    </Link>
+                    </button>
                 </div>
 
                 {/* FAQ Section */}

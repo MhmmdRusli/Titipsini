@@ -50,13 +50,6 @@ export default function ProfileEdit({ partner }) {
         <MitraLayout>
             <Head title="Profil Saya" />
 
-            <div className="flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-3">
-                <Link href="/mitra/profil" className="text-gray-500 hover:text-gray-700">
-                    <ChevronLeft size={20} />
-                </Link>
-                <h1 className="text-base font-semibold text-gray-900">Profil Saya</h1>
-            </div>
-
             {/* Cover + avatar */}
             <div className="relative h-36 bg-gray-200">
                 {coverPreview ? (

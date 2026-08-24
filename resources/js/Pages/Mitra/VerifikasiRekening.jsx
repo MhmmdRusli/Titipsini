@@ -38,13 +38,6 @@ export default function VerifikasiRekening({ rekeningId, email }) {
         <MitraLayout>
             <Head title="Verifikasi" />
 
-            <div className="flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-3">
-                <button type="button" onClick={() => window.history.back()} className="text-gray-500 hover:text-gray-700">
-                    <ChevronLeft size={20} />
-                </button>
-                <h1 className="text-base font-semibold text-gray-900">Verifikasi</h1>
-            </div>
-
             <div className="flex flex-col items-center px-4 pb-4 pt-10 text-center">
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50">
                     <Mail size={26} className="text-green-600" />

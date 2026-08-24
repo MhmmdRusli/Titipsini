@@ -103,14 +103,6 @@ export default function JamOperasional({ jamOperasional }) {
             <Head title="Jam Operasional" />
 
             <div className="flex flex-col min-h-screen bg-gray-50">
-                {/* Header */}
-                <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-3 shadow-sm">
-                    <Link href="/mitra/profil" className="text-gray-500 hover:text-gray-700">
-                        <ChevronLeft size={20} />
-                    </Link>
-                    <h1 className="text-base font-semibold text-gray-900">Jam Operasional</h1>
-                </div>
-
                 {/* Form Body - pb-44 memberikan ruang agar kartu Minggu bisa di-scroll sepenuhnya di atas tombol Simpan & Navbar */}
                 <form onSubmit={submit} className="flex-1 space-y-4 px-4 py-4 pb-44">
                     {HARI_LIST.map(({ key, label }) => {

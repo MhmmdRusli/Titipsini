@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useForm, router, Head } from '@inertiajs/react';
-import { ChevronLeft, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 const inputClass = (hasError) =>
     `mt-1 w-full rounded-lg border-none bg-gray-100 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 disabled:opacity-50 ${hasError ? 'ring-2 ring-red-400' : 'focus:ring-green-500'
@@ -93,10 +93,7 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
         <div className="flex min-h-dvh flex-col bg-white">
             <Head title="Alamat Gudang" />
 
-            <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
-                <button type="button" onClick={onBatal} className="text-gray-500 hover:text-gray-700">
-                    <ChevronLeft size={20} />
-                </button>
+            <div className="border-b border-gray-100 px-4 py-3">
                 <h1 className="text-base font-semibold text-gray-900">Alamat Gudang</h1>
             </div>
 

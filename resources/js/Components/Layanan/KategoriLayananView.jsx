@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import MitraLayout from '@/Layouts/MitraLayout';
-import { Plus, Pencil, Trash2, X, MapPin, AlertCircle, ChevronLeft, Home, Info, CheckCircle2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, MapPin, AlertCircle, Home, Info, CheckCircle2 } from 'lucide-react';
 const JENIS_KENDARAAN_OPTIONS = [
     { value: 'motor', label: 'Motor' },
     { value: 'mobil', label: 'Mobil' },
@@ -135,10 +135,6 @@ export default function KategoriLayananView({
     const tampilkanJenisKendaraan = kategori === 'kendaraan';
     const tampilkanJenisBangunan = kategori === 'bangunan';
 
-    // Alur form kustom (mis. FormIdentitasGudang) sudah punya header + tombol
-    // back sendiri di dalam komponennya, jadi di sini title dikosongkan
-    // supaya tidak dobel dengan header "Titipsini.com" dari MitraLayout.
-
     if (tahap === 'sukses') {
         return (
             <MitraLayout title="">
@@ -169,20 +165,6 @@ export default function KategoriLayananView({
 
     return (
         <MitraLayout title="">
-            {/* Header sendiri: tombol panah kembali ke halaman SEBELUMNYA (browser
-                history), bukan selalu ke satu URL tetap - menggantikan header
-                "Titipsini.com" bawaan MitraLayout */}
-            <div className="flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-3">
-                <button
-                    type="button"
-                    onClick={() => window.history.back()}
-                    className="text-gray-500 hover:text-gray-700"
-                >
-                    <ChevronLeft size={20} />
-                </button>
-                <h1 className="text-base font-semibold text-gray-900">{title}</h1>
-            </div>
-
             <div className="px-4 py-3">
                 {tahap === 'kosong' && (
                     <TahapKosong

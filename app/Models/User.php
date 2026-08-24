@@ -96,6 +96,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return 'VDR-'.str_pad((string) $this->id, 5, '0', STR_PAD_LEFT);
     }
 
+        public function getCustomerCodeAttribute(): string
+    {
+        return 'CU'.str_pad((string) $this->id, 4, '0', STR_PAD_LEFT);
+    }
+
     public function ordersAsCustomer(): HasMany
     {
         return $this->hasMany(Order::class, 'customer_id');
