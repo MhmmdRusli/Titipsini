@@ -40,29 +40,37 @@ function getFirstComponent(result, types) {
 }
 
 async function reverseGeocodeFallback(lat, lng) {
-    const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=id`,
-    );
-    if (!response.ok) throw new Error('Layanan pencari alamat sedang tidak tersedia.');
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
 
-    const result = await response.json();
-    if (!result.display_name) throw new Error('Alamat tidak ditemukan di titik tersebut.');
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=id`,
+            { signal: controller.signal },
+        );
+        if (!response.ok) throw new Error('Layanan pencari alamat sedang tidak tersedia.');
 
-    return {
-        address: result.display_name,
-        province: result.address?.state ?? '',
-        city: result.address?.city
-            ?? result.address?.county
-            ?? result.address?.municipality
-            ?? result.address?.town
-            ?? '',
-        district: result.address?.city_district
-            ?? result.address?.district
-            ?? result.address?.suburb
-            ?? result.address?.village
-            ?? (result.address?.county && result.address?.town ? result.address.town : '')
-            ?? '',
-    };
+        const result = await response.json();
+        if (!result.display_name) throw new Error('Alamat tidak ditemukan di titik tersebut.');
+
+        return {
+            address: result.display_name,
+            province: result.address?.state ?? '',
+            city: result.address?.city
+                ?? result.address?.county
+                ?? result.address?.municipality
+                ?? result.address?.town
+                ?? '',
+            district: result.address?.city_district
+                ?? result.address?.district
+                ?? result.address?.suburb
+                ?? result.address?.village
+                ?? (result.address?.county && result.address?.town ? result.address.town : '')
+                ?? '',
+        };
+    } finally {
+        window.clearTimeout(timeout);
+    }
 }
 
 export default function GoogleMapAddressPicker({ onAddressSelect }) {
