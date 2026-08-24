@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { ShieldCheck, Building2, Calendar, AlertCircle, Loader2, Car, Truck } from 'lucide-react';
+import { ShieldCheck, ChevronDown, Building2, Car, Truck, MapPin, ExternalLink } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+import DateRangeField, { parseISODate } from '@/Components/DateRangerField';
 
 const BENEFITS = [
     'Keamanan terjaga',
@@ -11,53 +12,87 @@ const BENEFITS = [
 ];
 
 function formatRupiah(value) {
-    return new Intl.NumberFormat('id-ID').format(value);
+    return 'Rp' + Math.round(value || 0).toLocaleString('id-ID');
 }
 
-// Sama persis dengan hitungJumlahHari() di ServiceController - dipakai hanya
-// untuk preview di frontend, harga final tetap dihitung ulang di server.
-function hitungJumlahHari(tanggalMasuk, tanggalKeluar) {
-    if (!tanggalMasuk || !tanggalKeluar) return null;
-    const d1 = new Date(tanggalMasuk);
-    const d2 = new Date(tanggalKeluar);
-    const diffDays = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
-    return Math.max(1, diffDays);
+function FieldError({ message }) {
+    if (!message) return null;
+    return <p className="mt-1.5 text-xs font-medium text-red-500">{message}</p>;
 }
 
-export default function Show({ service }) {
-    const [tanggalMasuk, setTanggalMasuk] = useState('');
-    const [tanggalKeluar, setTanggalKeluar] = useState('');
-    const [processing, setProcessing] = useState(false);
-    const [error, setError] = useState('');
-    const [setuju, setSetuju] = useState(false);
+function googleMapsUrl(address) {
+    const query = [
+        address.address,
+        address.district_name,
+        address.city_name,
+        address.province_name,
+    ].filter(Boolean).join(', ');
 
-    const jumlahHari = useMemo(
-        () => hitungJumlahHari(tanggalMasuk, tanggalKeluar),
-        [tanggalMasuk, tanggalKeluar]
-    );
-    const estimasiTotal = jumlahHari ? service.harga * jumlahHari : null;
-    const isKendaraan = service.kategori === 'kendaraan';
-    const isPindahan = service.kategori === 'pindahan';
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+export default function Show({ 
+    service, 
+    addresses = [], 
+    persenBiayaLayanan = 10 
+}) {
+    const isKendaraan = service?.kategori === 'kendaraan';
+    const isPindahan = service?.kategori === 'pindahan';
     const ServiceIcon = isKendaraan ? Car : isPindahan ? Truck : Building2;
     const serviceLabel = isKendaraan ? 'Kendaraan' : isPindahan ? 'Pindahan' : 'Bangunan';
 
+    const [form, setForm] = useState({
+        namaItem: '',
+        keterangan: '',
+        tanggalMasuk: '',
+        tanggalKeluar: '',
+        address_id: addresses.find((a) => a.is_primary)?.id || addresses[0]?.id || '',
+        setuju: false,
+        service_id: service?.id ?? '',
+    });
+
+    const [errors, setErrors] = useState({});
+    const [submitting, setSubmitting] = useState(false);
+    const selectedAddress = addresses.find((address) => String(address.id) === String(form.address_id));
+
+    function update(field, value) {
+        setForm((prev) => ({ ...prev, [field]: value }));
+    }
+
+    const jumlahHari = useMemo(() => {
+        if (!form.tanggalMasuk || !form.tanggalKeluar) return 0;
+        const masuk = parseISODate(form.tanggalMasuk);
+        const keluar = parseISODate(form.tanggalKeluar);
+        const diff = Math.round((keluar - masuk) / (1000 * 60 * 60 * 24));
+        return Math.max(1, diff);
+    }, [form.tanggalMasuk, form.tanggalKeluar]);
+
+    const hitung = useMemo(() => {
+        const hargaPerHari = Number(service?.harga) || 0;
+        const subtotal = hargaPerHari * jumlahHari;
+        const biayaLayanan = Math.round((subtotal * persenBiayaLayanan) / 100);
+        const total = subtotal + biayaLayanan;
+
+        return { subtotal, biayaLayanan, total };
+    }, [service, jumlahHari, persenBiayaLayanan]);
+
+    const bisaSubmit =
+        form.tanggalMasuk &&
+        form.tanggalKeluar &&
+        form.address_id &&
+        form.setuju &&
+        !submitting;
+
     function handleSubmit(e) {
         e.preventDefault();
-        if (!tanggalMasuk || !tanggalKeluar) {
-            setError('Tanggal masuk dan keluar wajib diisi.');
-            return;
-        }
-        if (!setuju) {
-            setError('Kamu harus menyetujui Syarat dan Ketentuan.');
-            return;
-        }
-        setError('');
-        setProcessing(true);
-        router.post(
-            `/app/services/${service.id}/pesan`,
-            { tanggalMasuk, tanggalKeluar },
-            { onFinish: () => setProcessing(false) }
-        );
+        setSubmitting(true);
+        router.post(`/app/services/${service.id}/pesan`, form, {
+            onError: (err) => {
+                setErrors(err);
+                setSubmitting(false);
+            },
+            onFinish: () => setSubmitting(false),
+        });
     }
 
     return (
@@ -65,91 +100,131 @@ export default function Show({ service }) {
             <Head title={`Form ${serviceLabel}`} />
 
             <div className="px-4 py-6">
+                {/* Banner Header */}
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#15803d] to-emerald-600 p-5 text-white shadow-md dark:from-green-700 dark:to-green-900">
                     <div className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/15">
-                        <ServiceIcon size={20} />
+                        <ServiceIcon size={22} />
                     </div>
-
                     <h1 className="text-xl font-extrabold">Our Best Service</h1>
                     <p className="mt-1 text-sm text-white/90">Form Penitipan {serviceLabel}</p>
 
-                    <ul className="mt-4 space-y-1.5">
-                        {BENEFITS.map((b) => (
-                            <li key={b} className="flex items-center gap-2 text-xs text-white/90">
-                                <ShieldCheck size={14} className="shrink-0 text-white" />
-                                {b}
-                            </li>
+                    <div className="mt-3 space-y-2">
+                        {BENEFITS.map((feature) => (
+                            <div key={feature} className="flex items-center gap-2 text-sm text-white/90">
+                                <ShieldCheck size={16} className="shrink-0" />
+                                <span>{feature}</span>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </div>
 
                 {/* Form Utama */}
                 <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+                    <input type="hidden" value={form.service_id} readOnly />
+
+                    {/* Jenis Layanan / Produk */}
                     <div>
-                            <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Jenis {serviceLabel}</label>
-                        <div className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {service.nama || service.jenisLabel || serviceLabel}
+                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Jenis {serviceLabel}</label>
+                        <div className="relative mt-2">
+                            <div className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-[#15803d] shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-green-400">
+                                {service?.nama || service?.jenisLabel || serviceLabel}
+                            </div>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 dark:text-gray-500">
+                                <ChevronDown size={16} />
+                            </span>
                         </div>
                     </div>
 
+                    {/* Rentang Tanggal */}
                     <div>
                         <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Tanggal Penitipan</label>
-                        <div className="relative mt-2">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                                <Calendar size={18} />
-                            </span>
-                            <input
-                                type="date"
-                                value={tanggalMasuk}
-                                onChange={(e) => setTanggalMasuk(e.target.value)}
-                                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 pl-11 text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:focus:ring-[#22c55e]"
+                        <div className="mt-2">
+                            <DateRangeField
+                                tanggalMasuk={form.tanggalMasuk}
+                                tanggalKeluar={form.tanggalKeluar}
+                                onChange={(masuk, keluar) =>
+                                    setForm((prev) => ({ ...prev, tanggalMasuk: masuk, tanggalKeluar: keluar }))
+                                }
+                                error={errors.tanggalMasuk || errors.tanggalKeluar}
                             />
                         </div>
                     </div>
 
+                    {/* Alamat Lengkap */}
                     <div>
-                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Tanggal keluar</label>
+                        <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Alamat Lengkap</label>
                         <div className="relative mt-2">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
-                                <Calendar size={18} />
+                            <select
+                                value={form.address_id}
+                                onChange={(e) => update('address_id', e.target.value)}
+                                className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                            >
+                                <option value="">Pilih alamat</option>
+                                {addresses.map((address) => (
+                                    <option key={address.id} value={address.id}>
+                                        {address.address}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 dark:text-gray-500">
+                                <ChevronDown size={16} />
                             </span>
-                            <input
-                                type="date"
-                                value={tanggalKeluar}
-                                onChange={(e) => setTanggalKeluar(e.target.value)}
-                                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 pl-11 text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:focus:ring-[#22c55e]"
-                            />
                         </div>
+                        {selectedAddress && (
+                            <div className="mt-2 rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 dark:border-emerald-900/60 dark:bg-emerald-950/30">
+                                <div className="flex items-start gap-2">
+                                    <MapPin size={17} className="mt-0.5 shrink-0 text-[#15803d] dark:text-emerald-400" />
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                                            {selectedAddress.name || 'Alamat pilihan'}
+                                        </p>
+                                        <p className="mt-0.5 text-xs leading-5 text-gray-600 dark:text-gray-300">
+                                            {[selectedAddress.address, selectedAddress.district_name, selectedAddress.city_name, selectedAddress.province_name]
+                                                .filter(Boolean)
+                                                .join(', ')}
+                                        </p>
+                                        <a
+                                            href={googleMapsUrl(selectedAddress)}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#15803d] hover:underline dark:text-emerald-400"
+                                        >
+                                            Tentukan / lihat di Google Maps
+                                            <ExternalLink size={13} />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {!addresses.length && (
+                            <Link href="/app/profile/alamat/tambah" className="mt-2 inline-flex text-xs font-bold text-[#15803d] hover:underline dark:text-emerald-400">
+                                Tambah alamat terlebih dahulu
+                            </Link>
+                        )}
+                        <FieldError message={errors.address_id} />
                     </div>
 
-                    {estimasiTotal !== null && (
-                        <div className="rounded-2xl border border-gray-100 bg-slate-50 p-4 dark:border-gray-700 dark:bg-gray-800">
-                            <span className="text-gray-500 dark:text-gray-400">
-                                Estimasi ({jumlahHari} hari)
-                            </span>
-                            <span className="mt-1 block text-xl font-extrabold text-gray-900 dark:text-gray-100">
-                                Rp {formatRupiah(estimasiTotal)}
-                            </span>
-                        </div>
-                    )}
+                    {/* Rincian Total */}
+                    <div className="rounded-2xl border border-gray-100 bg-slate-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                            Total Pembayaran ({jumlahHari} hari)
+                        </p>
+                        <p className="mt-1 text-xl font-extrabold text-gray-900 dark:text-gray-100">
+                            {formatRupiah(hitung.total)}
+                        </p>
+                    </div>
 
-                    {error && (
-                        <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
-                            <AlertCircle size={14} className="shrink-0" />
-                            <span>{error}</span>
-                        </div>
-                    )}
-
+                    {/* Catatan Denda */}
                     <p className="text-[11px] text-red-500 dark:text-red-400">
-                        *Jika menggunakan layanan {serviceLabel.toLowerCase()} melebihi batas
-                        yang sudah ditentukan tanpa konfirmasi maka akan dikenakan denda sebesar Rp 10.000/hari.
+                        *Jika menggunakan layanan {serviceLabel.toLowerCase()} melebihi batas yang sudah ditentukan tanpa konfirmasi maka akan dikenakan denda sebesar Rp 10.000/hari.
                     </p>
 
+                    {/* Persetujuan Syarat dan Ketentuan */}
                     <label className="flex items-start gap-2.5">
                         <input
                             type="checkbox"
-                            checked={setuju}
-                            onChange={(e) => setSetuju(e.target.checked)}
+                            checked={form.setuju}
+                            onChange={(e) => update('setuju', e.target.checked)}
                             className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-[#15803d] focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700"
                         />
                         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -165,19 +240,13 @@ export default function Show({ service }) {
                         </span>
                     </label>
 
+                    {/* Tombol Submit */}
                     <button
                         type="submit"
-                        disabled={processing || !setuju}
-                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-50"
+                        disabled={!bisaSubmit}
+                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                        {processing ? (
-                            <>
-                                <Loader2 size={16} className="animate-spin" />
-                                <span>Memproses...</span>
-                            </>
-                        ) : (
-                            <span>Lanjutkan Pembayaran</span>
-                        )}
+                        {submitting ? 'Memproses...' : 'Lanjutkan Pembayaran'}
                     </button>
                 </form>
             </div>
