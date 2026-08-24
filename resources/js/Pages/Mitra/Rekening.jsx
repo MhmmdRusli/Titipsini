@@ -106,19 +106,6 @@ export default function Rekening({ rekening = [] }) {
         <MitraLayout>
             <Head title="Rekening Bank" />
 
-            <div className="flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-3">
-                <button
-                    type="button"
-                    onClick={() => (view === 'form' ? batal() : window.history.back())}
-                    className="text-gray-500 hover:text-gray-700"
-                >
-                    <ChevronLeft size={20} />
-                </button>
-                <h1 className="text-base font-semibold text-gray-900">
-                    {view === 'list' ? 'Rekening Bank' : data.id ? 'Ubah Rekening Bank' : 'Tambah Rekening Bank'}
-                </h1>
-            </div>
-
             {/* Progress bar hanya muncul di alur form */}
             {view === 'form' && (
                 <div className="flex gap-1 px-4 pt-3">

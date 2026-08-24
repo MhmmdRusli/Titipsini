@@ -324,6 +324,8 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     Route::get('/bantuan', [MitraBantuanController::class, 'index'])->name('bantuan.index');
 
     Route::patch('/pesanan/{order}/verifikasi-pembayaran', [MitraOrderController::class, 'verifikasiPembayaran'])->name('orders.verifikasiPembayaran');
+    Route::patch('/pesanan/{order}/ambil', [MitraOrderController::class, 'ambilPesanan'])->name('orders.ambil');
+    Route::patch('/pesanan/{order}/tolak', [MitraOrderController::class, 'tolakPesanan'])->name('orders.tolak');
 
     // 👇 DITAMBAHKAN: route ini sebelumnya belum terdaftar, menyebabkan
     // klik tombol "Verifikasi Denda" di halaman Mitra selalu 404.

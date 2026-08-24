@@ -26,10 +26,10 @@ export default function Riwayat({ riwayat, totalPendapatan = 0 }) {
             <Head title="Riwayat Pendapatan" />
 
             <div className="px-4 py-4">
-                <Link href="/mitra/dashboard" className="mb-3 flex items-center gap-1 text-sm text-gray-500 hover:text-green-700">
+                <button type="button" onClick={() => window.history.back()} className="mb-3 flex items-center gap-1 text-sm text-gray-500 hover:text-green-700">
                     <ChevronLeft size={16} />
                     Riwayat Pendapatan
-                </Link>
+                </button>
 
                 {/* Ringkasan total */}
                 <div className="rounded-2xl bg-green-600 p-4 text-white shadow-sm">

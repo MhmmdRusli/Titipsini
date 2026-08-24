@@ -45,13 +45,22 @@ class Order extends Model
     'extend_payment_method',
     'extend_payment_receipt',
     'status_perpanjangan',
+    'jam_pickup',
+    'jumlah_barang',
+    'ukuran_barang',
+    'harga_per_hari',
+    'foto_barang_url',
+    'biaya_layanan',
     ];
     protected $appends = ['denda'];
 
-    protected function casts(): array
+        protected function casts(): array
     {
         return [
             'is_pickup' => 'boolean',
+            'jumlah_barang' => 'integer',
+            'harga_per_hari' => 'decimal:2',
+            'biaya_layanan' => 'decimal:2',
             'total_price' => 'decimal:2',
             'subtotal' => 'decimal:2',
             'discount' => 'decimal:2',

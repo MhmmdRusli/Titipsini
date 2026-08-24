@@ -48,7 +48,6 @@ export default function KebijakanPrivasi() {
                 </Link>
 
                 <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <h2 className="text-sm font-semibold text-gray-900">Kebijakan Privasi</h2>
                     {updated_at && (
                         <p className="mt-1 text-xs text-gray-400">Terakhir diperbarui: {updated_at}</p>
                     )}

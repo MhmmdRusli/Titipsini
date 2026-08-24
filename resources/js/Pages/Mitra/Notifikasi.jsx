@@ -27,21 +27,6 @@ export default function Notifikasi({ notifikasi = [] }) {
         <MitraLayout title="">
             <Head title="Notifikasi Mitra" />
 
-            {/* Header hijau */}
-            <div className="bg-[#15803d] dark:bg-green-700 px-4 py-4">
-                <div className="flex items-center gap-2">
-                    <Link
-                        href="/mitra/dashboard"
-                        className="flex h-8 w-8 items-center justify-center text-white/90 hover:text-white transition"
-                    >
-                        <ChevronLeft size={20} />
-                    </Link>
-                    <h1 className="text-lg font-bold text-white">
-                        Notifikasi 
-                    </h1>
-                </div>
-            </div>
-
             {hasUnread && (
                 <div className="flex justify-end px-4 pt-3">
                     <button

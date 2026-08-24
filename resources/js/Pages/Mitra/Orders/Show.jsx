@@ -1,13 +1,12 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowLeft, MapPin, User, Package, XCircle, CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, HandCoins, Clock, ArrowRightCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MapPin, Home, User, Package, XCircle, CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, HandCoins, Clock, ArrowRightCircle, AlertTriangle } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
-// Helper untuk memastikan URL gambar selalu valid
 function getImageUrl(path) {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/storage/')) {
@@ -23,7 +22,6 @@ const STATUS_CONFIG = {
     dibatalkan: { label: 'Dibatalkan', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
 };
 
-// Warna badge fase - generik untuk semua kategori
 const FASE_COLOR = {
     menunggu: 'bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-300',
     berjalan: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400',
@@ -31,6 +29,228 @@ const FASE_COLOR = {
 };
 
 export default function Show({ order }) {
+    if (order.status === 'baru') {
+        return <ShowBaru order={order} />;
+    }
+
+    return <ShowDiproses order={order} />;
+}
+
+/* ====================================================================
+   TAMPILAN PESANAN BARU (belum di-accept) — Ambil Pesanan / Tolak
+   ==================================================================== */
+const ALASAN_TOLAK = [
+    { value: 'area', label: 'Di luar jangkauan area Kerja' },
+    { value: 'penuh', label: 'Lahan sudah Penuh' },
+    { value: 'no_pickup', label: 'Tidak ada Pick Up' },
+    { value: 'kriteria', label: 'Barang tidak masuk kriteria' },
+    { value: 'lainnya', label: 'Lainnya' },
+];
+
+function ShowBaru({ order }) {
+    const [step, setStep] = useState('main'); // 'main' | 'alasan'
+    const [isAccepting, setIsAccepting] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
+    const [selectedAlasan, setSelectedAlasan] = useState('');
+    const [alasanLain, setAlasanLain] = useState('');
+
+    function ambilPesanan() {
+        setIsAccepting(true);
+        router.patch(`/mitra/pesanan/${order.id}/ambil`, {}, {
+            preserveScroll: true,
+            onFinish: () => setIsAccepting(false),
+        });
+    }
+
+    function tolakPesanan() {
+        const label = ALASAN_TOLAK.find((a) => a.value === selectedAlasan)?.label;
+        const reason = selectedAlasan === 'lainnya' ? alasanLain : label;
+
+        setIsRejecting(true);
+        router.patch(`/mitra/pesanan/${order.id}/tolak`, { cancel_reason: reason }, {
+            preserveScroll: true,
+            onFinish: () => setIsRejecting(false),
+        });
+    }
+
+    if (step === 'alasan') {
+        const bisaLanjut = selectedAlasan && (selectedAlasan !== 'lainnya' || alasanLain.trim().length > 0);
+
+        return (
+            <MitraLayout title="Alasan Penolakan">
+                <Head title="Alasan Penolakan" />
+
+                <div className="flex h-[calc(100%-56px)] flex-col px-4 py-4">
+                    <h2 className="text-center text-base font-bold text-gray-900 dark:text-gray-100">Alasan Menolak Pesanan</h2>
+                    <p className="mt-1 text-center text-xs text-gray-500 dark:text-gray-400">
+                        Pilih salah satu atau lebih alasan anda menolak pesanan ini.
+                    </p>
+
+                    <div className="mt-4 divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
+                        {ALASAN_TOLAK.map((opt) => (
+                            <label
+                                key={opt.value}
+                                className="flex items-center gap-3 py-3.5 text-sm text-gray-800 dark:text-gray-200"
+                            >
+                                <input
+                                    type="radio"
+                                    name="alasan_tolak"
+                                    checked={selectedAlasan === opt.value}
+                                    onChange={() => setSelectedAlasan(opt.value)}
+                                    className="h-4 w-4 accent-[#15803d]"
+                                />
+                                {opt.label}
+                            </label>
+                        ))}
+                    </div>
+
+                    {selectedAlasan === 'lainnya' && (
+                        <input
+                            type="text"
+                            value={alasanLain}
+                            onChange={(e) => setAlasanLain(e.target.value)}
+                            placeholder="Lainnya...."
+                            className="mt-3 w-full border-b border-gray-200 pb-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#15803d] focus:outline-none dark:border-gray-700 dark:bg-transparent dark:text-gray-100"
+                        />
+                    )}
+
+                    <div className="mt-auto pt-6">
+                        <button
+                            type="button"
+                            onClick={tolakPesanan}
+                            disabled={!bisaLanjut || isRejecting}
+                            className="w-full rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700"
+                        >
+                            {isRejecting ? 'Memproses...' : 'Selanjutnya'}
+                        </button>
+                    </div>
+                </div>
+            </MitraLayout>
+        );
+    }
+
+    return (
+        <MitraLayout title="Rincian Order">
+            <Head title={`Rincian Order - ${order.order_number}`} />
+
+            <div className="bg-green-50/60 px-4 py-4 dark:bg-green-950/10">
+                <div className="flex items-center justify-between rounded-2xl bg-[#15803d] px-4 py-3.5 text-white shadow-sm dark:bg-green-700">
+                    <div>
+                        <p className="flex items-center gap-1.5 text-base font-bold">
+                            <img src="/images/logo-titipsini.png" alt="" className="h-5 w-auto object-contain" />
+                            Titipsini<span className="text-[#fbbf24]">•</span>Com
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-white/80">Tempat Yang Aman Untuk Barang Berharga Kamu</p>
+                    </div>
+                    <div className="text-right text-xs text-white/90">
+                        <p>{order.created_at}</p>
+                        <p>Order ID {order.order_number}</p>
+                    </div>
+                </div>
+
+                <div className="mt-4">
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{order.customer?.name ?? '-'}</p>
+                    {order.customer?.code && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{order.customer.code}</p>
+                    )}
+                </div>
+
+                <div className="mt-4">
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Detail Alamat</p>
+
+                    <div className="mt-2 flex gap-2.5">
+                        <div className="flex flex-col items-center">
+                            <MapPin size={16} className="text-red-500" />
+                            <span className="my-0.5 h-6 w-px border-l border-dashed border-gray-300" />
+                        </div>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                            {order.pickup_address && order.pickup_address !== '-'
+                                ? order.pickup_address
+                                : 'Titip langsung di tempat mitra'}
+                        </p>
+                    </div>
+                    <div className="mt-1 flex items-center gap-2.5">
+                        <Home size={16} className="text-green-600" />
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                            {order.dropoff_address || 'Kantor Titipsini.com'}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mt-4">
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Detail Penitipan</p>
+                    <div className="mt-1.5 flex justify-between text-sm text-gray-700 dark:text-gray-300">
+                        <span>{order.item_description ?? '-'}</span>
+                    </div>
+
+                    <div className="mt-3 space-y-1.5 border-t border-gray-100 pt-2.5 text-sm dark:border-gray-800">
+                        {order.jam_pickup && (
+                            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                                <span>Jam Pick Up</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100">{order.jam_pickup}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                            <span>Pick up</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{order.pickup_status}</span>
+                        </div>
+                        {order.duration && (
+                            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                                <span>Durasi penitipan</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100">{order.duration}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="mt-4 space-y-1.5 border-t border-gray-100 pt-3 text-sm dark:border-gray-800">
+                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                        <span>Sub total</span>
+                        <span>{formatRupiah(order.subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                        <span>Diskon</span>
+                        <span>{order.discount > 0 ? `- ${formatRupiah(order.discount)}` : 0}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                        <span>Biaya penjemputan</span>
+                        <span>{formatRupiah(order.pickup_fee)}</span>
+                    </div>
+                </div>
+
+                <div className="mt-3 flex justify-between border-t border-gray-200 pt-3 text-base font-bold text-gray-900 dark:border-gray-700 dark:text-gray-100">
+                    <span>Total</span>
+                    <span>{formatRupiah(order.total)}</span>
+                </div>
+
+                <div className="mt-6 space-y-3">
+                    <button
+                        type="button"
+                        onClick={ambilPesanan}
+                        disabled={isAccepting}
+                        className="w-full rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-60 dark:bg-green-700"
+                    >
+                        {isAccepting ? 'Memproses...' : 'Ambil Pesanan'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setStep('alasan')}
+                        disabled={isAccepting}
+                        className="w-full rounded-xl border border-[#15803d] py-3 text-sm font-bold text-[#15803d] hover:bg-green-50 disabled:opacity-60 dark:border-green-600 dark:text-green-400"
+                    >
+                        Tolak
+                    </button>
+                </div>
+            </div>
+        </MitraLayout>
+    );
+}
+
+/* ====================================================================
+   TAMPILAN PESANAN YANG SUDAH DI-ACCEPT (diproses/selesai/dibatalkan)
+   — tidak berubah dari versi sebelumnya
+   ==================================================================== */
+function ShowDiproses({ order }) {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewDendaOpen, setPreviewDendaOpen] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
@@ -47,10 +267,7 @@ export default function Show({ order }) {
         router.patch(
             `/mitra/pesanan/${order.id}/verifikasi-pembayaran`,
             {},
-            {
-                preserveScroll: true,
-                onFinish: () => setIsVerifying(false),
-            }
+            { preserveScroll: true, onFinish: () => setIsVerifying(false) }
         );
     }
 
@@ -59,10 +276,7 @@ export default function Show({ order }) {
         router.patch(
             `/mitra/pesanan/${order.id}/verifikasi-denda`,
             {},
-            {
-                preserveScroll: true,
-                onFinish: () => setIsVerifyingDenda(false),
-            }
+            { preserveScroll: true, onFinish: () => setIsVerifyingDenda(false) }
         );
     }
 
@@ -71,39 +285,15 @@ export default function Show({ order }) {
         router.patch(
             `/mitra/pesanan/${order.id}/fase`,
             {},
-            {
-                preserveScroll: true,
-                onFinish: () => setIsAdvancingFase(false),
-            }
+            { preserveScroll: true, onFinish: () => setIsAdvancingFase(false) }
         );
     }
 
     return (
-        <MitraLayout title="">
+        <MitraLayout title="Rincian Order">
             <Head title={`Rincian Order - ${order.order_number}`} />
 
-            {/* Header Hijau Melengkung dengan Tombol Kembali */}
-            <div className="bg-[#15803d] dark:bg-green-700 px-4 pt-3 pb-6 rounded-b-[32px] shadow-sm">
-                <div className="flex items-center gap-3">
-                    <Link
-                        href={route('mitra.orders.index')}
-                        className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition"
-                    >
-                        <ArrowLeft size={18} />
-                    </Link>
-                    <div className="flex flex-col">
-                        <h1 className="text-base font-bold text-white">Rincian Order</h1>
-                        {order.category && (
-                            <span className="text-[11px] text-white/80 capitalize">
-                                Kategori Komoditas: <span className="font-semibold">{order.category}</span>
-                            </span>
-                        )}
-                    </div>
-                </div>
-            </div>
-
             <div className="px-4 py-4 space-y-4">
-                {/* Status Real-Time Pemrosesan */}
                 <div className={`flex items-center gap-2.5 rounded-2xl p-4 shadow-sm ${statusInfo.color}`}>
                     <StatusIcon size={20} className="shrink-0" />
                     <div>
@@ -114,7 +304,6 @@ export default function Show({ order }) {
                     </div>
                 </div>
 
-                {/* Status Operasional (Fase) */}
                 {order.fase_label && (
                     <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                         <div className="flex items-center justify-between">
@@ -149,7 +338,6 @@ export default function Show({ order }) {
                     </div>
                 )}
 
-                {/* Info Denda Keterlambatan */}
                 {order.denda > 0 && (
                     <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/30">
                         <div className="flex items-center gap-2">
@@ -169,7 +357,6 @@ export default function Show({ order }) {
                     </div>
                 )}
 
-                {/* Info Order / Ringkasan Transaksi & Logistik */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3 dark:border-gray-800 dark:bg-gray-800">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-3 dark:border-gray-700/60">
                         <div>
@@ -179,7 +366,6 @@ export default function Show({ order }) {
                         <p className="text-xs text-gray-400 dark:text-gray-500">{order.created_at}</p>
                     </div>
 
-                    {/* Identitas Pelanggan */}
                     <div className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
                         <User size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
                         <div>
@@ -189,14 +375,13 @@ export default function Show({ order }) {
                         </div>
                     </div>
 
-                    {/* Logistik Rute Penjemputan */}
                     <div className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
                         <MapPin size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
                         <div>
                             <p className="text-xs text-gray-400 dark:text-gray-500">Rute Penjemputan</p>
                             <p className={`text-xs font-medium ${order.pickup_address && order.pickup_address !== '-' ? 'text-gray-800 dark:text-gray-200' : 'italic text-gray-400'}`}>
-                                {order.pickup_address && order.pickup_address !== '-' 
-                                    ? order.pickup_address 
+                                {order.pickup_address && order.pickup_address !== '-'
+                                    ? order.pickup_address
                                     : 'Alamat penjemputan tidak disertakan (Titip langsung di tempat mitra)'}
                             </p>
                         </div>
@@ -212,7 +397,6 @@ export default function Show({ order }) {
                         </div>
                     )}
 
-                    {/* Deskripsi Item yang Dititipkan */}
                     <div className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
                         <Package size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
                         <div>
@@ -221,7 +405,6 @@ export default function Show({ order }) {
                         </div>
                     </div>
 
-                    {/* Durasi Penitipan & Status Pick Up */}
                     <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-50 dark:border-gray-700/40 text-sm">
                         <div>
                             <p className="text-xs text-gray-400 dark:text-gray-500">Durasi Penitipan</p>
@@ -234,7 +417,6 @@ export default function Show({ order }) {
                     </div>
                 </div>
 
-                {/* Bukti Pembayaran & Verifikasi Utama */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <div className="mb-3 flex items-center justify-between">
                         <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -317,7 +499,6 @@ export default function Show({ order }) {
                     )}
                 </div>
 
-                {/* --- BLOK BUKTI PEMBAYARAN DENDA KETERLAMBATAN --- */}
                 {order.denda > 0 && (
                     <div className="rounded-2xl border border-amber-200 bg-white p-4 shadow-sm dark:border-amber-900/50 dark:bg-gray-800">
                         <div className="mb-3 flex items-center justify-between">
@@ -371,7 +552,6 @@ export default function Show({ order }) {
                     </div>
                 )}
 
-                {/* Nota Finansial / Rincian Pembayaran */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                     <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Nota Finansial Pembayaran</p>
                     <div className="space-y-2 text-xs">
@@ -395,7 +575,6 @@ export default function Show({ order }) {
                 </div>
             </div>
 
-            {/* Modal Perbesar Gambar Bukti Utama */}
             {previewOpen && order.payment_receipt && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
@@ -409,7 +588,6 @@ export default function Show({ order }) {
                 </div>
             )}
 
-            {/* Modal Perbesar Gambar Bukti Denda */}
             {previewDendaOpen && order.bukti_denda && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
