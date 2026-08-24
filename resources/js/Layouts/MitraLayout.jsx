@@ -64,6 +64,7 @@ export default function MitraLayout({ children, title }) {
         .sort(([firstPath], [secondPath]) => secondPath.length - firstPath.length)
         .find(([pagePath]) => pathname === pagePath || pathname.startsWith(`${pagePath}/`))?.[1];
     const isDashboard = pathname === '/mitra/dashboard';
+    const hideBackButton = ['/mitra/pesanan', '/mitra/notifikasi', '/mitra/profil'].includes(pathname);
     const navbarTitle = title || (isDashboard ? 'Titipsini.com' : matchedTitle || 'Mitra');
 
     useEffect(() => {
@@ -82,7 +83,7 @@ export default function MitraLayout({ children, title }) {
                         className="flex items-center px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
                     >
-                        {!isDashboard && (
+                        {!isDashboard && !hideBackButton && (
                             <button
                                 type="button"
                                 onClick={() => window.history.back()}
