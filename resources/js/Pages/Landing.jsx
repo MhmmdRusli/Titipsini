@@ -251,7 +251,7 @@ export default function Landing() {
                 <div className="w-full grid grid-cols-1 gap-12 md:grid-cols-4 items-start">
                     <div>
                         <div className="flex items-center gap-3">
-                            <img src="/images/logo-titipsini-white.png" alt="Titipsini" className="h-9 w-auto" />
+                            <img src="/images/logo-titipsini.png" alt="Titipsini" className="h-9 w-auto brightness-0 invert" />
                             <span className="text-2xl font-bold">Titipsini•Com</span>
                         </div>
                     </div>
@@ -278,10 +278,6 @@ export default function Landing() {
                             <a href="#" className="block hover:underline">Facebook</a>
                             <a href="#" className="block hover:underline">Twitter</a>
                             <a href="#" className="block hover:underline">Instagram</a>
-                        </div>
-                        <div className="flex flex-col gap-3 mt-2">
-                            <img src="/images/google-play-badge.png" alt="Get it on Google Play" className="h-11 w-auto object-contain self-start" />
-                            <img src="/images/app-store-badge.png" alt="Download on the App Store" className="h-11 w-auto object-contain self-start" />
                         </div>
                     </div>
                 </div>
