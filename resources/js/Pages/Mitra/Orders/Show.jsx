@@ -7,7 +7,7 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
-function getImageUrl(path) {
+function getFileUrl(path) {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/storage/')) {
         return path;
@@ -251,8 +251,6 @@ function ShowBaru({ order }) {
    — tidak berubah dari versi sebelumnya
    ==================================================================== */
 function ShowDiproses({ order }) {
-    const [previewOpen, setPreviewOpen] = useState(false);
-    const [previewDendaOpen, setPreviewDendaOpen] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
     const [isVerifyingDenda, setIsVerifyingDenda] = useState(false);
     const [isAdvancingFase, setIsAdvancingFase] = useState(false);
@@ -293,8 +291,22 @@ function ShowDiproses({ order }) {
         <MitraLayout title="Rincian Order">
             <Head title={`Rincian Order - ${order.order_number}`} />
 
-            <div className="px-4 py-4 space-y-4">
-                <div className={`flex items-center gap-2.5 rounded-2xl p-4 shadow-sm ${statusInfo.color}`}>
+            <div className="min-h-full bg-green-50/60 px-4 py-4 space-y-4 dark:bg-green-950/10">
+                <div className="flex items-center justify-between rounded-2xl bg-[#15803d] px-4 py-3.5 text-white shadow-sm dark:bg-green-700">
+                    <div>
+                        <p className="flex items-center gap-1.5 text-base font-bold">
+                            <img src="/images/logo-titipsini.png" alt="" className="h-5 w-auto object-contain" />
+                            Titipsini<span className="text-[#fbbf24]">•</span>Com
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-white/80">Tempat Yang Aman Untuk Barang Berharga Kamu</p>
+                    </div>
+                    <div className="text-right text-xs text-white/90">
+                        <p>{order.created_at}</p>
+                        <p>Order ID {order.order_number}</p>
+                    </div>
+                </div>
+
+                <div className={`flex items-center gap-2.5 border-b border-green-200/70 pb-3 ${statusInfo.color.replace('bg-blue-50', 'bg-transparent').replace('bg-green-50', 'bg-transparent').replace('bg-red-50', 'bg-transparent').replace('dark:bg-blue-950/40', '').replace('dark:bg-green-950/40', '').replace('dark:bg-red-950/40', '')}`}>
                     <StatusIcon size={20} className="shrink-0" />
                     <div>
                         <p className="text-sm font-bold">{statusInfo.label}</p>
@@ -305,7 +317,7 @@ function ShowDiproses({ order }) {
                 </div>
 
                 {order.fase_label && (
-                    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                    <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
                         <div className="flex items-center justify-between">
                             <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
                                 <Clock size={15} className="text-gray-400" />
@@ -357,7 +369,7 @@ function ShowDiproses({ order }) {
                     </div>
                 )}
 
-                <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm space-y-3 dark:border-gray-800 dark:bg-gray-800">
+                <div className="space-y-3 border-b border-green-200/70 pb-4 dark:border-green-900/40">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-3 dark:border-gray-700/60">
                         <div>
                             <p className="text-xs text-gray-400 dark:text-gray-500">Nomor Pesanan</p>
@@ -417,7 +429,7 @@ function ShowDiproses({ order }) {
                     </div>
                 </div>
 
-                <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                <div className="space-y-3 border-b border-green-200/70 pb-4 dark:border-green-900/40">
                     <div className="mb-3 flex items-center justify-between">
                         <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
                             {isSaldo ? (
@@ -464,17 +476,15 @@ function ShowDiproses({ order }) {
                         )
                     ) : order.payment_receipt ? (
                         <>
-                            <div
-                                onClick={() => setPreviewOpen(true)}
-                                className="relative cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
+                            <a
+                                href={getFileUrl(order.payment_receipt)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-3.5 py-3 text-sm font-semibold text-green-700 transition hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-950/50"
                             >
-                                <img src={getImageUrl(order.payment_receipt)} alt="Bukti Pembayaran" className="h-44 w-full object-contain p-2" />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition hover:bg-black/40 hover:opacity-100">
-                                    <span className="flex items-center gap-1 text-xs font-semibold">
-                                        <ExternalLink size={13} /> Lihat Penuh
-                                    </span>
-                                </div>
-                            </div>
+                                <span>Lihat Bukti Transfer</span>
+                                <ExternalLink size={16} />
+                            </a>
 
                             {order.payment_verified_at ? (
                                 <p className="mt-3 text-center text-xs text-gray-400">
@@ -516,17 +526,15 @@ function ShowDiproses({ order }) {
 
                         {order.bukti_denda ? (
                             <>
-                                <div
-                                    onClick={() => setPreviewDendaOpen(true)}
-                                    className="relative cursor-pointer overflow-hidden rounded-xl border border-amber-100 bg-amber-50/50 dark:border-amber-900/30 dark:bg-gray-900"
+                                <a
+                                    href={getFileUrl(order.bukti_denda)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-sm font-semibold text-amber-700 transition hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400 dark:hover:bg-amber-950/50"
                                 >
-                                    <img src={getImageUrl(order.bukti_denda)} alt="Bukti Pembayaran Denda" className="h-44 w-full object-contain p-2" />
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition hover:bg-black/40 hover:opacity-100">
-                                        <span className="flex items-center gap-1 text-xs font-semibold">
-                                            <ExternalLink size={13} /> Lihat Penuh
-                                        </span>
-                                    </div>
-                                </div>
+                                    <span>Lihat Bukti Pembayaran Denda</span>
+                                    <ExternalLink size={16} />
+                                </a>
 
                                 {order.status_denda === 'terverifikasi' ? (
                                     <p className="mt-3 text-center text-xs text-gray-400">
@@ -552,7 +560,7 @@ function ShowDiproses({ order }) {
                     </div>
                 )}
 
-                <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+                <div className="space-y-2 border-t border-green-200/70 pt-4 dark:border-green-900/40">
                     <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Nota Finansial Pembayaran</p>
                     <div className="space-y-2 text-xs">
                         <div className="flex justify-between text-gray-600 dark:text-gray-400">
@@ -575,31 +583,6 @@ function ShowDiproses({ order }) {
                 </div>
             </div>
 
-            {previewOpen && order.payment_receipt && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-                    onClick={() => setPreviewOpen(false)}
-                >
-                    <img
-                        src={getImageUrl(order.payment_receipt)}
-                        alt="Bukti Pembayaran Perbesar"
-                        className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl"
-                    />
-                </div>
-            )}
-
-            {previewDendaOpen && order.bukti_denda && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-                    onClick={() => setPreviewDendaOpen(false)}
-                >
-                    <img
-                        src={getImageUrl(order.bukti_denda)}
-                        alt="Bukti Pembayaran Denda Perbesar"
-                        className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl"
-                    />
-                </div>
-            )}
         </MitraLayout>
     );
 }
