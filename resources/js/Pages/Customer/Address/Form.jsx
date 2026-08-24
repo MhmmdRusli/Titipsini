@@ -90,7 +90,7 @@ function normalizeRegionName(value) {
     return String(value ?? '')
         .toLowerCase()
         .replace(/[^a-z0-9 ]/g, ' ')
-        .replace(/\b(kabupaten|kota|kecamatan|kapanewon|daerah istimewa)\b/g, '')
+        .replace(/\b(kabupaten|kab|regency|kota|city|kecamatan|kec|kapanewon|district|daerah istimewa|special region|di)\b/g, '')
         .replace(/\s+/g, ' ')
         .trim();
 }
@@ -125,7 +125,6 @@ export default function AddressForm({ address = null }) {
     const [districts, setDistricts] = useState([]);
     const [loadingCities, setLoadingCities] = useState(false);
     const [loadingDistricts, setLoadingDistricts] = useState(false);
-    const [pendingRegion, setPendingRegion] = useState(null);
 
     // Muat daftar provinsi sekali di awal
     useEffect(() => {
@@ -200,39 +199,6 @@ export default function AddressForm({ address = null }) {
         return () => controller.abort();
     }, [data.city_id]);
 
-    useEffect(() => {
-        if (!pendingRegion?.province || !provinces.length) return;
-
-        const province = findRegionOption(provinces, pendingRegion.province);
-        if (!province) return;
-
-        setData((prev) => ({ ...prev, province_id: province.id, city_id: '', district_id: '' }));
-        setCities([]);
-        setDistricts([]);
-        setPendingRegion((prev) => ({ ...prev, province: '' }));
-    }, [provinces, pendingRegion?.province]);
-
-    useEffect(() => {
-        if (!pendingRegion?.city || pendingRegion.province || !cities.length) return;
-
-        const city = findRegionOption(cities, pendingRegion.city);
-        if (!city) return;
-
-        setData((prev) => ({ ...prev, city_id: city.id, district_id: '' }));
-        setDistricts([]);
-        setPendingRegion((prev) => ({ ...prev, city: '' }));
-    }, [cities, pendingRegion?.city, pendingRegion?.province]);
-
-    useEffect(() => {
-        if (!pendingRegion?.district || pendingRegion.city || !districts.length) return;
-
-        const district = findRegionOption(districts, pendingRegion.district);
-        if (!district) return;
-
-        setData('district_id', district.id);
-        setPendingRegion((prev) => ({ ...prev, district: '' }));
-    }, [districts, pendingRegion?.district, pendingRegion?.city]);
-
     function handleProvinceChange(e) {
         setData((prev) => ({
             ...prev,
@@ -250,9 +216,35 @@ export default function AddressForm({ address = null }) {
         }));
     }
 
-    function handleMapAddressSelect({ address, province, city, district }) {
+    async function handleMapAddressSelect({ address, province, city, district }) {
         setData('address', address);
-        setPendingRegion({ province, city, district });
+
+        try {
+            const provinceOptions = provinces.length
+                ? provinces
+                : await fetch(REGION_ENDPOINTS.provinces).then((res) => res.json());
+            const selectedProvince = findRegionOption(provinceOptions, province);
+            if (!selectedProvince) return;
+
+            setData((prev) => ({ ...prev, province_id: selectedProvince.id, city_id: '', district_id: '' }));
+            setLoadingCities(true);
+            const cityOptions = await fetch(REGION_ENDPOINTS.cities(selectedProvince.id)).then((res) => res.json());
+            setCities(cityOptions);
+            const selectedCity = findRegionOption(cityOptions, city);
+            if (!selectedCity) return;
+
+            setData((prev) => ({ ...prev, province_id: selectedProvince.id, city_id: selectedCity.id, district_id: '' }));
+            setLoadingDistricts(true);
+            const districtOptions = await fetch(REGION_ENDPOINTS.districts(selectedCity.id)).then((res) => res.json());
+            setDistricts(districtOptions);
+            const selectedDistrict = findRegionOption(districtOptions, district);
+            if (selectedDistrict) {
+                setData((prev) => ({ ...prev, province_id: selectedProvince.id, city_id: selectedCity.id, district_id: selectedDistrict.id }));
+            }
+        } finally {
+            setLoadingCities(false);
+            setLoadingDistricts(false);
+        }
     }
 
     function submit(e) {
