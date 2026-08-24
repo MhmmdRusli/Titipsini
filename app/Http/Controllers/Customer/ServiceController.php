@@ -66,28 +66,34 @@ class ServiceController extends Controller
 
     protected const UKURAN_BARANG = [
         'kecil' => [
-            'label' => 'Barang Ukuran Kecil',
+            'label' => 'S',
             'harga_per_hari' => 15000,
             'maks_item' => 2,
             'deskripsi' => 'Khusus penitipan barang berdimensi kecil dengan jumlah maksimal 2 item seperti laptop, tas kecil, koper kecil, box kecil.',
         ],
         'besar' => [
-            'label' => 'Barang Ukuran Besar',
+            'label' => 'M',
             'harga_per_hari' => 25000, // ⚠️ placeholder
             'maks_item' => 1,
             'deskripsi' => 'Khusus penitipan barang berdimensi besar dengan jumlah maksimal 1 item seperti barang elektronik, mebel, koper besar, box besar.',
         ],
         'kamar_kecil' => [
-            'label' => 'Barang 1 Kamar Kost Kecil (3x2 m²)',
+            'label' => 'L',
             'harga_per_hari' => 50000, // ⚠️ placeholder
             'maks_item' => 1,
             'deskripsi' => 'Khusus penitipan barang 1 kamar kos dengan luas kamar 3x2 m².',
         ],
         'kamar_besar' => [
-            'label' => 'Barang 1 Kamar Kost Besar (6x4 m²)',
+            'label' => 'XL',
             'harga_per_hari' => 75000, // ⚠️ placeholder
             'maks_item' => 1,
             'deskripsi' => 'Khusus penitipan barang 1 kamar kos dengan luas kamar 6x4 m².',
+        ],
+        'ekstra_besar' => [
+            'label' => 'XXL',
+            'harga_per_hari' => 100000, // ⚠️ placeholder
+            'maks_item' => 1,
+            'deskripsi' => 'Khusus penitipan barang dengan ukuran ekstra besar.',
         ],
     ];
 
@@ -274,6 +280,7 @@ class ServiceController extends Controller
             'partner_id' => $service->user_id, 'service_type' => 'bangunan',
             'item_name' => $data['namaBangunan'], 'item_description' => $data['keterangan'] ?? null,
             'jumlah_barang' => $data['jumlahBangunan'], 'ukuran_barang' => $service->jenis_bangunan ?: 'bangunan',
+            'ukuran_panjang' => $service->panjang, 'ukuran_lebar' => $service->lebar,
             'harga_per_hari' => $service->harga, 'start_date' => $data['tanggalMasuk'], 'end_date' => $data['tanggalKeluar'],
             'duration' => $duration, 'is_pickup' => false, 'pickup_address' => $address->address,
             'city' => $service->kota, 'status' => 'baru', 'subtotal' => $subtotal, 'discount' => 0,
@@ -314,6 +321,7 @@ class ServiceController extends Controller
             'mitraNama' => $order->partner?->name ?? '-', 'customerNama' => $customer->name,
             'customerTelepon' => $customer->phone ?? '-', 'alamatLengkap' => $order->pickup_address ?: '-',
             'namaBangunan' => $order->item_name, 'jenisBangunanLabel' => ucfirst(str_replace('_', ' ', $order->ukuran_barang)),
+            'ukuranPanjang' => $order->ukuran_panjang, 'ukuranLebar' => $order->ukuran_lebar,
             'jumlahBangunan' => $order->jumlah_barang, 'keterangan' => $order->item_description ?: '-',
             'tanggalMasuk' => $order->start_date?->translatedFormat('j F Y'), 'tanggalKeluar' => $order->end_date?->translatedFormat('j F Y'),
             'durasiHari' => $order->duration, 'nilaiHarga' => (float) $order->harga_per_hari,

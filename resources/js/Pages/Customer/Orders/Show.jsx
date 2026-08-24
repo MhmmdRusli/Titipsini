@@ -42,6 +42,14 @@ const SERVICE_LABEL = {
     pindahan: 'Jasa Pindahan',
 };
 
+const UKURAN_BARANG_LABEL = {
+    kecil: 'S',
+    besar: 'M',
+    kamar_kecil: 'L',
+    kamar_besar: 'XL',
+    ekstra_besar: 'XXL',
+};
+
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -170,6 +178,16 @@ export default function OrderShow({ order, qris_url }) {
     const paymentReceiptUrl = order.payment_receipt_url ?? (order.payment_receipt
         ? `/storage/${order.payment_receipt.replace(/^\/?storage\//, '')}`
         : null);
+    const ukuranDetail = order.service_type === 'barang'
+        ? UKURAN_BARANG_LABEL[order.ukuran_barang] ?? order.ukuran_barang
+        : order.service_type === 'bangunan' && order.ukuran_panjang && order.ukuran_lebar
+            ? `${order.ukuran_panjang} x ${order.ukuran_lebar} m`
+            : order.ukuran_barang;
+    const ukuranLabel = order.service_type === 'barang'
+        ? 'Ukuran'
+        : order.service_type === 'bangunan'
+            ? 'Ukuran Bangunan'
+            : 'Jenis Kendaraan';
 
     return (
         <CustomerLayout>
@@ -240,6 +258,7 @@ export default function OrderShow({ order, qris_url }) {
                             <SectionTitle>Detail Pesanan</SectionTitle>
                             <InfoRow label="Barang" value={namaBarang} />
                             <InfoRow label="Layanan" value={SERVICE_LABEL[order.service_type] ?? order.service_type} />
+                            <InfoRow label={ukuranLabel} value={ukuranDetail} />
                             <InfoRow label="Tanggal Masuk" value={formatTanggalPendek(order.start_date)} />
                             <InfoRow label="Tanggal Keluar" value={formatTanggalPendek(order.end_date)} />
                             <InfoRow label="Durasi Waktu" value={durasi} />
