@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { Search, MapPin, Clock, X, Car, Building2, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Clock, X, Package, Car, Building2, Truck, ChevronRight } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const VEHICLE_TYPES = [
@@ -37,6 +37,13 @@ const MODAL_LABEL_BY_KATEGORI = {
         description: 'Pilih jenis bangunan yang sesuai dengan kebutuhan Anda untuk melanjutkan transaksi.',
         icon: Building2,
     },
+};
+
+const ICON_BY_KATEGORI = {
+    barang: Package,
+    kendaraan: Car,
+    bangunan: Building2,
+    pindahan: Truck,
 };
 
 const KATEGORI_LABEL = {
@@ -101,7 +108,8 @@ export default function ServicesIndex({ services, filters }) {
     }
 
     const pageTitle = KATEGORI_LABEL[kategori] ?? 'Layanan';
-    const ModalIcon = modalLabel?.icon ?? Car;
+    const CategoryIcon = ICON_BY_KATEGORI[kategori] ?? Package;
+    const ModalIcon = modalLabel?.icon ?? CategoryIcon;
     const actionLabel = ACTION_LABEL_BY_KATEGORI[kategori] ?? 'Pilih';
 
     return (
@@ -138,15 +146,18 @@ export default function ServicesIndex({ services, filters }) {
                             Belum ada layanan yang cocok di area ini.
                         </div>
                     )}
-                    {services.data.map((service) => (
-                        <div
-                            key={service.id}
-                            className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
-                        >
+                    {services.data.map((service) => {
+                        const ServiceIcon = ICON_BY_KATEGORI[service.kategori] ?? CategoryIcon;
+
+                        return (
+                            <div
+                                key={service.id}
+                                className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                            >
                             <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-2.5">
                                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-900/30 dark:text-[#4ade80]">
-                                        <ModalIcon size={16} />
+                                        <ServiceIcon size={16} />
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{service.kota}</p>
@@ -188,7 +199,7 @@ export default function ServicesIndex({ services, filters }) {
 
                             <div className="mt-3 flex items-center justify-between">
                                 <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-gray-900/40 dark:text-gray-400">
-                                    <ModalIcon size={10} />
+                                    <ServiceIcon size={10} />
                                     {KATEGORI_LABEL[service.kategori]}
                                 </span>
 
@@ -200,8 +211,9 @@ export default function ServicesIndex({ services, filters }) {
                                     <ChevronRight size={13} />
                                 </Link>
                             </div>
-                        </div>
-                    ))}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 

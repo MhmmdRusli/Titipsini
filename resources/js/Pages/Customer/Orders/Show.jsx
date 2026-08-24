@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
-    ShieldCheck, Truck, XCircle, X, Clock, AlertTriangle,
+    ShieldCheck, Truck, Car, Building2, Package, XCircle, X, Clock, AlertTriangle,
     QrCode, WalletMinimal, Upload, CheckCircle2, ArrowLeft, FileText,
 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
@@ -188,6 +188,20 @@ export default function OrderShow({ order, qris_url }) {
         : order.service_type === 'bangunan'
             ? 'Ukuran Bangunan'
             : 'Jenis Kendaraan';
+    const ServiceIcon = order.service_type === 'barang'
+        ? Package
+        : order.service_type === 'kendaraan'
+            ? Car
+            : order.service_type === 'bangunan'
+                ? Building2
+                : Truck;
+    const itemLabel = order.service_type === 'barang'
+        ? 'Barang'
+        : order.service_type === 'kendaraan'
+            ? 'Merek Kendaraan'
+            : order.service_type === 'bangunan'
+                ? 'Nama Bangunan'
+                : 'Layanan Pindahan';
 
     return (
         <CustomerLayout>
@@ -211,7 +225,7 @@ export default function OrderShow({ order, qris_url }) {
                     <div className="flex items-center justify-between gap-3 bg-[#15803d] px-5 py-4 dark:bg-[#0f5c2c]">
                         <div className="flex items-center gap-2">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15">
-                                <ShieldCheck size={18} className="text-white" />
+                                <ServiceIcon size={18} className="text-white" />
                             </div>
                             <div>
                                 <p className="text-sm font-extrabold leading-tight text-white">Titipsini&nbsp;•&nbsp;Com</p>
@@ -256,7 +270,7 @@ export default function OrderShow({ order, qris_url }) {
                         {/* Detail Pesanan */}
                         <div className="space-y-2">
                             <SectionTitle>Detail Pesanan</SectionTitle>
-                            <InfoRow label="Barang" value={namaBarang} />
+                            <InfoRow label={itemLabel} value={namaBarang} />
                             <InfoRow label="Layanan" value={SERVICE_LABEL[order.service_type] ?? order.service_type} />
                             <InfoRow label={ukuranLabel} value={ukuranDetail} />
                             <InfoRow label="Tanggal Masuk" value={formatTanggalPendek(order.start_date)} />

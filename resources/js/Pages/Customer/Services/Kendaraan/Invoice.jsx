@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Boxes, CheckCircle2 } from 'lucide-react';
+import { Car, CheckCircle2 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 function formatRupiah(value) {
@@ -44,7 +44,7 @@ export default function InvoiceKendaraan({ order }) {
                     <div className="flex items-start justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
                         <div className="flex items-center gap-1.5">
                             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#15803d] text-white dark:bg-[#22c55e]">
-                                <Boxes size={14} />
+                                <Car size={14} />
                             </span>
                             <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">
                                 Titipsini<span className="text-[#15803d] dark:text-[#4ade80]">•</span>Com
