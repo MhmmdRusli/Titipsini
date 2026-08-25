@@ -53,18 +53,14 @@ const KATEGORI_LABEL = {
     pindahan: 'Pindahan',
 };
 
-// Label tombol aksi utama disesuaikan per kategori, tapi tujuan navigasinya
-// tetap persis sama seperti kode aslinya (barang -> paket-pilihan, lainnya -> show()).
+
 const ACTION_LABEL_BY_KATEGORI = {
     barang: 'Titip Disini',
     kendaraan: 'Pilih & Pesan',
     bangunan: 'Pilih & Pesan',
 };
 
-// 👇 DITAMBAHKAN: tujuan navigasi tombol "Pilih & Pesan" per kategori.
-// 'kendaraan' sekarang diarahkan ke form Penitipan Kendaraan yang baru
-// (bukan lagi Show.jsx generik). 'bangunan' belum ada flow barunya, jadi
-// tetap ke Show.jsx seperti semula.
+
 function hrefForService(service) {
     if (service.kategori === 'barang') {
         return `/app/services/barang/paket-pilihan?service_id=${service.id}`;
