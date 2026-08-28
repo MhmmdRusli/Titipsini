@@ -60,7 +60,11 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
             return;
         }
 
-        if (detectedKota) {
+        if (kategori === 'kendaraan') {
+            // Kendaraan memakai pemilih kota penuh. Saat kota dipilih,
+            // applyKota() langsung memuat daftar mitra di kota tersebut.
+            setSheet('picker');
+        } else if (detectedKota) {
             setSheet('confirm');
         } else {
             // No guess available at all — send straight to the picker instead of

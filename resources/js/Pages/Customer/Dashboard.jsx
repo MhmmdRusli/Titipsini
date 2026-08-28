@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Plus, History, Package, Building2, Car, Truck, ChevronRight, ChevronDown, MapPin, Clock, Search, Inbox, User, LogOut } from 'lucide-react';
+import { Plus, History, Package, Building2, Car, Truck, ChevronRight, ChevronDown, MapPin, Clock, Search, Inbox, User, LogOut, Crosshair, Loader2 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+import { reverseGeocodeCoordinates } from '@/Components/GoogleMapAddressPicker';
 
 const CATEGORIES = [
     { key: 'barang', label: 'Barang', icon: Package, href: '/app/services?kategori=barang' },
@@ -67,8 +68,10 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
-    const [selectedWilayah, setSelectedWilayah] = useState(currentUser?.wilayah ?? 'Daerah Istimewa Yogyakarta');
+    const [selectedWilayah, setSelectedWilayah] = useState(() => window.localStorage.getItem('titipsini:dashboard-wilayah') ?? currentUser?.wilayah ?? 'Daerah Istimewa Yogyakarta');
     const [searchQuery, setSearchQuery] = useState('');
+    const [isGettingLocation, setIsGettingLocation] = useState(false);
+    const [locationError, setLocationError] = useState('');
 
     const dropdownRef = useRef(null);
     const avatarMenuRef = useRef(null);
@@ -132,6 +135,42 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
     const filteredWilayah = daftarWilayahIndonesia.filter((wilayah) =>
         wilayah.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    function selectWilayah(wilayah) {
+        setSelectedWilayah(wilayah);
+        window.localStorage.setItem('titipsini:dashboard-wilayah', wilayah);
+        setLocationError('');
+        setIsDropdownOpen(false);
+    }
+
+    function useCurrentLocation() {
+        if (!navigator.geolocation) {
+            setLocationError('Browser ini tidak mendukung lokasi perangkat.');
+            return;
+        }
+
+        setIsGettingLocation(true);
+        setLocationError('');
+        navigator.geolocation.getCurrentPosition(
+            async ({ coords }) => {
+                try {
+                    const location = await reverseGeocodeCoordinates(coords.latitude, coords.longitude);
+                    const wilayah = location.city || location.district || location.province;
+                    if (!wilayah) throw new Error('Kota atau kabupaten tidak ditemukan.');
+                    selectWilayah(wilayah);
+                } catch (error) {
+                    setLocationError(error.message || 'Lokasi saat ini tidak dapat diterjemahkan.');
+                } finally {
+                    setIsGettingLocation(false);
+                }
+            },
+            () => {
+                setLocationError('Lokasi tidak bisa diakses. Izinkan GPS pada browser, lalu coba lagi.');
+                setIsGettingLocation(false);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+        );
+    }
 
     return (
         <CustomerLayout>
@@ -219,16 +258,24 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                                             />
                                         </div>
 
+                                        <button
+                                            type="button"
+                                            onClick={useCurrentLocation}
+                                            disabled={isGettingLocation}
+                                            className="mb-2 flex w-full items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-left text-xs font-semibold text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/60"
+                                        >
+                                            {isGettingLocation ? <Loader2 size={14} className="animate-spin" /> : <Crosshair size={14} />}
+                                            {isGettingLocation ? 'Mendeteksi lokasi...' : 'Gunakan lokasi saat ini'}
+                                        </button>
+                                        {locationError && <p className="mb-2 rounded-lg bg-amber-50 px-2.5 py-2 text-[11px] text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">{locationError}</p>}
+
                                         {/* Daftar Pilihan */}
                                         <div className="space-y-0.5 max-h-60 overflow-y-auto pr-1">
                                             {filteredWilayah.length > 0 ? (
                                                 filteredWilayah.map((wilayah, index) => (
                                                     <button
                                                         key={index}
-                                                        onClick={() => {
-                                                            setSelectedWilayah(wilayah);
-                                                            setIsDropdownOpen(false);
-                                                        }}
+                                                        onClick={() => selectWilayah(wilayah)}
                                                         className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between cursor-pointer ${
                                                             selectedWilayah === wilayah
                                                                 ? 'bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400 font-bold'
