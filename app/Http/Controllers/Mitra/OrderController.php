@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Mitra;
 use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Order;
-use App\Services\OrderFaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -157,6 +156,7 @@ class OrderController extends Controller
                 'payment_method' => $order->payment_method,
                 'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
                 'payment_verified_at' => optional($order->payment_verified_at)->format('d M Y, H:i'),
+                'pickup_requested_at' => optional($order->pickup_requested_at)->format('d M Y, H:i'),
                 
                 // 👇 Properti Denda yang ditambahkan agar muncul di halaman Mitra
                 'denda' => (float) $order->denda, 
@@ -166,7 +166,9 @@ class OrderController extends Controller
                 'fase' => $order->fase,
                 'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
                 'next_fase_action_label' => $nextFaseAction,
-                'can_advance_fase' => $order->status === 'diproses' && $nextFaseAction !== null,
+                'can_advance_fase' => $order->status === 'diproses'
+                    && $nextFaseAction !== null
+                    && ! ($order->service_type === 'barang' && $order->fase === 'berjalan' && ! $order->pickup_requested_at),
                 'can_accept' => $order->status === 'baru',
             ],
         ]);
@@ -212,26 +214,27 @@ class OrderController extends Controller
         $next = self::NEXT_FASE[$order->fase] ?? null;
 
         abort_unless($next, 400, 'Pesanan ini sudah berada di fase akhir.');
+        if ($order->service_type === 'barang' && $next === 'akhir') {
+            abort_unless($order->pickup_requested_at, 400, 'Customer belum mengajukan pengambilan barang.');
+        }
 
         $order->update(['fase' => $next]);
 
         $label = self::FASE_LABELS[$order->service_type][$next] ?? $next;
-
-        if ($next === 'akhir' && $order->payment_verified_at) {
-            OrderFaseService::completeOrder($order);
-
-            return back()->with('success', 'Status pesanan diperbarui menjadi "'.$label.'" dan pesanan otomatis diselesaikan.');
-        }
 
         Notifikasi::create([
             'user_id' => $order->customer_id,
             'order_id' => $order->id,
             'type' => 'transaksi_masuk',
             'judul' => 'Status Pesanan Diperbarui',
-            'pesan' => 'Pesanan '.$order->order_code.' sekarang: '.$label.'.',
+            'pesan' => $next === 'akhir'
+                ? 'Barang untuk pesanan '.$order->order_code.' sudah ditandai diambil. Silakan selesaikan pesanan setelah barang diterima.'
+                : 'Pesanan '.$order->order_code.' sekarang: '.$label.'.',
         ]);
 
-        return back()->with('success', 'Status pesanan berhasil diperbarui menjadi "'.$label.'".');
+        return back()->with('success', $next === 'akhir'
+            ? 'Barang ditandai sudah diambil. Menunggu konfirmasi customer.'
+            : 'Status pesanan berhasil diperbarui menjadi "'.$label+'".');
     }
 
         public function ambilPesanan(Order $order)
@@ -285,7 +288,7 @@ class OrderController extends Controller
 
         $mulai = \Illuminate\Support\Carbon::parse($order->start_date);
         $selesai = \Illuminate\Support\Carbon::parse($order->end_date);
-        $hari = $mulai->diffInDays($selesai) + 1;
+        $hari = max(1, $mulai->diffInDays($selesai));
 
         return $hari.' hari';
     }

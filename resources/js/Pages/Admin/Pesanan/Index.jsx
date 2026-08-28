@@ -40,10 +40,10 @@ function isCashPendingConfirmation(order) {
     return order.payment_method === 'cod' && !order.payment_verified_at;
 }
 
-// Order dianggap "siap diselesaikan" kalau:
+// Order dianggap sudah sampai fase pengambilan kalau:
 // 1) pembayaran sudah diverifikasi (payment_verified_at keisi), DAN
-// 2) fase operasionalnya sudah akhir (Mitra sudah tandai dititip lalu diambil/dst)
-// tapi status masih 'diproses' — artinya tinggal nunggu Admin klik "Selesaikan Pesanan".
+// 2) fase operasionalnya sudah akhir (Mitra sudah tandai dititip lalu diambil/dst).
+// Setelah itu Admin menunggu customer mengonfirmasi "Selesaikan Pesanan".
 function isReadyToComplete(order) {
     return !!order.payment_verified_at && order.fase === 'akhir' && order.status === 'diproses';
 }
@@ -339,7 +339,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                 )}
                                                 {readyToComplete && (
                                                     <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                                                        <CheckCircle2 size={11} /> Siap Diselesaikan
+                                                        <CheckCircle2 size={11} /> Menunggu Customer
                                                     </span>
                                                 )}
                                                 {order.payment_method === 'cod' && (
@@ -703,17 +703,15 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda }) {
 
     const nextActions = {
         baru: ['diproses', 'dibatalkan'],
-        // Tombol 'selesai' cuma dimasukkan kalau readyToComplete true —
-        // artinya pembayaran sudah diverifikasi DAN Mitra sudah menandai
-        // fase akhir. Kalau belum, Admin cuma bisa membatalkan pesanan.
-        diproses: [...(readyToComplete ? ['selesai'] : []), 'dibatalkan'],
+        // Penyelesaian normal dilakukan oleh customer setelah barang diterima.
+        // Admin tetap dapat memantau dan membatalkan bila ada masalah.
+        diproses: ['dibatalkan'],
         selesai: [],
         dibatalkan: [],
     }[order.status] ?? [];
 
     const actionLabel = {
         diproses: 'Verifikasi & Proses',
-        selesai: 'Selesaikan Pesanan',
         dibatalkan: 'Batalkan Pesanan',
     };
 
@@ -763,7 +761,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda }) {
                             </span>
                             {readyToComplete && (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                                    <CheckCircle2 size={11} /> Siap Diselesaikan
+                                    <CheckCircle2 size={11} /> Menunggu Customer
                                 </span>
                             )}
                             {order.denda > 0 && (
@@ -943,7 +941,11 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda }) {
 
                 {order.status === 'diproses' && !readyToComplete && (
                     <p className="mt-5 text-xs italic text-gray-400 dark:text-gray-500">
-                        Menunggu {!order.payment_verified_at ? 'verifikasi pembayaran' : 'Mitra menandai fase akhir'} sebelum pesanan ini bisa diselesaikan.
+                        Menunggu {!order.payment_verified_at
+                            ? 'verifikasi pembayaran'
+                            : order.fase === 'akhir'
+                            ? 'customer mengonfirmasi pesanan selesai'
+                            : 'Mitra menandai fase akhir'} sebelum pesanan ini selesai.
                     </p>
                 )}
 

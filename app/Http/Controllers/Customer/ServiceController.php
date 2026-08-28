@@ -419,7 +419,7 @@ class ServiceController extends Controller
             'is_pickup' => $isPickup,
             'jam_pickup' => $isPickup ? $data['jamPickup'] : null,
             'pickup_address' => $isPickup ? $address?->address : null,
-            'city' => $service->kota ?? $customer->city ?? '-',
+            'city' => $service->kabupaten_kota ?? $service->kota ?? $customer->city ?? '-',
             'status' => 'baru',
             'subtotal' => $subtotal,
             'discount' => 0,

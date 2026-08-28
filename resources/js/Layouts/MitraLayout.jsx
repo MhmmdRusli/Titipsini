@@ -56,7 +56,7 @@ function Toast({ type, message, onClose }) {
     );
 }
 
-export default function MitraLayout({ children, title }) {
+export default function MitraLayout({ children, title, backHref }) {
     const { url, props } = usePage();
     const [toast, setToast] = useState(null);
     const pathname = url.split('?')[0];
@@ -64,8 +64,6 @@ export default function MitraLayout({ children, title }) {
         .sort(([firstPath], [secondPath]) => secondPath.length - firstPath.length)
         .find(([pagePath]) => pathname === pagePath || pathname.startsWith(`${pagePath}/`))?.[1];
     const isDashboard = pathname === '/mitra/dashboard';
-    const hideBackButton = ['/mitra/pesanan', '/mitra/notifikasi', '/mitra/profil'].includes(pathname);
-    const centerNavbarTitle = ['/mitra/pesanan', '/mitra/notifikasi', '/mitra/profil'].includes(pathname);
     const navbarTitle = title || (isDashboard ? 'Titipsini.com' : matchedTitle || 'Mitra');
 
     useEffect(() => {
@@ -84,10 +82,10 @@ export default function MitraLayout({ children, title }) {
                         className="flex min-h-14 items-center px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
                     >
-                        {!isDashboard && !hideBackButton && (
+                        {!isDashboard && (
                             <button
                                 type="button"
-                                onClick={() => window.history.back()}
+                                onClick={() => backHref ? window.location.assign(backHref) : window.history.back()}
                                 aria-label="Kembali ke halaman sebelumnya"
                                 className="mr-3 flex shrink-0 items-center text-gray-600 hover:text-gray-900"
                             >
@@ -96,7 +94,7 @@ export default function MitraLayout({ children, title }) {
                         )}
                         <Link
                             href="/mitra/dashboard"
-                            className={`flex items-center gap-1.5 ${centerNavbarTitle ? 'absolute left-1/2 -translate-x-1/2' : ''}`}
+                            className="flex items-center gap-1.5"
                         >
                             {isDashboard ? (
                                 <>

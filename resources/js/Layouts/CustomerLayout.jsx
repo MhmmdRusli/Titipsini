@@ -53,7 +53,7 @@ export default function CustomerLayout({ children, title, backHref }) {
                     </div>
                 </header>
 
-                <main className="flex-1 pb-20 relative z-0">
+                <main className="flex-1 pb-20">
                     {children}
                 </main>
 

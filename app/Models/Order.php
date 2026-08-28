@@ -32,6 +32,7 @@ class Order extends Model
         'city',
         'status',
         'fase',
+        'pickup_requested_at',
         'tanggal_selesai_aktual',
         'denda_paid_at',
         'denda_payment_receipt',
@@ -77,6 +78,7 @@ class Order extends Model
             'total' => 'decimal:2',
             'payment_verified_at' => 'datetime',
             'tanggal_selesai_aktual' => 'datetime',
+            'pickup_requested_at' => 'datetime',
             'denda_paid_at' => 'datetime',
             'start_date' => 'date',
             'end_date' => 'date',
@@ -119,13 +121,15 @@ class Order extends Model
 
         $batasWaktu = $this->tanggal_selesai_aktual
             ? $this->tanggal_selesai_aktual->copy()->startOfDay()
+            : ($this->pickup_requested_at
+                ? $this->pickup_requested_at->copy()->startOfDay()
             : ($this->status === 'selesai'
                 // Order selesai tapi tidak pernah lewat alur fase mitra (edge
                 // case, mis. admin set status manual) - pakai updated_at
                 // sebagai perkiraan terbaik, supaya tidak ikut now() yang
                 // terus bertambah untuk order yang sudah final.
                 ? $this->updated_at->copy()->startOfDay()
-                : now()->startOfDay());
+                : now()->startOfDay()));
 
         $batasSeharusnya = $this->end_date->copy()->startOfDay();
 

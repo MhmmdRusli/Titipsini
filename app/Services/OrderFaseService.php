@@ -10,8 +10,8 @@ use App\Models\PendapatanPlatform;
 /**
  * Sumber tunggal untuk label fase operasional (menunggu/berjalan/akhir) per
  * kategori layanan, dan logic "selesaikan pesanan" yang dipakai bersama oleh
- * Admin\OrderController (klik manual) dan Mitra\OrderController (otomatis saat
- * fase mencapai akhir & pembayaran sudah terverifikasi).
+ * Admin\OrderController (klik manual) dan Customer\OrderController (customer
+ * mengonfirmasi pesanan setelah barang benar-benar diterima).
  */
 class OrderFaseService
 {

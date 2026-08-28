@@ -109,6 +109,9 @@ export default function OrderShow({ order, qris_url }) {
     const [cancelOpen, setCancelOpen] = useState(false);
     const [reason, setReason] = useState('');
     const [processing, setProcessing] = useState(false);
+    const [pickupConfirmOpen, setPickupConfirmOpen] = useState(false);
+    const [requestingPickup, setRequestingPickup] = useState(false);
+    const [completing, setCompleting] = useState(false);
     const [payingDenda, setPayingDenda] = useState(false);
     const [showQrisDenda, setShowQrisDenda] = useState(false);
     const [dendaFile, setDendaFile] = useState(null);
@@ -161,6 +164,30 @@ export default function OrderShow({ order, qris_url }) {
             {
                 onFinish: () => setProcessing(false),
                 onSuccess: () => setCancelOpen(false),
+            }
+        );
+    }
+
+    function completeOrder() {
+        if (!window.confirm('Pastikan barang sudah kamu terima. Selesaikan pesanan sekarang?')) return;
+
+        setCompleting(true);
+        router.patch(
+            `/app/orders/${order.id}/selesaikan`,
+            {},
+            { preserveScroll: true, onFinish: () => setCompleting(false) }
+        );
+    }
+
+    function requestPickup() {
+        setRequestingPickup(true);
+        router.patch(
+            `/app/orders/${order.id}/ajukan-pengambilan`,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setRequestingPickup(false),
+                onSuccess: () => setPickupConfirmOpen(false),
             }
         );
     }
@@ -379,6 +406,54 @@ export default function OrderShow({ order, qris_url }) {
                         </div>
                     </div>
                 </div>
+
+                {order.status === 'diproses' && order.fase === 'berjalan' && order.payment_verified_at && !order.pickup_requested_at && (
+                    <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-950/30">
+                        <p className="text-sm font-bold text-blue-800 dark:text-blue-300">
+                            Ingin mengambil kembali barang?
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-blue-700 dark:text-blue-400">
+                            Ajukan pengambilan saat kamu sudah siap mengambil barang di lokasi mitra.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => setPickupConfirmOpen(true)}
+                            disabled={requestingPickup}
+                            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-60 dark:bg-green-700"
+                        >
+                            {requestingPickup ? 'Mengirim Pengajuan...' : 'Ajukan Pengambilan Barang'}
+                        </button>
+                    </div>
+                )}
+
+                {order.status === 'diproses' && order.fase === 'berjalan' && order.pickup_requested_at && (
+                    <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/30">
+                        <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Pengambilan diajukan</p>
+                        <p className="mt-1 text-xs leading-relaxed text-amber-700 dark:text-amber-400">
+                            Menunggu mitra menyerahkan barang.
+                        </p>
+                    </div>
+                )}
+
+                {order.status === 'diproses' && order.fase === 'akhir' && order.payment_verified_at && (
+                    <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-950/30">
+                        <p className="text-sm font-bold text-green-800 dark:text-green-300">
+                            Barang sudah ditandai diambil
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-green-700 dark:text-green-400">
+                            Pastikan barang sudah kamu terima sebelum menyelesaikan pesanan.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={completeOrder}
+                            disabled={completing}
+                            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-60 dark:bg-green-700"
+                        >
+                            <CheckCircle2 size={15} />
+                            {completing ? 'Menyelesaikan...' : 'Selesaikan Pesanan'}
+                        </button>
+                    </div>
+                )}
 
                 {/* ================= INFO DENDA ================= */}
                 {adaDenda && (
@@ -599,6 +674,49 @@ export default function OrderShow({ order, qris_url }) {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {pickupConfirmOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400">
+                                <Truck size={19} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                                    Ajukan Pengambilan Barang?
+                                </h2>
+                                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                    Pengajuan ini memberi tahu mitra bahwa kamu siap mengambil barang di lokasi penyimpanan.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 rounded-xl bg-green-50 px-3 py-2.5 text-xs leading-relaxed text-green-800 dark:bg-green-950/30 dark:text-green-300">
+                            Pastikan kamu sudah siap datang. Setelah dikirim, mitra akan menyiapkan barang untuk diserahkan.
+                        </div>
+
+                        <div className="mt-5 flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPickupConfirmOpen(false)}
+                                disabled={requestingPickup}
+                                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/60"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={requestPickup}
+                                disabled={requestingPickup}
+                                className="flex-1 rounded-xl bg-[#15803d] py-2.5 text-xs font-bold text-white transition hover:bg-green-700 disabled:opacity-60"
+                            >
+                                {requestingPickup ? 'Mengirim...' : 'Ya, Ajukan'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

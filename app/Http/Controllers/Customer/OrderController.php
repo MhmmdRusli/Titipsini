@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\PaymentSetting;
+use App\Services\OrderFaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -101,6 +102,42 @@ class OrderController extends Controller
         ]);
 
         return back()->with('success', 'Pesanan berhasil dibatalkan.');
+    }
+
+    public function complete(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+        abort_unless($order->status === 'diproses', 400, 'Pesanan ini tidak sedang diproses.');
+        abort_unless($order->fase === 'akhir', 400, 'Mitra belum menandai barang sudah diambil.');
+        abort_unless($order->payment_verified_at !== null, 400, 'Pembayaran pesanan belum diverifikasi.');
+
+        $order->update(['tanggal_selesai_aktual' => now()]);
+        OrderFaseService::completeOrder($order);
+
+        return back()->with('success', 'Pesanan berhasil diselesaikan.');
+    }
+
+    public function requestPickup(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+        abort_unless($order->status === 'diproses', 400, 'Pesanan ini tidak sedang diproses.');
+        abort_unless($order->fase === 'berjalan', 400, 'Pesanan belum berada pada tahap penitipan.');
+        abort_unless($order->payment_verified_at !== null, 400, 'Pembayaran pesanan belum diverifikasi.');
+        abort_if($order->pickup_requested_at, 400, 'Pengajuan pengambilan sudah dikirim.');
+
+        $order->update(['pickup_requested_at' => now()]);
+
+        if ($order->partner_id) {
+            Notifikasi::create([
+                'user_id' => $order->partner_id,
+                'order_id' => $order->id,
+                'type' => 'transaksi_masuk',
+                'judul' => 'Customer Mengajukan Pengambilan',
+                'pesan' => 'Customer mengajukan pengambilan barang untuk pesanan '.$order->order_code.'. Silakan serahkan barang dan konfirmasi pengambilan.',
+            ]);
+        }
+
+        return back()->with('success', 'Pengajuan pengambilan berhasil dikirim ke mitra.');
     }
 
     public function success(Request $request, Order $order): Response
