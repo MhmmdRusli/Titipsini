@@ -11,6 +11,7 @@ class Order extends Model
         'order_number',
         'customer_id',
         'partner_id',
+        'service_id',
         'service_type',
         'item_name',
         'item_description',
@@ -99,6 +100,11 @@ class Order extends Model
     public function partner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'partner_id');
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     /**

@@ -335,7 +335,7 @@ class ServiceController extends Controller
 
         $order = Order::create([
             'order_code' => 'TS-'.strtoupper(uniqid()), 'customer_id' => $request->user()->id,
-            'partner_id' => $service->user_id, 'service_type' => 'bangunan',
+            'partner_id' => $service->user_id, 'service_id' => $service->id, 'service_type' => 'bangunan',
             'item_name' => $data['namaBangunan'], 'item_description' => $data['keterangan'] ?? null,
             'jumlah_barang' => $data['jumlahBangunan'], 'ukuran_barang' => $service->jenis_bangunan ?: 'bangunan',
             'ukuran_panjang' => $service->panjang, 'ukuran_lebar' => $service->lebar,
@@ -465,6 +465,7 @@ class ServiceController extends Controller
             'customer_id' => $customer->id,
             'address_id' => $address?->id,
             'partner_id' => $service?->user_id,
+            'service_id' => $service?->id,
             'service_type' => 'barang',
             'item_name' => $data['namaBarang'],
             'item_description' => $data['keterangan'] ?? null,
@@ -661,6 +662,7 @@ class ServiceController extends Controller
             'order_code' => 'TS-'.strtoupper(uniqid()),
             'customer_id' => $customer->id,
             'partner_id' => $service?->user_id,
+            'service_id' => $service?->id,
             'service_type' => 'kendaraan',
             'item_name' => $data['merekKendaraan'],
             'item_description' => $data['keterangan'] ?? null,
@@ -810,6 +812,7 @@ class ServiceController extends Controller
             'order_code' => 'TS-'.strtoupper(uniqid()),
             'customer_id' => $customer->id,
             'partner_id' => $service->user_id,
+            'service_id' => $service->id,
             'service_type' => $service->kategori,
             'item_name' => $service->nama.' ('.$this->jenisLabel($service).')',
             'harga_per_hari' => $hargaPerHari,
@@ -887,6 +890,7 @@ class ServiceController extends Controller
             'order_code' => 'TS-'.strtoupper(uniqid()),
             'customer_id' => $customer->id,
             'partner_id' => $service->user_id,
+            'service_id' => $service->id,
             'service_type' => $service->kategori,
             'item_name' => $service->nama.' ('.$this->jenisLabel($service).')',
             'start_date' => $data['tanggalMasuk'],
@@ -966,8 +970,7 @@ class ServiceController extends Controller
     protected function reviewSummary(Service $service): array
     {
         $reviews = Order::query()
-            ->where('partner_id', $service->user_id)
-            ->where('service_type', $service->kategori)
+            ->where('service_id', $service->id)
             ->where('status', 'selesai')
             ->whereNotNull('rating')
             ->with('customer:id,name')
