@@ -277,32 +277,6 @@ export default function OrdersIndex({ orders, filters }) {
                 </div>
             </div>
 
-            {notice && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
-                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-gray-800">
-                        <div className="flex items-start justify-between gap-4">
-                            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Belum Bisa Diselesaikan</h2>
-                            <button
-                                type="button"
-                                onClick={() => setNotice('')}
-                                className="text-xl leading-none text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                                aria-label="Tutup notifikasi"
-                            >
-                                x
-                            </button>
-                        </div>
-                        <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{notice}</p>
-                        <button
-                            type="button"
-                            onClick={() => setNotice('')}
-                            className="mt-5 w-full rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white dark:bg-[#22c55e]"
-                        >
-                            Mengerti
-                        </button>
-                    </div>
-                </div>
-            )}
-
             <style>{`
                 .no-scrollbar {
                     scrollbar-width: none;
