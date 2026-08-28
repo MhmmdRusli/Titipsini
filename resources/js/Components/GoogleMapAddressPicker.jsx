@@ -39,7 +39,7 @@ function getFirstComponent(result, types) {
     return types.map((type) => getComponent(result, type)).find(Boolean) ?? '';
 }
 
-async function reverseGeocodeFallback(lat, lng) {
+export async function reverseGeocodeCoordinates(lat, lng) {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 4000);
 
@@ -124,7 +124,7 @@ export default function GoogleMapAddressPicker({ onAddressSelect }) {
 
                 if (!selectedAddress.province || !selectedAddress.city || !selectedAddress.district) {
                     try {
-                        const fallback = await reverseGeocodeFallback(lat, lng);
+                        const fallback = await reverseGeocodeCoordinates(lat, lng);
                         selectedAddress = {
                             address: selectedAddress.address || fallback.address,
                             province: selectedAddress.province || fallback.province,
@@ -137,7 +137,7 @@ export default function GoogleMapAddressPicker({ onAddressSelect }) {
                 }
             } else {
                 try {
-                    selectedAddress = await reverseGeocodeFallback(lat, lng);
+                    selectedAddress = await reverseGeocodeCoordinates(lat, lng);
                 } catch (reason) {
                     setError(`${reason.message} Cek izin lokasi dan koneksi internet.`);
                     setPicking(false);
