@@ -78,7 +78,7 @@ export default function FormKendaraan({ serviceId, jenisKendaraanOptions = [], p
     }
 
     return (
-        <CustomerLayout title="Form Penitipan Kendaraan" backHref="/app/services/barang/paket-pilihan">
+        <CustomerLayout title="Form Penitipan Kendaraan" backHref="/app/services/kendaraan/search">
             <Head title="Form Penitipan Kendaraan" />
 
              <div className="px-4 py-6">

@@ -159,7 +159,7 @@ class ServiceController extends Controller
             return redirect()->route('customer.services.kendaraan.form');
         }
 
-        if ($kategori === 'bangunan') {
+        if ($kategori === 'bangunan' && ! $request->boolean('browse')) {
             return redirect()->route('customer.services.bangunan.form');
         }
 
@@ -389,7 +389,7 @@ class ServiceController extends Controller
             'pickup' => 'boolean',
             'jamPickup' => ['nullable', 'date_format:H:i'],
             'ukuranBarang' => ['required', Rule::in(array_keys(self::UKURAN_BARANG))],
-            'fotoBarangUrl' => 'nullable|url|max:500',
+            'fotoBarang' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
             'service_id' => 'nullable|integer|exists:services,id',
             'address_id' => [
                 'nullable',
@@ -439,6 +439,7 @@ class ServiceController extends Controller
         $address = !empty($data['address_id'])
             ? $customer->addresses()->find($data['address_id'])
             : null;
+        $fotoBarangPath = $request->file('fotoBarang')->store('barang', 'public');
 
         $order = Order::create([
             'order_code' => 'TS-'.strtoupper(uniqid()),
@@ -451,7 +452,7 @@ class ServiceController extends Controller
             'jumlah_barang' => $data['jumlahBarang'],
             'ukuran_barang' => $data['ukuranBarang'],
             'harga_per_hari' => $hargaPerHari,
-            'foto_barang_url' => $data['fotoBarangUrl'] ?? null,
+            'foto_barang_url' => $fotoBarangPath,
             'start_date' => $data['tanggalMasuk'],
             'end_date' => $data['tanggalKeluar'],
             'duration' => $jumlahHari,
@@ -916,6 +917,16 @@ class ServiceController extends Controller
     public function searchBangunan(Request $request)
     {
         return $this->search($request, 'bangunan');
+    }
+
+    public function searchBarang(Request $request)
+    {
+        return $this->search($request, 'barang');
+    }
+
+    public function searchPindahan(Request $request)
+    {
+        return $this->search($request, 'pindahan');
     }
 
     protected function formatMitraKendaraan(Service $service): array

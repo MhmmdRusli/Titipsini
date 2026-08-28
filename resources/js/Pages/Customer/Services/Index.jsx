@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { Search, MapPin, Clock, X, Package, Car, Building2, Truck, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Clock, X, Package, Car, Building2, Truck } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const VEHICLE_TYPES = [
@@ -13,17 +13,8 @@ const VEHICLE_TYPES = [
     { value: 'mobil_pick_up', label: 'Mobil pick up' },
 ];
 
-const BUILDING_TYPES = [
-    { value: 'rumah', label: 'Rumah' },
-    { value: 'apartemen', label: 'Apartemen' },
-    { value: 'kosan', label: 'Kosan' },
-    { value: 'gudang', label: 'Gudang' },
-    { value: 'kamar', label: 'Kamar' },
-];
-
 const TYPE_OPTIONS_BY_KATEGORI = {
     kendaraan: VEHICLE_TYPES,
-    bangunan: BUILDING_TYPES,
 };
 
 const MODAL_LABEL_BY_KATEGORI = {
@@ -31,11 +22,6 @@ const MODAL_LABEL_BY_KATEGORI = {
         title: 'Pilih Kendaraan',
         description: 'Pilih jenis kendaraan yang sesuai dengan kebutuhan Anda untuk melanjutkan transaksi.',
         icon: Car,
-    },
-    bangunan: {
-        title: 'Pilih Bangunan',
-        description: 'Pilih jenis bangunan yang sesuai dengan kebutuhan Anda untuk melanjutkan transaksi.',
-        icon: Building2,
     },
 };
 
@@ -53,15 +39,6 @@ const KATEGORI_LABEL = {
     pindahan: 'Pindahan',
 };
 
-
-const ACTION_LABEL_BY_KATEGORI = {
-    barang: 'Titip Disini',
-    kendaraan: 'Pilih & Pesan',
-    bangunan: 'Pilih & Pesan',
-    pindahan: 'Pilih & Pesan',
-};
-
-
 function hrefForService(service) {
     if (service.kategori === 'barang') {
         return `/app/services/barang/paket-pilihan?service_id=${service.id}`;
@@ -73,7 +50,7 @@ function hrefForService(service) {
         return `/app/services/bangunan/search?kota=${encodeURIComponent(service.kota)}`;
     }
     if (service.kategori === 'pindahan') {
-        return `/app/services/pindahan/${service.id}/detail`;
+        return `/app/services/pindahan/${service.id}/titip`;
     }
     return `/app/services/${service.id}`;
 }
@@ -81,6 +58,12 @@ function hrefForService(service) {
 function detailHrefForService(service) {
     if (service.kategori === 'barang') {
         return `/app/services/barang/${service.id}/detail`;
+    }
+    if (service.kategori === 'bangunan') {
+        return `/app/services/bangunan/${service.id}/detail`;
+    }
+    if (service.kategori === 'kendaraan') {
+        return `/app/services/kendaraan/${service.id}/detail`;
     }
     return `/app/services/pindahan/${service.id}/detail`;
 }
@@ -117,8 +100,6 @@ export default function ServicesIndex({ services, filters }) {
     const pageTitle = KATEGORI_LABEL[kategori] ?? 'Layanan';
     const CategoryIcon = ICON_BY_KATEGORI[kategori] ?? Package;
     const ModalIcon = modalLabel?.icon ?? CategoryIcon;
-    const actionLabel = ACTION_LABEL_BY_KATEGORI[kategori] ?? 'Pilih';
-
     return (
         <CustomerLayout title={pageTitle} backHref="/app/dashboard">
             <Head title={pageTitle} />
@@ -194,30 +175,20 @@ export default function ServicesIndex({ services, filters }) {
                             </div>
 
                             <div className="mt-2.5 flex items-center gap-2">
-                                {['barang', 'pindahan'].includes(service.kategori) ? (
-                                    <div className="flex w-full items-center gap-2">
-                                        <Link
-                                            href={hrefForService(service)}
-                                            className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#15803d] px-3.5 py-2 text-xs font-bold text-white dark:bg-[#22c55e]"
-                                        >
-                                            Titip Disini
-                                        </Link>
-                                        <Link
-                                            href={detailHrefForService(service)}
-                                            className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#15803d] px-3.5 py-2 text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
-                                        >
-                                            Detail Mitra
-                                        </Link>
-                                    </div>
-                                ) : (
+                                <div className="flex w-full items-center gap-2">
                                     <Link
                                         href={hrefForService(service)}
-                                        className="inline-flex items-center gap-1 rounded-full bg-[#15803d] px-3.5 py-1.5 text-xs font-bold text-white dark:bg-[#22c55e]"
+                                        className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#15803d] px-3.5 py-2 text-xs font-bold text-white dark:bg-[#22c55e]"
                                     >
-                                        {actionLabel}
-                                        <ChevronRight size={13} />
+                                        Titip Disini
                                     </Link>
-                                )}
+                                    <Link
+                                        href={detailHrefForService(service)}
+                                        className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#15803d] px-3.5 py-2 text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
+                                    >
+                                        Detail Mitra
+                                    </Link>
+                                </div>
                             </div>
                             </div>
                         );

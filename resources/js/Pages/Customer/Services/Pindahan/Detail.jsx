@@ -4,10 +4,10 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 
 export default function Detail({ mitra }) {
     return (
-        <CustomerLayout title="Detail Mitra" backHref="/app/services?kategori=pindahan">
+        <CustomerLayout title="Detail Mitra" backHref="/app/services?kategori=pindahan&browse=1">
             <Head title="Detail Mitra Pindahan" />
             <div className="px-4 py-6">
-                <Link href="/app/services?kategori=pindahan" className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-gray-500">
+                <Link href="/app/services?kategori=pindahan&browse=1" className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-gray-500">
                     <ArrowLeft size={16} /> Detail Mitra
                 </Link>
                 <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">

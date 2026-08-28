@@ -47,6 +47,11 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
 
     // On first load: if no kota confirmed yet, decide whether to ask.
     useEffect(() => {
+        if (openCityPicker) {
+            setSheet('picker');
+            return;
+        }
+
         if (kota) return;
 
         const remembered = window.localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -55,9 +60,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
             return;
         }
 
-        if (openCityPicker) {
-            setSheet('picker');
-        } else if (detectedKota) {
+        if (detectedKota) {
             setSheet('confirm');
         } else {
             // No guess available at all — send straight to the picker instead of
@@ -129,9 +132,15 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
 
     const hasNoResults = kota && mitras && mitras.data.length === 0;
     const CategoryIcon = CATEGORY_ICON[kategori] ?? Package;
+    const landingHref = {
+        barang: '/app/services/barang/landing',
+        bangunan: '/app/services/bangunan',
+        kendaraan: '/app/services/kendaraan',
+        pindahan: '/app/services/pindahan',
+    }[kategori] ?? '/app/dashboard';
 
     return (
-        <CustomerLayout title="Pencarian" backHref="/app/dashboard">
+        <CustomerLayout title="Pencarian" backHref={landingHref}>
             <Head title="Pencarian" />
 
             <div className={`px-4 py-3 ${sheet ? 'pointer-events-none blur-sm' : ''}`}>

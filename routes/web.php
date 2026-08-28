@@ -363,6 +363,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
     Route::get('/services/barang/paket-pilihan', [ServiceController::class, 'pilihPaket'])->name('services.barang.pilihPaket');
     Route::get('/services/barang/landing', [ServiceController::class, 'landingBarang'])->name('services.barang.landing');
+    Route::get('/services/barang/search', [ServiceController::class, 'searchBarang'])->name('services.barang.search');
     Route::get('/services/barang', [ServiceController::class, 'formBarang'])->name('services.barang.form');
     Route::get('/services/barang/{service}/detail', [ServiceController::class, 'detailBarang'])->name('services.barang.detail');
     Route::post('/services/barang', [ServiceController::class, 'simpanBarang'])->name('services.barang.store');
@@ -377,6 +378,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/services/bangunan/{order}/invoice', [ServiceController::class, 'invoiceBangunan'])->name('services.bangunan.invoice');
 
     Route::get('/services/pindahan', [ServiceController::class, 'formPindahan'])->name('services.pindahan.form');
+    Route::get('/services/pindahan/search', [ServiceController::class, 'searchPindahan'])->name('services.pindahan.search');
     Route::get('/services/pindahan/{service}/detail', [ServiceController::class, 'detailPindahan'])->name('services.pindahan.detail');
     Route::get('/services/pindahan/{order}/invoice', [ServiceController::class, 'invoicePindahan'])->name('services.pindahan.invoice');
     Route::get('/services/kendaraan', [ServiceController::class, 'formKendaraan'])->name('services.kendaraan.form');

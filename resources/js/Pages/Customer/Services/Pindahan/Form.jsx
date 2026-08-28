@@ -96,7 +96,7 @@ export default function Form({
     }
 
     return (
-        <CustomerLayout title={`Form ${serviceLabel}`} backHref="/app/services">
+        <CustomerLayout title={`Form ${serviceLabel}`} backHref="/app/services?kategori=pindahan&browse=1">
             <Head title={`Form ${serviceLabel}`} />
 
             <div className="px-4 py-6">
