@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { MapPin } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
@@ -17,15 +18,20 @@ const SERVICE_LABEL = {
     pindahan: 'Jasa Pindahan',
 };
 
-// Label & warna badge status dipetakan langsung dari order.status,
-// bukan hasil tebakan ternary fallback (supaya status 'dibatalkan'
-// tidak ikut kelabeli "Belum Bayar").
 const STATUS_LABEL = {
     baru: 'Belum Bayar',
     diproses: 'Dititipkan',
     selesai: 'Selesai',
     dibatalkan: 'Dibatalkan',
 };
+
+function getStatusLabel(order) {
+    if (order.status === 'diproses' && !order.payment_verified_at) {
+        return order.payment_receipt ? 'Menunggu Verifikasi Pembayaran' : 'Menunggu Pembayaran';
+    }
+
+    return STATUS_LABEL[order.status] ?? order.status;
+}
 
 const STATUS_COLOR = {
     baru: 'text-red-500',
@@ -44,9 +50,30 @@ function formatRupiah(value) {
 
 export default function OrdersIndex({ orders, filters }) {
     const activeStatus = filters?.status ?? '';
+    const [processingOrderId, setProcessingOrderId] = useState(null);
 
     function changeTab(status) {
         router.get('/app/orders', { status }, { preserveState: true, preserveScroll: true, replace: true });
+    }
+
+    function requestPickup(order) {
+        if (!window.confirm('Ajukan pengambilan barang sekarang?')) return;
+
+        setProcessingOrderId(order.id);
+        router.patch(`/app/orders/${order.id}/ajukan-pengambilan`, {}, {
+            preserveScroll: true,
+            onFinish: () => setProcessingOrderId(null),
+        });
+    }
+
+    function completeOrder(order) {
+        if (!window.confirm('Pastikan barang sudah kamu terima. Selesaikan pesanan sekarang?')) return;
+
+        setProcessingOrderId(order.id);
+        router.patch(`/app/orders/${order.id}/selesaikan`, {}, {
+            preserveScroll: true,
+            onFinish: () => setProcessingOrderId(null),
+        });
     }
 
     return (
@@ -90,9 +117,13 @@ export default function OrdersIndex({ orders, filters }) {
                         )}
 
                         {orders.data.map((order) => {
-                            const isDititipkan = order.status === 'diproses';
+                            const isDititipkan = order.status === 'diproses' && Boolean(order.payment_verified_at);
                             const isSelesai = order.status === 'selesai';
                             const isBelumBayar = order.status === 'baru';
+                            const isBarang = order.service_type === 'barang';
+                            const isPickupRequested = Boolean(order.pickup_requested_at);
+                            const isReadyToComplete = isBarang && order.fase === 'akhir';
+                            const isProcessing = processingOrderId === order.id;
 
                             return (
                                 <div
@@ -111,7 +142,7 @@ export default function OrdersIndex({ orders, filters }) {
                                             </p>
                                         </div>
                                         <span className={`text-xs font-semibold ${STATUS_COLOR[order.status] ?? 'text-gray-400'}`}>
-                                            {STATUS_LABEL[order.status] ?? order.status}
+                                            {getStatusLabel(order)}
                                         </span>
                                     </div>
 
@@ -159,10 +190,21 @@ export default function OrdersIndex({ orders, filters }) {
                                                 <div className="flex gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => router.post(`/app/orders/${order.id}/complete`)}
+                                                        onClick={() => isBarang && (isReadyToComplete
+                                                            ? completeOrder(order)
+                                                            : requestPickup(order))}
+                                                        disabled={!isBarang || isProcessing || isPickupRequested && !isReadyToComplete}
                                                         className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
                                                     >
-                                                        Selesai
+                                                        {isProcessing
+                                                            ? 'Memproses...'
+                                                            : isReadyToComplete
+                                                            ? 'Selesaikan Pesanan'
+                                                            : isBarang && isPickupRequested
+                                                            ? 'Menunggu Mitra'
+                                                            : isBarang
+                                                            ? 'Ajukan Pengembalian'
+                                                            : 'Selesai'}
                                                     </button>
                                                     <Link
                                                         href={`/app/orders/${order.id}`}
@@ -202,11 +244,29 @@ export default function OrdersIndex({ orders, filters }) {
 
                                         {/* Tab Belum Bayar */}
                                         {isBelumBayar && (
+                                            <div className="flex gap-2">
+                                                <Link
+                                                    href={`/app/orders/${order.id}`}
+                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-semibold text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                >
+                                                    Bayar Sekarang
+                                                </Link>
+                                                <Link
+                                                    href={`/app/orders/${order.id}`}
+                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                >
+                                                    Detail Pesanan
+                                                </Link>
+                                            </div>
+                                        )}
+
+                                        {/* Detail tetap tersedia saat pembayaran menunggu verifikasi atau order dibatalkan */}
+                                        {!isDititipkan && !isSelesai && !isBelumBayar && (
                                             <Link
                                                 href={`/app/orders/${order.id}`}
-                                                className="block w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-semibold text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                className="block w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
                                             >
-                                                Bayar Sekarang
+                                                Detail Pesanan
                                             </Link>
                                         )}
                                     </div>
