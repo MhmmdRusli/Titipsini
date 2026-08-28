@@ -159,7 +159,7 @@ export default function OrdersIndex({ orders, filters }) {
                                                 <div className="flex gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => router.post(`/app/orders/${order.id}/finish`)}
+                                                        onClick={() => router.post(`/app/orders/${order.id}/complete`)}
                                                         className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
                                                     >
                                                         Selesai

@@ -402,6 +402,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/batalkan', [CustomerOrderController::class, 'cancel'])->name('orders.batalkan');
+    Route::post('/orders/{order}/complete', [CustomerOrderController::class, 'complete'])->name('orders.complete');
     Route::patch('/orders/{order}/selesaikan', [CustomerOrderController::class, 'complete'])->name('orders.selesaikan');
     Route::patch('/orders/{order}/ajukan-pengambilan', [CustomerOrderController::class, 'requestPickup'])->name('orders.ajukanPengambilan');
 

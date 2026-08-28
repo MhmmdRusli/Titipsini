@@ -9,12 +9,14 @@ export default function PilihPaket({ serviceId }) {
 
             <div className="flex flex-col items-center px-6 py-8 text-center">
                 {/* Logo / wordmark ala Titipsini.com */}
-                <div className="flex items-center gap-1.5">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#15803d] text-white dark:bg-[#22c55e]">
-                        <Boxes size={14} />
-                    </span>
-                    <p className="text-lg font-extrabold text-gray-900 dark:text-gray-100">
-                        Titipsini<span className="text-[#15803d] dark:text-[#4ade80]">•</span>Com
+                <div className="flex items-center gap-2">
+                    <img
+                        src="/storage/avatars/76MKTQ8OA4ZViUeZbVShc2dkr5voqs7lzmfD3iWu.png"
+                        alt="Titipsini"
+                        className="h-8 w-8 rounded-full object-cover"
+                    />
+                    <p className="text-lg font-extrabold text-[#15803d] dark:text-[#4ade80]">
+                        Titipsini<span className="text-yellow-400">•</span>Com
                     </p>
                 </div>
                 <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
