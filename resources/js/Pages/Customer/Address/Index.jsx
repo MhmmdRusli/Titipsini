@@ -51,12 +51,13 @@ function DetailRow({ label, value, last }) {
 
 function AddressCard({ address }) {
     const [deleting, setDeleting] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
 
     function handleDelete() {
-        if (!confirm('Hapus alamat ini?')) return;
         setDeleting(true);
         router.delete(`/app/profile/alamat/${address.id}`, {
             onFinish: () => setDeleting(false),
+            onSuccess: () => setDeleteOpen(false),
         });
     }
 
@@ -84,7 +85,7 @@ function AddressCard({ address }) {
                     </Link>
                     <button
                         type="button"
-                        onClick={handleDelete}
+                        onClick={() => setDeleteOpen(true)}
                         disabled={deleting}
                         className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500 transition hover:scale-105 disabled:opacity-50 dark:bg-red-950/40 dark:text-red-400"
                         title="Hapus Alamat"
@@ -102,6 +103,45 @@ function AddressCard({ address }) {
                 <DetailRow label="Alamat Lengkap" value={address.address} />
                 <DetailRow label="Catatan" value={address.notes} last />
             </div>
+
+            {deleteOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+                                <Trash2 size={18} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Hapus Alamat?</h2>
+                                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                    Alamat ini akan dihapus dari daftar alamat kamu.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mt-4 rounded-xl bg-red-50 px-3 py-2.5 text-xs leading-relaxed text-red-700 dark:bg-red-950/30 dark:text-red-300">
+                            Tindakan ini tidak dapat dibatalkan.
+                        </div>
+                        <div className="mt-5 flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setDeleteOpen(false)}
+                                disabled={deleting}
+                                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/60"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="flex-1 rounded-xl bg-red-600 py-2.5 text-xs font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+                            >
+                                {deleting ? 'Menghapus...' : 'Ya, Hapus'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

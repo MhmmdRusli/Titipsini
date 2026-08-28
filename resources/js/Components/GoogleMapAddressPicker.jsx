@@ -41,7 +41,7 @@ function getFirstComponent(result, types) {
 
 async function reverseGeocodeFallback(lat, lng) {
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 8000);
+    const timeout = window.setTimeout(() => controller.abort(), 4000);
 
     try {
         const response = await fetch(
@@ -93,7 +93,17 @@ export default function GoogleMapAddressPicker({ onAddressSelect }) {
         const position = new maps.LatLng(lat, lng);
         mapInstance.current.panTo(position);
         mapInstance.current.setZoom(17);
+        let geocodeFinished = false;
+        const geocodeTimeout = window.setTimeout(() => {
+            if (geocodeFinished) return;
+            geocodeFinished = true;
+            setError('Pencarian alamat terlalu lama. Kamu bisa memilih titik lain atau mengisi alamat manual.');
+            setPicking(false);
+        }, 6000);
         geocoderInstance.current.geocode({ location: position }, async (results, status) => {
+            if (geocodeFinished) return;
+            geocodeFinished = true;
+            window.clearTimeout(geocodeTimeout);
             let selectedAddress;
             if (status === 'OK' && results?.[0]) {
                 const result = results[0];
@@ -161,7 +171,7 @@ export default function GoogleMapAddressPicker({ onAddressSelect }) {
                 setError('Lokasi tidak bisa diakses. Izinkan GPS pada browser, lalu coba lagi.');
                 setPicking(false);
             },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 },
         );
     }
 

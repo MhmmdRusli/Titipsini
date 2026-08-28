@@ -9,6 +9,7 @@ import {
     StickyNote,
     ChevronDown,
     Loader2,
+    Pencil,
 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import GoogleMapAddressPicker from '@/Components/GoogleMapAddressPicker';
@@ -125,6 +126,7 @@ export default function AddressForm({ address = null }) {
     const [districts, setDistricts] = useState([]);
     const [loadingCities, setLoadingCities] = useState(false);
     const [loadingDistricts, setLoadingDistricts] = useState(false);
+    const [editConfirmOpen, setEditConfirmOpen] = useState(false);
 
     // Muat daftar provinsi sekali di awal
     useEffect(() => {
@@ -250,10 +252,16 @@ export default function AddressForm({ address = null }) {
     function submit(e) {
         e.preventDefault();
         if (isEdit) {
-            put(`/app/profile/alamat/${address.id}`);
+            setEditConfirmOpen(true);
         } else {
             post('/app/profile/alamat');
         }
+    }
+
+    function updateAddress() {
+        put(`/app/profile/alamat/${address.id}`, {
+            onFinish: () => setEditConfirmOpen(false),
+        });
     }
 
     return (
@@ -424,6 +432,45 @@ export default function AddressForm({ address = null }) {
                     </div>
                 </form>
             </div>
+
+            {editConfirmOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-[#008736] dark:bg-emerald-950/50 dark:text-emerald-400">
+                                <Pencil size={18} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Simpan Perubahan?</h2>
+                                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                    Pastikan data alamat yang kamu ubah sudah benar sebelum disimpan.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mt-4 rounded-xl bg-green-50 px-3 py-2.5 text-xs leading-relaxed text-green-800 dark:bg-green-950/30 dark:text-green-300">
+                            Perubahan alamat akan langsung diterapkan pada pesanan berikutnya.
+                        </div>
+                        <div className="mt-5 flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setEditConfirmOpen(false)}
+                                disabled={processing}
+                                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/60"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={updateAddress}
+                                disabled={processing}
+                                className="flex-1 rounded-xl bg-[#008736] py-2.5 text-xs font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60"
+                            >
+                                {processing ? 'Menyimpan...' : 'Ya, Simpan'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </CustomerLayout>
     );
 }
