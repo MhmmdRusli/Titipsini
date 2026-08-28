@@ -176,16 +176,14 @@ class ServiceController extends Controller
             ->select('services.*')
             ->selectSub(
                 Order::query()->selectRaw('COALESCE(AVG(rating), 0)')
-                    ->whereColumn('partner_id', 'services.user_id')
-                    ->whereColumn('service_type', 'services.kategori')
+                    ->whereColumn('service_id', 'services.id')
                     ->where('status', 'selesai')
                     ->whereNotNull('rating'),
                 'average_rating'
             )
             ->selectSub(
                 Order::query()->selectRaw('COUNT(rating)')
-                    ->whereColumn('partner_id', 'services.user_id')
-                    ->whereColumn('service_type', 'services.kategori')
+                    ->whereColumn('service_id', 'services.id')
                     ->where('status', 'selesai')
                     ->whereNotNull('rating'),
                 'review_count'
