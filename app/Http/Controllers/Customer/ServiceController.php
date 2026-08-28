@@ -173,6 +173,23 @@ class ServiceController extends Controller
 
         $services = Service::query()
             ->where('is_active', true)
+            ->select('services.*')
+            ->selectSub(
+                Order::query()->selectRaw('COALESCE(AVG(rating), 0)')
+                    ->whereColumn('partner_id', 'services.user_id')
+                    ->whereColumn('service_type', 'services.kategori')
+                    ->where('status', 'selesai')
+                    ->whereNotNull('rating'),
+                'average_rating'
+            )
+            ->selectSub(
+                Order::query()->selectRaw('COUNT(rating)')
+                    ->whereColumn('partner_id', 'services.user_id')
+                    ->whereColumn('service_type', 'services.kategori')
+                    ->where('status', 'selesai')
+                    ->whereNotNull('rating'),
+                'review_count'
+            )
             ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
             ->when($jenis && $kategori === 'kendaraan', fn ($query) => $query->where('jenis_kendaraan', $jenis))
             ->when($jenis && $kategori === 'bangunan', fn ($query) => $query->where('jenis_bangunan', $jenis))
@@ -258,11 +275,13 @@ class ServiceController extends Controller
             'service' => [
                 'id' => $service->id,
                 'nama' => $service->nama,
+                'mitraNama' => $service->vendor?->name ?? 'Mitra Titipsini',
                 'kota' => $service->kota,
                 'alamatLengkap' => $service->alamat_lengkap ?: $service->kecamatan,
                 'jamBuka' => $service->jam_buka ? Carbon::parse($service->jam_buka)->format('H.i') : '08.00',
                 'jamTutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
                 'isBuka' => (bool) $service->is_active,
+                ...$this->reviewSummary($service),
             ],
         ]);
     }
@@ -336,7 +355,7 @@ class ServiceController extends Controller
         abort_unless($service->kategori === 'bangunan' && $service->is_active, 404);
 
         return Inertia::render('Customer/Services/Bangunan/Detail', [
-            'mitra' => $this->formatMitraKendaraan($service),
+            'mitra' => array_merge($this->formatMitraKendaraan($service), $this->reviewSummary($service)),
         ]);
     }
 
@@ -533,7 +552,7 @@ class ServiceController extends Controller
         abort_unless($service->kategori === 'kendaraan' && $service->is_active, 404);
 
         return Inertia::render('Customer/Services/Kendaraan/Detail', [
-            'mitra' => $this->formatMitraKendaraan($service),
+            'mitra' => array_merge($this->formatMitraKendaraan($service), $this->reviewSummary($service)),
         ]);
     }
 
@@ -542,7 +561,7 @@ class ServiceController extends Controller
         abort_unless($service->kategori === 'pindahan' && $service->is_active, 404);
 
         return Inertia::render('Customer/Services/Pindahan/Detail', [
-            'mitra' => $this->formatMitraKendaraan($service),
+            'mitra' => array_merge($this->formatMitraKendaraan($service), $this->reviewSummary($service)),
         ]);
     }
 
@@ -934,12 +953,37 @@ class ServiceController extends Controller
         return [
             'id' => $service->id,
             'nama' => $service->nama,
+            'mitraNama' => $service->vendor?->name ?? 'Mitra Titipsini',
             'alamat' => $service->alamat_lengkap ?: $service->kecamatan,
             'kota' => $service->kota,
             'kecamatan' => $service->kecamatan,
             'jam_buka' => $service->jam_buka ? Carbon::parse($service->jam_buka)->format('H.i') : '08.00',
             'jam_tutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
             'is_buka' => (bool) $service->is_active,
+        ];
+    }
+
+    protected function reviewSummary(Service $service): array
+    {
+        $reviews = Order::query()
+            ->where('partner_id', $service->user_id)
+            ->where('service_type', $service->kategori)
+            ->where('status', 'selesai')
+            ->whereNotNull('rating')
+            ->with('customer:id,name')
+            ->latest()
+            ->get(['id', 'customer_id', 'rating', 'review', 'created_at']);
+
+        return [
+            'averageRating' => round((float) $reviews->avg('rating'), 1),
+            'reviewCount' => $reviews->count(),
+            'reviews' => $reviews->map(fn ($review) => [
+                'id' => $review->id,
+                'customerName' => $review->customer?->name ?? 'Customer',
+                'rating' => $review->rating,
+                'review' => $review->review,
+                'createdAt' => $review->created_at?->translatedFormat('j F Y'),
+            ])->values()->all(),
         ];
     }
 }

@@ -39,6 +39,8 @@ class Order extends Model
         'bukti_denda',
         'status_denda',
         'cancel_reason',
+        'rating',
+        'review',
         'subtotal',
         'discount',
         'pickup_fee',
@@ -69,6 +71,7 @@ class Order extends Model
         return [
             'is_pickup' => 'boolean',
             'jumlah_barang' => 'integer',
+            'rating' => 'integer',
             'harga_per_hari' => 'decimal:2',
             'biaya_layanan' => 'decimal:2',
             'total_price' => 'decimal:2',

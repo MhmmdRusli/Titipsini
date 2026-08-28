@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { Search, MapPin, Clock, X, Package, Car, Building2, Truck } from 'lucide-react';
+import { Search, MapPin, Clock, X, Package, Car, Building2, Truck, Star } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const VEHICLE_TYPES = [
@@ -147,7 +147,10 @@ export default function ServicesIndex({ services, filters }) {
                                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-900/30 dark:text-[#4ade80]">
                                         <ServiceIcon size={16} />
                                     </div>
-                                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{service.nama}</p>
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{service.nama}</p>
+                                            <p className="text-[11px] text-gray-500 dark:text-gray-400">{service.vendor?.name ?? service.mitraNama ?? 'Mitra Titipsini'}</p>
+                                        </div>
                                 </div>
 
                                 {typeof service.is_buka === 'boolean' && (
@@ -173,6 +176,13 @@ export default function ServicesIndex({ services, filters }) {
                                     {service.jam_buka || '08.00'} - {service.jam_tutup || '21.00'}
                                 </p>
                             </div>
+
+                            {Number(service.review_count) > 0 && (
+                                <div className="mt-2 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                    <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                                    {Number(service.average_rating).toFixed(1)} ({service.review_count} ulasan)
+                                </div>
+                            )}
 
                             <div className="mt-2.5 flex items-center gap-2">
                                 <div className="flex w-full items-center gap-2">

@@ -126,6 +126,22 @@ class OrderController extends Controller
         return back()->with('success', 'Pesanan berhasil diselesaikan.');
     }
 
+    public function review(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->customer_id === $request->user()->id, 403);
+
+        $data = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'review' => 'required|string|max:1000',
+        ]);
+
+        abort_unless($order->status === 'selesai', 400, 'Ulasan hanya bisa diberikan untuk pesanan selesai.');
+
+        $order->update($data);
+
+        return back()->with('success', 'Ulasan berhasil dikirim.');
+    }
+
     public function requestPickup(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);

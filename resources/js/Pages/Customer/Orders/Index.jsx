@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { MapPin, Truck } from 'lucide-react';
+import { MapPin, Star, Truck } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const TABS = [
@@ -53,6 +53,10 @@ export default function OrdersIndex({ orders, filters }) {
     const [processingOrderId, setProcessingOrderId] = useState(null);
     const [pickupConfirmOrder, setPickupConfirmOrder] = useState(null);
     const [completeConfirmOrder, setCompleteConfirmOrder] = useState(null);
+    const [reviewOrderId, setReviewOrderId] = useState(null);
+    const [reviewText, setReviewText] = useState('');
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewing, setReviewing] = useState(false);
 
     function changeTab(status) {
         router.get('/app/orders', { status }, { preserveState: true, preserveScroll: true, replace: true });
@@ -73,6 +77,23 @@ export default function OrdersIndex({ orders, filters }) {
             preserveScroll: true,
             onFinish: () => setProcessingOrderId(null),
             onSuccess: () => setCompleteConfirmOrder(null),
+        });
+    }
+
+    function submitReview(orderId) {
+        if (!reviewRating || !reviewText.trim()) return;
+        setReviewing(true);
+        router.post(`/app/orders/${orderId}/review`, {
+            rating: reviewRating,
+            review: reviewText,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setReviewOrderId(null);
+                setReviewText('');
+                setReviewRating(0);
+            },
+            onFinish: () => setReviewing(false),
         });
     }
 
@@ -172,13 +193,43 @@ export default function OrdersIndex({ orders, filters }) {
                                     </div>
 
                                     {/* Section Ulasan (Hanya Tampil di Status Selesai) */}
-                                    {isSelesai && (
+                                    {isSelesai && !order.rating && (
                                         <div className="mt-3.5">
                                             <p className="text-xs font-semibold text-gray-900 dark:text-gray-200">Ulasan</p>
-                                            <div className="mt-1.5 rounded-lg bg-emerald-100/30 p-2.5 text-xs text-gray-600 dark:bg-emerald-950/40 dark:text-gray-300">
-                                                {order.review ??
-                                                    'Keadaan barang saya ketika barang sudah kembali baik baik saja dan pelayanan nya juga sudah bagus'}
+                                            {reviewOrderId === order.id ? (
+                                                <div className="mt-1.5 rounded-lg bg-emerald-100/30 p-3 dark:bg-emerald-950/40">
+                                                    <div className="flex gap-1">
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <button key={star} type="button" onClick={() => setReviewRating(star)} aria-label={`${star} bintang`}>
+                                                                <Star size={20} className={star <= reviewRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'} />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <textarea
+                                                        value={reviewText}
+                                                        onChange={(e) => setReviewText(e.target.value)}
+                                                        placeholder="Tulis ulasan kamu..."
+                                                        rows={3}
+                                                        className="mt-2 w-full rounded-lg border border-gray-200 bg-white p-2.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                                                    />
+                                                    <button type="button" disabled={!reviewRating || !reviewText.trim() || reviewing} onClick={() => submitReview(order.id)} className="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white disabled:opacity-50">
+                                                        {reviewing ? 'Mengirim...' : 'Kirim Ulasan'}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button type="button" onClick={() => setReviewOrderId(order.id)} className="mt-1.5 w-full rounded-lg border border-emerald-300 p-2.5 text-left text-xs text-emerald-700 dark:border-emerald-800 dark:text-emerald-300">
+                                                    Beri ulasan dan rating
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {isSelesai && order.rating && (
+                                        <div className="mt-3.5">
+                                            <div className="flex items-center gap-1">
+                                                {[1, 2, 3, 4, 5].map((star) => <Star key={star} size={14} className={star <= order.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'} />)}
                                             </div>
+                                            <div className="mt-1.5 rounded-lg bg-emerald-100/30 p-2.5 text-xs text-gray-600 dark:bg-emerald-950/40 dark:text-gray-300">{order.review}</div>
                                         </div>
                                     )}
 
