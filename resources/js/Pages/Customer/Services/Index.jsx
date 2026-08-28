@@ -58,6 +58,7 @@ const ACTION_LABEL_BY_KATEGORI = {
     barang: 'Titip Disini',
     kendaraan: 'Pilih & Pesan',
     bangunan: 'Pilih & Pesan',
+    pindahan: 'Pilih & Pesan',
 };
 
 
@@ -71,7 +72,17 @@ function hrefForService(service) {
     if (service.kategori === 'bangunan') {
         return `/app/services/bangunan/search?kota=${encodeURIComponent(service.kota)}`;
     }
+    if (service.kategori === 'pindahan') {
+        return `/app/services/pindahan/${service.id}/detail`;
+    }
     return `/app/services/${service.id}`;
+}
+
+function detailHrefForService(service) {
+    if (service.kategori === 'barang') {
+        return `/app/services/barang/${service.id}/detail`;
+    }
+    return `/app/services/pindahan/${service.id}/detail`;
 }
 
 export default function ServicesIndex({ services, filters }) {
@@ -148,20 +159,14 @@ export default function ServicesIndex({ services, filters }) {
                         return (
                             <div
                                 key={service.id}
-                                className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                                className="rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
                             >
                             <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-2.5">
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-900/30 dark:text-[#4ade80]">
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-900/30 dark:text-[#4ade80]">
                                         <ServiceIcon size={16} />
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{service.kota}</p>
-                                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
-                                            <MapPin size={11} />
-                                            Kecamatan {service.kecamatan}
-                                        </p>
-                                    </div>
+                                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{service.nama}</p>
                                 </div>
 
                                 {typeof service.is_buka === 'boolean' && (
@@ -177,35 +182,42 @@ export default function ServicesIndex({ services, filters }) {
                                 )}
                             </div>
 
-                            {(service.jam_buka || service.alamat_lengkap) && (
-                                <div className="mt-2.5 space-y-1 border-t border-gray-50 pt-2.5 dark:border-gray-700/60">
-                                    {service.jam_buka && service.jam_tutup && (
-                                        <p className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
-                                            <Clock size={11} />
-                                            {service.jam_buka} - {service.jam_tutup}
-                                        </p>
-                                    )}
-                                    {service.alamat_lengkap && (
-                                        <p className="truncate text-[11px] text-gray-500 dark:text-gray-400">
-                                            {service.alamat_lengkap}
-                                        </p>
-                                    )}
-                                </div>
-                            )}
+                            <div className="mt-2.5 space-y-1 border-t border-gray-50 pt-2 text-[11px] text-gray-500 dark:border-gray-700/60 dark:text-gray-400">
+                                <p className="flex items-center gap-1.5">
+                                    <MapPin size={11} />
+                                    {service.kecamatan}, {service.kota}
+                                </p>
+                                <p className="flex items-center gap-1.5">
+                                    <Clock size={11} />
+                                    {service.jam_buka || '08.00'} - {service.jam_tutup || '21.00'}
+                                </p>
+                            </div>
 
-                            <div className="mt-3 flex items-center justify-between">
-                                <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-gray-900/40 dark:text-gray-400">
-                                    <ServiceIcon size={10} />
-                                    {KATEGORI_LABEL[service.kategori]}
-                                </span>
-
-                                <Link
-                                    href={hrefForService(service)}
-                                    className="inline-flex items-center gap-1 rounded-full bg-[#15803d] px-3.5 py-1.5 text-xs font-bold text-white dark:bg-[#22c55e]"
-                                >
-                                    {actionLabel}
-                                    <ChevronRight size={13} />
-                                </Link>
+                            <div className="mt-2.5 flex items-center gap-2">
+                                {['barang', 'pindahan'].includes(service.kategori) ? (
+                                    <div className="flex w-full items-center gap-2">
+                                        <Link
+                                            href={hrefForService(service)}
+                                            className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#15803d] px-3.5 py-2 text-xs font-bold text-white dark:bg-[#22c55e]"
+                                        >
+                                            Titip Disini
+                                        </Link>
+                                        <Link
+                                            href={detailHrefForService(service)}
+                                            className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#15803d] px-3.5 py-2 text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
+                                        >
+                                            Detail Mitra
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        href={hrefForService(service)}
+                                        className="inline-flex items-center gap-1 rounded-full bg-[#15803d] px-3.5 py-1.5 text-xs font-bold text-white dark:bg-[#22c55e]"
+                                    >
+                                        {actionLabel}
+                                        <ChevronRight size={13} />
+                                    </Link>
+                                )}
                             </div>
                             </div>
                         );

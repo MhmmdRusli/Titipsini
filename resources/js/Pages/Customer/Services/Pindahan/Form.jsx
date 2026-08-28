@@ -31,7 +31,7 @@ function googleMapsUrl(address) {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
-export default function Show({ 
+export default function Form({ 
     service, 
     addresses = [], 
     persenBiayaLayanan = 10 

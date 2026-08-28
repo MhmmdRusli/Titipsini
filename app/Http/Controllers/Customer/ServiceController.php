@@ -163,6 +163,14 @@ class ServiceController extends Controller
             return redirect()->route('customer.services.bangunan.form');
         }
 
+        if ($kategori === 'pindahan' && ! $request->boolean('browse')) {
+            return redirect()->route('customer.services.pindahan.form');
+        }
+
+        if ($kategori === 'barang' && ! $request->boolean('browse')) {
+            return redirect()->route('customer.services.barang.landing');
+        }
+
         $services = Service::query()
             ->where('is_active', true)
             ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
@@ -235,9 +243,40 @@ class ServiceController extends Controller
         ]);
     }
 
+    public function landingBarang()
+    {
+        return Inertia::render('Customer/Services/Barang/Landing', [
+            'detectedKota' => 'Yogyakarta',
+        ]);
+    }
+
+    public function detailBarang(Service $service)
+    {
+        abort_unless($service->kategori === 'barang' && $service->is_active, 404);
+
+        return Inertia::render('Customer/Services/Barang/DetailMitra', [
+            'service' => [
+                'id' => $service->id,
+                'nama' => $service->nama,
+                'kota' => $service->kota,
+                'alamatLengkap' => $service->alamat_lengkap ?: $service->kecamatan,
+                'jamBuka' => $service->jam_buka ? Carbon::parse($service->jam_buka)->format('H.i') : '08.00',
+                'jamTutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
+                'isBuka' => (bool) $service->is_active,
+            ],
+        ]);
+    }
+
     public function formBangunan()
     {
         return Inertia::render('Customer/Services/Bangunan/Landing', [
+            'detectedKota' => 'Yogyakarta',
+        ]);
+    }
+
+    public function formPindahan()
+    {
+        return Inertia::render('Customer/Services/Pindahan/Landing', [
             'detectedKota' => 'Yogyakarta',
         ]);
     }
@@ -497,6 +536,43 @@ class ServiceController extends Controller
         ]);
     }
 
+    public function detailPindahan(Service $service)
+    {
+        abort_unless($service->kategori === 'pindahan' && $service->is_active, 404);
+
+        return Inertia::render('Customer/Services/Pindahan/Detail', [
+            'mitra' => $this->formatMitraKendaraan($service),
+        ]);
+    }
+
+    public function invoicePindahan(Order $order)
+    {
+        abort_unless($order->customer_id === auth()->id() && $order->service_type === 'pindahan', 403);
+
+        return Inertia::render('Customer/Services/Pindahan/Invoice', [
+            'order' => [
+                'id' => $order->id,
+                'orderCode' => $order->order_code,
+                'tanggalDiterbitkan' => $order->created_at->translatedFormat('l, j F Y'),
+                'mitraNama' => $order->partner?->name ?? '-',
+                'customerNama' => $order->customer->name,
+                'customerTelepon' => $order->customer->phone ?? '-',
+                'alamatLengkap' => $order->pickup_address ?: '-',
+                'namaPindahan' => $order->item_name,
+                'jumlahBarang' => $order->jumlah_barang,
+                'keterangan' => $order->item_description ?: '-',
+                'tanggalMasuk' => $order->start_date?->translatedFormat('j F Y'),
+                'tanggalKeluar' => $order->end_date?->translatedFormat('j F Y'),
+                'durasiHari' => $order->duration,
+                'nilaiHarga' => (float) $order->harga_per_hari,
+                'totalHarga' => (float) $order->subtotal,
+                'biayaLayanan' => (float) $order->biaya_layanan,
+                'totalPembayaran' => (float) $order->total_price,
+                'sudahDibayar' => (bool) $order->payment_verified_at,
+            ],
+        ]);
+    }
+
     public function formPesanKendaraan(Request $request)
     {
         $jenisKendaraan = collect(self::JENIS_KENDARAAN)
@@ -668,7 +744,7 @@ class ServiceController extends Controller
             return redirect()->route('customer.services.bangunan.form', ['service_id' => $service->id]);
         }
 
-        return Inertia::render('Customer/Services/Show', [
+        return Inertia::render('Customer/Services/Pindahan/Form', [
             'service' => [
                 'id' => $service->id,
                 'nama' => $service->nama,
@@ -705,7 +781,10 @@ class ServiceController extends Controller
         $customer = $request->user();
         $address = $customer->addresses()->findOrFail($data['address_id']);
         $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
-        $total = (float) $service->harga * $jumlahHari;
+        $hargaPerHari = (float) $service->harga;
+        $subtotal = $hargaPerHari * $jumlahHari;
+        $biayaLayanan = round($subtotal * self::PERSEN_BIAYA_LAYANAN / 100);
+        $total = $subtotal + $biayaLayanan;
 
         $order = Order::create([
             'order_code' => 'TS-'.strtoupper(uniqid()),
@@ -713,21 +792,28 @@ class ServiceController extends Controller
             'partner_id' => $service->user_id,
             'service_type' => $service->kategori,
             'item_name' => $service->nama.' ('.$this->jenisLabel($service).')',
+            'harga_per_hari' => $hargaPerHari,
             'start_date' => $data['tanggalMasuk'],
             'end_date' => $data['tanggalKeluar'],
+            'duration' => $jumlahHari,
             'is_pickup' => false,
             'address_id' => $address->id,
             'pickup_address' => $address->address,
             'city' => $service->kota,
             'status' => 'baru',
-            'subtotal' => $total,
+            'subtotal' => $subtotal,
             'discount' => 0,
             'pickup_fee' => 0,
+            'biaya_layanan' => $biayaLayanan,
             'total_price' => $total,
             'payment_method' => 'default', // Menggunakan nilai bawaan/default
         ]);
 
         $this->notifikasiPesananBaru($order);
+
+        if ($service->kategori === 'pindahan') {
+            return redirect()->route('customer.services.pindahan.invoice', $order->id);
+        }
 
         return redirect()->route('customer.orders.show', $order->id);
     }
