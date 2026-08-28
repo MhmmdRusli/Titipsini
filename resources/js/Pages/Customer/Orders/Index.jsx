@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { MapPin, Star, Truck } from 'lucide-react';
+import { CheckCircle2, MapPin, Star, Truck } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const TABS = [

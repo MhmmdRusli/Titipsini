@@ -99,6 +99,7 @@ class OrderController extends Controller
                 'status' => $order->status,
                 'fase' => $order->fase,
                 'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
+                'pickup_requested_at' => optional($order->pickup_requested_at)->format('d M Y, H:i'),
             ];
         });
 
@@ -211,16 +212,18 @@ class OrderController extends Controller
         abort_unless($order->partner_id === Auth::id(), 403);
         abort_unless($order->status === 'diproses', 400, 'Fase hanya bisa diubah selagi pesanan berstatus Diproses.');
 
-        $next = self::NEXT_FASE[$order->fase] ?? null;
+        $fase = (string) $order->fase;
+        $serviceType = (string) $order->service_type;
+        $next = self::NEXT_FASE[$fase] ?? null;
 
         abort_unless($next, 400, 'Pesanan ini sudah berada di fase akhir.');
-        if ($order->service_type === 'barang' && $next === 'akhir') {
+        if ($serviceType === 'barang' && $next === 'akhir') {
             abort_unless($order->pickup_requested_at, 400, 'Customer belum mengajukan pengambilan barang.');
         }
 
         $order->update(['fase' => $next]);
 
-        $label = self::FASE_LABELS[$order->service_type][$next] ?? $next;
+        $label = self::FASE_LABELS[$serviceType][$next] ?? $next;
 
         Notifikasi::create([
             'user_id' => $order->customer_id,
@@ -234,7 +237,7 @@ class OrderController extends Controller
 
         return back()->with('success', $next === 'akhir'
             ? 'Barang ditandai sudah diambil. Menunggu konfirmasi customer.'
-            : 'Status pesanan berhasil diperbarui menjadi "'.$label+'".');
+            : 'Status pesanan berhasil diperbarui menjadi "'.$label.'".');
     }
 
         public function ambilPesanan(Order $order)
