@@ -11,7 +11,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
  */
 export default function DetailMitra({ service }) {
     return (
-        <CustomerLayout title="Detail Mitra" backHref="/app/dashboard">
+        <CustomerLayout title="Detail Mitra" backHref="/app/services?kategori=barang&browse=1">
             <Head title="Detail Mitra" />
 
             <div className="px-4 py-4">

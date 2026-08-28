@@ -4,7 +4,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 
 export default function PilihPaket({ serviceId }) {
     return (
-        <CustomerLayout title="Pilih Paket" backHref="/app/dashboard">
+        <CustomerLayout title="Pilih Paket" backHref="/app/services?kategori=barang&browse=1">
             <Head title="Pilih Paket" />
 
             <div className="flex flex-col items-center px-6 py-8 text-center">

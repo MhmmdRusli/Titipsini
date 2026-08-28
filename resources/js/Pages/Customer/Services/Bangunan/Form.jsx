@@ -79,7 +79,7 @@ export default function FormBangunan({ service, buildingOptions = [], addresses 
     }
 
     return (
-        <CustomerLayout title="Form Penitipan Bangunan" backHref="/app/services">
+        <CustomerLayout title="Form Penitipan Bangunan" backHref="/app/services/bangunan/search">
             <Head title="Form Penitipan Bangunan" />
 
             <div className="px-4 py-6">

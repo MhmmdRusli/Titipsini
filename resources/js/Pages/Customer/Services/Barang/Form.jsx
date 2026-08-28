@@ -12,7 +12,7 @@ import {
     ChevronRight,
     Info,
     X,
-    Link2,
+    Image,
 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
@@ -229,7 +229,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
         tanggalMasuk: '',
         tanggalKeluar: '',
         ukuranBarang: '',
-        fotoBarangUrl: '',
+        fotoBarang: null,
         address_id: addresses.find((a) => a.is_primary)?.id ?? addresses[0]?.id ?? '',
         setuju: false,
         service_id: serviceId ?? '',
@@ -271,6 +271,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
         form.tanggalMasuk &&
         form.tanggalKeluar &&
         form.ukuranBarang &&
+        form.fotoBarang &&
         (!form.pickup || (form.jamPickup && form.address_id)) &&
         form.setuju &&
         !submitting;
@@ -279,6 +280,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
         e.preventDefault();
         setSubmitting(true);
         router.post('/app/services/barang', form, {
+            forceFormData: true,
             onError: (err) => {
                 setErrors(err);
                 setSubmitting(false);
@@ -287,7 +289,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
     }
 
     return (
-        <CustomerLayout title="Form Penitipan Barang" backHref="/app/services/barang/paket-pilihan">
+        <CustomerLayout title="Form Penitipan Barang" backHref="/app/services?kategori=barang&browse=1">
             <Head title="Form Penitipan Barang" />
 
             <div className="px-4 py-3">
@@ -502,18 +504,19 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                             </span>
                         </div>
                         <div className="relative mt-2">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400 dark:text-gray-500">
-                                <Link2 size={16} />
-                            </span>
                             <input
-                                type="url"
-                                value={form.fotoBarangUrl}
-                                onChange={(e) => update('fotoBarangUrl', e.target.value)}
-                                placeholder="Link Foto Barang"
-                                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pl-11 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={(e) => update('fotoBarang', e.target.files?.[0] ?? null)}
+                                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-green-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#15803d] focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:file:bg-green-950/40 dark:file:text-green-400"
                             />
                         </div>
-                        <FieldError message={errors.fotoBarangUrl} />
+                        {form.fotoBarang && (
+                            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                <Image size={14} /> {form.fotoBarang.name}
+                            </p>
+                        )}
+                        <FieldError message={errors.fotoBarang} />
                     </div>
 
                     <div className="rounded-2xl border border-gray-100 bg-slate-50 p-4 dark:border-gray-700 dark:bg-gray-800">
