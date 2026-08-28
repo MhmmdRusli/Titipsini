@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Truck } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const TABS = [
@@ -51,18 +51,18 @@ function formatRupiah(value) {
 export default function OrdersIndex({ orders, filters }) {
     const activeStatus = filters?.status ?? '';
     const [processingOrderId, setProcessingOrderId] = useState(null);
+    const [pickupConfirmOrder, setPickupConfirmOrder] = useState(null);
 
     function changeTab(status) {
         router.get('/app/orders', { status }, { preserveState: true, preserveScroll: true, replace: true });
     }
 
     function requestPickup(order) {
-        if (!window.confirm('Ajukan pengambilan barang sekarang?')) return;
-
         setProcessingOrderId(order.id);
         router.patch(`/app/orders/${order.id}/ajukan-pengambilan`, {}, {
             preserveScroll: true,
             onFinish: () => setProcessingOrderId(null),
+            onSuccess: () => setPickupConfirmOrder(null),
         });
     }
 
@@ -192,7 +192,7 @@ export default function OrdersIndex({ orders, filters }) {
                                                         type="button"
                                                         onClick={() => isBarang && (isReadyToComplete
                                                             ? completeOrder(order)
-                                                            : requestPickup(order))}
+                                                            : setPickupConfirmOrder(order))}
                                                         disabled={!isBarang || isProcessing || isPickupRequested && !isReadyToComplete}
                                                         className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
                                                     >
@@ -276,6 +276,49 @@ export default function OrdersIndex({ orders, filters }) {
                     </div>
                 </div>
             </div>
+
+            {pickupConfirmOrder && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400">
+                                <Truck size={19} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                                    Ajukan Pengembalian Barang?
+                                </h2>
+                                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                    Mitra akan diberi tahu bahwa kamu siap mengambil barang di lokasi penyimpanan.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 rounded-xl bg-green-50 px-3 py-2.5 text-xs leading-relaxed text-green-800 dark:bg-green-950/30 dark:text-green-300">
+                            Pastikan kamu sudah siap datang. Setelah pengajuan dikirim, tunggu mitra menyiapkan barang.
+                        </div>
+
+                        <div className="mt-5 flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPickupConfirmOrder(null)}
+                                disabled={processingOrderId === pickupConfirmOrder.id}
+                                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/60"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => requestPickup(pickupConfirmOrder)}
+                                disabled={processingOrderId === pickupConfirmOrder.id}
+                                className="flex-1 rounded-xl bg-[#15803d] py-2.5 text-xs font-bold text-white transition hover:bg-green-700 disabled:opacity-60"
+                            >
+                                {processingOrderId === pickupConfirmOrder.id ? 'Mengirim...' : 'Ya, Ajukan'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 .no-scrollbar {
