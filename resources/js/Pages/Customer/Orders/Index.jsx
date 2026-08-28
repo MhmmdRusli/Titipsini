@@ -1,4 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { MapPin } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
@@ -44,6 +45,14 @@ function formatRupiah(value) {
 
 export default function OrdersIndex({ orders, filters }) {
     const activeStatus = filters?.status ?? '';
+    const { errors = {} } = usePage().props;
+    const [notice, setNotice] = useState(errors.finish ?? '');
+
+    function completeOrder(orderId) {
+        router.post(`/app/orders/${orderId}/complete`, {}, {
+            onError: (requestErrors) => setNotice(requestErrors.finish ?? 'Pesanan belum bisa diselesaikan.'),
+        });
+    }
 
     function changeTab(status) {
         router.get('/app/orders', { status }, { preserveState: true, preserveScroll: true, replace: true });
@@ -159,7 +168,7 @@ export default function OrdersIndex({ orders, filters }) {
                                                 <div className="flex gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => router.post(`/app/orders/${order.id}/complete`)}
+                                                        onClick={() => completeOrder(order.id)}
                                                         className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
                                                     >
                                                         Selesai
@@ -216,6 +225,32 @@ export default function OrdersIndex({ orders, filters }) {
                     </div>
                 </div>
             </div>
+
+            {notice && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-gray-800">
+                        <div className="flex items-start justify-between gap-4">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Belum Bisa Diselesaikan</h2>
+                            <button
+                                type="button"
+                                onClick={() => setNotice('')}
+                                className="text-xl leading-none text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                aria-label="Tutup notifikasi"
+                            >
+                                x
+                            </button>
+                        </div>
+                        <p className="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{notice}</p>
+                        <button
+                            type="button"
+                            onClick={() => setNotice('')}
+                            className="mt-5 w-full rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white dark:bg-[#22c55e]"
+                        >
+                            Mengerti
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 .no-scrollbar {

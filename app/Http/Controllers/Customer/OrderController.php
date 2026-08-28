@@ -107,9 +107,18 @@ class OrderController extends Controller
     public function complete(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
-        abort_unless($order->status === 'diproses', 400, 'Pesanan ini tidak sedang diproses.');
-        abort_unless($order->fase === 'akhir', 400, 'Mitra belum menandai barang sudah diambil.');
-        abort_unless($order->payment_verified_at !== null, 400, 'Pembayaran pesanan belum diverifikasi.');
+
+        if ($order->status !== 'diproses') {
+            return back()->withErrors(['finish' => 'Pesanan ini belum sedang diproses.']);
+        }
+
+        if ($order->fase !== 'akhir') {
+            return back()->withErrors(['finish' => 'Mitra belum menandai barang sudah diambil.']);
+        }
+
+        if ($order->payment_verified_at === null) {
+            return back()->withErrors(['finish' => 'Pembayaran pesanan belum diverifikasi.']);
+        }
 
         $order->update(['tanggal_selesai_aktual' => now()]);
         OrderFaseService::completeOrder($order);
