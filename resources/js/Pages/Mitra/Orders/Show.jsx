@@ -163,11 +163,14 @@ function ShowBaru({ order }) {
                             <MapPin size={16} className="text-red-500" />
                             <span className="my-0.5 h-6 w-px border-l border-dashed border-gray-300" />
                         </div>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                            {order.pickup_address && order.pickup_address !== '-'
+                        <div className="text-sm text-gray-700 dark:text-gray-300">
+                            <p>{order.pickup_address && order.pickup_address !== '-'
                                 ? order.pickup_address
-                                : 'Titip langsung di tempat mitra'}
-                        </p>
+                                : 'Titip langsung di tempat mitra'}</p>
+                            {order.address_notes && (
+                                <p className="mt-1 text-xs italic text-gray-500 dark:text-gray-400">{order.address_notes}</p>
+                            )}
+                        </div>
                     </div>
                     <div className="mt-1 flex items-center gap-2.5">
                         <Home size={16} className="text-green-600" />
@@ -380,7 +383,7 @@ function ShowDiproses({ order }) {
 
                     <div className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
                         <User size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
-                        <div>
+                        <div className="space-y-1">
                             <p className="text-xs text-gray-400 dark:text-gray-500">Identitas Pelanggan</p>
                             <p className="font-semibold text-gray-900 dark:text-gray-100">{order.customer?.name ?? '-'}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{order.customer?.phone ?? '-'}</p>
@@ -389,20 +392,23 @@ function ShowDiproses({ order }) {
 
                     <div className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
                         <MapPin size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
-                        <div>
+                        <div className="space-y-1">
                             <p className="text-xs text-gray-400 dark:text-gray-500">Rute Penjemputan</p>
                             <p className={`text-xs font-medium ${order.pickup_address && order.pickup_address !== '-' ? 'text-gray-800 dark:text-gray-200' : 'italic text-gray-400'}`}>
                                 {order.pickup_address && order.pickup_address !== '-'
                                     ? order.pickup_address
                                     : 'Alamat penjemputan tidak disertakan (Titip langsung di tempat mitra)'}
                             </p>
+                            {order.address_notes && (
+                                <p className="text-xs italic text-gray-500 dark:text-gray-400">{order.address_notes}</p>
+                            )}
                         </div>
                     </div>
 
                     {order.dropoff_address && (
                         <div className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
                             <MapPin size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
-                            <div>
+                            <div className="space-y-1">
                                 <p className="text-xs text-gray-400 dark:text-gray-500">Rute Pengantaran</p>
                                 <p className="text-xs font-medium text-gray-800 dark:text-gray-200">{order.dropoff_address}</p>
                             </div>
@@ -411,7 +417,7 @@ function ShowDiproses({ order }) {
 
                     <div className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-300">
                         <Package size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
-                        <div>
+                        <div className="space-y-1">
                             <p className="text-xs text-gray-400 dark:text-gray-500">Deskripsi Item Dititipkan</p>
                             <p className="text-xs font-medium text-gray-800 dark:text-gray-200">{order.item_description ?? '-'}</p>
                         </div>

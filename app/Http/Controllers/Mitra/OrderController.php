@@ -123,7 +123,7 @@ class OrderController extends Controller
     {
         abort_unless($order->partner_id === Auth::id(), 403);
 
-        $order->load('customer');
+        $order->load(['customer', 'address']);
 
         $subtotal = $order->subtotal > 0 ? $order->subtotal : $order->total_price;
         $discount = $order->discount ?? 0;
@@ -145,6 +145,7 @@ class OrderController extends Controller
                 ],
                 'pickup_address' => $order->pickup_address,
                 'dropoff_address' => $order->dropoff_address,
+                'address_notes' => $order->address?->notes,
                 'item_description' => $order->item_name,
                 'duration' => $this->hitungDurasi($order),
                 'pickup_status' => $order->is_pickup ? 'Dijemput oleh mitra' : 'Diantar sendiri oleh customer',

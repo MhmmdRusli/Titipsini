@@ -107,6 +107,11 @@ class Order extends Model
         return $this->belongsTo(Service::class);
     }
 
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'address_id');
+    }
+
     /**
      * Hitung denda keterlambatan secara otomatis berdasarkan `end_date` vs
      * tanggal order benar-benar selesai (tanggal_selesai_aktual kalau sudah
