@@ -65,7 +65,7 @@ class Order extends Model
     'foto_barang_url',
     'biaya_layanan',
     ];
-    protected $appends = ['denda'];
+    protected $appends = ['denda', 'vendor_name', 'vendor_address'];
 
         protected function casts(): array
     {
@@ -194,6 +194,27 @@ class Order extends Model
     public function getDendaAttribute(): float
     {
         return $this->hitungDenda();
+    }
+
+    public function getVendorNameAttribute(): ?string
+    {
+        return $this->partner?->name;
+    }
+
+    public function getVendorAddressAttribute(): ?string
+    {
+        $partner = $this->partner;
+
+        if (! $partner) {
+            return null;
+        }
+
+        $parts = array_filter([
+            $partner->address,
+            $partner->city,
+        ]);
+
+        return $parts ? implode(', ', $parts) : null;
     }
     public function hargaPerpanjangan(string $tanggalKeluarBaru): float
 {
