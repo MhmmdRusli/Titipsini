@@ -71,12 +71,7 @@ class Order extends Model
         'foto_barang_url',
         'biaya_layanan',
     ];
-<<<<<<< HEAD
-
-    protected $appends = ['denda'];
-=======
     protected $appends = ['denda', 'vendor_name', 'vendor_address'];
->>>>>>> 06eb20b3b1401304d360b9c96b071e168c202c48
 
     protected function casts(): array
     {
@@ -244,7 +239,6 @@ class Order extends Model
         return $this->hitungDenda();
     }
 
-<<<<<<< HEAD
     public function hargaHarianPerpanjangan(): float
     {
         if ((float) $this->harga_per_hari > 0) {
@@ -266,7 +260,6 @@ class Order extends Model
         return max(1, $selesaiLama->diffInDays($selesaiBaru));
     }
 
-=======
     public function getVendorNameAttribute(): ?string
     {
         return $this->partner?->name;
@@ -287,7 +280,7 @@ class Order extends Model
 
         return $parts ? implode(', ', $parts) : null;
     }
->>>>>>> 06eb20b3b1401304d360b9c96b071e168c202c48
+
     public function hargaPerpanjangan(string $tanggalKeluarBaru): float
     {
         return round($this->hargaHarianPerpanjangan() * $this->jumlahHariPerpanjangan($tanggalKeluarBaru));
