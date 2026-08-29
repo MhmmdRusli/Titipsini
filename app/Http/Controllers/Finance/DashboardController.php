@@ -13,16 +13,29 @@ class DashboardController extends Controller
     public function index(Request $request): Response
     {
         $status = $request->query('status', 'semua');
-        $allowedStatuses = ['semua', 'baru', 'diproses', 'selesai', 'dibatalkan'];
+        $city = $request->query('city', '');
+        $period = $request->query('period', 'all');
 
+        $allowedStatuses = ['semua', 'baru', 'diproses', 'selesai', 'dibatalkan'];
         if (! in_array($status, $allowedStatuses, true)) {
             $status = 'semua';
         }
 
-        $transactions = Order::query()
+        $allowedPeriods = ['all', 'month', 'quarter', 'year'];
+        if (! in_array($period, $allowedPeriods, true)) {
+            $period = 'all';
+        }
+
+        $query = Order::query()
             ->with(['customer:id,name', 'partner:id,name'])
-            ->when($status !== 'semua', fn ($query) => $query->where('status', $status))
-            ->latest()
+            ->when($status !== 'semua', fn ($q) => $q->where('status', $status))
+            ->when($city, fn ($q) => $q->where('city', $city))
+            ->when($period === 'month', fn ($q) => $q->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year))
+            ->when($period === 'quarter', fn ($q) => $q->where('created_at', '>=', now()->subMonths(3)))
+            ->when($period === 'year', fn ($q) => $q->whereYear('created_at', now()->year))
+            ->latest();
+
+        $transactions = (clone $query)
             ->paginate(10)
             ->withQueryString()
             ->through(fn (Order $order) => [
@@ -36,16 +49,34 @@ class DashboardController extends Controller
                 'created_at' => $order->created_at?->format('d M Y, H:i'),
             ]);
 
+        $baseQuery = Order::query()
+            ->when($city, fn ($q) => $q->where('city', $city))
+            ->when($period === 'month', fn ($q) => $q->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year))
+            ->when($period === 'quarter', fn ($q) => $q->where('created_at', '>=', now()->subMonths(3)))
+            ->when($period === 'year', fn ($q) => $q->whereYear('created_at', now()->year));
+
+        $cities = Order::query()
+            ->select('city')
+            ->distinct()
+            ->whereNotNull('city')
+            ->where('city', '!=', '')
+            ->orderBy('city')
+            ->pluck('city')
+            ->toArray();
+
         return Inertia::render('Finance/Dashboard', [
             'stats' => [
-                'totalIncome' => (float) Order::where('status', 'selesai')->sum('total_price'),
-                'todayIncome' => (float) Order::where('status', 'selesai')
-                    ->whereDate('updated_at', today())
-                    ->sum('total_price'),
-                'pendingTransactions' => Order::whereIn('status', ['baru', 'diproses'])->count(),
+                'totalIncome' => (float) (clone $baseQuery)->where('status', 'selesai')->sum('total_price'),
+                'todayIncome' => (float) (clone $baseQuery)->where('status', 'selesai')->whereDate('updated_at', today())->sum('total_price'),
+                'pendingTransactions' => (clone $baseQuery)->whereIn('status', ['baru', 'diproses'])->count(),
             ],
             'transactions' => $transactions,
-            'filters' => ['status' => $status],
+            'cities' => $cities,
+            'filters' => [
+                'status' => $status,
+                'city' => $city,
+                'period' => $period,
+            ],
         ]);
     }
 }
