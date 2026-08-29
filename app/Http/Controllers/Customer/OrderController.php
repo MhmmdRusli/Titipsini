@@ -145,10 +145,22 @@ class OrderController extends Controller
     public function requestPickup(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
-        abort_unless($order->status === 'diproses', 400, 'Pesanan ini tidak sedang diproses.');
-        abort_unless($order->fase === 'berjalan', 400, 'Pesanan belum berada pada tahap penitipan.');
-        abort_unless($order->payment_verified_at !== null, 400, 'Pembayaran pesanan belum diverifikasi.');
-        abort_if($order->pickup_requested_at, 400, 'Pengajuan pengambilan sudah dikirim.');
+
+        if ($order->status !== 'diproses') {
+            return back()->withErrors(['pickup' => 'Pesanan ini tidak sedang diproses.']);
+        }
+
+        if ($order->fase !== 'berjalan') {
+            return back()->withErrors(['pickup' => 'Pesanan belum berada pada tahap penitipan.']);
+        }
+
+        if ($order->payment_verified_at === null) {
+            return back()->withErrors(['pickup' => 'Pembayaran pesanan belum diverifikasi.']);
+        }
+
+        if ($order->pickup_requested_at) {
+            return back()->withErrors(['pickup' => 'Pengajuan pengambilan sudah dikirim.']);
+        }
 
         $order->update(['pickup_requested_at' => now()]);
 

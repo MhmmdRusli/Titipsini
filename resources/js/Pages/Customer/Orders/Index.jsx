@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { CheckCircle2, MapPin, Star, Truck } from 'lucide-react';
+import Swal from 'sweetalert2';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const TABS = [
@@ -40,6 +41,14 @@ const STATUS_COLOR = {
     dibatalkan: 'text-gray-500',
 };
 
+const PICKUP_ALERT_CLASS = {
+    popup: 'titipsini-alert-popup',
+    icon: 'titipsini-alert-icon',
+    title: 'titipsini-alert-title',
+    htmlContainer: 'titipsini-alert-text',
+    confirmButton: 'titipsini-alert-button',
+};
+
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -67,7 +76,29 @@ export default function OrdersIndex({ orders, filters }) {
         router.patch(`/app/orders/${order.id}/ajukan-pengambilan`, {}, {
             preserveScroll: true,
             onFinish: () => setProcessingOrderId(null),
-            onSuccess: () => setPickupConfirmOrder(null),
+            onSuccess: () => {
+                setPickupConfirmOrder(null);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pengajuan dikirim',
+                    text: 'Pengajuan pengembalian berhasil dikirim ke mitra.',
+                    width: 'min(86vw, 320px)',
+                    confirmButtonColor: '#15803d',
+                    buttonsStyling: false,
+                    customClass: PICKUP_ALERT_CLASS,
+                });
+            },
+            onError: (errors) => {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Belum Bisa Diajukan',
+                    text: errors.pickup ?? 'Pengajuan pengembalian belum bisa diproses.',
+                    width: 'min(86vw, 320px)',
+                    confirmButtonColor: '#15803d',
+                    buttonsStyling: false,
+                    customClass: PICKUP_ALERT_CLASS,
+                });
+            },
         });
     }
 
@@ -421,6 +452,45 @@ export default function OrdersIndex({ orders, filters }) {
                 }
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;
+                }
+                .titipsini-alert-popup {
+                    border-radius: 14px;
+                    padding: 18px 16px 16px;
+                }
+                .titipsini-alert-icon {
+                    margin: 4px auto 10px;
+                    width: 44px;
+                    height: 44px;
+                    border-width: 3px;
+                    font-size: 28px;
+                }
+                .titipsini-alert-title {
+                    padding: 0;
+                    color: #111827;
+                    font-size: 18px;
+                    font-weight: 800;
+                    line-height: 1.25;
+                }
+                .titipsini-alert-text {
+                    margin: 8px 0 0;
+                    color: #6b7280;
+                    font-size: 13px;
+                    line-height: 1.5;
+                }
+                .titipsini-alert-button {
+                    margin-top: 16px;
+                    min-width: 74px;
+                    border-radius: 8px;
+                    background: #15803d;
+                    padding: 9px 16px;
+                    color: white;
+                    font-size: 13px;
+                    font-weight: 700;
+                    box-shadow: 0 2px 8px rgba(21, 128, 61, 0.24);
+                }
+                .titipsini-alert-button:focus {
+                    outline: 3px solid rgba(21, 128, 61, 0.2);
+                    outline-offset: 2px;
                 }
             `}</style>
         </CustomerLayout>
