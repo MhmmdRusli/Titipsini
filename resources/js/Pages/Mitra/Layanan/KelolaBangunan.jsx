@@ -14,7 +14,7 @@ function IlustrasiBangunan() {
     );
 }
 
-export default function KelolaBangunan({ layanan = [], daftarKota = [], menungguVerifikasi = false }) {
+export default function KelolaBangunan({ layanan = [], daftarKota = [], menungguVerifikasi = false, edit = null }) {
     return (
         <>
             <Head title="Kelola Bangunan" />
@@ -32,6 +32,7 @@ export default function KelolaBangunan({ layanan = [], daftarKota = [], menunggu
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
                 FormKustom={FormIdentitasPenjaga}
+                edit={edit}
             />
         </>
     );

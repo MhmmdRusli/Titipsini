@@ -131,6 +131,20 @@ class ServiceController extends Controller
     }
 
     /**
+     * Blokir pemesanan kalau layanan/mitra belum siap: layanan belum
+     * divalidasi, KTP mitra belum terverifikasi, atau jam operasional mitra
+     * belum dipasang.
+     */
+    protected function ensureOrderable(Service $service): void
+    {
+        abort_unless(
+            $service->isOrderable(),
+            403,
+            'Layanan ini belum siap menerima pesanan (masih dalam proses verifikasi atau belum mengatur jam operasional).'
+        );
+    }
+
+    /**
      * Potong saldo customer untuk pembayaran via "Saldo Titipsini".
      * Melempar ValidationException kalau saldo tidak mencukupi, supaya
      * ditangkap otomatis oleh Inertia sebagai error form (payment_method).
@@ -203,6 +217,7 @@ class ServiceController extends Controller
             ->withQueryString()
             ->through(function ($service) {
                 $service->foto = $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null;
+                $service->is_orderable = $service->isOrderable();
                 return $service;
             });
 
@@ -280,6 +295,8 @@ class ServiceController extends Controller
                 'jamTutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
                 'isBuka' => (bool) $service->is_active,
                 ...$this->reviewSummary($service),
+                'jadwalOperasional' => $this->jadwalUntukCustomer($service),
+                'isOrderable' => $service->isOrderable(),
             ],
         ]);
     }
@@ -326,6 +343,7 @@ class ServiceController extends Controller
         ]);
 
         $service = Service::where('kategori', 'bangunan')->findOrFail($data['service_id']);
+        $this->ensureOrderable($service);
         $address = $request->user()->addresses()->findOrFail($data['address_id']);
         $duration = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
         $subtotal = (float) $service->harga * $data['jumlahBangunan'] * $duration;
@@ -353,7 +371,14 @@ class ServiceController extends Controller
         abort_unless($service->kategori === 'bangunan' && $service->is_active, 404);
 
         return Inertia::render('Customer/Services/Bangunan/Detail', [
-            'mitra' => array_merge($this->formatMitraKendaraan($service), $this->reviewSummary($service)),
+            'mitra' => array_merge(
+                $this->formatMitraKendaraan($service),
+                $this->reviewSummary($service),
+                [
+                    'jadwalOperasional' => $this->jadwalUntukCustomer($service),
+                    'isOrderable' => $service->isOrderable(),
+                ]
+            ),
         ]);
     }
 
@@ -445,6 +470,11 @@ class ServiceController extends Controller
 
         $customer = $request->user();
         $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
+
+        if ($service) {
+            $this->ensureOrderable($service);
+        }
+
         $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
 
         $hargaPerHari = (float) $tier['harga_per_hari'];
@@ -551,7 +581,11 @@ class ServiceController extends Controller
         abort_unless($service->kategori === 'kendaraan' && $service->is_active, 404);
 
         return Inertia::render('Customer/Services/Kendaraan/Detail', [
-            'mitra' => array_merge($this->formatMitraKendaraan($service), $this->reviewSummary($service)),
+            'mitra' => array_merge(
+                $this->formatMitraKendaraan($service),
+                $this->reviewSummary($service),
+                ['jadwalOperasional' => $this->jadwalUntukCustomer($service)]
+            ),
         ]);
     }
 
@@ -560,7 +594,11 @@ class ServiceController extends Controller
         abort_unless($service->kategori === 'pindahan' && $service->is_active, 404);
 
         return Inertia::render('Customer/Services/Pindahan/Detail', [
-            'mitra' => array_merge($this->formatMitraKendaraan($service), $this->reviewSummary($service)),
+            'mitra' => array_merge(
+                $this->formatMitraKendaraan($service),
+                $this->reviewSummary($service),
+                ['jadwalOperasional' => $this->jadwalUntukCustomer($service)]
+            ),
         ]);
     }
 
@@ -649,6 +687,11 @@ class ServiceController extends Controller
 
         $customer = $request->user();
         $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
+
+        if ($service) {
+            $this->ensureOrderable($service);
+        }
+
         $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
 
         $hargaPerHari = (float) $tier['harga_per_hari'];
@@ -754,6 +797,8 @@ class ServiceController extends Controller
      */
     public function show(Request $request, Service $service)
     {
+        abort_unless($service->isOrderable(), 404);
+
         if ($service->kategori === 'kendaraan') {
             return redirect()->route('customer.services.kendaraan.form', [
                 'service_id' => $service->id,
@@ -791,6 +836,8 @@ class ServiceController extends Controller
      */
     public function storePesanan(Request $request, Service $service)
     {
+        $this->ensureOrderable($service);
+
         $data = $request->validate([
             'tanggalMasuk' => 'required|date',
             'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
@@ -847,6 +894,8 @@ class ServiceController extends Controller
      */
     public function metodePembayaranLayanan(Request $request, Service $service)
     {
+        $this->ensureOrderable($service);
+
         $tanggalMasuk = $request->query('tanggalMasuk');
         $tanggalKeluar = $request->query('tanggalKeluar');
         $jumlahHari = ($tanggalMasuk && $tanggalKeluar)
@@ -869,6 +918,8 @@ class ServiceController extends Controller
      */
     public function konfirmasiLayanan(Request $request, Service $service)
     {
+        $this->ensureOrderable($service);
+
         $data = $request->validate([
             'payment_method' => 'required|string',
             'tanggalMasuk' => 'required|date',
@@ -913,6 +964,7 @@ class ServiceController extends Controller
         $services = Service::query()
             ->where('kategori', $kategori)
             ->where('is_active', true)
+            ->with('vendor:id,name')
             ->when($request->filled('kota'), fn ($query) => $query->where('kota', $request->string('kota')))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
@@ -962,6 +1014,7 @@ class ServiceController extends Controller
             'jam_buka' => $service->jam_buka ? Carbon::parse($service->jam_buka)->format('H.i') : '08.00',
             'jam_tutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
             'is_buka' => (bool) $service->is_active,
+            'is_orderable' => $service->isOrderable(),
         ];
     }
 
@@ -986,5 +1039,37 @@ class ServiceController extends Controller
                 'createdAt' => $review->created_at?->translatedFormat('j F Y'),
             ])->values()->all(),
         ];
+    }
+
+    /**
+     * Susun jadwal operasional mitra jadi array berurutan Senin-Minggu
+     * supaya bisa ditampilkan ke customer (hari buka + jam per hari).
+     * Diambil dari users.jadwal_operasional (bukan dari jam_buka statis).
+     */
+    protected function jadwalUntukCustomer(Service $service): array
+    {
+        $jadwal = $service->vendor?->jadwal_operasional ?? [];
+        $hariList = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
+        $label = [
+            'senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu',
+            'kamis' => 'Kamis', 'jumat' => 'Jumat', 'sabtu' => 'Sabtu', 'minggu' => 'Minggu',
+        ];
+
+        return collect($hariList)->map(function ($key) use ($jadwal, $label) {
+            $h = $jadwal[$key] ?? null;
+            $aktif = ! empty($h['aktif']);
+            $slots = collect($h['slots'] ?? [])
+                ->filter(fn ($s) => ! empty($s['aktif']) && ! empty($s['jam_buka']) && ! empty($s['jam_tutup']))
+                ->map(fn ($s) => ['jam_buka' => $s['jam_buka'], 'jam_tutup' => $s['jam_tutup']])
+                ->values()
+                ->all();
+
+            return [
+                'key' => $key,
+                'hari' => $label[$key],
+                'aktif' => $aktif && count($slots) > 0,
+                'slots' => $slots,
+            ];
+        })->all();
     }
 }

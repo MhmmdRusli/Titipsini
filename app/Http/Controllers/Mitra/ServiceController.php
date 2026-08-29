@@ -77,6 +77,7 @@ class ServiceController extends Controller
             'daftarKota' => \App\Models\Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
             'menungguVerifikasi' => false,
             'fiturPenuhAktif' => (bool) (($request->user()->fitur_penuh_kategori ?? [])[$kategori] ?? false),
+            'edit' => $request->query('edit'),
         ]);
     }
 

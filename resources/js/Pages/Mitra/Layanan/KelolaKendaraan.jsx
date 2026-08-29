@@ -22,7 +22,7 @@ function IlustrasiKendaraan() {
     );
 }
 
-export default function KelolaKendaraan({ layanan = [], daftarKota = [], menungguVerifikasi = false }) {
+export default function KelolaKendaraan({ layanan = [], daftarKota = [], menungguVerifikasi = false, edit = null }) {
     return (
         <>
             <Head title="Kelola Kendaraan" />
@@ -40,6 +40,7 @@ export default function KelolaKendaraan({ layanan = [], daftarKota = [], menungg
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
                 FormKustom={FormAlamatLahanParkir}
+                edit={edit}
             />
         </>
     );

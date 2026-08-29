@@ -47,4 +47,37 @@ class Service extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    /**
+     * Scope: hanya layanan yang BENAR-BENAR siap dipesan customer, yaitu
+     * - layanan aktif & sudah divalidasi (verification_status = terverifikasi)
+     * - mitra (vendor) sudah verifikasi KTP (verification_status = terverifikasi)
+     * - mitra sudah memasang jam operasional (jadwal_operasional terisi)
+     * Dipakai di semua titik customer (list, search, detail, pemesanan) supaya
+     * layanan yang masih proses verifikasi tidak bisa dilihat/dipesan.
+     */
+    public function scopeOrderable($query)
+    {
+        return $query
+            ->where('services.is_active', true)
+            ->where('services.verification_status', 'terverifikasi')
+            ->whereHas('vendor', function ($q) {
+                $q->where('verification_status', 'terverifikasi')
+                    ->whereNotNull('jadwal_operasional')
+                    ->where('jadwal_operasional', '<>', '[]');
+            });
+    }
+
+    /**
+     * Cek kesiapan layanan di sisi PHP (mirip scopeOrderable tapi untuk
+     * validasi objek yang sudah di-load, mis. saat menyimpan pesanan).
+     */
+    public function isOrderable(): bool
+    {
+        return $this->is_active
+            && $this->verification_status === 'terverifikasi'
+            && $this->vendor
+            && $this->vendor->verification_status === 'terverifikasi'
+            && ! empty($this->vendor->jadwal_operasional);
+    }
 }

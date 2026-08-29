@@ -136,6 +136,7 @@ export default function ServicesIndex({ services, filters }) {
                     )}
                     {services.data.map((service) => {
                         const ServiceIcon = ICON_BY_KATEGORI[service.kategori] ?? CategoryIcon;
+                        const orderable = service.is_orderable !== false;
 
                         return (
                             <div
@@ -153,15 +154,21 @@ export default function ServicesIndex({ services, filters }) {
                                         </div>
                                 </div>
 
-                                {typeof service.is_buka === 'boolean' && (
-                                    <span
-                                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                            service.is_buka
-                                                ? 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]'
-                                                : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'
-                                        }`}
-                                    >
-                                        {service.is_buka ? 'Buka' : 'Tutup'}
+                                {orderable ? (
+                                    typeof service.is_buka === 'boolean' && (
+                                        <span
+                                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                                service.is_buka
+                                                    ? 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]'
+                                                    : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'
+                                            }`}
+                                        >
+                                            {service.is_buka ? 'Buka' : 'Tutup'}
+                                        </span>
+                                    )
+                                ) : (
+                                    <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                        Segera Tersedia
                                     </span>
                                 )}
                             </div>
@@ -186,12 +193,22 @@ export default function ServicesIndex({ services, filters }) {
 
                             <div className="mt-2.5 flex items-center gap-2">
                                 <div className="flex w-full items-center gap-2">
-                                    <Link
-                                        href={hrefForService(service)}
-                                        className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#15803d] px-3.5 py-2 text-xs font-bold text-white dark:bg-[#22c55e]"
-                                    >
-                                        Titip Disini
-                                    </Link>
+                                    {orderable ? (
+                                        <Link
+                                            href={hrefForService(service)}
+                                            className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#15803d] px-3.5 py-2 text-xs font-bold text-white dark:bg-[#22c55e]"
+                                        >
+                                            Titip Disini
+                                        </Link>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            disabled
+                                            className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-1 rounded-lg bg-gray-200 px-3.5 py-2 text-xs font-bold text-gray-400 dark:bg-gray-700 dark:text-gray-500"
+                                        >
+                                            Segera Tersedia
+                                        </button>
+                                    )}
                                     <Link
                                         href={detailHrefForService(service)}
                                         className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#15803d] px-3.5 py-2 text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
