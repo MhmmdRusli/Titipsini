@@ -44,10 +44,11 @@ class OrderController extends Controller
         $orders = $query->latest()
             ->paginate(10)
             ->withQueryString()
-            ->through(fn (Order $order) => [
-                ...$order->toArray(),
+            ->through(fn (Order $order) => $order->toArray() + [
                 'vendor_name' => $order->partner?->name ?? 'Experi',
-                'vendor_address' => $order->partner ? trim(implode(', ', array_filter([$order->partner->address, $order->partner->city])), ', ') : 'Jl. Janti, Bantul, Yogyakarta',
+                'vendor_address' => $order->partner
+                    ? trim(implode(', ', array_filter([$order->partner->address, $order->partner->city])), ', ')
+                    : 'Jl. Janti, Bantul, Yogyakarta',
             ]);
 
         return Inertia::render('Customer/Orders/Index', [
