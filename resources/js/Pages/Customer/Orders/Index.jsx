@@ -66,6 +66,20 @@ export default function OrdersIndex({ orders, filters }) {
         toastTimer.current = setTimeout(() => setToast(null), 3200);
     }
 
+    const [expandedAddresses, setExpandedAddresses] = useState({});
+
+    function truncateText(text, maxLength = 35) {
+        if (!text || text.length <= maxLength) return text;
+        return text.slice(0, maxLength).trim() + '...';
+    }
+
+    function toggleAddress(orderId) {
+        setExpandedAddresses((prev) => ({
+            ...prev,
+            [orderId]: !prev[orderId],
+        }));
+    }
+
     function changeTab(status) {
         router.get('/app/orders', { status }, { preserveState: true, preserveScroll: true, replace: true });
     }
@@ -171,9 +185,22 @@ export default function OrdersIndex({ orders, filters }) {
                                             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                                                 {order.vendor_name ?? 'Experi'}
                                             </h3>
-                                            <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-400">
-                                                <MapPin size={13} className="shrink-0" />
-                                                <span>{order.vendor_address ?? 'Jl. Janti, Bantul, Yogyakarta'}</span>
+                                            <p className="mt-0.5 flex items-start gap-1 text-xs text-gray-400">
+                                                <MapPin size={13} className="mt-0.5 shrink-0" />
+                                                <span>
+                                                    {expandedAddresses[order.id]
+                                                        ? order.vendor_address ?? 'Jl. Janti, Bantul, Yogyakarta'
+                                                        : truncateText(order.vendor_address ?? 'Jl. Janti, Bantul, Yogyakarta')}
+                                                    {(order.vendor_address ?? '').length > 35 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => toggleAddress(order.id)}
+                                                            className="ml-1 text-emerald-600 dark:text-emerald-400 hover:underline"
+                                                        >
+                                                            {expandedAddresses[order.id] ? 'sembunyikan' : 'selengkapnya'}
+                                                        </button>
+                                                    )}
+                                                </span>
                                             </p>
                                         </div>
                                         <span className={`text-xs font-semibold ${STATUS_COLOR[order.status] ?? 'text-gray-400'}`}>
