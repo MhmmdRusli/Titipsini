@@ -7,10 +7,11 @@ use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\PaymentSetting;
 use App\Services\OrderFaseService;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-use Illuminate\Http\RedirectResponse;
 use Inertia\Response;
 
 class OrderController extends Controller
@@ -37,7 +38,7 @@ class OrderController extends Controller
             ->with('partner:id,name');
 
         $statuses = $this->statusesForTab($status);
-        if (!empty($statuses)) {
+        if (! empty($statuses)) {
             $query->whereIn('status', $statuses);
         }
 
@@ -120,7 +121,10 @@ class OrderController extends Controller
             return back()->withErrors(['finish' => 'Pembayaran pesanan belum diverifikasi.']);
         }
 
-        $order->update(['tanggal_selesai_aktual' => now()]);
+        if (! $order->tanggal_selesai_aktual) {
+            $order->update(['tanggal_selesai_aktual' => now()]);
+        }
+
         OrderFaseService::completeOrder($order);
 
         return back()->with('success', 'Pesanan berhasil diselesaikan.');
@@ -238,12 +242,12 @@ class OrderController extends Controller
 
         return Inertia::render('Customer/Orders/Pembayaran', [
             'order' => $order->only([
-                'id', 
-                'order_code', 
-                'item_name', 
+                'id',
+                'order_code',
+                'item_name',
                 'service_type',
-                'payment_method', 
-                'total_price', 
+                'payment_method',
+                'total_price',
                 'status',
                 'created_at',
             ]),
@@ -262,12 +266,12 @@ class OrderController extends Controller
 
         return Inertia::render('Customer/Orders/BuktiPembayaran', [
             'order' => $order->only([
-                'id', 
-                'order_code', 
-                'item_name', 
+                'id',
+                'order_code',
+                'item_name',
                 'service_type',
-                'payment_method', 
-                'total_price', 
+                'payment_method',
+                'total_price',
                 'created_at',
             ]),
             'qris_url' => $qrisUrl,
@@ -291,8 +295,8 @@ class OrderController extends Controller
 
             $order->update([
                 'payment_receipt' => $path,
-                'status'          => 'diproses',
-                'payment_method'  => $order->payment_method === 'pending' ? 'transfer' : $order->payment_method,
+                'status' => 'diproses',
+                'payment_method' => $order->payment_method === 'pending' ? 'transfer' : $order->payment_method,
             ]);
 
             if ($order->partner_id) {
@@ -321,38 +325,55 @@ class OrderController extends Controller
     public function bayarDenda(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
-     
+
+        if (! in_array($order->fase, ['berjalan', 'akhir'], true)) {
+            return back()->withErrors([
+                'saldo_denda' => 'Denda baru bisa dibayar saat penitipan berjalan atau sudah diakhiri mitra.',
+            ]);
+        }
+
         if ($order->denda_paid_at !== null) {
             return back()->with('success', 'Denda untuk pesanan ini sudah dibayar sebelumnya.');
         }
-     
+
         $dendaAmount = $order->hitungDenda();
-     
+
         if ($dendaAmount <= 0) {
             return back()->with('success', 'Pesanan ini tidak memiliki denda keterlambatan.');
         }
-     
+
         $customer = $request->user();
-     
+
         if ((float) $customer->saldo < $dendaAmount) {
             return back()->withErrors([
                 'saldo_denda' => 'Saldo kamu tidak mencukupi untuk membayar denda ini. Silakan top up terlebih dahulu.',
             ]);
         }
-     
+
         $customer->decrement('saldo', $dendaAmount);
-     
+
         $order->update([
             'denda_paid_at' => now(),
-            'status_denda'  => 'terverifikasi',
+            'denda_amount' => $dendaAmount,
+            'status_denda' => 'terverifikasi',
         ]);
-     
+
         return back()->with('success', 'Denda keterlambatan berhasil dibayar.');
     }
 
     public function uploadBuktiDenda(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
+
+        if (! in_array($order->fase, ['berjalan', 'akhir'], true)) {
+            return back()->withErrors([
+                'denda_receipt' => 'Bukti denda baru bisa diunggah saat penitipan berjalan atau sudah diakhiri mitra.',
+            ]);
+        }
+
+        if ($order->denda_paid_at !== null) {
+            return back()->with('success', 'Denda untuk pesanan ini sudah dibayar sebelumnya.');
+        }
 
         $request->validate([
             'denda_receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',
@@ -365,7 +386,7 @@ class OrderController extends Controller
         $path = $request->file('denda_receipt')->store('bukti-denda', 'public');
 
         $order->update([
-            'bukti_denda'  => $path,
+            'bukti_denda' => $path,
             'status_denda' => 'menunggu_verifikasi',
         ]);
 
@@ -400,14 +421,13 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        abort_unless(
-            $order->status === 'diproses',
-            400,
-            'Hanya pesanan yang sedang dititipkan yang bisa diperpanjang.'
-        );
+        abort_unless($order->status === 'diproses', 400, 'Hanya pesanan yang sedang dititipkan yang bisa diperpanjang.');
+        abort_unless($order->fase === 'berjalan', 400, 'Perpanjangan hanya bisa diajukan saat penitipan sedang berjalan.');
+        abort_unless($order->payment_verified_at !== null, 400, 'Pembayaran pesanan utama belum diverifikasi.');
+        abort_unless(! in_array($order->status_perpanjangan, ['menunggu_pembayaran', 'menunggu_verifikasi'], true), 400, 'Masih ada perpanjangan yang belum selesai.');
+        abort_unless($order->dendaLunas(), 400, 'Pesanan sudah melewati tanggal keluar. Selesaikan denda terlebih dahulu.');
 
-        $jumlahHariAsli = max(1, \Carbon\Carbon::parse($order->start_date)->diffInDays($order->end_date));
-        $hargaPerHari = round(((float) $order->subtotal) / $jumlahHariAsli);
+        $hargaPerHari = $order->hargaHarianPerpanjangan();
 
         return Inertia::render('Customer/Orders/Extend', [
             'order' => $order->only([
@@ -425,11 +445,25 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        abort_unless(
-            $order->status === 'diproses',
-            400,
-            'Hanya pesanan yang sedang dititipkan yang bisa diperpanjang.'
-        );
+        if ($order->status !== 'diproses') {
+            return back()->withErrors(['extend_end_date' => 'Hanya pesanan yang sedang dititipkan yang bisa diperpanjang.']);
+        }
+
+        if ($order->fase !== 'berjalan') {
+            return back()->withErrors(['extend_end_date' => 'Perpanjangan hanya bisa diajukan saat penitipan sedang berjalan.']);
+        }
+
+        if ($order->payment_verified_at === null) {
+            return back()->withErrors(['extend_end_date' => 'Pembayaran pesanan utama belum diverifikasi.']);
+        }
+
+        if (in_array($order->status_perpanjangan, ['menunggu_pembayaran', 'menunggu_verifikasi'], true)) {
+            return back()->withErrors(['extend_end_date' => 'Masih ada perpanjangan yang belum selesai.']);
+        }
+
+        if (! $order->dendaLunas()) {
+            return back()->withErrors(['extend_end_date' => 'Pesanan sudah melewati tanggal keluar. Selesaikan denda terlebih dahulu.']);
+        }
 
         $validated = $request->validate([
             'extend_end_date' => ['required', 'date', 'after:'.$order->end_date],
@@ -482,7 +516,13 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        abort_unless($order->status_perpanjangan === 'menunggu_pembayaran', 400, 'Tidak ada perpanjangan yang menunggu pembayaran.');
+        if ($order->status_perpanjangan !== 'menunggu_pembayaran') {
+            return back()->withErrors(['saldo_perpanjangan' => 'Tidak ada perpanjangan yang menunggu pembayaran.']);
+        }
+
+        if (! $order->extend_end_date || (float) $order->extend_price <= 0) {
+            return back()->withErrors(['saldo_perpanjangan' => 'Data perpanjangan belum lengkap. Ajukan ulang perpanjangan penitipan.']);
+        }
 
         $customer = $request->user();
         $harga = (float) $order->extend_price;
@@ -509,7 +549,7 @@ class OrderController extends Controller
                 'order_id' => $order->id,
                 'type' => 'transaksi_masuk',
                 'judul' => 'Penitipan Diperpanjang',
-                'pesan' => 'Pesanan '.$order->order_code.' diperpanjang sampai '.\Carbon\Carbon::parse($order->end_date)->translatedFormat('d F Y').'.',
+                'pesan' => 'Pesanan '.$order->order_code.' diperpanjang sampai '.Carbon::parse($order->end_date)->translatedFormat('d F Y').'.',
             ]);
         }
 
@@ -524,7 +564,13 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        abort_unless($order->status_perpanjangan === 'menunggu_pembayaran', 400, 'Tidak ada perpanjangan yang menunggu pembayaran.');
+        if ($order->status_perpanjangan !== 'menunggu_pembayaran') {
+            return back()->withErrors(['extend_receipt' => 'Tidak ada perpanjangan yang menunggu pembayaran.']);
+        }
+
+        if (! $order->extend_end_date || (float) $order->extend_price <= 0) {
+            return back()->withErrors(['extend_receipt' => 'Data perpanjangan belum lengkap. Ajukan ulang perpanjangan penitipan.']);
+        }
 
         $request->validate([
             'extend_receipt' => 'required|image|mimes:jpeg,png,jpg|max:2048',

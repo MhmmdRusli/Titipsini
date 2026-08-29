@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Mitra;
 use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -119,7 +121,7 @@ class OrderController extends Controller
             ];
         });
 
-            $counts = [
+        $counts = [
             'baru' => Order::where('partner_id', $partner->id)->whereIn('status', ['baru', 'diproses'])->count(),
             'selesai' => Order::where('partner_id', $partner->id)->where('status', 'selesai')->count(),
             'dibatalkan' => Order::where('partner_id', $partner->id)->where('status', 'dibatalkan')->count(),
@@ -165,7 +167,7 @@ class OrderController extends Controller
                 'item_description' => $order->item_name,
                 'duration' => $this->hitungDurasi($order),
                 'pickup_status' => $order->is_pickup ? 'Dijemput oleh mitra' : 'Diantar sendiri oleh customer',
-                'jam_pickup' => $order->jam_pickup ? \Illuminate\Support\Carbon::parse($order->jam_pickup)->format('H:i') : null,
+                'jam_pickup' => $order->jam_pickup ? Carbon::parse($order->jam_pickup)->format('H:i') : null,
                 'subtotal' => (float) $subtotal,
                 'discount' => (float) $discount,
                 'pickup_fee' => (float) $pickupFee,
@@ -175,9 +177,9 @@ class OrderController extends Controller
                 'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
                 'payment_verified_at' => optional($order->payment_verified_at)->format('d M Y, H:i'),
                 'pickup_requested_at' => optional($order->pickup_requested_at)->format('d M Y, H:i'),
-                
+
                 // 👇 Properti Denda yang ditambahkan agar muncul di halaman Mitra
-                'denda' => (float) $order->denda, 
+                'denda' => (float) $order->denda,
                 'bukti_denda' => $order->bukti_denda ? Storage::disk('public')->url($order->bukti_denda) : null,
                 'status_denda' => $order->status_denda,
 
@@ -238,7 +240,13 @@ class OrderController extends Controller
             abort_unless($order->pickup_requested_at, 400, 'Customer belum mengajukan pengambilan barang.');
         }
 
-        $order->update(['fase' => $next]);
+        $updates = ['fase' => $next];
+
+        if ($next === 'akhir' && ! $order->tanggal_selesai_aktual) {
+            $updates['tanggal_selesai_aktual'] = now();
+        }
+
+        $order->update($updates);
 
         $label = self::FASE_LABELS[$serviceType][$next] ?? $next;
 
@@ -257,7 +265,7 @@ class OrderController extends Controller
             : 'Status pesanan berhasil diperbarui menjadi "'.$label.'".');
     }
 
-        public function ambilPesanan(Order $order)
+    public function ambilPesanan(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
         abort_unless($order->status === 'baru', 400, 'Pesanan ini sudah tidak berstatus baru.');
@@ -306,62 +314,67 @@ class OrderController extends Controller
             return null;
         }
 
-        $mulai = \Illuminate\Support\Carbon::parse($order->start_date);
-        $selesai = \Illuminate\Support\Carbon::parse($order->end_date);
+        $mulai = Carbon::parse($order->start_date);
+        $selesai = Carbon::parse($order->end_date);
         $hari = max(1, $mulai->diffInDays($selesai));
 
         return $hari.' hari';
     }
 
     public function verifikasiDenda(Request $request, Order $order)
-{
-    // Pengaman: Pastikan order benar-benar milik mitra yang sedang login
-    abort_unless($order->partner_id === Auth::id(), 403);
+    {
+        // Pengaman: Pastikan order benar-benar milik mitra yang sedang login
+        abort_unless($order->partner_id === Auth::id(), 403);
 
-    abort_unless($order->bukti_denda, 422, 'Belum ada bukti pembayaran denda yang diunggah.');
-    abort_if($order->denda_paid_at, 422, 'Denda untuk pesanan ini sudah diverifikasi sebelumnya.');
+        abort_unless($order->bukti_denda, 422, 'Belum ada bukti pembayaran denda yang diunggah.');
+        abort_unless($order->hitungDenda() > 0, 422, 'Pesanan ini tidak memiliki denda keterlambatan.');
+        abort_if($order->denda_paid_at, 422, 'Denda untuk pesanan ini sudah diverifikasi sebelumnya.');
 
-    $order->update([
-        'status_denda' => 'terverifikasi',
-        'denda_paid_at' => now(),
-    ]);
+        $order->update([
+            'status_denda' => 'terverifikasi',
+            'denda_paid_at' => now(),
+            'denda_amount' => $order->hitungDenda(),
+        ]);
 
-    // Kirim notifikasi ke Customer bahwa denda sudah diverifikasi
-    Notifikasi::create([
-        'user_id' => $order->customer_id,
-        'order_id' => $order->id,
-        'type' => 'pembayaran_diterima',
-        'judul' => 'Denda Terverifikasi',
-        'pesan' => 'Mitra telah memverifikasi pembayaran denda untuk pesanan '.$order->order_code.'.',
-    ]);
+        // Kirim notifikasi ke Customer bahwa denda sudah diverifikasi
+        Notifikasi::create([
+            'user_id' => $order->customer_id,
+            'order_id' => $order->id,
+            'type' => 'pembayaran_diterima',
+            'judul' => 'Denda Terverifikasi',
+            'pesan' => 'Mitra telah memverifikasi pembayaran denda untuk pesanan '.$order->order_code.'.',
+        ]);
 
-    return redirect()->back()->with('success', 'Pembayaran denda keterlambatan berhasil diverifikasi!');
-}
-public function verifikasiPerpanjangan(Order $order): RedirectResponse
-{
-    abort_unless($order->partner_id === auth()->id(), 403);
- 
-    abort_unless(
-        $order->status_perpanjangan === 'menunggu_verifikasi',
-        400,
-        'Tidak ada perpanjangan yang menunggu verifikasi untuk pesanan ini.'
-    );
- 
-    $order->update([
-        'end_date' => $order->extend_end_date,
-        'total_price' => $order->total_price + $order->extend_price,
-        'extend_paid_at' => now(),
-        'status_perpanjangan' => 'terverifikasi',
-    ]);
- 
-    Notifikasi::create([
-        'user_id' => $order->customer_id,
-        'order_id' => $order->id,
-        'type' => 'pembayaran_diterima',
-        'judul' => 'Perpanjangan Disetujui',
-        'pesan' => 'Perpanjangan penitipan untuk pesanan '.$order->order_code.' sudah diverifikasi mitra.',
-    ]);
- 
-    return back()->with('success', 'Perpanjangan penitipan berhasil diverifikasi.');
-}
+        return redirect()->back()->with('success', 'Pembayaran denda keterlambatan berhasil diverifikasi!');
+    }
+
+    public function verifikasiPerpanjangan(Order $order): RedirectResponse
+    {
+        abort_unless($order->partner_id === auth()->id(), 403);
+
+        if ($order->status_perpanjangan !== 'menunggu_verifikasi') {
+            return back()->with('error', 'Tidak ada perpanjangan yang menunggu verifikasi untuk pesanan ini.');
+        }
+
+        if (! $order->extend_end_date || (float) $order->extend_price <= 0) {
+            return back()->with('error', 'Data perpanjangan belum lengkap. Minta customer mengajukan ulang.');
+        }
+
+        $order->update([
+            'end_date' => $order->extend_end_date,
+            'total_price' => (float) $order->total_price + (float) $order->extend_price,
+            'extend_paid_at' => now(),
+            'status_perpanjangan' => 'terverifikasi',
+        ]);
+
+        Notifikasi::create([
+            'user_id' => $order->customer_id,
+            'order_id' => $order->id,
+            'type' => 'pembayaran_diterima',
+            'judul' => 'Perpanjangan Disetujui',
+            'pesan' => 'Perpanjangan penitipan untuk pesanan '.$order->order_code.' sudah diverifikasi mitra.',
+        ]);
+
+        return back()->with('success', 'Perpanjangan penitipan berhasil diverifikasi.');
+    }
 }

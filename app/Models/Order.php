@@ -1,11 +1,16 @@
 <?php
+
 namespace App\Models;
+
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class Order extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'order_code',
         'order_number',
@@ -36,6 +41,7 @@ class Order extends Model
         'pickup_requested_at',
         'tanggal_selesai_aktual',
         'denda_paid_at',
+        'denda_amount',
         'denda_payment_receipt',
         'bukti_denda',
         'status_denda',
@@ -51,23 +57,24 @@ class Order extends Model
         'payment_method',
         'payment_receipt',
         'payment_verified_at',
-         'extend_end_date',
-    'extend_price',
-    'extend_requested_at',
-    'extend_paid_at',
-    'extend_payment_method',
-    'extend_payment_receipt',
-    'status_perpanjangan',
-    'jam_pickup',
-    'jumlah_barang',
-    'ukuran_barang',
-    'harga_per_hari',
-    'foto_barang_url',
-    'biaya_layanan',
+        'extend_end_date',
+        'extend_price',
+        'extend_requested_at',
+        'extend_paid_at',
+        'extend_payment_method',
+        'extend_payment_receipt',
+        'status_perpanjangan',
+        'jam_pickup',
+        'jumlah_barang',
+        'ukuran_barang',
+        'harga_per_hari',
+        'foto_barang_url',
+        'biaya_layanan',
     ];
+
     protected $appends = ['denda'];
 
-        protected function casts(): array
+    protected function casts(): array
     {
         return [
             'is_pickup' => 'boolean',
@@ -84,19 +91,22 @@ class Order extends Model
             'tanggal_selesai_aktual' => 'datetime',
             'pickup_requested_at' => 'datetime',
             'denda_paid_at' => 'datetime',
+            'denda_amount' => 'decimal:2',
             'start_date' => 'date',
             'end_date' => 'date',
             'ukuran_panjang' => 'integer',
             'ukuran_lebar' => 'integer',
             'extend_end_date' => 'date',
-    'extend_requested_at' => 'datetime',
-    'extend_paid_at' => 'datetime',
+            'extend_requested_at' => 'datetime',
+            'extend_paid_at' => 'datetime',
         ];
     }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');
     }
+
     public function partner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'partner_id');
@@ -113,19 +123,19 @@ class Order extends Model
     }
 
     /**
-     * Hitung denda keterlambatan secara otomatis berdasarkan `end_date` vs
-     * tanggal order benar-benar selesai (tanggal_selesai_aktual kalau sudah
-     * diisi/fase 'akhir', atau `now()` sebagai estimasi live kalau order
-     * masih berjalan).
+     * Hitung denda keterlambatan.
      *
-     * Rumus: total_price * persen_per_hari * jumlah_hari_terlambat / 100,
-     * dibatasi maksimal (max_persen / 100) * total_price supaya tidak
-     * membengkak tanpa batas untuk keterlambatan yang sangat lama.
+     * Kalau denda SUDAH dibayar (denda_paid_at terisi), kembalikan nominal
+     * yang disimpan di `denda_amount` - nilainya harus BEKU supaya tidak
+     * "mengembang" tiap hari setelah lunas, dan supaya saldo mitra cocok
+     * dengan yang benar-benar ditagih ke customer.
+     *
+     * Kalau belum dibayar, hitung live lewat hitungDendaFormula().
      *
      * Return 0 kalau:
      * - Tidak ada end_date sama sekali
-     * - Belum melewati end_date (tidak terlambat)
-     * - Order berstatus 'dibatalkan' (denda tidak relevan untuk order batal)
+     * - Belum melewati deadline (tidak terlambat)
+     * - Order berstatus 'dibatalkan'
      */
     public function hitungDenda(): float
     {
@@ -133,21 +143,23 @@ class Order extends Model
             return 0.0;
         }
 
-        $batasWaktu = $this->tanggal_selesai_aktual
-            ? $this->tanggal_selesai_aktual->copy()->startOfDay()
-            : ($this->pickup_requested_at
-                ? $this->pickup_requested_at->copy()->startOfDay()
-            : ($this->status === 'selesai'
-                // Order selesai tapi tidak pernah lewat alur fase mitra (edge
-                // case, mis. admin set status manual) - pakai updated_at
-                // sebagai perkiraan terbaik, supaya tidak ikut now() yang
-                // terus bertambah untuk order yang sudah final.
-                ? $this->updated_at->copy()->startOfDay()
-                : now()->startOfDay()));
+        if ($this->denda_paid_at !== null) {
+            return (float) ($this->denda_amount ?? $this->hitungDendaFormula());
+        }
 
-        $batasSeharusnya = $this->end_date->copy()->startOfDay();
+        return $this->hitungDendaFormula();
+    }
 
-        $hariTerlambat = $batasSeharusnya->diffInDays($batasWaktu, false);
+    /**
+     * Hitungan denda live (belum dibayar) berdasarkan deadline efektif vs
+     * kapan order benar-benar selesai / sekarang.
+     *
+     * Rumus: total_price * persen_per_hari * jumlah_hari_terlambat / 100,
+     * dibatasi maksimal (max_persen / 100) * total_price.
+     */
+    protected function hitungDendaFormula(): float
+    {
+        $hariTerlambat = $this->hariTerlambatDenda();
 
         if ($hariTerlambat <= 0) {
             return 0.0;
@@ -161,6 +173,38 @@ class Order extends Model
         );
 
         return round((float) $this->total_price * $persenTotal / 100);
+    }
+
+    /**
+     * Jumlah hari keterlambatan (<= 0 berarti tidak terlambat).
+     *
+     * Deadline efektif = end_date, KECUALI saat perpanjangan via transfer
+     * sedang `menunggu_verifikasi` (customer sudah upload bukti = sudah
+     * bayar, tinggal mitra konfirmasi). Di situ kita bekukan deadline ke
+     * extend_end_date agar jam denda berhenti - customer sudah komitmen
+     * perpanjang, jadi tidak denda ganda selagi nunggu mitra. (Jalur saldo
+     * & verifikasi mitra sudah menggeser end_date langsung, tidak perlu
+     * pengecualian di sini.)
+     */
+    protected function hariTerlambatDenda(): int
+    {
+        $batasWaktu = $this->tanggal_selesai_aktual?->copy()->startOfDay()
+            ?? $this->denda_paid_at?->copy()->startOfDay()
+            ?? ($this->status === 'selesai'
+                ? $this->updated_at->copy()->startOfDay()
+                : now()->startOfDay());
+
+        $batasSeharusnya = $this->end_date->copy()->startOfDay();
+
+        if (
+            $this->status_perpanjangan === 'menunggu_verifikasi'
+            && $this->extend_end_date
+            && $this->extend_end_date->copy()->startOfDay()->gt($batasSeharusnya)
+        ) {
+            $batasSeharusnya = $this->extend_end_date->copy()->startOfDay();
+        }
+
+        return (int) $batasSeharusnya->diffInDays($batasWaktu, false);
     }
 
     /**
@@ -195,17 +239,30 @@ class Order extends Model
     {
         return $this->hitungDenda();
     }
+
+    public function hargaHarianPerpanjangan(): float
+    {
+        if ((float) $this->harga_per_hari > 0) {
+            return (float) $this->harga_per_hari;
+        }
+
+        $mulai = Carbon::parse($this->start_date)->startOfDay();
+        $selesai = Carbon::parse($this->end_date)->startOfDay();
+        $jumlahHari = max(1, $mulai->diffInDays($selesai));
+
+        return round(((float) $this->subtotal) / $jumlahHari);
+    }
+
+    public function jumlahHariPerpanjangan(string $tanggalKeluarBaru): int
+    {
+        $selesaiLama = Carbon::parse($this->end_date)->startOfDay();
+        $selesaiBaru = Carbon::parse($tanggalKeluarBaru)->startOfDay();
+
+        return max(1, $selesaiLama->diffInDays($selesaiBaru));
+    }
+
     public function hargaPerpanjangan(string $tanggalKeluarBaru): float
-{
-    $mulai = \Carbon\Carbon::parse($this->start_date)->startOfDay();
-    $selesaiLama = \Carbon\Carbon::parse($this->end_date)->startOfDay();
-    $selesaiBaru = \Carbon\Carbon::parse($tanggalKeluarBaru)->startOfDay();
- 
-    $jumlahHariAsli = max(1, $mulai->diffInDays($selesaiLama));
-    $hargaPerHari = ((float) $this->subtotal) / $jumlahHariAsli;
- 
-    $jumlahHariTambahan = max(1, $selesaiLama->diffInDays($selesaiBaru));
- 
-    return round($hargaPerHari * $jumlahHariTambahan);
-}
+    {
+        return round($this->hargaHarianPerpanjangan() * $this->jumlahHariPerpanjangan($tanggalKeluarBaru));
+    }
 }

@@ -9,6 +9,7 @@ use App\Models\PaymentSetting;
 use App\Models\PendapatanPlatform;
 use App\Services\OrderFaseService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -34,20 +35,20 @@ class OrderController extends Controller
             ->paginate(10)
             ->through(function ($order) {
                 return [
-                    'id'              => $order->id,
-                    'order_code'      => $order->order_code,
-                    'service_type'    => $order->service_type,
-                    'is_pickup'       => $order->is_pickup,
-                    'city'            => $order->city,
-                    'status'          => $order->status,
+                    'id' => $order->id,
+                    'order_code' => $order->order_code,
+                    'service_type' => $order->service_type,
+                    'is_pickup' => $order->is_pickup,
+                    'city' => $order->city,
+                    'status' => $order->status,
                     // Fase operasional (menunggu/berjalan/akhir) - dipakai frontend
                     // untuk menampilkan badge "Siap Diselesaikan" saat fase sudah
                     // akhir tapi status masih 'diproses'.
-                    'fase'            => $order->fase,
+                    'fase' => $order->fase,
                     // Label fase yang enak dibaca (mis. "Sedang Disewa") - dipakai
                     // frontend untuk menggantikan tulisan "diproses" yang generik
                     // selagi pesanan masih berjalan.
-                    'fase_label'      => OrderFaseService::label($order->service_type, $order->fase),
+                    'fase_label' => OrderFaseService::label($order->service_type, $order->fase),
                     // Denda keterlambatan (0 kalau tidak terlambat). Karena
                     // updateStatus() di bawah sudah mewajibkan fase === 'akhir'
                     // sebelum status bisa 'selesai', tanggal_selesai_aktual
@@ -55,38 +56,40 @@ class OrderController extends Controller
                     // ini konsisten baik masih berjalan (estimasi live) maupun
                     // sudah selesai (nilai final). 100% masuk saldo mitra,
                     // tanpa potongan komisi - lihat User::saldoMitra().
-                    'denda'           => $order->hitungDenda(),
-                    'denda_payment_receipt' => $order->denda_payment_receipt ? Storage::disk('public')->url($order->denda_payment_receipt) : null,
-                    'denda_paid_at'   => $order->denda_paid_at?->format('d M Y H:i'),
-                    'cancel_reason'   => $order->cancel_reason,
-                    'total_price'     => $order->total_price,
-                    'payment_method'  => $order->payment_method,
+                    'denda' => $order->hitungDenda(),
+                    'denda_payment_receipt' => ($order->bukti_denda ?? $order->denda_payment_receipt)
+                        ? Storage::disk('public')->url($order->bukti_denda ?? $order->denda_payment_receipt)
+                        : null,
+                    'denda_paid_at' => $order->denda_paid_at?->format('d M Y H:i'),
+                    'cancel_reason' => $order->cancel_reason,
+                    'total_price' => $order->total_price,
+                    'payment_method' => $order->payment_method,
                     'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
                     // Dipakai frontend untuk menampilkan badge "Uang Belum Diterima"
                     // + tombol konfirmasi, khusus order dengan payment_method 'cod'.
                     'payment_verified_at' => $order->payment_verified_at?->format('d M Y H:i'),
-                    'created_at'      => $order->created_at ? $order->created_at->format('d M Y H:i') : null,
+                    'created_at' => $order->created_at ? $order->created_at->format('d M Y H:i') : null,
                     // Rentang waktu sewa/titip sesuai yang diisi customer saat booking
                     // (bukan waktu aktual dititip/diambil) - dipakai untuk kolom
                     // "Periode" di tabel Admin.
-                    'start_date'      => $order->start_date ? \Illuminate\Support\Carbon::parse($order->start_date)->format('d M Y') : null,
-                    'end_date'        => $order->end_date ? \Illuminate\Support\Carbon::parse($order->end_date)->format('d M Y') : null,
-                    'duration_label'  => $this->hitungDurasi($order),
-                    'customer'        => $order->customer,
-                    'partner'         => $order->partner,
+                    'start_date' => $order->start_date ? Carbon::parse($order->start_date)->format('d M Y') : null,
+                    'end_date' => $order->end_date ? Carbon::parse($order->end_date)->format('d M Y') : null,
+                    'duration_label' => $this->hitungDurasi($order),
+                    'customer' => $order->customer,
+                    'partner' => $order->partner,
                 ];
             })
             ->withQueryString();
 
         return Inertia::render('Admin/Pesanan/Index', [
-            'orders'  => $orders,
+            'orders' => $orders,
             'filters' => [
-                'search'       => $search,
+                'search' => $search,
                 'service_type' => $serviceType,
-                'status'       => $status,
-                'city'         => $city,
+                'status' => $status,
+                'city' => $city,
             ],
-            'cities'  => Order::query()->whereNotNull('city')->distinct()->orderBy('city')->pluck('city'),
+            'cities' => Order::query()->whereNotNull('city')->distinct()->orderBy('city')->pluck('city'),
         ]);
     }
 
@@ -101,8 +104,8 @@ class OrderController extends Controller
             return null;
         }
 
-        $mulai = \Illuminate\Support\Carbon::parse($order->start_date);
-        $selesai = \Illuminate\Support\Carbon::parse($order->end_date);
+        $mulai = Carbon::parse($order->start_date);
+        $selesai = Carbon::parse($order->end_date);
         $hari = $mulai->diffInDays($selesai) + 1;
 
         return $hari.' hari';
@@ -181,7 +184,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status'        => ['required', Rule::in(['baru', 'diproses', 'selesai', 'dibatalkan'])],
+            'status' => ['required', Rule::in(['baru', 'diproses', 'selesai', 'dibatalkan'])],
             'cancel_reason' => ['required_if:status,dibatalkan', 'nullable', 'string', 'max:255'],
         ]);
 
@@ -200,7 +203,7 @@ class OrderController extends Controller
         $statusSebelumnya = $order->status;
 
         $order->update([
-            'status'        => $validated['status'],
+            'status' => $validated['status'],
             'cancel_reason' => $validated['status'] === 'dibatalkan' ? $validated['cancel_reason'] : null,
         ]);
 
@@ -248,26 +251,30 @@ class OrderController extends Controller
         return back()->with('success', 'Pembayaran tunai untuk pesanan '.$order->order_code.' berhasil dikonfirmasi.');
     }
 
-
     public function approveDenda(Order $order)
-{
-    abort_unless($order->denda_payment_receipt, 422, 'Bukti pembayaran denda belum diunggah.');
-    abort_if($order->denda_paid_at, 422, 'Denda untuk pesanan ini sudah diverifikasi sebelumnya.');
+    {
+        abort_unless($order->bukti_denda || $order->denda_payment_receipt, 422, 'Bukti pembayaran denda belum diunggah.');
+        abort_unless($order->hitungDenda() > 0, 422, 'Pesanan ini tidak memiliki denda keterlambatan.');
+        abort_if($order->denda_paid_at, 422, 'Denda untuk pesanan ini sudah diverifikasi sebelumnya.');
 
-    $order->update(['denda_paid_at' => now()]);
-
-    if ($order->customer_id) {
-        Notifikasi::create([
-            'user_id' => $order->customer_id,
-            'order_id' => $order->id,
-            'type' => 'pembayaran_diterima',
-            'judul' => 'Denda Terverifikasi',
-            'pesan' => 'Pembayaran denda untuk pesanan '.$order->order_code.' telah diverifikasi.',
+        $order->update([
+            'denda_paid_at' => now(),
+            'denda_amount' => $order->hitungDenda(),
+            'status_denda' => 'terverifikasi',
         ]);
-    }
 
-    return back()->with('success', 'Denda berhasil diverifikasi, saldo mitra otomatis bertambah.');
-}
+        if ($order->customer_id) {
+            Notifikasi::create([
+                'user_id' => $order->customer_id,
+                'order_id' => $order->id,
+                'type' => 'pembayaran_diterima',
+                'judul' => 'Denda Terverifikasi',
+                'pesan' => 'Pembayaran denda untuk pesanan '.$order->order_code.' telah diverifikasi.',
+            ]);
+        }
+
+        return back()->with('success', 'Denda berhasil diverifikasi, saldo mitra otomatis bertambah.');
+    }
 
     public function destroy(Order $order)
     {
@@ -281,12 +288,10 @@ class OrderController extends Controller
         return back()->with('success', 'Pesanan berhasil dihapus.');
     }
 
-    
-
     public function bulkDestroy(Request $request)
     {
         $validated = $request->validate([
-            'ids'   => ['required', 'array', 'min:1'],
+            'ids' => ['required', 'array', 'min:1'],
             'ids.*' => ['integer', 'exists:orders,id'],
         ]);
 

@@ -1,7 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
-import { CheckCircle2, MapPin, Star, Truck } from 'lucide-react';
-import Swal from 'sweetalert2';
+import { useRef, useState } from 'react';
+import { CheckCircle2, MapPin, Star, Truck, XCircle } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const TABS = [
@@ -41,14 +40,6 @@ const STATUS_COLOR = {
     dibatalkan: 'text-gray-500',
 };
 
-const PICKUP_ALERT_CLASS = {
-    popup: 'titipsini-alert-popup',
-    icon: 'titipsini-alert-icon',
-    title: 'titipsini-alert-title',
-    htmlContainer: 'titipsini-alert-text',
-    confirmButton: 'titipsini-alert-button',
-};
-
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -66,6 +57,14 @@ export default function OrdersIndex({ orders, filters }) {
     const [reviewText, setReviewText] = useState('');
     const [reviewRating, setReviewRating] = useState(0);
     const [reviewing, setReviewing] = useState(false);
+    const [toast, setToast] = useState(null);
+    const toastTimer = useRef(null);
+
+    function showToast(type, message) {
+        setToast({ type, message });
+        if (toastTimer.current) clearTimeout(toastTimer.current);
+        toastTimer.current = setTimeout(() => setToast(null), 3200);
+    }
 
     function changeTab(status) {
         router.get('/app/orders', { status }, { preserveState: true, preserveScroll: true, replace: true });
@@ -78,26 +77,10 @@ export default function OrdersIndex({ orders, filters }) {
             onFinish: () => setProcessingOrderId(null),
             onSuccess: () => {
                 setPickupConfirmOrder(null);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Pengajuan dikirim',
-                    text: 'Pengajuan pengembalian berhasil dikirim ke mitra.',
-                    width: 'min(86vw, 320px)',
-                    confirmButtonColor: '#15803d',
-                    buttonsStyling: false,
-                    customClass: PICKUP_ALERT_CLASS,
-                });
+                showToast('success', 'Pengajuan pengembalian berhasil dikirim ke mitra.');
             },
             onError: (errors) => {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Belum Bisa Diajukan',
-                    text: errors.pickup ?? 'Pengajuan pengembalian belum bisa diproses.',
-                    width: 'min(86vw, 320px)',
-                    confirmButtonColor: '#15803d',
-                    buttonsStyling: false,
-                    customClass: PICKUP_ALERT_CLASS,
-                });
+                showToast('error', errors.pickup ?? 'Pengajuan pengembalian belum bisa diproses.');
             },
         });
     }
@@ -453,46 +436,21 @@ export default function OrdersIndex({ orders, filters }) {
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;
                 }
-                .titipsini-alert-popup {
-                    border-radius: 14px;
-                    padding: 18px 16px 16px;
-                }
-                .titipsini-alert-icon {
-                    margin: 4px auto 10px;
-                    width: 44px;
-                    height: 44px;
-                    border-width: 3px;
-                    font-size: 28px;
-                }
-                .titipsini-alert-title {
-                    padding: 0;
-                    color: #111827;
-                    font-size: 18px;
-                    font-weight: 800;
-                    line-height: 1.25;
-                }
-                .titipsini-alert-text {
-                    margin: 8px 0 0;
-                    color: #6b7280;
-                    font-size: 13px;
-                    line-height: 1.5;
-                }
-                .titipsini-alert-button {
-                    margin-top: 16px;
-                    min-width: 74px;
-                    border-radius: 8px;
-                    background: #15803d;
-                    padding: 9px 16px;
-                    color: white;
-                    font-size: 13px;
-                    font-weight: 700;
-                    box-shadow: 0 2px 8px rgba(21, 128, 61, 0.24);
-                }
-                .titipsini-alert-button:focus {
-                    outline: 3px solid rgba(21, 128, 61, 0.2);
-                    outline-offset: 2px;
-                }
             `}</style>
+
+            {toast && (
+                <div className="pointer-events-none fixed inset-x-0 bottom-24 z-[60] flex justify-center px-4">
+                    <div
+                        role="status"
+                        className={`pointer-events-auto flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium shadow-lg ${
+                            toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-emerald-700 text-white'
+                        }`}
+                    >
+                        {toast.type === 'error' ? <XCircle size={18} /> : <CheckCircle2 size={18} />}
+                        <span>{toast.message}</span>
+                    </div>
+                </div>
+            )}
         </CustomerLayout>
     );
 }
