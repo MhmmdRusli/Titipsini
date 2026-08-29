@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import {
     MapPin, LayoutDashboard, CircleUserRound, Users, Handshake,
-    Package, BarChart3, Settings, LogOut, ChevronDown, Wallet, Newspaper,
+    Package, BarChart3, Settings, LogOut, ChevronDown, Newspaper,
     HelpCircle, Clock, Calendar, Sun, Cloud, CloudRain, CloudFog, CloudLightning,
     CloudSnow, Moon, AlertCircle, X
 } from 'lucide-react';
@@ -15,8 +15,6 @@ const navItems = [
     { label: 'Vendor', href: '/admin/partners', icon: Handshake },
     { label: 'Berita', href: '/admin/berita', icon: Newspaper },
     { label: 'FAQ', href: '/admin/faq', icon: HelpCircle },
-    { label: 'Top Up', href: '/admin/topup', icon: Wallet },
-    { label: 'Penarikan', href: '/admin/penarikan', icon: Wallet },
     {
         label: 'Pesanan',
         href: '/admin/orders',

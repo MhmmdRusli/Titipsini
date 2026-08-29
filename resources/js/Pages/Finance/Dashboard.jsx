@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowDownToLine, ArrowUpRight, CircleDollarSign, Clock3, Eye, ReceiptText, WalletCards } from 'lucide-react';
+import { ArrowDownToLine, CircleDollarSign, Clock3, Eye, ReceiptText } from 'lucide-react';
 import FinanceLayout from '@/Layouts/FinanceLayout';
 
 const statusOptions = [
@@ -46,22 +46,16 @@ export default function Dashboard({ stats = {}, transactions, filters = {} }) {
     return (
         <FinanceLayout>
             <Head title="Dashboard Finance" />
-            <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-                <div>
-                    <p className="text-sm font-semibold text-emerald-700">Ringkasan keuangan</p>
-                    <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Dashboard Finance</h1>
-                    <p className="mt-2 max-w-xl text-sm text-slate-500">Pantau arus pemasukan, transaksi aktif, dan pencairan dana Titipsini.</p>
-                </div>
-                <Link href="/finance/payouts" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#123c2b] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0d2f22]">
-                    Kelola payout <ArrowUpRight size={16} />
-                </Link>
+            <div className="mb-8">
+                <p className="text-sm font-semibold text-emerald-700">Ringkasan keuangan</p>
+                <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Dashboard Finance</h1>
+                <p className="mt-2 max-w-xl text-sm text-slate-500">Pantau arus pemasukan, transaksi aktif, dan pencairan dana Titipsini.</p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <StatCard label="Total pemasukan" value={currency(stats.totalIncome)} detail="Dari transaksi selesai" icon={CircleDollarSign} tone="bg-emerald-100 text-emerald-700" />
                 <StatCard label="Pendapatan hari ini" value={currency(stats.todayIncome)} detail="Transaksi selesai hari ini" icon={ArrowDownToLine} tone="bg-blue-100 text-blue-700" />
                 <StatCard label="Transaksi pending" value={stats.pendingTransactions || 0} detail="Menunggu diproses" icon={Clock3} tone="bg-amber-100 text-amber-700" />
-                <StatCard label="Total payout" value={currency(stats.totalPayout)} detail="Payout yang sudah selesai" icon={WalletCards} tone="bg-rose-100 text-rose-700" />
             </div>
 
             <section className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

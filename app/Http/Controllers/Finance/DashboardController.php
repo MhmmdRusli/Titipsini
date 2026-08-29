@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Penarikan;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -44,7 +43,6 @@ class DashboardController extends Controller
                     ->whereDate('updated_at', today())
                     ->sum('total_price'),
                 'pendingTransactions' => Order::whereIn('status', ['baru', 'diproses'])->count(),
-                'totalPayout' => (float) Penarikan::where('status', 'selesai')->sum('jumlah'),
             ],
             'transactions' => $transactions,
             'filters' => ['status' => $status],

@@ -9,16 +9,15 @@ use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\KotaController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PartnerController as AdminPartnerController;
-use App\Http\Controllers\Admin\PendapatanController as AdminPendapatanController;
-use App\Http\Controllers\Admin\PenarikanController as AdminPenarikanController;
 use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ReportController;
-use App\Http\Controllers\Admin\TopupVerifikasiController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Finance\DashboardController as FinanceDashboardController;
-use App\Http\Controllers\Finance\PayoutController as FinancePayoutController;
+use App\Http\Controllers\Finance\PendapatanController as FinancePendapatanController;
+use App\Http\Controllers\Finance\PenarikanController as FinancePenarikanController;
+use App\Http\Controllers\Finance\TopupController as FinanceTopupController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -27,7 +26,6 @@ use App\Http\Controllers\Customer\BantuanController;
 use App\Http\Controllers\Customer\BeritaController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\LengkapiDataController;
-use App\Http\Controllers\Customer\NotificationSettingController;
 use App\Http\Controllers\Customer\NotifikasiController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Customer\PinController;
@@ -167,9 +165,20 @@ Route::get('/mitra/verifikasi-email/{id}/{hash}', [MitraVerifyEmailController::c
 
 Route::middleware(['auth', 'role:finance,super_admin'])->prefix('finance')->name('finance.')->group(function () {
     Route::get('/dashboard', [FinanceDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/payouts', [FinancePayoutController::class, 'index'])->name('payouts.index');
-    Route::post('/payouts/{payout}/approve', [FinancePayoutController::class, 'approve'])->name('payouts.approve');
-    Route::post('/payouts/{payout}/reject', [FinancePayoutController::class, 'reject'])->name('payouts.reject');
+
+    Route::prefix('topup')->name('topup.')->group(function () {
+        Route::get('/', [FinanceTopupController::class, 'index'])->name('index');
+        Route::get('/{topup}', [FinanceTopupController::class, 'show'])->name('show');
+        Route::post('/{topup}/approve', [FinanceTopupController::class, 'approve'])->name('approve');
+        Route::post('/{topup}/reject', [FinanceTopupController::class, 'reject'])->name('reject');
+    });
+
+    Route::get('pendapatan', [FinancePendapatanController::class, 'index'])->name('pendapatan.index');
+    Route::prefix('penarikan')->name('penarikan.')->group(function () {
+        Route::get('/', [FinancePenarikanController::class, 'index'])->name('index');
+        Route::post('/{penarikan}/approve', [FinancePenarikanController::class, 'approve'])->name('approve');
+        Route::post('/{penarikan}/reject', [FinancePenarikanController::class, 'reject'])->name('reject');
+    });
 });
 
 Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
@@ -235,20 +244,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::put('{report}/suspend', [ReportController::class, 'suspend'])->name('suspend');
         Route::put('{report}/restore', [ReportController::class, 'restore'])->name('restore');
         Route::get('{report}/penangguhan', [ReportController::class, 'penangguhan'])->name('penangguhan');
-    });
-
-    Route::prefix('topup')->name('topup.')->group(function () {
-        Route::get('/', [TopupVerifikasiController::class, 'index'])->name('index');
-        Route::get('/{topup}', [TopupVerifikasiController::class, 'show'])->name('show');
-        Route::post('/{topup}/approve', [TopupVerifikasiController::class, 'approve'])->name('approve');
-        Route::post('/{topup}/reject', [TopupVerifikasiController::class, 'reject'])->name('reject');
-    });
-
-    Route::get('pendapatan', [AdminPendapatanController::class, 'index'])->name('pendapatan.index');
-    Route::prefix('penarikan')->name('penarikan.')->group(function () {
-        Route::get('/', [AdminPenarikanController::class, 'index'])->name('index');
-        Route::post('/{penarikan}/approve', [AdminPenarikanController::class, 'approve'])->name('approve');
-        Route::post('/{penarikan}/reject', [AdminPenarikanController::class, 'reject'])->name('reject');
     });
 });
 
@@ -431,8 +426,6 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [CustomerProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
-    Route::get('/profile/notifikasi', [NotificationSettingController::class, 'edit'])->name('profile.notifikasi.edit');
-    Route::patch('/profile/notifikasi', [NotificationSettingController::class, 'update'])->name('profile.notifikasi.update');
     Route::get('/profile/bantuan', [BantuanController::class, 'index'])->name('profile.bantuan');
     Route::get('/profile/tentang', [TentangController::class, 'index'])->name('profile.tentang');
     Route::get('/profile/tentang/syarat-ketentuan', [TentangController::class, 'syaratKetentuan'])->name('profile.tentang.syarat');
