@@ -13,7 +13,14 @@ export default function Detail({ mitra }) {
                     <div className="flex items-center gap-3"><div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-green-400"><Building2 size={24} /></div><div><h1 className="text-lg font-extrabold text-gray-900 dark:text-gray-100">{mitra.nama}</h1><p className="text-xs text-gray-500">{mitra.mitraNama}</p><p className="text-xs text-gray-400">{mitra.kota}</p></div></div>
                     <div className="mt-6 space-y-4 border-t border-gray-100 pt-5 dark:border-gray-700"><div className="flex gap-3 text-sm text-gray-600 dark:text-gray-300"><CheckCircle2 size={17} className="text-[#15803d]" /> {mitra.is_buka ? 'Buka' : 'Tutup'} : {mitra.jam_buka} - {mitra.jam_tutup}</div><div className="flex gap-3 text-sm text-gray-600 dark:text-gray-300"><MapPin size={17} className="text-[#15803d]" /> {mitra.alamat}, {mitra.kecamatan}, {mitra.kota}</div><JadwalOperasional jadwal={mitra.jadwalOperasional} /></div>
                     <Reviews mitra={mitra} />
-                    <Link href={`/app/services/bangunan/${mitra.id}/titip`} className="mt-7 flex w-full items-center justify-center rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white dark:bg-[#22c55e]">Titip Disini</Link>
+                    {mitra.isOrderable ? (
+                        <Link href={`/app/services/bangunan/${mitra.id}/titip`} className="mt-7 flex w-full items-center justify-center rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white dark:bg-[#22c55e]">Titip Disini</Link>
+                    ) : (
+                        <button type="button" disabled className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-300 py-3.5 text-sm font-bold text-white dark:bg-gray-700">Titip Disini</button>
+                    )}
+                    {!mitra.isOrderable && (
+                        <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">Layanan ini belum bisa dipesan (masih dalam proses verifikasi atau belum mengatur jam operasional).</p>
+                    )}
                 </div>
             </div>
         </CustomerLayout>
