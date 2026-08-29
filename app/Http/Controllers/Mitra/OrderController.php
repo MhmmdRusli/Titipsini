@@ -71,7 +71,7 @@ class OrderController extends Controller
         $tab = $request->query('tab', 'baru'); // baru | selesai | dibatalkan
         $kategori = $request->query('kategori'); // barang | kendaraan | bangunan | null
 
-        $query = Order::with('customer')->where('partner_id', $partner->id);
+        $query = Order::with(['customer', 'address'])->where('partner_id', $partner->id);
 
         if ($tab === 'baru') {
             // "Baru" mencakup order yang belum di-accept (baru) DAN yang
@@ -93,9 +93,25 @@ class OrderController extends Controller
                 'id' => $order->id,
                 'order_number' => $order->order_code,
                 'customer_name' => $order->customer->name ?? '-',
-                'address' => $order->pickup_address ?? $order->city,
+                // Prioritaskan alamat tersimpan yang dipilih customer karena
+                // lebih rinci daripada nama kota pada pesanan.
+                'address' => $order->address?->address ?? $order->pickup_address ?? $order->city ?? '-',
+                'address_notes' => $order->address?->notes,
                 'service_type' => $order->service_type,
+                'service_label' => match ($order->service_type) {
+                    'barang' => 'Penitipan Barang',
+                    'kendaraan' => 'Penitipan Kendaraan',
+                    'bangunan' => 'Penitipan Bangunan',
+                    'pindahan' => 'Layanan Pindahan',
+                    default => 'Penitipan',
+                },
                 'duration' => $this->hitungDurasi($order),
+                'total_price' => (float) $order->total_price,
+                // Ulasan diberikan customer setelah pesanan selesai. Data ini
+                // dikirim ke kartu daftar pesanan agar mitra dapat langsung
+                // melihat penilaian tanpa harus membuka detail pesanan.
+                'rating' => $order->rating,
+                'review' => $order->review,
                 'status' => $order->status,
                 'fase' => $order->fase,
                 'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
