@@ -68,6 +68,8 @@ export default function OrdersIndex({ orders, filters }) {
 
     const [expandedAddresses, setExpandedAddresses] = useState({});
 
+    console.log('ORDERS DATA:', orders?.data?.map(o => ({ id: o.id, vendor_name: o.vendor_name, vendor_address: o.vendor_address })));
+
     function truncateText(text, maxLength = 35) {
         if (!text || text.length <= maxLength) return text;
         return text.slice(0, maxLength).trim() + '...';
@@ -185,8 +187,10 @@ export default function OrdersIndex({ orders, filters }) {
                                             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                                                 {order.vendor_name ?? 'Experi'}
                                             </h3>
-                                            <p className="mt-0.5 flex items-start gap-1 text-xs text-gray-400">
-                                                <MapPin size={13} className="mt-0.5 shrink-0" />
+                                            <p className="mt-0.5 flex items-start gap-1 text-xs text-gray-400 border border-red-500">
+                                                <span className="mt-0.5 shrink-0 text-gray-400">
+                                                    <MapPin size={13} />
+                                                </span>
                                                 <span>
                                                     {expandedAddresses[order.id]
                                                         ? order.vendor_address ?? 'Jl. Janti, Bantul, Yogyakarta'
