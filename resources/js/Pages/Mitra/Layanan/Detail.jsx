@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ChevronLeft, Pencil, AlertTriangle, Info, X, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import MitraLayout from '@/Layouts/MitraLayout';
@@ -16,10 +16,24 @@ function Baris({ label, value }) {
 
 export default function Detail({ layanan }) {
     const [showBanner, setShowBanner] = useState(true);
+    const [loadingToggle, setLoadingToggle] = useState(false);
     const status = layanan.verification_status ?? 'pending';
 
+    const handleToggleActive = () => {
+        if (loadingToggle) return;
+        setLoadingToggle(true);
+        router.patch(
+            `/mitra/layanan/${layanan.id}/toggle-aktif`,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setLoadingToggle(false),
+            }
+        );
+    };
+
     return (
-            <MitraLayout title="Detail Gudang">
+        <MitraLayout title="Detail Gudang">
             <Head title="Detail Gudang" />
 
             <div className="px-4 py-4">
@@ -74,12 +88,35 @@ export default function Detail({ layanan }) {
                         <Baris label="Catatan" value={layanan.catatan_alamat} />
                     </div>
 
+                    <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
+                        <div>
+                            <p className="text-sm font-semibold text-gray-800">Status Gudang</p>
+                            <p className="text-xs text-gray-500">
+                                {layanan.is_active ? 'Sedang menerima pesanan' : 'Ditutup sementara, tidak menerima pesanan'}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            disabled={loadingToggle}
+                            onClick={handleToggleActive}
+                            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
+                                layanan.is_active ? 'bg-green-600' : 'bg-gray-300'
+                            }`}
+                        >
+                            <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                                    layanan.is_active ? 'translate-x-6' : 'translate-x-1'
+                                }`}
+                            />
+                        </button>
+                    </div>
+
                     {layanan.foto_lahan && (
                         <div className="mt-3 flex gap-4 border-t border-gray-200 pt-3 text-sm">
                             <span className="w-32 shrink-0 text-gray-500">Foto Lahan Parkir</span>
                             <span className="text-gray-500">:</span>
-                            
-                               <a href={layanan.foto_lahan}
+
+                            <a href={layanan.foto_lahan}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="break-all text-blue-500 underline"

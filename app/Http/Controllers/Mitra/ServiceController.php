@@ -86,19 +86,36 @@ class ServiceController extends Controller
      * Aktif/nonaktifkan fitur "tutup otomatis saat penuh" untuk 1 kategori layanan.
      */
     public function toggleFiturPenuh(Request $request, string $kategori): RedirectResponse
+{
+    abort_unless(in_array($kategori, ['barang', 'kendaraan', 'bangunan', 'pindahan']), 404);
+
+    $validated = $request->validate([
+        'aktif' => ['required', 'boolean'],
+    ]);
+
+    $user = $request->user();
+    $pengaturan = $user->fitur_penuh_kategori ?? [];
+    $pengaturan[$kategori] = $validated['aktif'];
+    $user->update(['fitur_penuh_kategori' => $pengaturan]);
+
+    return back()->with('success', 'Pengaturan fitur berhasil diperbarui.');
+}
+
+
+    /**
+ * PATCH /mitra/layanan/{layanan}/toggle-aktif
+ * Buka/tutup manual 1 gudang/layanan tertentu (terpisah dari fitur "tutup otomatis saat penuh").
+ */
+    public function toggleAktif(Request $request, Service $layanan): RedirectResponse
     {
-        abort_unless(in_array($kategori, ['barang', 'kendaraan', 'bangunan', 'pindahan']), 404);
+        $this->authorizeOwnership($request, $layanan);
 
-        $validated = $request->validate([
-            'aktif' => ['required', 'boolean'],
-        ]);
+        $layanan->update(['is_active' => ! $layanan->is_active]);
 
-        $user = $request->user();
-        $pengaturan = $user->fitur_penuh_kategori ?? [];
-        $pengaturan[$kategori] = $validated['aktif'];
-        $user->update(['fitur_penuh_kategori' => $pengaturan]);
-
-        return back()->with('success', 'Pengaturan fitur berhasil diperbarui.');
+        return back()->with('success', $layanan->is_active
+            ? 'Layanan berhasil diaktifkan kembali.'
+            : 'Layanan berhasil ditutup sementara.'
+        );
     }
 
         /**

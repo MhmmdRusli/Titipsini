@@ -280,6 +280,7 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
 
 
     Route::resource('layanan', MitraServiceController::class)->except(['show', 'create', 'edit']);
+    Route::patch('/layanan/{layanan}/toggle-aktif', [MitraServiceController::class, 'toggleAktif'])->name('layanan.toggleAktif');
     Route::get('/layanan/barang', [MitraServiceController::class, 'kategori'])->name('layanan.barang')->defaults('kategori', 'barang');
     Route::get('/layanan/kendaraan', [MitraServiceController::class, 'kategori'])->name('layanan.kendaraan')->defaults('kategori', 'kendaraan');
     Route::get('/layanan/bangunan', [MitraServiceController::class, 'kategori'])->name('layanan.bangunan')->defaults('kategori', 'bangunan');

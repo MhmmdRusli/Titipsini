@@ -1,7 +1,8 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import KategoriLayananView from '@/Components/Layanan/KategoriLayananView';
 import FormIdentitasGudang from '@/Components/Layanan/FormIdentitasGudang';
 import { BookMarked, Plus } from 'lucide-react';
+import { useState } from 'react';
 
 function IlustrasiBarang() {
     return (
@@ -15,10 +16,32 @@ function IlustrasiBarang() {
 }
 
 export default function KelolaBarang({ layanan = [], daftarKota = [], menungguVerifikasi = false, fiturPenuhAktif = false, edit = null }) {
+    const [isAktif, setIsAktif] = useState(fiturPenuhAktif);
+    const [loading, setLoading] = useState(false);
+
+    // Fungsi untuk menghandle klik tombol aktif/nonaktif
+    const handleToggleFiturPenuh = () => {
+        if (loading) return;
+        setLoading(true);
+
+        // Ubah URL endpoint sesuai dengan route backend Laravel kamu
+        router.patch(
+            route('mitra.fitur-penuh.toggle'), 
+            {}, 
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setIsAktif(!isAktif);
+                },
+                onFinish: () => setLoading(false),
+            }
+        );
+    };
+
     return (
         <>
             <Head title="Kelola Gudang" />
-                <KategoriLayananView
+            <KategoriLayananView
                 kategori="barang"
                 title="Kelola Barang"
                 ilustrasi={<IlustrasiBarang />}
@@ -32,7 +55,9 @@ export default function KelolaBarang({ layanan = [], daftarKota = [], menungguVe
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
                 FormKustom={FormIdentitasGudang}
-                fiturPenuhAktif={fiturPenuhAktif}
+                fiturPenuhAktif={isAktif}
+                onToggleFiturPenuh={handleToggleFiturPenuh}
+                loadingFiturPenuh={loading}
                 edit={edit}
             />
         </>
