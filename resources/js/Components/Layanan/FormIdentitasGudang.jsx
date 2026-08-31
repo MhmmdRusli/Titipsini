@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useForm, router, Head } from '@inertiajs/react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, MapPin, Loader2 } from 'lucide-react';
+import { findRegionOption } from '@/lib/wilayah';
+import { loadGoogleMaps, reverseGeocodeGoogle } from '@/Components/GoogleMapAddressPicker';
 
 const inputClass = (hasError) =>
     `mt-1 w-full rounded-lg border-none bg-gray-100 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 disabled:opacity-50 ${hasError ? 'ring-2 ring-red-400' : 'focus:ring-green-500'
@@ -21,15 +23,16 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
         jumlah_tampung: editingItem?.jumlah_tampung ?? '',
     });
 
-    // Data wilayah bertingkat: provinsi -> kabupaten/kota -> kecamatan.
-    // Memakai endpoint /api/wilayah yang sudah ada di project.
     const [daftarProvinsi, setDaftarProvinsi] = useState([]);
     const [daftarKabupaten, setDaftarKabupaten] = useState([]);
     const [daftarKecamatan, setDaftarKecamatan] = useState([]);
-
     const [provinsiId, setProvinsiId] = useState('');
     const [kabupatenId, setKabupatenId] = useState('');
-    const [editingFoto, setEditingFoto] = useState(false);
+    const [kecamatanId, setKecamatanId] = useState('');
+    const [loadingLocation, setLoadingLocation] = useState(false);
+    const [loadingKabupaten, setLoadingKabupaten] = useState(false);
+    const [loadingKecamatan, setLoadingKecamatan] = useState(false);
+    const [locationError, setLocationError] = useState('');
 
     useEffect(() => {
         fetch('/api/wilayah/provinces')
@@ -37,6 +40,160 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
             .then(setDaftarProvinsi)
             .catch(() => setDaftarProvinsi([]));
     }, []);
+
+    useEffect(() => {
+        if (!editingItem) return;
+
+        let cancelled = false;
+        const restoreDropdown = async () => {
+            let provinces = daftarProvinsi;
+            if (!provinces.length) {
+                provinces = await fetch('/api/wilayah/provinces').then((res) => res.json());
+                if (!cancelled) setDaftarProvinsi(provinces);
+            }
+
+            const p = findRegionOption(provinces, editingItem.provinsi);
+            if (!p) return;
+
+            if (!cancelled) setProvinsiId(p.id);
+            const regencies = await fetch(`/api/wilayah/regencies/${p.id}`).then((res) => res.json());
+            if (cancelled) return;
+            setDaftarKabupaten(regencies);
+
+            const k = findRegionOption(regencies, editingItem.kabupaten_kota);
+            if (!k) return;
+            if (!cancelled) setKabupatenId(k.id);
+
+            const districts = await fetch(`/api/wilayah/districts/${k.id}`).then((res) => res.json());
+            if (cancelled) return;
+            setDaftarKecamatan(districts);
+
+            const d = findRegionOption(districts, editingItem.kecamatan);
+            if (d && !cancelled) setKecamatanId(d.id);
+        };
+
+        restoreDropdown();
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editingItem]);
+
+    async function getWilayahDariKoordinat(latitude, longitude) {
+        try {
+            await loadGoogleMaps();
+            return await reverseGeocodeGoogle(latitude, longitude);
+        } catch {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=id`,
+            );
+            const result = await response.json();
+            const address = result.address || {};
+            return {
+                address: result.display_name || '',
+                province: address.state || address.province || '',
+                city: address.city || address.town || address.county || '',
+                district: address.city_district || address.district || address.suburb || '',
+            };
+        }
+    }
+
+    async function getCurrentLocation() {
+        setLoadingLocation(true);
+        setLocationError('');
+
+        try {
+            if (!navigator.geolocation) {
+                throw new Error('Browser ini tidak mendukung geolokasi.');
+            }
+
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0,
+                });
+            });
+
+            const { latitude, longitude } = position.coords;
+            const lokasi = await getWilayahDariKoordinat(latitude, longitude);
+
+            let provinces = daftarProvinsi;
+            if (!provinces.length) {
+                provinces = await fetch('/api/wilayah/provinces').then((res) => res.json());
+                setDaftarProvinsi(provinces);
+            }
+
+            const matchedProvinsi = findRegionOption(provinces, lokasi.province);
+            if (!matchedProvinsi) {
+                setData((prev) => ({
+                    ...prev,
+                    provinsi: lokasi.province,
+                    kabupaten_kota: lokasi.city,
+                    kecamatan: lokasi.district,
+                    alamat_lengkap: lokasi.address,
+                }));
+                setProvinsiId('');
+                setKabupatenId('');
+                setKecamatanId('');
+                setDaftarKabupaten([]);
+                setDaftarKecamatan([]);
+                setLoadingLocation(false);
+                return;
+            }
+
+            setProvinsiId(matchedProvinsi.id);
+            setLoadingKabupaten(true);
+            const regencies = await fetch(`/api/wilayah/regencies/${matchedProvinsi.id}`).then((res) => res.json());
+            setDaftarKabupaten(regencies);
+            setLoadingKabupaten(false);
+
+            const matchedKabupaten = findRegionOption(regencies, lokasi.city);
+            if (!matchedKabupaten) {
+                setData((prev) => ({
+                    ...prev,
+                    provinsi: matchedProvinsi.name,
+                    kabupaten_kota: lokasi.city,
+                    kecamatan: lokasi.district,
+                    alamat_lengkap: lokasi.address,
+                }));
+                setKabupatenId('');
+                setKecamatanId('');
+                setDaftarKecamatan([]);
+                setLoadingLocation(false);
+                return;
+            }
+
+            setKabupatenId(matchedKabupaten.id);
+            setLoadingKecamatan(true);
+            const districts = await fetch(`/api/wilayah/districts/${matchedKabupaten.id}`).then((res) => res.json());
+            setDaftarKecamatan(districts);
+            setLoadingKecamatan(false);
+
+            const matchedKecamatan = findRegionOption(districts, lokasi.district);
+            setKecamatanId(matchedKecamatan?.id ?? '');
+
+            setData((prev) => ({
+                ...prev,
+                provinsi: matchedProvinsi.name,
+                kabupaten_kota: matchedKabupaten.name,
+                kecamatan: matchedKecamatan?.name ?? lokasi.district,
+                alamat_lengkap: lokasi.address,
+            }));
+        } catch (error) {
+            if (error.code === 1) {
+                setLocationError('Izin akses lokasi ditolak. Silakan aktifkan di pengaturan browser.');
+            } else if (error.code === 2) {
+                setLocationError('Informasi lokasi tidak tersedia.');
+            } else if (error.code === 3) {
+                setLocationError('Permintaan lokasi timeout. Coba lagi.');
+            } else {
+                setLocationError(error.message || 'Gagal mengambil alamat dari lokasi Anda.');
+            }
+        } finally {
+            setLoadingLocation(false);
+        }
+    }
 
     function handleProvinsiChange(e) {
         const id = e.target.value;
@@ -46,12 +203,15 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
         setDaftarKabupaten([]);
         setDaftarKecamatan([]);
         setKabupatenId('');
+        setKecamatanId('');
 
         if (id) {
+            setLoadingKabupaten(true);
             fetch(`/api/wilayah/regencies/${id}`)
                 .then((res) => res.json())
                 .then(setDaftarKabupaten)
-                .catch(() => setDaftarKabupaten([]));
+                .catch(() => setDaftarKabupaten([]))
+                .finally(() => setLoadingKabupaten(false));
         }
     }
 
@@ -61,17 +221,22 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
         setKabupatenId(id);
         setData((prev) => ({ ...prev, kabupaten_kota: nama, kecamatan: '' }));
         setDaftarKecamatan([]);
+        setKecamatanId('');
 
         if (id) {
+            setLoadingKecamatan(true);
             fetch(`/api/wilayah/districts/${id}`)
                 .then((res) => res.json())
                 .then(setDaftarKecamatan)
-                .catch(() => setDaftarKecamatan([]));
+                .catch(() => setDaftarKecamatan([]))
+                .finally(() => setLoadingKecamatan(false));
         }
     }
 
     function handleKecamatanChange(e) {
+        const id = e.target.value;
         const nama = e.target.options[e.target.selectedIndex]?.text ?? '';
+        setKecamatanId(id);
         setData('kecamatan', nama);
     }
 
@@ -144,10 +309,12 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
                         <select
                             value={kabupatenId}
                             onChange={handleKabupatenChange}
-                            disabled={!provinsiId}
+                            disabled={!provinsiId || loadingKabupaten}
                             className={`${inputClass(errors.kabupaten_kota)} appearance-none pr-8`}
                         >
-                            <option value="">Kabupaten/Kota</option>
+                            <option value="">
+                                {loadingKabupaten ? 'Memuat...' : 'Kabupaten/Kota'}
+                            </option>
                             {daftarKabupaten.map((k) => (
                                 <option key={k.id} value={k.id}>{k.name}</option>
                             ))}
@@ -161,12 +328,14 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
                     <label className="block text-sm font-medium text-gray-700">Kecamatan</label>
                     <div className="relative">
                         <select
+                            value={kecamatanId}
                             onChange={handleKecamatanChange}
-                            disabled={!kabupatenId}
-                            defaultValue=""
+                            disabled={!kabupatenId || loadingKecamatan}
                             className={`${inputClass(errors.kecamatan)} appearance-none pr-8`}
                         >
-                            <option value="">Kecamatan</option>
+                            <option value="">
+                                {loadingKecamatan ? 'Memuat...' : 'Kecamatan'}
+                            </option>
                             {daftarKecamatan.map((k) => (
                                 <option key={k.id} value={k.id}>{k.name}</option>
                             ))}
@@ -178,13 +347,34 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
-                    <textarea
-                        rows={3}
-                        placeholder="Jl. Jlagran Lor No.2, Pringgokusuman, Gedong Tengen, Kota Yogyakarta, Daerah Istimewa Yogyakarta 55271"
-                        value={data.alamat_lengkap}
-                        onChange={(e) => setData('alamat_lengkap', e.target.value)}
-                        className={inputClass(errors.alamat_lengkap)}
-                    />
+                    <div className="mt-1 flex gap-2">
+                        <textarea
+                            rows={3}
+                            placeholder="Jl. Jlagran Lor No.2, Pringgokusuman, Gedong Tengen, Kota Yogyakarta, Daerah Istimewa Yogyakarta 55271"
+                            value={data.alamat_lengkap}
+                            onChange={(e) => setData('alamat_lengkap', e.target.value)}
+                            className={inputClass(errors.alamat_lengkap)}
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={getCurrentLocation}
+                        disabled={loadingLocation}
+                        className="mt-2 flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-60"
+                    >
+                        {loadingLocation ? (
+                            <>
+                                <Loader2 size={14} className="animate-spin" />
+                                Mendapatkan lokasi...
+                            </>
+                        ) : (
+                            <>
+                                <MapPin size={14} />
+                                Gunakan Lokasi Saat Ini
+                            </>
+                        )}
+                    </button>
+                    {locationError && <p className="mt-1 text-xs text-red-600">{locationError}</p>}
                     {errors.alamat_lengkap && <p className="mt-1 text-xs text-red-600">{errors.alamat_lengkap}</p>}
                 </div>
 
