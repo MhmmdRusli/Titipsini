@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,7 +23,7 @@ class LegalitasController extends Controller
                 'gender' => $partner->gender,
                 'birth_date' => $partner->birth_date?->format('Y-m-d'),
                 'nik' => $partner->nik,
-                'link_verifikasi_ktp' => $partner->link_verifikasi_ktp,
+                'foto_ktp' => $partner->foto_ktp ? Storage::url($partner->foto_ktp) : null,
                 'verification_status' => $partner->verification_status,
                 'has_pin' => ! empty($partner->pin),
             ],
@@ -38,12 +39,20 @@ class LegalitasController extends Controller
             'gender' => ['required', 'in:male,female'],
             'birth_date' => ['required', 'date'],
             'nik' => ['required', 'digits:16', 'unique:users,nik,'.$partner->id],
-            'link_verifikasi_ktp' => ['required', 'url'],
+            'foto_ktp' => ['nullable', 'image', 'max:2048'],
         ], [
             'nik.digits' => 'NIK harus 16 digit.',
             'nik.unique' => 'NIK ini sudah terdaftar di akun lain.',
-            'link_verifikasi_ktp.url' => 'Link harus berupa URL yang valid (link Google Drive).',
+            'foto_ktp.image' => 'File harus berupa gambar.',
+            'foto_ktp.max' => 'Ukuran gambar maksimal 2MB.',
         ]);
+
+        if ($request->hasFile('foto_ktp')) {
+            if ($partner->foto_ktp) {
+                Storage::delete($partner->foto_ktp);
+            }
+            $validated['foto_ktp'] = $request->file('foto_ktp')->store('ktp', 'public');
+        }
 
         $partner->update([
             ...$validated,
