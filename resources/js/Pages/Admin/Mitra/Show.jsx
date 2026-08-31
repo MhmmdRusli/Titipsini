@@ -42,6 +42,42 @@ function formatDate(value) {
 }
 
 /* ─────────────────────────────────────────────
+   FOTO HELPERS
+   Backend bisa saja mengirim foto sebagai:
+   - string path ("lahan/abc.jpg")
+   - string URL penuh ("https://.../abc.jpg")
+   - array of string (["lahan/a.jpg", "lahan/b.jpg"])
+   - array of object ([{ path: "..." }, { url: "..." }])
+   - object tunggal ({ path: "..." } / { url: "..." })
+   - null / undefined (belum ada foto)
+
+   resolveFotoUrl menormalkan semua kemungkinan itu menjadi
+   satu string URL siap pakai, atau null kalau memang tidak ada.
+───────────────────────────────────────────── */
+function resolveFotoUrl(foto) {
+    if (!foto) return null;
+
+    // Kalau array (relasi banyak foto), ambil elemen pertama
+    if (Array.isArray(foto)) {
+        foto = foto.length > 0 ? foto[0] : null;
+    }
+
+    // Kalau object relasi, ambil field yang paling mungkin berisi path/url
+    if (foto && typeof foto === 'object') {
+        foto = foto.path ?? foto.url ?? foto.foto_lahan ?? foto.foto ?? null;
+
+        // Kalau ternyata masih object/array bersarang, coba sekali lagi
+        if (foto && typeof foto === 'object') {
+            foto = Array.isArray(foto) ? foto[0] : null;
+        }
+    }
+
+    if (typeof foto !== 'string' || foto.trim() === '') return null;
+
+    return foto.startsWith('http') ? foto : `/storage/${foto}`;
+}
+
+/* ─────────────────────────────────────────────
    ICON HELPERS (inline SVG)
 ───────────────────────────────────────────── */
 function IconEye() {
@@ -275,6 +311,10 @@ export default function Show({ partner }) {
     const identityApproved = currentStatus === 'terverifikasi';
     const identityRejected = currentStatus === 'ditolak';
 
+    // Foto KTP juga dinormalkan lewat resolveFotoUrl agar konsisten
+    // dan aman dari bentuk data yang bukan string.
+    const identityFotoHref = resolveFotoUrl(partner.foto_ktp);
+
     return (
         <AdminLayout title="Panel Verifikasi Mitra">
             <Head title={`Verifikasi – ${partner.name}`} />
@@ -365,9 +405,9 @@ export default function Show({ partner }) {
                                     Buka foto KTP di tab baru untuk memeriksa keasliannya
                                 </p>
                             </div>
-                            {partner.foto_ktp ? (
+                            {identityFotoHref ? (
                                 <a
-                                    href={`/storage/${partner.foto_ktp}`}
+                                    href={identityFotoHref}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
@@ -480,10 +520,11 @@ export default function Show({ partner }) {
                         partner.services.map((svc) => {
                             const svcApproved = svc.verification_status === 'terverifikasi';
                             const svcRejected = svc.verification_status === 'ditolak';
-                            const fotoUrl = svc.foto_lahan || svc.foto;
-                            const fotoHref = fotoUrl
-                                ? (fotoUrl.startsWith('http') ? fotoUrl : `/storage/${fotoUrl}`)
-                                : null;
+
+                            // Normalkan foto lahan (bisa string, array, atau object relasi)
+                            // sebelum dipakai sebagai href, supaya tidak crash saat
+                            // bentuk datanya bukan string murni.
+                            const fotoHref = resolveFotoUrl(svc.foto_lahan) ?? resolveFotoUrl(svc.foto);
 
                             return (
                                 <SectionCard
@@ -595,4 +636,4 @@ export default function Show({ partner }) {
             </div>
         </AdminLayout>
     );
-}
+}   
