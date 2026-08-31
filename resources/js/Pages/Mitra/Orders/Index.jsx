@@ -66,7 +66,7 @@ export default function Index({ orders, counts, filters }) {
                 })}
             </div>
 
-            {/* Filter kategori - pil hijau */}
+            {/* Filter kategori - pil kapsul */}
             <div className="flex gap-2 overflow-x-auto bg-white px-4 py-3 scrollbar-none dark:bg-gray-900">
                 {KATEGORI.map((k) => {
                     const active = filters.kategori === k.key;
@@ -74,10 +74,10 @@ export default function Index({ orders, counts, filters }) {
                         <button
                             key={k.label}
                             onClick={() => goTo(filters.tab, k.key)}
-                            className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold text-white transition ${
+                            className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition ${
                                 active
-                                    ? 'bg-[#15803d] ring-2 ring-[#15803d] ring-offset-1 dark:ring-offset-gray-900'
-                                    : 'bg-[#22c55e] hover:bg-[#16a34a]'
+                                    ? 'border-[#15803d] bg-[#15803d] text-white dark:border-green-700 dark:bg-green-700'
+                                    : 'border-gray-300 bg-white text-gray-600 hover:border-[#22c55e] hover:bg-[#22c55e] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-green-600 dark:hover:bg-green-600 dark:hover:text-white'
                             }`}
                         >
                             {k.label}

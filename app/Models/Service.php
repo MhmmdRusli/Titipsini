@@ -32,7 +32,7 @@ class Service extends Model
         'rejection_reason',
     ];
 
-        protected function casts(): array
+            protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
@@ -40,9 +40,9 @@ class Service extends Model
             'panjang' => 'integer',
             'lebar' => 'integer',
             'jumlah_tampung' => 'integer',
+            'foto_lahan' => 'array',
         ];
     }
-
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

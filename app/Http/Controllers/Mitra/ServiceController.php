@@ -101,10 +101,10 @@ class ServiceController extends Controller
         return back()->with('success', 'Pengaturan fitur berhasil diperbarui.');
     }
 
-    /**
+        /**
      * POST /mitra/layanan
      */
-        public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $validated = $this->validated($request);
 
@@ -113,6 +113,10 @@ class ServiceController extends Controller
         // tabel services wajib diisi (NOT NULL).
         if ($validated['kategori'] === 'barang') {
             $validated['nama'] = $validated['nama_usaha'];
+
+            $validated['foto_lahan'] = $request->hasFile('foto_lahan')
+                ? $this->simpanFotoLahan($request)
+                : [];
         }
 
         if ($request->hasFile('foto')) {
@@ -131,10 +135,19 @@ class ServiceController extends Controller
     {
         $this->authorizeOwnership($request, $layanan);
 
-        $validated = $this->validated($request);
+        $validated = $this->validated($request, isUpdate: true);
 
         if ($validated['kategori'] === 'barang') {
             $validated['nama'] = $validated['nama_usaha'];
+
+            if ($request->hasFile('foto_lahan')) {
+                // Ada foto baru diupload -> hapus foto lama, ganti dengan yang baru.
+                $this->hapusFotoLahan($layanan);
+                $validated['foto_lahan'] = $this->simpanFotoLahan($request);
+            } else {
+                // Tidak ada foto baru -> jangan sentuh foto yang sudah ada.
+                unset($validated['foto_lahan']);
+            }
         }
 
         $validated['verification_status'] = 'pending';
@@ -163,9 +176,39 @@ class ServiceController extends Controller
             Storage::delete($layanan->foto);
         }
 
+        $this->hapusFotoLahan($layanan);
+
         $layanan->delete();
 
         return redirect()->back()->with('success', 'Layanan berhasil dihapus.');
+    }
+
+    /**
+     * Simpan semua file foto_lahan yang diupload, kembalikan array path-nya.
+     */
+    protected function simpanFotoLahan(Request $request): array
+    {
+        $paths = [];
+
+        foreach ($request->file('foto_lahan') as $foto) {
+            $paths[] = $foto->store('foto-lahan', 'public');
+        }
+
+        return $paths;
+    }
+
+    /**
+     * Hapus semua file foto_lahan milik layanan dari storage.
+     */
+    protected function hapusFotoLahan(Service $layanan): void
+    {
+        if (! is_array($layanan->foto_lahan)) {
+            return;
+        }
+
+        foreach ($layanan->foto_lahan as $path) {
+            Storage::disk('public')->delete($path);
+        }
     }
 
     /**
@@ -173,11 +216,15 @@ class ServiceController extends Controller
      * - barang        -> field alamat gudang lengkap (provinsi/kabupaten/kecamatan/dst)
      * - kendaraan/bangunan/pindahan -> field lama (nama, kota, kecamatan, harga, foto)
      */
-    protected function validated(Request $request): array
+    protected function validated(Request $request, bool $isUpdate = false): array
     {
         $kategori = $request->input('kategori');
 
-            if ($kategori === 'barang') {
+        if ($kategori === 'barang') {
+            $fotoLahanRule = $isUpdate
+                ? ['nullable', 'array', 'max:8']
+                : ['required', 'array', 'min:1', 'max:8'];
+
             return $request->validate([
                 'kategori' => ['required', 'in:barang,bangunan,kendaraan,pindahan'],
                 'nama_usaha' => ['required', 'string', 'max:150'],
@@ -186,7 +233,8 @@ class ServiceController extends Controller
                 'kecamatan' => ['required', 'string', 'max:100'],
                 'alamat_lengkap' => ['required', 'string', 'max:500'],
                 'catatan_alamat' => ['nullable', 'string', 'max:500'],
-                'foto_lahan' => ['required', 'string', 'max:500'],
+                'foto_lahan' => $fotoLahanRule,
+                'foto_lahan.*' => ['image', 'max:5120'],
                 'panjang' => ['required', 'integer', 'min:1'],
                 'lebar' => ['required', 'integer', 'min:1'],
                 'jumlah_tampung' => ['required', 'integer', 'min:1'],

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Crosshair, Loader2, MapPinned } from 'lucide-react';
+import { extractRegionFromAddressComponents } from '@/lib/wilayah';
 
 let googleMapsPromise;
 const GOOGLE_MAPS_CALLBACK = '__titipsiniGoogleMapsReady';
 
-function loadGoogleMaps() {
+export function loadGoogleMaps() {
     if (window.google?.maps) return Promise.resolve(window.google.maps);
     if (googleMapsPromise) return googleMapsPromise;
 
@@ -71,6 +72,32 @@ export async function reverseGeocodeCoordinates(lat, lng) {
     } finally {
         window.clearTimeout(timeout);
     }
+}
+
+/**
+ * Reverse geocode koordinat memakai Google Maps Geocoding API.
+ * Mengembalikan { address, province, city, district } berdasarkan
+ * address_components, sehingga dipakai untuk auto-isi dropdown wilayah.
+ */
+export async function reverseGeocodeGoogle(lat, lng) {
+    const maps = await loadGoogleMaps();
+    return new Promise((resolve, reject) => {
+        const geocoder = new maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === 'OK' && results?.[0]) {
+                const result = results[0];
+                const wilayah = extractRegionFromAddressComponents(result.address_components);
+                resolve({
+                    address: result.formatted_address,
+                    province: wilayah.province,
+                    city: wilayah.city,
+                    district: wilayah.district,
+                });
+            } else {
+                reject(new Error('Alamat tidak ditemukan dari Google Maps.'));
+            }
+        });
+    });
 }
 
 export default function GoogleMapAddressPicker({ onAddressSelect }) {
