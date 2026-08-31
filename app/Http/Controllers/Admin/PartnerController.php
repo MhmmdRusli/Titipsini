@@ -66,13 +66,15 @@ class PartnerController extends Controller
     {
         abort_unless($partner->role === 'partner', 404);
 
+        $partner->load('services');
+
         return Inertia::render('Admin/Mitra/Show', [
             'partner' => $partner,
         ]);
     }
 
     /**
-     * Update status verifikasi / penangguhan mitra.
+     * Update status verifikasi / penangguhan mitra dan layanannya.
      * PATCH /admin/partners/{partner}/status
      */
     public function updateStatus(Request $request, User $partner): RedirectResponse
@@ -99,7 +101,33 @@ class PartnerController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', 'Status mitra berhasil diperbarui.');
+            ->with('success', 'Status identitas mitra berhasil diperbarui.');
+    }
+
+    /**
+     * Update status verifikasi layanan / lahan mitra.
+     * PATCH /admin/partners/{partner}/services/{service}/status
+     */
+    public function updateServiceStatus(Request $request, User $partner, \App\Models\Service $service): RedirectResponse
+    {
+        abort_unless($partner->role === 'partner', 404);
+        abort_unless($service->user_id === $partner->id, 403);
+
+        $validated = $request->validate([
+            'verification_status' => 'required|in:pendaftar,verifikasi_akun,terverifikasi,ditolak,ditangguhkan',
+            'rejection_reason' => 'nullable|string|required_if:verification_status,ditolak,ditangguhkan',
+        ]);
+
+        $service->update([
+            'verification_status' => $validated['verification_status'],
+            'rejection_reason' => in_array($validated['verification_status'], ['ditolak', 'ditangguhkan'])
+                ? $validated['rejection_reason']
+                : null,
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Status validasi lahan berhasil diperbarui.');
     }
 
     /**

@@ -200,6 +200,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/partners', [AdminPartnerController::class, 'index'])->name('partners.index');
     Route::get('/partners/{partner}', [AdminPartnerController::class, 'show'])->name('partners.show');
     Route::patch('/partners/{partner}/status', [AdminPartnerController::class, 'updateStatus'])->name('partners.updateStatus');
+    Route::patch('/partners/{partner}/services/{service}/status', [AdminPartnerController::class, 'updateServiceStatus'])->name('partners.services.updateStatus');
 
     Route::patch('/partners/{partner}/restore', [AdminPartnerController::class, 'restore'])->name('partners.restore');
     Route::post('/partners/bulk-destroy', [AdminPartnerController::class, 'bulkDestroy'])->name('partners.bulkDestroy');
