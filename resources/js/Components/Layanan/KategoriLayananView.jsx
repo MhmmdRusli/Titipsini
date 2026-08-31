@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import MitraLayout from '@/Layouts/MitraLayout';
 import { Plus, Pencil, Trash2, X, MapPin, AlertCircle, Home, Info, CheckCircle2 } from 'lucide-react';
@@ -40,12 +40,25 @@ export default function KategoriLayananView({
     menungguVerifikasi = false,
     fiturPenuhAktif = false,
     FormKustom = null,
+    edit = null,
 }) {
     const [tahap, setTahap] = useState(layanan.length > 0 ? 'hub' : 'kosong');
     const [modalOpen, setModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [fotoPreview, setFotoPreview] = useState(null);
+
+    // Buka otomatis modal edit bila halaman dibuka dengan ?edit=<id>
+    // (dipakai tombol pensil di halaman Detail & link "Verikasi Ulang").
+    const editOpened = useRef(false);
+    useEffect(() => {
+        if (editOpened.current || !edit || !layanan.length) return;
+        const item = layanan.find((l) => String(l.id) === String(edit));
+        if (item) {
+            editOpened.current = true;
+            openTambah(item);
+        }
+    }, [edit, layanan]);
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         kategori,

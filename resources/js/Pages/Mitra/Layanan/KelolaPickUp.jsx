@@ -17,7 +17,7 @@ function IlustrasiPickUp() {
     );
 }
 
-export default function KelolaPickUp({ layanan = [], daftarKota = [], menungguVerifikasi = false }) {
+export default function KelolaPickUp({ layanan = [], daftarKota = [], menungguVerifikasi = false, edit = null }) {
     return (
         <>
             <Head title="Kelola Pick Up" />
@@ -35,6 +35,7 @@ export default function KelolaPickUp({ layanan = [], daftarKota = [], menungguVe
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
                 FormKustom={FormIdentitasKendaraan}
+                edit={edit}
             />
         </>
     );

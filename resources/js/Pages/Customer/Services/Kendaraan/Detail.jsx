@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Car, CheckCircle2, Clock, MapPin, Star } from 'lucide-react';
+import { ArrowLeft, Car, CheckCircle2, MapPin, Star } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+import JadwalOperasional from '@/Components/JadwalOperasional';
 
 export default function Detail({ mitra }) {
     return (
@@ -24,12 +25,23 @@ export default function Detail({ mitra }) {
                     <div className="mt-6 space-y-4 border-t border-gray-100 pt-5 dark:border-gray-700">
                         <div className="flex gap-3 text-sm text-gray-600 dark:text-gray-300"><CheckCircle2 size={17} className="text-[#15803d]" /> {mitra.is_buka ? 'Buka' : 'Tutup'} : {mitra.jam_buka} - {mitra.jam_tutup}</div>
                         <div className="flex gap-3 text-sm text-gray-600 dark:text-gray-300"><MapPin size={17} className="text-[#15803d]" /> {mitra.alamat}, {mitra.kecamatan}, {mitra.kota}</div>
-                        <div className="flex gap-3 text-sm text-gray-600 dark:text-gray-300"><Clock size={17} className="text-[#15803d]" /> Jam operasional setiap hari</div>
+                        <JadwalOperasional jadwal={mitra.jadwalOperasional} />
                     </div>
                     <Reviews mitra={mitra} />
-                    <Link href={`/app/services/kendaraan/${mitra.id}/titip`} className="mt-7 flex w-full items-center justify-center rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white dark:bg-[#22c55e]">
-                        Titip Disini
-                    </Link>
+                    {mitra.isOrderable ? (
+                        <Link href={`/app/services/kendaraan/${mitra.id}/titip`} className="mt-7 flex w-full items-center justify-center rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white dark:bg-[#22c55e]">
+                            Titip Disini
+                        </Link>
+                    ) : (
+                        <button type="button" disabled className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-300 py-3.5 text-sm font-bold text-white dark:bg-gray-700">
+                            Titip Disini
+                        </button>
+                    )}
+                    {!mitra.isOrderable && (
+                        <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">
+                            Layanan ini belum bisa dipesan (masih dalam proses verifikasi atau belum mengatur jam operasional).
+                        </p>
+                    )}
                 </div>
             </div>
         </CustomerLayout>

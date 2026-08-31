@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { MapPin, Clock, Star } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+import JadwalOperasional from '@/Components/JadwalOperasional';
 
 /**
  * Props expected from ServiceController@showBarangMitra:
@@ -33,17 +34,7 @@ export default function DetailMitra({ service }) {
                     </div>
 
                     <div className="mt-4 space-y-3">
-                        <div className="flex items-start gap-3 text-sm">
-                            <Clock size={16} className="mt-0.5 shrink-0 text-gray-400" />
-                            <div>
-                                <p className="text-xs text-gray-400 dark:text-gray-500">Buka</p>
-                                <p className="text-gray-800 dark:text-gray-200">
-                                    {service.jamBuka && service.jamTutup
-                                        ? `${service.jamBuka} - ${service.jamTutup}`
-                                        : 'Tidak tersedia'}
-                                </p>
-                            </div>
-                        </div>
+                        <JadwalOperasional jadwal={service.jadwalOperasional} />
 
                         <div className="flex items-start gap-3 text-sm">
                             <MapPin size={16} className="mt-0.5 shrink-0 text-gray-400" />
@@ -59,16 +50,16 @@ export default function DetailMitra({ service }) {
                 <Link
                     href={`/app/services/barang/paket-pilihan?service_id=${service.id}`}
                     className={`mt-6 block w-full rounded-xl py-3 text-center text-sm font-bold text-white ${
-                        service.isBuka
+                        service.isOrderable
                             ? 'bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600'
                             : 'pointer-events-none bg-gray-300 dark:bg-gray-700'
                     }`}
                 >
                     Titip Disini
                 </Link>
-                {!service.isBuka && (
+                {!service.isOrderable && (
                     <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">
-                        Mitra sedang tutup, coba lagi saat jam operasional.
+                        Layanan ini belum bisa dipesan (masih dalam proses verifikasi atau belum mengatur jam operasional).
                     </p>
                 )}
             </div>

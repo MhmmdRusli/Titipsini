@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ChevronLeft, Pencil, AlertTriangle, Info, X, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import MitraLayout from '@/Layouts/MitraLayout';
@@ -53,11 +53,7 @@ export default function Detail({ layanan }) {
                 <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4">
                     <div className="mb-3 flex items-center justify-end border-b border-gray-200 pb-3">
                         <Link
-                            href={`/mitra/layanan/${layanan.id}`}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                router.visit(`/mitra/layanan/barang`, { data: { edit: layanan.id } });
-                            }}
+                            href={`/mitra/layanan/barang?edit=${layanan.id}`}
                             className="text-gray-400 hover:text-gray-600"
                         >
                             <Pencil size={16} />

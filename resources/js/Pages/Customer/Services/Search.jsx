@@ -189,10 +189,16 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                         </span>
                                         <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{m.nama}</p>
                                     </div>
-                                    {!m.is_buka && (
-                                        <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-500 dark:bg-red-950/40 dark:text-red-400">
-                                            Tutup
+                                    {m.is_orderable === false ? (
+                                        <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                            Segera Tersedia
                                         </span>
+                                    ) : (
+                                        !m.is_buka && (
+                                            <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-500 dark:bg-red-950/40 dark:text-red-400">
+                                                Tutup
+                                            </span>
+                                        )
                                     )}
                                 </div>
                                 <p className="mt-1.5 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
@@ -205,8 +211,8 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                 <div className="mt-3 flex gap-2">
                                     <button
                                         type="button"
-                                        disabled={!m.is_buka}
-                                        onClick={() => router.visit(`/app/services/${kategori}/${m.id}/titip`)}
+                                        disabled={!m.is_buka || m.is_orderable === false}
+                                        onClick={() => { if (m.is_orderable !== false) router.visit(`/app/services/${kategori}/${m.id}/titip`); }}
                                         className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-[#22c55e] dark:disabled:bg-gray-700"
                                     >
                                         Titip Disini
