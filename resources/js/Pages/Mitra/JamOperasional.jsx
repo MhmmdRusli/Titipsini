@@ -214,9 +214,9 @@ export default function JamOperasional({ jamOperasional }) {
                         );
                     })}
 
-                    {/* Floating Save Button - Menggunakan bottom-16 agar posisinya persis di atas bottom navigation bar */}
-                    <div className="fixed inset-x-0 bottom-16 z-20 border-t border-gray-100 bg-white/95 backdrop-blur-sm px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                        <div className="mx-auto max-w-md">
+                     {/* Floating Save Button */}
+                    <div className="fixed bottom-20 left-0 right-0 z-20 border-t border-gray-100 bg-white/95 px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]" style={{ backdropFilter: 'blur(4px)' }}>
+                        <div className="mx-auto max-w-[430px]">
                             <button
                                 type="submit"
                                 disabled={processing}
