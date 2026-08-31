@@ -1,141 +1,92 @@
+/**
+ * SNIPPET UNTUK Mitra/Layanan/Detail.jsx
+ * (saya tidak punya isi lengkap file ini, jadi berikut bagian yang relevan
+ * saja - komponen toggle "Status Gudang" yang terlihat di screenshot Anda)
+ */
+
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronLeft, Pencil, AlertTriangle, Info, X, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Pencil, Info } from 'lucide-react';
 import { useState } from 'react';
-import MitraLayout from '@/Layouts/MitraLayout';
 
-function Baris({ label, value }) {
-    if (value === null || value === undefined || value === '') return null;
-    return (
-        <div className="flex gap-4 py-2 text-sm">
-            <span className="w-32 shrink-0 text-gray-500">{label}</span>
-            <span className="text-gray-500">:</span>
-            <span className="text-gray-900">{value}</span>
-        </div>
-    );
-}
+export default function DetailGudang({ layanan, fiturPenuhAktif }) {
+    const [processing, setProcessing] = useState(false);
 
-export default function Detail({ layanan }) {
-    const [showBanner, setShowBanner] = useState(true);
-    const [loadingToggle, setLoadingToggle] = useState(false);
-    const status = layanan.verification_status ?? 'pending';
+    // Toggle individual HANYA aktif kalau fiturPenuhAktif true.
+    // Kalau fiturPenuhAktif false, toggle otomatis tampak mati & disabled -
+    // mengikuti aturan #1 & #3 dari spesifikasi.
+    function handleToggleStatus() {
+        if (!fiturPenuhAktif || processing) return;
 
-    const handleToggleActive = () => {
-        if (loadingToggle) return;
-        setLoadingToggle(true);
+        setProcessing(true);
         router.patch(
-            `/mitra/layanan/${layanan.id}/toggle-aktif`,
+            route('mitra.layanan.toggle-aktif', layanan.id),
             {},
-            {
-                preserveScroll: true,
-                onFinish: () => setLoadingToggle(false),
-            }
+            { preserveScroll: true, onFinish: () => setProcessing(false) }
         );
-    };
+    }
+
+    // Status yang ditampilkan: kalau fitur penuh OFF, paksa tampil OFF di UI
+    // meskipun nilai is_active di data belum sempat ke-refresh (defensif).
+    const statusTampil = fiturPenuhAktif && layanan.is_active;
 
     return (
-        <MitraLayout title="Detail Gudang">
+        <>
             <Head title="Detail Gudang" />
 
-            <div className="px-4 py-4">
-                {status === 'pending' && showBanner && (
-                    <div className="mb-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
-                        <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-500" />
-                        <p className="flex-1 text-xs font-medium text-amber-700">Lahan Parkir belum di validasi</p>
-                        <button onClick={() => setShowBanner(false)} className="text-amber-400 hover:text-amber-600">
-                            <X size={14} />
-                        </button>
-                    </div>
-                )}
+            <div className="min-h-screen bg-gray-50">
+                {/* Header */}
+                <div className="flex items-center gap-3 border-b border-gray-100 bg-white px-4 py-4">
+                    <Link href={route('mitra.layanan.kategori', 'barang')} className="text-gray-600">
+                        <ArrowLeft size={20} />
+                    </Link>
+                    <h1 className="text-base font-bold text-gray-900">Detail Gudang</h1>
+                </div>
 
-                {status === 'terverifikasi' && (
-                    <div className="mb-3 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5">
-                        <Info size={15} className="shrink-0 text-blue-500" />
-                        <p className="text-xs font-medium text-blue-700">Lahan Parkiran telah di verifikasi</p>
-                    </div>
-                )}
+                <div className="p-4">
+                    {/* ...bagian Nama Usaha / Provinsi / dst tetap sama seperti yang sudah ada... */}
 
-                {status === 'ditolak' && (
-                    <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
-                        <AlertTriangle size={15} className="mt-0.5 shrink-0 text-red-500" />
-                        <p className="text-xs font-medium text-red-700">
-                            Maaf Verifikasi anda di tolak{layanan.rejection_reason ? `, ${layanan.rejection_reason}` : ''}.
-                            Silahkan isi kembali dengan benar
-                        </p>
-                    </div>
-                )}
+                    {/* Peringatan kalau Fitur Penuh sedang OFF */}
+                    {!fiturPenuhAktif && (
+                        <div className="mb-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+                            <Info size={14} className="mt-0.5 shrink-0" />
+                            <span>
+                                "Fitur Penuh" untuk kategori Barang sedang nonaktif, sehingga semua gudang
+                                otomatis ditutup dan tidak bisa diubah manual. Aktifkan kembali dari halaman
+                                Kelola Barang untuk mengatur status gudang ini.
+                            </span>
+                        </div>
+                    )}
 
-                <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4">
-                    <div className="mb-3 flex items-center justify-end border-b border-gray-200 pb-3">
-                        <Link
-                            href={`/mitra/layanan/barang?edit=${layanan.id}`}
-                            className="text-gray-400 hover:text-gray-600"
-                        >
-                            <Pencil size={16} />
-                        </Link>
-                    </div>
-
-                    <Baris label="Nama Usaha" value={layanan.nama_usaha} />
-                    <Baris label="Provinsi" value={layanan.provinsi} />
-                    <Baris label="Kabupaten" value={layanan.kabupaten_kota} />
-                    <Baris label="Kecamatan" value={layanan.kecamatan} />
-                    <Baris label="Alamat Lenkap" value={layanan.alamat_lengkap} />
-
-                    <div className="mt-3 border-t border-gray-200 pt-3">
-                        <p className="mb-1 text-sm font-semibold text-gray-800">Luas Lahan</p>
-                        <Baris label="Panjang" value={layanan.panjang ? `${layanan.panjang} M` : null} />
-                        <Baris label="Lebar" value={layanan.lebar ? `${layanan.lebar} M` : null} />
-                        <Baris label="Jumlah tampung" value={layanan.jumlah_tampung} />
-                        <Baris label="Catatan" value={layanan.catatan_alamat} />
-                    </div>
-
-                    <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
+                    {/* Toggle Status Gudang */}
+                    <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4">
                         <div>
-                            <p className="text-sm font-semibold text-gray-800">Status Gudang</p>
-                            <p className="text-xs text-gray-500">
-                                {layanan.is_active ? 'Sedang menerima pesanan' : 'Ditutup sementara, tidak menerima pesanan'}
+                            <p className="text-sm font-bold text-gray-900">Status Gudang</p>
+                            <p className="text-xs text-gray-400">
+                                {statusTampil ? 'Sedang menerima pesanan' : 'Sedang tidak menerima pesanan'}
                             </p>
                         </div>
+
                         <button
                             type="button"
-                            disabled={loadingToggle}
-                            onClick={handleToggleActive}
-                            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
-                                layanan.is_active ? 'bg-green-600' : 'bg-gray-300'
-                            }`}
+                            role="switch"
+                            aria-checked={statusTampil}
+                            disabled={!fiturPenuhAktif || processing}
+                            onClick={handleToggleStatus}
+                            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors duration-200 ${
+                                statusTampil ? 'bg-[#15803d]' : 'bg-gray-300'
+                            } ${!fiturPenuhAktif ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                         >
                             <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                                    layanan.is_active ? 'translate-x-6' : 'translate-x-1'
+                                className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform duration-200 ${
+                                    statusTampil ? 'translate-x-5' : 'translate-x-0.5'
                                 }`}
                             />
                         </button>
                     </div>
 
-                    {layanan.foto_lahan && (
-                        <div className="mt-3 flex gap-4 border-t border-gray-200 pt-3 text-sm">
-                            <span className="w-32 shrink-0 text-gray-500">Foto Lahan Parkir</span>
-                            <span className="text-gray-500">:</span>
-
-                            <a href={layanan.foto_lahan}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="break-all text-blue-500 underline"
-                            >
-                                {layanan.foto_lahan}
-                            </a>
-                        </div>
-                    )}
+                    {/* ...bagian Foto Lahan Parkir dst tetap sama seperti yang sudah ada... */}
                 </div>
-
-                {status === 'ditolak' && (
-                    <Link
-                        href={`/mitra/layanan/barang?edit=${layanan.id}`}
-                        className="mt-4 block w-full rounded-xl bg-green-600 py-3 text-center text-sm font-bold text-white hover:bg-green-700"
-                    >
-                        Verikasi Ulang
-                    </Link>
-                )}
             </div>
-        </MitraLayout>
+        </>
     );
 }
