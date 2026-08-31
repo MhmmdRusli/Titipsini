@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ChevronDown, ChevronLeft, Eye, EyeOff, Shield } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Eye, EyeOff } from 'lucide-react';
 
 const COUNTRIES = [
     { code: '62', name: 'Indonesia', flag: '🇮🇩' },
@@ -84,12 +84,14 @@ export default function Register() {
                 {/* Logo */}
                 <div className="mt-6 flex flex-col items-center px-6 text-center">
                     <div className="flex items-center gap-2">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-50 text-green-600">
-                            <Shield size={18} />
-                        </div>
+                        <img
+                            src="/images/logo-titipsini.png"
+                            alt="Logo"
+                            className="h-9 w-auto object-contain"
+                        />
                         <span className="text-2xl font-extrabold text-green-600">
                             Titipsini
-                            <span className="text-yellow-400">&middot;</span>
+                            <span className="text-yellow-400 text-3xl leading-none">&middot;</span>
                             Com
                         </span>
                     </div>

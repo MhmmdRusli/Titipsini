@@ -321,8 +321,8 @@ export default function Show({ partner }) {
 
                 {/* Partner quick profile strip */}
                 <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center dark:border-gray-800 dark:bg-[#111827]">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-2xl font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
-                        {partner.name.charAt(0).toUpperCase()}
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 p-1.5 dark:bg-emerald-950/60">
+                        <img src="/images/logo-titipsini.png" alt="Titipsini" className="h-full w-full object-contain" />
                     </div>
                     <div className="min-w-0 flex-1">
                         <h1 className="truncate text-lg font-semibold text-slate-900 dark:text-gray-100">{partner.name}</h1>
