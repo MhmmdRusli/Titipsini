@@ -103,8 +103,7 @@ export default function JamOperasional({ jamOperasional }) {
             <Head title="Jam Operasional" />
 
             <div className="flex flex-col min-h-screen bg-gray-50">
-                {/* Form Body - pb-44 memberikan ruang agar kartu Minggu bisa di-scroll sepenuhnya di atas tombol Simpan & Navbar */}
-                <form onSubmit={submit} className="flex-1 space-y-4 px-4 py-4 pb-44">
+                <form onSubmit={submit} className="flex-1 space-y-4 px-4 py-4">
                     {HARI_LIST.map(({ key, label }) => {
                         const hari = data.jadwal[key];
                         return (
@@ -214,17 +213,15 @@ export default function JamOperasional({ jamOperasional }) {
                         );
                     })}
 
-                     {/* Floating Save Button */}
-                    <div className="fixed bottom-20 left-0 right-0 z-20 border-t border-gray-100 bg-white/95 px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]" style={{ backdropFilter: 'blur(4px)' }}>
-                        <div className="mx-auto max-w-[430px]">
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="w-full rounded-xl bg-green-700 py-3 text-sm font-semibold text-white shadow-md hover:bg-green-600 active:scale-[0.99] transition-all disabled:opacity-60"
-                            >
-                                {processing ? 'Menyimpan...' : 'Simpan'}
-                            </button>
-                        </div>
+                    {/* Save Button - di dalam flow form, mobile-friendly */}
+                    <div className="pt-2 pb-4">
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="w-full rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white shadow-md active:scale-[0.98] transition-all disabled:opacity-60 hover:bg-green-800"
+                        >
+                            {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
+                        </button>
                     </div>
                 </form>
             </div>
