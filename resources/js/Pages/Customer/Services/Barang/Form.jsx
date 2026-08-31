@@ -493,6 +493,28 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                                 <ChevronDown size={16} />
                             </span>
                         </div>
+                        <div className="mt-2 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+                            <table className="w-full text-left text-xs">
+                                <thead className="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                                    <tr>
+                                        <th className="px-3 py-2 font-semibold">Ukuran</th>
+                                        <th className="px-3 py-2 font-semibold">Dimensi (P x L x T)</th>
+                                        <th className="px-3 py-2 font-semibold">Berat</th>
+                                        <th className="px-3 py-2 font-semibold">Maks Item</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                                    {ukuranBarangOptions.map((opt) => (
+                                        <tr key={opt.value} className={tierTerpilih?.value === opt.value ? 'bg-green-50 dark:bg-green-950/30' : ''}>
+                                            <td className="px-3 py-2 font-bold text-gray-900 dark:text-gray-100">{opt.label}</td>
+                                            <td className="px-3 py-2 text-gray-600 dark:text-gray-300">{opt.dimensi}</td>
+                                            <td className="px-3 py-2 text-gray-600 dark:text-gray-300">{opt.berat}</td>
+                                            <td className="px-3 py-2 text-gray-600 dark:text-gray-300">{opt.maksItem}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                         <FieldError message={errors.ukuranBarang} />
                     </div>
 

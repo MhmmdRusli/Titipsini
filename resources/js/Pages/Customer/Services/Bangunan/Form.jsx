@@ -15,6 +15,14 @@ function formatRupiah(value) {
     return 'Rp' + Math.round(value || 0).toLocaleString('id-ID');
 }
 
+const BUILDING_DESKRIPSI = {
+    rumah: 'Rumah tinggal, rumah toko, atau hunian pribadi.',
+    apartemen: 'Unit apartemen, kondominium, atau hunian vertikal.',
+    kosan: 'Kos-kosan, kontrakan, atau hunian sewa.',
+    gudang: 'Gudang, warehouse, atau tempat penyimpanan komersial.',
+    kamar: 'Kamar kos, kamar mandi, atau ruangan kecil.',
+};
+
 function FieldError({ message }) {
     if (!message) return null;
     return <p className="mt-1.5 text-xs font-medium text-red-500">{message}</p>;

@@ -55,13 +55,13 @@ class ServiceController extends Controller
      * bisnis yang sebenarnya sebelum dipakai di production.
      */
     protected const JENIS_KENDARAAN = [
-        'motor' => ['label' => 'Motor', 'harga_per_hari' => 10000],
-        'mobil' => ['label' => 'Mobil', 'harga_per_hari' => 15000],
-        'truk' => ['label' => 'Truk', 'harga_per_hari' => 30000],
-        'becak' => ['label' => 'Becak', 'harga_per_hari' => 8000],
-        'sepeda' => ['label' => 'Sepeda', 'harga_per_hari' => 5000],
-        'bus' => ['label' => 'Bus', 'harga_per_hari' => 40000],
-        'mobil_pick_up' => ['label' => 'Mobil pick up', 'harga_per_hari' => 20000],
+        'motor' => ['label' => 'Motor', 'harga_per_hari' => 10000, 'dimensi' => '120 x 80 x 100 cm', 'berat' => '150 kg'],
+        'mobil' => ['label' => 'Mobil', 'harga_per_hari' => 15000, 'dimensi' => '200 x 150 x 150 cm', 'berat' => '800 kg'],
+        'truk' => ['label' => 'Truk', 'harga_per_hari' => 30000, 'dimensi' => '300 x 200 x 200 cm', 'berat' => '2000 kg'],
+        'becak' => ['label' => 'Becak', 'harga_per_hari' => 8000, 'dimensi' => '150 x 100 x 100 cm', 'berat' => '100 kg'],
+        'sepeda' => ['label' => 'Sepeda', 'harga_per_hari' => 5000, 'dimensi' => '150 x 60 x 100 cm', 'berat' => '20 kg'],
+        'bus' => ['label' => 'Bus', 'harga_per_hari' => 40000, 'dimensi' => '600 x 250 x 300 cm', 'berat' => '5000 kg'],
+        'mobil_pick_up' => ['label' => 'Mobil pick up', 'harga_per_hari' => 20000, 'dimensi' => '250 x 180 x 180 cm', 'berat' => '1500 kg'],
     ];
 
     protected const UKURAN_BARANG = [
@@ -70,30 +70,40 @@ class ServiceController extends Controller
             'harga_per_hari' => 15000,
             'maks_item' => 2,
             'deskripsi' => 'Khusus penitipan barang berdimensi kecil dengan jumlah maksimal 2 item seperti laptop, tas kecil, koper kecil, box kecil.',
+            'dimensi' => '50 x 40 x 40 cm',
+            'berat' => '10 kg',
         ],
         'besar' => [
             'label' => 'M',
             'harga_per_hari' => 25000, // ⚠️ placeholder
             'maks_item' => 1,
             'deskripsi' => 'Khusus penitipan barang berdimensi besar dengan jumlah maksimal 1 item seperti barang elektronik, mebel, koper besar, box besar.',
+            'dimensi' => '80 x 60 x 60 cm',
+            'berat' => '25 kg',
         ],
         'kamar_kecil' => [
             'label' => 'L',
             'harga_per_hari' => 50000, // ⚠️ placeholder
             'maks_item' => 1,
             'deskripsi' => 'Khusus penitipan barang 1 kamar kos dengan luas kamar 3x2 m².',
+            'dimensi' => '120 x 100 x 100 cm',
+            'berat' => '50 kg',
         ],
         'kamar_besar' => [
             'label' => 'XL',
             'harga_per_hari' => 75000, // ⚠️ placeholder
             'maks_item' => 1,
             'deskripsi' => 'Khusus penitipan barang 1 kamar kos dengan luas kamar 6x4 m².',
+            'dimensi' => '180 x 150 x 150 cm',
+            'berat' => '100 kg',
         ],
         'ekstra_besar' => [
             'label' => 'XXL',
             'harga_per_hari' => 100000, // ⚠️ placeholder
             'maks_item' => 1,
             'deskripsi' => 'Khusus penitipan barang dengan ukuran ekstra besar.',
+            'dimensi' => '240 x 200 x 200 cm',
+            'berat' => '200 kg',
         ],
     ];
 
@@ -246,6 +256,8 @@ class ServiceController extends Controller
                 'hargaPerHari' => $tier['harga_per_hari'],
                 'maksItem' => $tier['maks_item'],
                 'deskripsi' => $tier['deskripsi'],
+                'dimensi' => $tier['dimensi'],
+                'berat' => $tier['berat'],
             ])
             ->values();
 
@@ -599,6 +611,8 @@ class ServiceController extends Controller
                 'value' => $key,
                 'label' => $tier['label'],
                 'hargaPerHari' => $tier['harga_per_hari'],
+                'dimensi' => $tier['dimensi'],
+                'berat' => $tier['berat'],
             ])->values();
 
         return Inertia::render('Customer/Services/Kendaraan/Form', [
