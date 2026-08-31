@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ChevronDown, ChevronLeft, Eye, EyeOff } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Eye, EyeOff, Shield } from 'lucide-react';
 
 const COUNTRIES = [
     { code: '62', name: 'Indonesia', flag: '🇮🇩' },
@@ -89,10 +89,8 @@ export default function Register() {
                             alt="Logo"
                             className="h-9 w-auto object-contain"
                         />
-                        <span className="text-2xl font-extrabold text-green-600">
-                            Titipsini
-                            <span className="text-yellow-400 text-3xl leading-none">&middot;</span>
-                            Com
+                        <span className="text-2xl font-extrabold tracking-tight text-[#15803d]">
+                            Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                         </span>
                     </div>
                     <p className="mt-1 text-xs text-gray-400">Tempat Yang Aman Untuk Barang Berharga Anda</p>
@@ -194,9 +192,8 @@ export default function Register() {
                             Nomor Telepon
                         </label>
                         <div
-                            className={`flex items-center rounded-xl border bg-gray-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-green-500 transition ${
-                                errors.phone ? 'border-red-400 bg-red-50 focus-within:ring-red-400' : 'border-transparent'
-                            }`}
+                            className={`flex items-center rounded-xl border bg-gray-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-green-500 transition ${errors.phone ? 'border-red-400 bg-red-50 focus-within:ring-red-400' : 'border-transparent'
+                                }`}
                         >
                             <div className="relative" ref={countryRef}>
                                 <button
@@ -219,9 +216,8 @@ export default function Register() {
                                                     setCountry(c);
                                                     setCountryOpen(false);
                                                 }}
-                                                className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 ${
-                                                    c.code === country.code ? 'bg-green-50 text-green-700' : 'text-gray-700'
-                                                }`}
+                                                className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 ${c.code === country.code ? 'bg-green-50 text-green-700' : 'text-gray-700'
+                                                    }`}
                                             >
                                                 <span>{c.flag}</span>
                                                 <span className="flex-1">{c.name}</span>
