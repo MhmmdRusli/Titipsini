@@ -82,19 +82,43 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
     async function getWilayahDariKoordinat(latitude, longitude) {
         try {
             await loadGoogleMaps();
-            return await reverseGeocodeGoogle(latitude, longitude);
-        } catch {
+            const lokasi = await reverseGeocodeGoogle(latitude, longitude);
+            console.log('LOKASI (Google Maps):', lokasi);
+            return lokasi;
+        } catch (err) {
+            console.log('Google Maps gagal, fallback ke Nominatim:', err);
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=id`,
             );
             const result = await response.json();
             const address = result.address || {};
-            return {
+            console.log('RAW Nominatim address:', address);
+
+            // Nominatim sering salah label untuk alamat Indonesia: nama
+            // kecamatan kadang muncul di field `town`/`city`, bukan di
+            // `city_district`/`suburb`. `county` biasanya paling konsisten
+            // berisi nama kabupaten/kota yang sebenarnya.
+            const city = address.county || address.regency || address.city || address.town || '';
+            const kandidatKecamatan = address.city || address.town || '';
+
+            const district =
+                address.city_district ||
+                address.district ||
+                address.subdistrict ||
+                address.suburb ||
+                (kandidatKecamatan && kandidatKecamatan !== city ? kandidatKecamatan : '') ||
+                address.municipality ||
+                address.village ||
+                '';
+
+            const lokasi = {
                 address: result.display_name || '',
                 province: address.state || address.province || '',
-                city: address.city || address.town || address.county || '',
-                district: address.city_district || address.district || address.suburb || '',
+                city,
+                district,
             };
+            console.log('LOKASI (Nominatim, sudah dikoreksi):', lokasi);
+            return lokasi;
         }
     }
 
@@ -125,6 +149,7 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
             }
 
             const matchedProvinsi = findRegionOption(provinces, lokasi.province);
+            console.log('MATCH PROVINSI:', lokasi.province, '->', matchedProvinsi);
             if (!matchedProvinsi) {
                 setData((prev) => ({
                     ...prev,
@@ -149,6 +174,7 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
             setLoadingKabupaten(false);
 
             const matchedKabupaten = findRegionOption(regencies, lokasi.city);
+            console.log('MATCH KABUPATEN:', lokasi.city, '->', matchedKabupaten);
             if (!matchedKabupaten) {
                 setData((prev) => ({
                     ...prev,
@@ -171,6 +197,7 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
             setLoadingKecamatan(false);
 
             const matchedKecamatan = findRegionOption(districts, lokasi.district);
+            console.log('MATCH KECAMATAN:', lokasi.district, '->', matchedKecamatan);
             setKecamatanId(matchedKecamatan?.id ?? '');
 
             setData((prev) => ({

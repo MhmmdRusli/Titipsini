@@ -1,29 +1,4 @@
-/**
- * Utility wilayah (provinsi / kabupaten-kota / kecamatan).
- *
- * Dipakai untuk menormalkan & mencocokkan nama wilayah yang berasal dari
- * Google Maps Geocoding API (address_components) atau Nominatim OpenStreetMap
- * dengan daftar wilayah pada API /api/wilayah, sehingga dropdown pada form
- * "Alamat Gudang" otomatis terpilih saat tombol "Gunakan Lokasi Saat Ini"
- * ditekan.
- */
 
-/**
- * Bersihkan nama wilayah agar bisa dicocokkan:
- * - lowercase
- * - buang tanda baca / karakter non-alfanumerik (kecuali spasi)
- * - buang prefiks umum ("Kabupaten", "Kota", "Kecamatan", "Provinsi",
- *   "Daerah Istimewa", "Daerah Khusus", "DKI", "Ibukota", dst.)
- * - normalisasi spasi
- *
- * Contoh:
- *   "Kabupaten Sleman"                    -> "sleman"
- *   "Kota Yogyakarta"                     -> "yogyakarta"
- *   "Daerah Istimewa Yogyakarta"          -> "yogyakarta"
- *   "Kecamatan Umbulharjo"                -> "umbulharjo"
- *   "DI YOGYAKARTA"                       -> "yogyakarta"
- *   "Special Region of Yogyakarta" (Google)-> "yogyakarta"
- */
 export function normalizeRegionName(value) {
     return String(value ?? '')
         .toLowerCase()
@@ -36,14 +11,7 @@ export function normalizeRegionName(value) {
         .trim();
 }
 
-/**
- * Cari opsi wilayah ({ id, name }) yang paling cocok dengan nilai teks dari
- * Google Maps / Nominatim.
- *
- * Prioritas:
- * 1. Nama persis setelah dinormalisasi.
- * 2. Saling mengandung (substring) — menangani perbedaan kecil ejaan/spasi.
- */
+
 export function findRegionOption(options, value) {
     const target = normalizeRegionName(value);
     if (!target) return null;
@@ -63,9 +31,14 @@ export function findRegionOption(options, value) {
  * Ekstrak nama provinsi, kabupaten/kota, dan kecamatan dari array
  * `address_components` milik Google Maps Geocoding API.
  *
+ * Catatan penting: Google Maps sering TIDAK punya boundary resmi untuk
+ * level kecamatan di Indonesia (administrative_area_level_3 sering kosong).
+ * Jadi kita coba beberapa fallback berurutan, dan sebagai upaya terakhir
+ * pakai locality/administrative_area_level_2 yang paling mendekati kecamatan.
+ *
  * @param {Array<{ long_name: string, types: string[] }>} addressComponents
  * @returns {{ province: string, city: string, district: string }}
- */
+ */             
 export function extractRegionFromAddressComponents(addressComponents = []) {
     const getComponent = (type) =>
         addressComponents.find((component) => component.types.includes(type))?.long_name ?? '';
@@ -86,6 +59,8 @@ export function extractRegionFromAddressComponents(addressComponents = []) {
             'administrative_area_level_4',
             'sublocality_level_1',
             'sublocality',
+            'locality',
+            'administrative_area_level_2',
         ),
     };
 }
