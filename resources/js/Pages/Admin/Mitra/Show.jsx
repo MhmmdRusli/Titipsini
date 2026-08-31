@@ -252,7 +252,7 @@ export default function Show({ partner }) {
     function submitLandStatus(serviceId, status, reason = '') {
         setLandProcessing(true);
         router.patch(
-            `/admin/services/${serviceId}/verify`,
+            `/admin/partners/${partner.id}/services/${serviceId}/status`,
             { verification_status: status, rejection_reason: reason },
             {
                 preserveScroll: true,
@@ -371,7 +371,7 @@ export default function Show({ partner }) {
                         </div>
                         {partner.foto_ktp ? (
                             
-                              <a  href={`/storage/${partner.foto_ktp}`}
+                               <a href={`/storage/${partner.foto_ktp}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-900 dark:bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 dark:hover:bg-blue-700 transition-colors"
