@@ -116,18 +116,15 @@ export default function Show({ partner }) {
                             <dt className="text-slate-500 dark:text-gray-400">Bergabung</dt>
                             <dd className="font-medium text-slate-800 dark:text-gray-200">{formatDate(partner.created_at)}</dd>
                         </div>
-                            {partner.link_verifikasi_ktp && (
+                        {partner.foto_ktp && (
                             <div>
                                 <dt className="text-slate-500 dark:text-gray-400">Foto KTP & Selfie</dt>
-                                <dd className="mt-1">
-                                    
-                                       <a href={partner.link_verifikasi_ktp}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="font-medium text-emerald-600 dark:text-emerald-400 underline break-all"
-                                    >
-                                        Buka link Google Drive
-                                    </a>
+                                <dd className="mt-2">
+                                    <img
+                                        src={`/storage/${partner.foto_ktp}`}
+                                        alt="Foto KTP"
+                                        className="max-h-64 rounded-lg object-contain border border-slate-200 dark:border-gray-700"
+                                    />
                                 </dd>
                             </div>
                         )}

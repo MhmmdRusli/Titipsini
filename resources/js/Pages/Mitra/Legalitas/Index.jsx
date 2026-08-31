@@ -9,7 +9,7 @@ import MitraLayout from '@/Layouts/MitraLayout';
 const PIN_LENGTH = 6;
 
 export default function Legalitas({ partner }) {
-    const sudahKirimKtp = !!partner.link_verifikasi_ktp;
+    const sudahKirimKtp = !!partner.foto_ktp;
     const sudahPunyaPin = !!partner.has_pin;
 
     // Tentukan step awal berdasarkan progres yang sudah ada
@@ -30,7 +30,7 @@ export default function Legalitas({ partner }) {
         gender: partner.gender ?? '',
         birth_date: partner.birth_date ?? '',
         nik: partner.nik ?? '',
-        link_verifikasi_ktp: partner.link_verifikasi_ktp ?? '',
+        foto_ktp: null,
     });
     const [errors, setErrors] = useState({});
     const [submittingKtp, setSubmittingKtp] = useState(false);
@@ -121,7 +121,6 @@ export default function Legalitas({ partner }) {
                     submitting={submittingKtp}
                     onBack={() => setStep('panduan')}
                     onSubmit={submitKtp}
-                    onOpenPanduanDrive={() => setShowPanduanDrive(true)}
                 />
             )}
 
@@ -305,7 +304,7 @@ function PanduanBlok({ judul, deskripsi, poin }) {
 }
 
 /* ============================= STEP 3 ============================= */
-function FormStep({ form, setForm, errors, submitting, onBack, onSubmit, onOpenPanduanDrive }) {
+function FormStep({ form, setForm, errors, submitting, onBack, onSubmit }) {
     function update(key, value) {
         setForm((f) => ({ ...f, [key]: value }));
     }
@@ -360,26 +359,15 @@ function FormStep({ form, setForm, errors, submitting, onBack, onSubmit, onOpenP
                     />
                 </Field>
 
-                <Field
-                    label={
-                        <span className="flex items-center gap-1">
-                            Link Foto KTP dan Foto Selfie dengan KTP
-                            <button type="button" onClick={onOpenPanduanDrive}>
-                                <Info size={13} className="text-gray-400" />
-                            </button>
-                        </span>
-                    }
-                    error={errors.link_verifikasi_ktp}
-                >
+                <Field label="Foto KTP dan Foto Selfie dengan KTP" error={errors.foto_ktp}>
                     <input
-                        type="url"
-                        placeholder="https://drive.google.com/contoh"
-                        value={form.link_verifikasi_ktp}
-                        onChange={(e) => update('link_verifikasi_ktp', e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-green-500 focus:outline-none"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => update('foto_ktp', e.target.files[0])}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 focus:border-green-500 focus:outline-none"
                     />
                     <p className="mt-1 text-[11px] text-gray-400">
-                        Foto selfie ini diperlukan untuk memastikan KTP kamu benar milik kamu.
+                        Foto selfie ini diperlukan untuk memastikan KTP kamu benar milik kamu. (Maksimal 2MB)
                     </p>
                 </Field>
 
