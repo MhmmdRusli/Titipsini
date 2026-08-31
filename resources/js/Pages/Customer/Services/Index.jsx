@@ -100,6 +100,7 @@ export default function ServicesIndex({ services, filters }) {
     const pageTitle = KATEGORI_LABEL[kategori] ?? 'Layanan';
     const CategoryIcon = ICON_BY_KATEGORI[kategori] ?? Package;
     const ModalIcon = modalLabel?.icon ?? CategoryIcon;
+
     return (
         <CustomerLayout title={pageTitle} backHref="/app/dashboard">
             <Head title={pageTitle} />
@@ -127,7 +128,6 @@ export default function ServicesIndex({ services, filters }) {
                     </button>
                 )}
 
-                {/* List style ala Detail Mitra, ganti dari grid thumbnail */}
                 <div className="mt-4 space-y-3">
                     {services.data.length === 0 && (
                         <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400 dark:border-gray-700 dark:text-gray-500">
@@ -143,90 +143,90 @@ export default function ServicesIndex({ services, filters }) {
                                 key={service.id}
                                 className="rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
                             >
-                            <div className="flex items-start justify-between gap-2">
-                                <div className="flex items-center gap-2.5">
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-900/30 dark:text-[#4ade80]">
-                                        <ServiceIcon size={16} />
-                                    </div>
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-900/30 dark:text-[#4ade80]">
+                                            <ServiceIcon size={16} />
+                                        </div>
                                         <div>
                                             <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{service.nama}</p>
                                             <p className="text-[11px] text-gray-500 dark:text-gray-400">{service.vendor?.name ?? service.mitraNama ?? 'Mitra Titipsini'}</p>
                                         </div>
-                                </div>
+                                    </div>
 
-                                {orderable ? (
-                                    typeof service.is_buka === 'boolean' && (
-                                        <span
-                                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                                service.is_buka
-                                                    ? 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]'
-                                                    : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'
-                                            }`}
-                                        >
-                                            {service.is_buka ? 'Buka' : 'Tutup'}
-                                        </span>
-                                    )
-                                ) : (
-                                    <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
-                                        Segera Tersedia
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className="mt-2.5 space-y-1 border-t border-gray-50 pt-2 text-[11px] text-gray-500 dark:border-gray-700/60 dark:text-gray-400">
-                                <p className="flex items-center gap-1.5">
-                                    <MapPin size={11} />
-                                    {service.kecamatan}, {service.kota}
-                                </p>
-                                <p className="flex items-center gap-1.5">
-                                    <Clock size={11} />
-                                    {service.jam_buka || '08.00'} - {service.jam_tutup || '21.00'}
-                                </p>
-                            </div>
-
-                            {Number(service.review_count) > 0 && (
-                                <div className="mt-2 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
-                                    <Star size={12} className="fill-yellow-400 text-yellow-400" />
-                                    {Number(service.average_rating).toFixed(1)} ({service.review_count} ulasan)
-                                </div>
-                            )}
-
-                            <div className="mt-2.5 flex items-center gap-2">
-                                <div className="flex w-full items-center gap-2">
                                     {orderable ? (
-                                        <Link
-                                            href={hrefForService(service)}
-                                            className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#15803d] px-3.5 py-2 text-xs font-bold text-white dark:bg-[#22c55e]"
-                                        >
-                                            Titip Disini
-                                        </Link>
+                                        typeof service.is_buka === 'boolean' && (
+                                            <span
+                                                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                                    service.is_buka
+                                                        ? 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]'
+                                                        : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'
+                                                }`}
+                                            >
+                                                {service.is_buka ? 'Buka' : 'Tutup'}
+                                            </span>
+                                        )
                                     ) : (
-                                        <button
-                                            type="button"
-                                            disabled
-                                            className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-1 rounded-lg bg-gray-200 px-3.5 py-2 text-xs font-bold text-gray-400 dark:bg-gray-700 dark:text-gray-500"
-                                        >
+                                        <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
                                             Segera Tersedia
-                                        </button>
+                                        </span>
                                     )}
-                                    <Link
-                                        href={detailHrefForService(service)}
-                                        className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#15803d] px-3.5 py-2 text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
-                                    >
-                                        Detail Mitra
-                                    </Link>
                                 </div>
-                            </div>
+
+                                <div className="mt-2.5 space-y-1 border-t border-gray-50 pt-2 text-[11px] text-gray-500 dark:border-gray-700/60 dark:text-gray-400">
+                                    <p className="flex items-center gap-1.5">
+                                        <MapPin size={11} />
+                                        {service.kecamatan}, {service.kota}
+                                    </p>
+                                    <p className="flex items-center gap-1.5">
+                                        <Clock size={11} />
+                                        {service.jam_buka || '08.00'} - {service.jam_tutup || '21.00'}
+                                    </p>
+                                </div>
+
+                                {Number(service.review_count) > 0 && (
+                                    <div className="mt-2 flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                        <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                                        {Number(service.average_rating).toFixed(1)} ({service.review_count} ulasan)
+                                    </div>
+                                )}
+
+                                <div className="mt-2.5 flex items-center gap-2">
+                                    <div className="flex w-full items-center gap-2">
+                                        {orderable ? (
+                                            <Link
+                                                href={hrefForService(service)}
+                                                className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#15803d] px-3.5 py-2 text-xs font-bold text-white dark:bg-[#22c55e]"
+                                            >
+                                                Titip Disini
+                                            </Link>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                disabled
+                                                className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-1 rounded-lg bg-gray-200 px-3.5 py-2 text-xs font-bold text-gray-400 dark:bg-gray-700 dark:text-gray-500"
+                                            >
+                                                Segera Tersedia
+                                            </button>
+                                        )}
+                                        <Link
+                                            href={detailHrefForService(service)}
+                                            className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#15803d] px-3.5 py-2 text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
+                                        >
+                                            Detail Mitra
+                                        </Link>
+                                    </div>
+                                </div>
                             </div>
                         );
                     })}
                 </div>
             </div>
 
-            {/* Modal Pilih Jenis */}
+            {/* Modal Pilih Jenis (Fixed Center) */}
             {modalOpen && needsTypeSelection && (
-                <div className="absolute inset-0 z-20 flex items-end bg-black/40">
-                    <div className="w-full rounded-t-2xl bg-white p-5 pb-8 dark:bg-gray-800">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
                                 <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{modalLabel.title}</h2>

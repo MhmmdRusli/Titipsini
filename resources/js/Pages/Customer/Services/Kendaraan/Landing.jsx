@@ -61,8 +61,8 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
             </div>
 
             {open && (
-                <div className="absolute inset-0 z-30 flex items-end bg-black/40 sm:items-center sm:justify-center sm:p-4">
-                    <div className="w-full rounded-t-3xl bg-white p-6 dark:bg-gray-800 sm:max-w-sm sm:rounded-3xl">
+                <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-sm rounded-3xl bg-white p-6 dark:bg-gray-800">
                         <div className="flex items-center justify-between">
                             <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Pencarian</h2>
                             <button type="button" onClick={() => setOpen(false)} className="text-gray-400" aria-label="Tutup">

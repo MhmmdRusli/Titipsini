@@ -176,11 +176,10 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                         {mitras.data.map((m) => (
                             <div
                                 key={m.id}
-                                className={`rounded-xl border p-4 shadow-sm ${
-                                    m.is_buka
-                                        ? 'border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800'
-                                        : 'border-gray-100 bg-gray-50 opacity-60 dark:border-gray-800 dark:bg-gray-900'
-                                }`}
+                                className={`rounded-xl border p-4 shadow-sm ${m.is_buka
+                                    ? 'border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800'
+                                    : 'border-gray-100 bg-gray-50 opacity-60 dark:border-gray-800 dark:bg-gray-900'
+                                    }`}
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex min-w-0 items-center gap-2">
@@ -252,35 +251,40 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
 
             {/* Bottom sheet: confirm detected city */}
             {sheet === 'confirm' && (
-                <div className="absolute inset-0 z-20 flex items-end bg-black/40">
-                    <div className="w-full rounded-t-2xl bg-white p-5 pb-8 dark:bg-gray-800">
-                        <p className="text-sm text-gray-700 dark:text-gray-200">
-                            Pilih kota : <span className="font-semibold">{detectedKota}</span>
-                        </p>
-                        <div className="mt-4 flex items-center justify-between">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl dark:bg-gray-800">
+                        <div className="flex items-start justify-between">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Pencarian</h2>
+                            <button
+                                type="button"
+                                onClick={() => setSheet(null)}
+                                className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-300">Pilih kota</p>
+
+                        <div className="mt-2 w-full rounded-full border border-gray-200 bg-white px-4 py-2.5 text-center text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                            {detectedKota}
+                        </div>
+
+                        <div className="mt-5 flex items-center gap-3">
                             <button
                                 type="button"
                                 onClick={() => setSheet('picker')}
-                                className="text-xs font-semibold text-[#15803d] dark:text-[#4ade80]"
+                                className="flex-1 rounded-full border border-[#15803d] py-2.5 text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
                             >
                                 KOTA LAIN
                             </button>
-                            <div className="flex items-center gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setSheet(null)}
-                                    className="text-xs font-semibold text-gray-400 dark:text-gray-500"
-                                >
-                                    BATAL
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => applyKota(detectedKota)}
-                                    className="rounded-full bg-[#15803d] px-5 py-1.5 text-xs font-bold text-white dark:bg-[#22c55e]"
-                                >
-                                    OKE
-                                </button>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => applyKota(detectedKota)}
+                                className="flex-1 rounded-full bg-[#15803d] py-2.5 text-xs font-bold text-white dark:bg-[#22c55e]"
+                            >
+                                OKE
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -288,7 +292,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
 
             {/* Full screen: pick another city */}
             {sheet === 'picker' && (
-                <div className="absolute inset-0 z-20 bg-white dark:bg-gray-900">
+                <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900">
                     <div className="flex items-center gap-2 border-b border-gray-100 px-3 py-3 dark:border-gray-800">
                         <button
                             type="button"
