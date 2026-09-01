@@ -58,6 +58,7 @@ use App\Http\Controllers\Mitra\ProfileController as MitraProfileController;
 use App\Http\Controllers\Mitra\RekeningController;
 use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
 use App\Http\Controllers\WilayahController;
+use App\Http\Controllers\SuperAdmin\UserController as SuperAdminUserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -477,4 +478,26 @@ Route::get('/api/wilayah/districts/{regencyId}', [WilayahController::class, 'dis
 Route::middleware(['auth', 'role:customer'])->prefix('buat-pin')->name('customer.pin.')->group(function () {
     Route::get('/', [PinController::class, 'create'])->name('create');
     Route::post('/', [PinController::class, 'store'])->name('store');
+});
+Route::prefix('super-admin/user')->name('super-admin.user.')->middleware(['auth', 'role:super_admin'])->group(function () {
+    Route::get('/customer', [SuperAdminUserController::class, 'customerIndex'])->name('customer.index');
+    Route::get('/customer/{user}', [SuperAdminUserController::class, 'customerShow'])->name('customer.show');
+    Route::patch('/customer/{user}/status', [SuperAdminUserController::class, 'updateCustomerStatus'])->name('customer.updateStatus');
+
+    Route::get('/vendor', [SuperAdminUserController::class, 'vendorIndex'])->name('vendor.index');
+    Route::get('/vendor/{partner}', [SuperAdminUserController::class, 'vendorShow'])->name('vendor.show');
+    Route::patch('/vendor/{partner}/status', [SuperAdminUserController::class, 'updateVendorStatus'])->name('vendor.updateStatus');
+    Route::patch('/vendor/{partner}/services/{service}/status', [SuperAdminUserController::class, 'updateVendorServiceStatus'])->name('vendor.updateServiceStatus');
+    Route::patch('/vendor/{partner}/restore', [SuperAdminUserController::class, 'restoreVendor'])->name('vendor.restore');
+
+    Route::get('/finance', [SuperAdminUserController::class, 'financeIndex'])->name('finance.index');
+    Route::get('/finance/{user}', [SuperAdminUserController::class, 'financeShow'])->name('finance.show');
+
+    Route::get('/admin', [SuperAdminUserController::class, 'adminIndex'])->name('admin.index');
+    Route::get('/admin/{user}', [SuperAdminUserController::class, 'adminShow'])->name('admin.show');
+
+    Route::patch('/{user}/toggle-active', [SuperAdminUserController::class, 'toggleActive'])->name('toggleActive');
+
+    Route::get('/tambah', [SuperAdminUserController::class, 'create'])->name('create');
+    Route::post('/tambah', [SuperAdminUserController::class, 'store'])->name('store');
 });
