@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm, router, Head } from '@inertiajs/react';
-import { ChevronLeft, ChevronDown } from 'lucide-react';
+import { ChevronDown, ImagePlus, X } from 'lucide-react';
 
 const inputClass = (hasError) =>
     `mt-1 w-full rounded-lg border-none bg-gray-100 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 disabled:opacity-50 ${
         hasError ? 'ring-2 ring-red-400' : 'focus:ring-green-500'
     }`;
+
+const MAKS_FOTO = 8;
 
 export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, onSukses }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -16,7 +18,7 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
         kecamatan: editingItem?.kecamatan ?? '',
         alamat_lengkap: editingItem?.alamat_lengkap ?? '',
         catatan_alamat: editingItem?.catatan_alamat ?? '',
-        foto_lahan: editingItem?.foto_lahan ?? '',
+        foto_lahan: [], // array File baru yang mau diupload
         panjang: editingItem?.panjang ?? '',
         lebar: editingItem?.lebar ?? '',
     });
@@ -30,11 +32,32 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
     const [provinsiId, setProvinsiId] = useState('');
     const [kabupatenId, setKabupatenId] = useState('');
 
+    // Foto lahan yang sudah ada sebelumnya (mode edit) — ditampilkan
+    // sebagai info, bukan file baru yang diupload ulang.
+    const [existingFotoLahan] = useState(() => {
+        if (!editingItem?.foto_lahan) return [];
+        return Array.isArray(editingItem.foto_lahan) ? editingItem.foto_lahan : [editingItem.foto_lahan];
+    });
+
+    // Foto baru yang dipilih user (belum diupload, masih di browser).
+    const [fotoLahanFiles, setFotoLahanFiles] = useState([]);
+    const [fotoLahanPreviews, setFotoLahanPreviews] = useState([]);
+    const [fotoLahanError, setFotoLahanError] = useState('');
+    const fotoLahanInputRef = useRef(null);
+
     useEffect(() => {
         fetch('/api/wilayah/provinces')
             .then((res) => res.json())
             .then(setDaftarProvinsi)
             .catch(() => setDaftarProvinsi([]));
+    }, []);
+
+    // Bersihkan object URL preview supaya tidak bocor memori.
+    useEffect(() => {
+        return () => {
+            fotoLahanPreviews.forEach((url) => URL.revokeObjectURL(url));
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     function handleProvinsiChange(e) {
@@ -74,15 +97,55 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
         setData('kecamatan', nama);
     }
 
+    function handleFotoLahanChange(e) {
+        const filesDipilih = Array.from(e.target.files || []);
+        e.target.value = ''; // supaya bisa pilih file yang sama lagi kalau perlu
+
+        if (!filesDipilih.length) return;
+
+        setFotoLahanError('');
+
+        const hanyaGambar = filesDipilih.filter((file) => file.type.startsWith('image/'));
+        if (hanyaGambar.length !== filesDipilih.length) {
+            setFotoLahanError('Hanya file gambar (JPG/PNG) yang bisa diupload.');
+        }
+
+        const maksUkuran = 5 * 1024 * 1024; // 5MB per foto
+        const ukuranAman = hanyaGambar.filter((file) => file.size <= maksUkuran);
+        if (ukuranAman.length !== hanyaGambar.length) {
+            setFotoLahanError('Ada foto yang ukurannya lebih dari 5MB, foto itu dilewati.');
+        }
+
+        const gabungan = [...fotoLahanFiles, ...ukuranAman].slice(0, MAKS_FOTO);
+        setFotoLahanFiles(gabungan);
+        setData('foto_lahan', gabungan);
+
+        fotoLahanPreviews.forEach((url) => URL.revokeObjectURL(url));
+        setFotoLahanPreviews(gabungan.map((file) => URL.createObjectURL(file)));
+    }
+
+    function handleHapusFotoLahan(index) {
+        const gabungan = fotoLahanFiles.filter((_, i) => i !== index);
+        setFotoLahanFiles(gabungan);
+        setData('foto_lahan', gabungan);
+
+        setFotoLahanPreviews((prev) => {
+            URL.revokeObjectURL(prev[index]);
+            return prev.filter((_, i) => i !== index);
+        });
+    }
+
     const submit = (e) => {
         e.preventDefault();
 
         if (editingItem) {
             router.post(`/mitra/layanan/${editingItem.id}`, { ...data, _method: 'put' }, {
+                forceFormData: true,
                 onSuccess: onSukses,
             });
         } else {
             post('/mitra/layanan', {
+                forceFormData: true,
                 onSuccess: onSukses,
             });
         }
@@ -92,10 +155,7 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
         <div className="flex min-h-dvh flex-col bg-white">
             <Head title="Alamat Lahan Parkir" />
 
-            <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
-                <button type="button" onClick={onBatal} className="text-gray-500 hover:text-gray-700">
-                    <ChevronLeft size={20} />
-                </button>
+            <div className="border-b border-gray-100 px-4 py-3">
                 <h1 className="text-base font-semibold text-gray-900">Alamat Lahan Parkir</h1>
             </div>
 
@@ -207,14 +267,66 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Foto Lahan</label>
-                    <p className="text-xs text-gray-400">Sertakan Foto Lahan dari depan, belakang, samping Kiri dan Kanan</p>
-                    <textarea
-                        rows={2}
-                        placeholder="Link Drive"
-                        value={data.foto_lahan}
-                        onChange={(e) => setData('foto_lahan', e.target.value)}
-                        className={inputClass(errors.foto_lahan)}
+                    <p className="text-xs text-gray-400">
+                        Sertakan Foto Lahan dari depan, belakang, samping Kiri dan Kanan (maks. {MAKS_FOTO} foto, JPG/PNG, maks. 5MB per foto)
+                    </p>
+
+                    {existingFotoLahan.length > 0 && (
+                        <div className="mt-2">
+                            <p className="mb-1 text-xs text-gray-500">Foto yang sudah tersimpan:</p>
+                            <div className="flex flex-wrap gap-2">
+                                {existingFotoLahan.map((url, i) => (
+                                    <img
+                                        key={i}
+                                        src={url}
+                                        alt={`Foto lahan lama ${i + 1}`}
+                                        className="h-16 w-16 rounded-lg border border-gray-200 object-cover"
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        {fotoLahanPreviews.map((src, i) => (
+                            <div key={i} className="relative h-20 w-20">
+                                <img
+                                    src={src}
+                                    alt={`Foto lahan baru ${i + 1}`}
+                                    className="h-20 w-20 rounded-lg border border-gray-200 object-cover"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => handleHapusFotoLahan(i)}
+                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-white shadow"
+                                >
+                                    <X size={12} />
+                                </button>
+                            </div>
+                        ))}
+
+                        {fotoLahanPreviews.length < MAKS_FOTO && (
+                            <button
+                                type="button"
+                                onClick={() => fotoLahanInputRef.current?.click()}
+                                className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 transition hover:border-green-500 hover:text-green-600"
+                            >
+                                <ImagePlus size={20} />
+                                <span className="text-[10px]">Tambah</span>
+                            </button>
+                        )}
+                    </div>
+
+                    <input
+                        ref={fotoLahanInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFotoLahanChange}
+                        className="hidden"
                     />
+
+                    {fotoLahanError && <p className="mt-1 text-xs text-red-600">{fotoLahanError}</p>}
                     {errors.foto_lahan && <p className="mt-1 text-xs text-red-600">{errors.foto_lahan}</p>}
                 </div>
 
