@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { MapPin, Clock, Star } from 'lucide-react';
+import { MapPin, Star } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import JadwalOperasional from '@/Components/JadwalOperasional';
 

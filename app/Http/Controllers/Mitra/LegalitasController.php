@@ -15,6 +15,7 @@ class LegalitasController extends Controller
 {
     public function edit(): Response
     {
+        /** @var \App\Models\User $partner */
         $partner = Auth::user();
 
         return Inertia::render('Mitra/Legalitas/Index', [
@@ -32,13 +33,14 @@ class LegalitasController extends Controller
 
     public function storeKtp(Request $request): RedirectResponse
     {
+        /** @var \App\Models\User $partner */
         $partner = Auth::user();
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female'],
             'birth_date' => ['required', 'date'],
-            'nik' => ['required', 'digits:16', 'unique:users,nik,'.$partner->id],
+            'nik' => ['required', 'digits:16', 'unique:users,nik,' . $partner->id],
             'foto_ktp' => ['nullable', 'image', 'max:2048'],
         ], [
             'nik.digits' => 'NIK harus 16 digit.',
@@ -54,16 +56,26 @@ class LegalitasController extends Controller
             $validated['foto_ktp'] = $request->file('foto_ktp')->store('ktp', 'public');
         }
 
-        $partner->update([
-            ...$validated,
+        $updateData = [
+            'name' => $validated['name'],
+            'gender' => $validated['gender'],
+            'birth_date' => $validated['birth_date'],
+            'nik' => $validated['nik'],
             'verification_status' => 'verifikasi_akun',
-        ]);
+        ];
+
+        if (isset($validated['foto_ktp'])) {
+            $updateData['foto_ktp'] = $validated['foto_ktp'];
+        }
+
+        $partner->update($updateData);
 
         return back()->with('success', 'Data KTP berhasil dikirim.');
     }
 
-        public function storePin(Request $request): RedirectResponse
+    public function storePin(Request $request): RedirectResponse
     {
+        /** @var \App\Models\User $partner */
         $partner = Auth::user();
 
         $validated = $request->validate([
