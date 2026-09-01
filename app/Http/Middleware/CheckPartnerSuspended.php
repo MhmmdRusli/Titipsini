@@ -11,6 +11,12 @@ class CheckPartnerSuspended
     {
         $user = $request->user();
 
+        if ($user && $user->role === 'partner') {
+            // Pastikan data mitra selalu fresh dari DB, bukan cached di session.
+            // Ini agar perubahan verifikasi admin langsung terlihat tanpa logout/login ulang.
+            $user->refresh();
+        }
+
         // Jika user adalah partner dan memiliki tanggal penangguhan (suspended_at)
         if ($user && $user->role === 'partner' && $user->suspended_at) {
             // Izinkan mereka mengakses halaman peringatan dan rute pemulihan/logout agar tidak infinite redirect
