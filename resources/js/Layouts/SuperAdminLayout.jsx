@@ -4,14 +4,29 @@ import {
     MapPin, LayoutDashboard, Users, Package, ClipboardList, Undo2,
     Wallet, ArrowLeftRight, FileBarChart, Settings, ShieldCheck,
     LogOut, ChevronDown, Clock, Calendar, Sun, Cloud, CloudRain,
-    CloudFog, CloudLightning, CloudSnow, Moon, AlertCircle, X
+    CloudFog, CloudLightning, CloudSnow, Moon, AlertCircle, X, Plus
 } from 'lucide-react';
 
 // Menu Super Admin — sesuai struktur sidebar yang dipakai.
 const navItems = [
     { label: 'Kota', href: '/super-admin/kota', icon: MapPin },
     { label: 'Dashboard', href: '/super-admin/dashboard', icon: LayoutDashboard },
-    { label: 'User', href: '/super-admin/user', icon: Users },
+    {
+        label: 'User',
+        href: '/super-admin/user',
+        icon: Users,
+        children: [
+            { label: 'Customer', href: '/super-admin/user/customer' },
+            { label: 'Vendor', href: '/super-admin/user/vendor' },
+            { label: 'Finance', href: '/super-admin/user/finance' },
+            { label: 'Admin', href: '/super-admin/user/admin' },
+            // "Tambah Akun" ditandai isAction supaya tampil beda (ikon +,
+            // latar menonjol) dibanding sub-menu daftar role di atasnya —
+            // sesuai mockup dimana item ini terlihat seperti tombol, bukan
+            // item navigasi biasa.
+            { label: 'Tambah Akun', href: '/super-admin/user/tambah', isAction: true },
+        ],
+    },
     { label: 'Layanan', href: '/super-admin/layanan', icon: Package },
     { label: 'Pesanan', href: '/super-admin/pesanan', icon: ClipboardList },
     { label: 'Pengembalian Dana', href: '/super-admin/pengembalian-dana', icon: Undo2 },
@@ -234,16 +249,34 @@ export default function SuperAdminLayout({ children, title }) {
                                     <div className="mt-1 ml-4 space-y-1 border-l border-white/15 pl-4">
                                         {subItems.map((sub) => {
                                             const subActive = url.startsWith(sub.href);
+
+                                            // "Tambah Akun" (isAction) tampil sebagai tombol
+                                            // menonjol dengan ikon +, terpisah secara visual
+                                            // dari daftar role Customer/Vendor/Finance/Admin.
+                                            if (sub.isAction) {
+                                                return (
+                                                    <Link
+                                                        key={sub.href}
+                                                        href={sub.href}
+                                                        className="mt-2 flex items-center gap-2 rounded-lg bg-emerald-500/15 px-3 py-2 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/25 hover:text-white"
+                                                    >
+                                                        <Plus size={14} />
+                                                        {sub.label}
+                                                    </Link>
+                                                );
+                                            }
+
                                             return (
                                                 <Link
                                                     key={sub.href}
                                                     href={sub.href}
-                                                    className={`block rounded-lg px-3 py-2 text-xs transition-colors ${
+                                                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors ${
                                                         subActive
                                                             ? 'font-bold text-[#fbbf24] bg-white/10'
                                                             : 'text-emerald-100/70 hover:text-white hover:bg-white/5'
                                                     }`}
                                                 >
+                                                    <span className="text-emerald-200/50">—</span>
                                                     {sub.label}
                                                 </Link>
                                             );
