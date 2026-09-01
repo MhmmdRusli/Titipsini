@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { ChevronRight, Eye, EyeOff, Lock, KeyRound } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
@@ -60,8 +60,16 @@ export default function Keamanan() {
 
     const onlyDigits = (setter) => (v) => setter(v.replace(/\D/g, '').slice(0, 6));
 
+    const sectionTitles = {
+        password: 'Ubah Kata Sandi',
+        pin: 'PIN Keamanan',
+    };
+
     return (
-        <MitraLayout title="Keamanan">
+        <MitraLayout
+            title={activeSection ? sectionTitles[activeSection] : 'Keamanan'}
+            onBack={activeSection ? () => setActiveSection(null) : () => router.visit('/mitra/profil')}
+        >
             <Head title="Keamanan" />
 
             <div className="px-4 py-3 space-y-4">
@@ -93,148 +101,148 @@ export default function Keamanan() {
                 )}
 
                 {activeSection === 'password' && (
-                <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <h2 className="text-sm font-semibold text-gray-900">Ubah Kata Sandi</h2>
-                    <p className="mt-1 text-xs text-gray-500">
-                        Pastikan kata sandi baru kamu berbeda dari sebelumnya.
-                    </p>
+                    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                        <h2 className="text-sm font-semibold text-gray-900">Ubah Kata Sandi</h2>
+                        <p className="mt-1 text-xs text-gray-500">
+                            Pastikan kata sandi baru kamu berbeda dari sebelumnya.
+                        </p>
 
-                    <form onSubmit={submit} className="mt-4 space-y-4" autoComplete="off">
-                        <Field label="Kata Sandi Lama" error={errors.password_lama}>
-                            <PasswordInput
-                                name="f_pw_old_mitra"
-                                value={data.password_lama}
-                                onChange={(v) => setData('password_lama', v)}
-                                show={showOld}
-                                onToggle={() => setShowOld((s) => !s)}
-                            />
-                        </Field>
+                        <form onSubmit={submit} className="mt-4 space-y-4" autoComplete="off">
+                            <Field label="Kata Sandi Lama" error={errors.password_lama}>
+                                <PasswordInput
+                                    name="f_pw_old_mitra"
+                                    value={data.password_lama}
+                                    onChange={(v) => setData('password_lama', v)}
+                                    show={showOld}
+                                    onToggle={() => setShowOld((s) => !s)}
+                                />
+                            </Field>
 
-                        <Field label="Kata Sandi Baru" error={errors.password_baru}>
-                            <PasswordInput
-                                name="f_pw_new_mitra"
-                                value={data.password_baru}
-                                onChange={(v) => setData('password_baru', v)}
-                                show={showNew}
-                                onToggle={() => setShowNew((s) => !s)}
-                            />
-                        </Field>
+                            <Field label="Kata Sandi Baru" error={errors.password_baru}>
+                                <PasswordInput
+                                    name="f_pw_new_mitra"
+                                    value={data.password_baru}
+                                    onChange={(v) => setData('password_baru', v)}
+                                    show={showNew}
+                                    onToggle={() => setShowNew((s) => !s)}
+                                />
+                            </Field>
 
-                        <Field
-                            label="Konfirmasi Kata Sandi Baru"
-                            error={errors.password_baru_confirmation}
-                        >
-                            <PasswordInput
-                                name="f_pw_confirm_mitra"
-                                value={data.password_baru_confirmation}
-                                onChange={(v) => setData('password_baru_confirmation', v)}
-                                show={showConfirm}
-                                onToggle={() => setShowConfirm((s) => !s)}
-                            />
-                        </Field>
+                            <Field
+                                label="Konfirmasi Kata Sandi Baru"
+                                error={errors.password_baru_confirmation}
+                            >
+                                <PasswordInput
+                                    name="f_pw_confirm_mitra"
+                                    value={data.password_baru_confirmation}
+                                    onChange={(v) => setData('password_baru_confirmation', v)}
+                                    show={showConfirm}
+                                    onToggle={() => setShowConfirm((s) => !s)}
+                                />
+                            </Field>
 
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
-                        >
-                            {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
-                        </button>
-                    </form>
-                </div>
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                            >
+                                {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
+                            </button>
+                        </form>
+                    </div>
                 )}
 
                 {/* PIN Keamanan — baru */}
                 {activeSection === 'pin' && (
-                <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
-                                <Lock size={14} className="text-green-600" />
-                                PIN Keamanan
-                            </h2>
-                            <p className="mt-1 text-xs text-gray-500">
-                                PIN dipakai untuk verifikasi setiap kali kamu menarik saldo.
-                            </p>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => setPinMode((m) => (m === 'ubah' ? 'lupa' : 'ubah'))}
-                            className="shrink-0 text-xs font-semibold text-green-700 hover:underline"
-                        >
-                            {pinMode === 'ubah' ? 'Lupa PIN?' : 'Batal'}
-                        </button>
-                    </div>
-
-                    {pinMode === 'ubah' ? (
-                        <form onSubmit={submitUbahPin} className="mt-4 space-y-4" autoComplete="off">
-                            <Field label="PIN Lama" error={pinForm.errors.pin_lama}>
-                                <PinInput
-                                    value={pinForm.data.pin_lama}
-                                    onChange={onlyDigits((v) => pinForm.setData('pin_lama', v))}
-                                />
-                            </Field>
-                            <Field label="PIN Baru" error={pinForm.errors.pin_baru}>
-                                <PinInput
-                                    value={pinForm.data.pin_baru}
-                                    onChange={onlyDigits((v) => pinForm.setData('pin_baru', v))}
-                                />
-                            </Field>
-                            <Field label="Konfirmasi PIN Baru" error={pinForm.errors.pin_baru_confirmation}>
-                                <PinInput
-                                    value={pinForm.data.pin_baru_confirmation}
-                                    onChange={onlyDigits((v) => pinForm.setData('pin_baru_confirmation', v))}
-                                />
-                            </Field>
-
-                            <button
-                                type="submit"
-                                disabled={pinForm.processing}
-                                className="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
-                            >
-                                {pinForm.processing ? 'Menyimpan...' : 'Simpan PIN Baru'}
-                            </button>
-                        </form>
-                    ) : (
-                        <form onSubmit={submitLupaPin} className="mt-4 space-y-4" autoComplete="off">
-                            <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
-                                <KeyRound size={14} className="mt-0.5 shrink-0" />
-                                <p>Masukkan kata sandi akun kamu untuk verifikasi, lalu buat PIN baru.</p>
+                    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
+                                    <Lock size={14} className="text-green-600" />
+                                    PIN Keamanan
+                                </h2>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    PIN dipakai untuk verifikasi setiap kali kamu menarik saldo.
+                                </p>
                             </div>
-
-                            <Field label="Kata Sandi Akun" error={lupaPinForm.errors.password}>
-                                <PasswordInput
-                                    name="f_pw_verify_pin"
-                                    value={lupaPinForm.data.password}
-                                    onChange={(v) => lupaPinForm.setData('password', v)}
-                                    show={false}
-                                    onToggle={() => {}}
-                                    hideToggle
-                                />
-                            </Field>
-                            <Field label="PIN Baru" error={lupaPinForm.errors.pin_baru}>
-                                <PinInput
-                                    value={lupaPinForm.data.pin_baru}
-                                    onChange={onlyDigits((v) => lupaPinForm.setData('pin_baru', v))}
-                                />
-                            </Field>
-                            <Field label="Konfirmasi PIN Baru" error={lupaPinForm.errors.pin_baru_confirmation}>
-                                <PinInput
-                                    value={lupaPinForm.data.pin_baru_confirmation}
-                                    onChange={onlyDigits((v) => lupaPinForm.setData('pin_baru_confirmation', v))}
-                                />
-                            </Field>
-
                             <button
-                                type="submit"
-                                disabled={lupaPinForm.processing}
-                                className="w-full rounded-xl bg-amber-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
+                                type="button"
+                                onClick={() => setPinMode((m) => (m === 'ubah' ? 'lupa' : 'ubah'))}
+                                className="shrink-0 text-xs font-semibold text-green-700 hover:underline"
                             >
-                                {lupaPinForm.processing ? 'Memverifikasi...' : 'Buat PIN Baru'}
+                                {pinMode === 'ubah' ? 'Lupa PIN?' : 'Batal'}
                             </button>
-                        </form>
-                    )}
-                </div>
+                        </div>
+
+                        {pinMode === 'ubah' ? (
+                            <form onSubmit={submitUbahPin} className="mt-4 space-y-4" autoComplete="off">
+                                <Field label="PIN Lama" error={pinForm.errors.pin_lama}>
+                                    <PinInput
+                                        value={pinForm.data.pin_lama}
+                                        onChange={onlyDigits((v) => pinForm.setData('pin_lama', v))}
+                                    />
+                                </Field>
+                                <Field label="PIN Baru" error={pinForm.errors.pin_baru}>
+                                    <PinInput
+                                        value={pinForm.data.pin_baru}
+                                        onChange={onlyDigits((v) => pinForm.setData('pin_baru', v))}
+                                    />
+                                </Field>
+                                <Field label="Konfirmasi PIN Baru" error={pinForm.errors.pin_baru_confirmation}>
+                                    <PinInput
+                                        value={pinForm.data.pin_baru_confirmation}
+                                        onChange={onlyDigits((v) => pinForm.setData('pin_baru_confirmation', v))}
+                                    />
+                                </Field>
+
+                                <button
+                                    type="submit"
+                                    disabled={pinForm.processing}
+                                    className="w-full rounded-xl bg-green-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                                >
+                                    {pinForm.processing ? 'Menyimpan...' : 'Simpan PIN Baru'}
+                                </button>
+                            </form>
+                        ) : (
+                            <form onSubmit={submitLupaPin} className="mt-4 space-y-4" autoComplete="off">
+                                <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
+                                    <KeyRound size={14} className="mt-0.5 shrink-0" />
+                                    <p>Masukkan kata sandi akun kamu untuk verifikasi, lalu buat PIN baru.</p>
+                                </div>
+
+                                <Field label="Kata Sandi Akun" error={lupaPinForm.errors.password}>
+                                    <PasswordInput
+                                        name="f_pw_verify_pin"
+                                        value={lupaPinForm.data.password}
+                                        onChange={(v) => lupaPinForm.setData('password', v)}
+                                        show={false}
+                                        onToggle={() => { }}
+                                        hideToggle
+                                    />
+                                </Field>
+                                <Field label="PIN Baru" error={lupaPinForm.errors.pin_baru}>
+                                    <PinInput
+                                        value={lupaPinForm.data.pin_baru}
+                                        onChange={onlyDigits((v) => lupaPinForm.setData('pin_baru', v))}
+                                    />
+                                </Field>
+                                <Field label="Konfirmasi PIN Baru" error={lupaPinForm.errors.pin_baru_confirmation}>
+                                    <PinInput
+                                        value={lupaPinForm.data.pin_baru_confirmation}
+                                        onChange={onlyDigits((v) => lupaPinForm.setData('pin_baru_confirmation', v))}
+                                    />
+                                </Field>
+
+                                <button
+                                    type="submit"
+                                    disabled={lupaPinForm.processing}
+                                    className="w-full rounded-xl bg-amber-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
+                                >
+                                    {lupaPinForm.processing ? 'Memverifikasi...' : 'Buat PIN Baru'}
+                                </button>
+                            </form>
+                        )}
+                    </div>
                 )}
             </div>
         </MitraLayout>
