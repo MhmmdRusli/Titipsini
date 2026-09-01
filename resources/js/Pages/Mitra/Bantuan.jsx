@@ -1,134 +1,110 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import { ChevronLeft, ChevronDown, MessageCircle, Mail } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
-const faqs = [
-    {
-        q: 'Bagaimana cara menarik pendapatan saya?',
-        a: 'Buka menu Profil > Penarikan, masukkan nominal yang ingin ditarik, lalu pilih rekening tujuan yang sudah terdaftar.',
-    },
-    {
-        q: 'Kenapa akun saya belum terverifikasi?',
-        a: 'Proses verifikasi biasanya memakan waktu 1x24 jam setelah kamu melengkapi seluruh data dan dokumen yang diminta.',
-    },
-    {
-        q: 'Bagaimana cara mengubah jam operasional?',
-        a: 'Buka menu Profil > Jam Operasional, atur jam buka dan tutup untuk setiap hari sesuai kebutuhan kamu.',
-    },
-    {
-        q: 'Saya lupa kata sandi, apa yang harus dilakukan?',
-        a: 'Klik "Lupa kata sandi?" di halaman login, lalu ikuti instruksi yang dikirimkan ke email kamu.',
-    },
-];
+const FEEDBACK_KEY_PREFIX = 'bantuan_feedback_';
 
-export default function Bantuan() {
-    const [openIndex, setOpenIndex] = useState(null);
+export default function Bantuan({ faqs = [] }) {
+    const [selected, setSelected] = useState(null);
+    const [feedback, setFeedback] = useState(null);
+
+    function openFaq(faq) {
+        setSelected(faq);
+        try {
+            setFeedback(localStorage.getItem(`${FEEDBACK_KEY_PREFIX}${faq.id}`));
+        } catch {
+            setFeedback(null);
+        }
+    }
+
+    function submitFeedback(value) {
+        setFeedback(value);
+        try {
+            localStorage.setItem(`${FEEDBACK_KEY_PREFIX}${selected.id}`, value);
+        } catch {
+            // localStorage tidak tersedia
+        }
+    }
+
+    function handleBack() {
+        if (selected) {
+            setSelected(null);
+            setFeedback(null);
+        } else {
+            window.history.back();
+        }
+    }
 
     return (
         <MitraLayout title="Pusat Bantuan">
             <Head title="Pusat Bantuan" />
 
-            <div className="max-w-xl mx-auto px-4 py-5 space-y-4">
-                {/* Tombol Kembali Saja (Judul di sampingnya dihapus) */}
-                <div>
+            <div className="mx-auto max-w-xl px-4 py-4">
+                {selected && (
                     <button
                         type="button"
-                        onClick={() => window.history.back()}
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900"
+                        onClick={handleBack}
+                        className="mb-4 inline-flex items-center gap-1 text-gray-800"
                     >
-                        <ChevronLeft size={18} />
-                        Kembali
+                        <ChevronLeft size={22} />
+                        <span className="text-lg font-semibold">Pusat Bantuan</span>
                     </button>
-                </div>
+                )}
 
-                {/* FAQ Section */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-600">
-                            FAQ (Pertanyaan Umum)
-                        </h2>
+                {!selected ? (
+                    <div className="space-y-3">
+                        {faqs.length === 0 && (
+                            <p className="py-8 text-center text-sm text-gray-400">
+                                Belum ada pertanyaan yang tersedia.
+                            </p>
+                        )}
+                        {faqs.map((faq) => (
+                            <button
+                                key={faq.id}
+                                type="button"
+                                onClick={() => openFaq(faq)}
+                                className="w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3.5 text-left text-sm text-gray-800 hover:bg-gray-100 transition-colors"
+                            >
+                                {faq.pertanyaan}
+                            </button>
+                        ))}
                     </div>
+                ) : (
+                    <div>
+                        <div className="space-y-3 text-sm leading-relaxed text-gray-700">
+                            {selected.jawaban.split('\n').filter(Boolean).map((paragraf, i) => (
+                                <p key={i}>{paragraf}</p>
+                            ))}
+                        </div>
 
-                    <div className="divide-y divide-gray-100 px-4">
-                        {faqs.map((faq, i) => {
-                            const isOpen = openIndex === i;
-                            return (
-                                <div key={faq.q} className="py-3.5">
+                        <div className="mt-6 rounded-xl bg-emerald-50 p-4">
+                            <p className="mb-3 text-sm font-semibold text-gray-900">Apakah ini membantu?</p>
+                            {feedback ? (
+                                <p className="rounded-lg bg-white px-4 py-2.5 text-center text-sm font-medium text-emerald-700">
+                                    Terima kasih atas tanggapanmu!
+                                </p>
+                            ) : (
+                                <div className="flex gap-3">
                                     <button
                                         type="button"
-                                        onClick={() => setOpenIndex(isOpen ? null : i)}
-                                        className="flex w-full items-center justify-between text-left group"
+                                        onClick={() => submitFeedback('ya')}
+                                        className="flex-1 rounded-lg border border-gray-200 bg-white py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                                     >
-                                        <span className="text-sm font-semibold text-gray-800 group-hover:text-emerald-600 transition-colors pr-3">
-                                            {faq.q}
-                                        </span>
-                                        <ChevronDown
-                                            size={16}
-                                            className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                                                isOpen ? 'rotate-180 text-emerald-600' : ''
-                                            }`}
-                                        />
+                                        YA
                                     </button>
-                                    {isOpen && (
-                                        <p className="mt-2.5 text-sm text-gray-600 leading-relaxed bg-gray-50/70 p-3 rounded-lg border border-gray-100">
-                                            {faq.a}
-                                        </p>
-                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => submitFeedback('tidak')}
+                                        className="flex-1 rounded-lg border border-gray-200 bg-white py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                    >
+                                        TIDAK
+                                    </button>
                                 </div>
-                            );
-                        })}
+                            )}
+                        </div>
                     </div>
-                </div>
-
-                {/* Hubungi Kami Section */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-600">
-                            Layanan Dukungan
-                        </h2>
-                    </div>
-
-                    <div className="p-4 space-y-2.5">
-                        <a
-                            href="https://wa.me/6285643333061"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between rounded-lg border border-gray-200 bg-white hover:bg-gray-50 px-4 py-3 transition-colors shadow-2xs"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
-                                    <MessageCircle size={18} />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-gray-800">WhatsApp Support</p>
-                                    <p className="text-xs text-gray-500">0856-4333-3061</p>
-                                </div>
-                            </div>
-                            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">
-                                Chat
-                            </span>
-                        </a>
-
-                        <a
-                            href="mailto:support@titipsini.com"
-                            className="flex items-center justify-between rounded-lg border border-gray-200 bg-white hover:bg-gray-50 px-4 py-3 transition-colors shadow-2xs"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gray-100 text-gray-700">
-                                    <Mail size={18} />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-gray-800">Email Resmi</p>
-                                    <p className="text-xs text-gray-500">support@titipsini.com</p>
-                                </div>
-                            </div>
-                            <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2.5 py-1 rounded-md">
-                                Kirim Email
-                            </span>
-                        </a>
-                    </div>
-                </div>
+                )}
             </div>
         </MitraLayout>
     );

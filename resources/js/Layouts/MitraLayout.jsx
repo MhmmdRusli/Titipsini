@@ -122,7 +122,7 @@ export default function MitraLayout({ children, title }) {
                     </div>
                 )}
 
-                <main className="flex-1 overflow-y-auto pb-20">{children}</main>
+                <main className="flex-1 overflow-y-auto pb-28">{children}</main>
 
                 <nav
                     className="absolute inset-x-0 bottom-0 z-10 flex justify-around border-t border-gray-200 bg-white py-2"
