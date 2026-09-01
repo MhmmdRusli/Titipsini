@@ -27,7 +27,7 @@ export default function Keamanan() {
     // Ganti PIN — 2 mode: 'ubah' (masih ingat PIN lama) atau 'lupa' (verifikasi pakai password)
     const [pinMode, setPinMode] = useState('ubah');
 
-    const pinForm = useForm({
+    const pinForm = useForm({   
         pin_lama: '',
         pin_baru: '',
         pin_baru_confirmation: '',
