@@ -39,9 +39,8 @@ function Toast({ type, message, onClose }) {
 
     return (
         <div
-            className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 shadow-lg ${
-                isSuccess ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
-            }`}
+            className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 shadow-lg ${isSuccess ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                }`}
         >
             {isSuccess ? (
                 <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-green-600" />
@@ -56,7 +55,7 @@ function Toast({ type, message, onClose }) {
     );
 }
 
-export default function MitraLayout({ children, title }) {
+export default function MitraLayout({ children, title, hideBack = false, onBack }) {
     const { url, props } = usePage();
     const [toast, setToast] = useState(null);
     const pathname = url.split('?')[0];
@@ -67,6 +66,7 @@ export default function MitraLayout({ children, title }) {
     const hideBackButton = ['/mitra/pesanan', '/mitra/notifikasi', '/mitra/profil'].includes(pathname);
     const centerNavbarTitle = ['/mitra/pesanan', '/mitra/notifikasi', '/mitra/profil'].includes(pathname);
     const navbarTitle = title || (isDashboard ? 'Titipsini.com' : matchedTitle || 'Mitra');
+    const showBackButton = !isDashboard && !hideBackButton && !hideBack;
 
     useEffect(() => {
         if (props.flash?.success) {
@@ -84,10 +84,10 @@ export default function MitraLayout({ children, title }) {
                         className="flex min-h-14 items-center px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
                     >
-                        {!isDashboard && !hideBackButton && (
+                        {showBackButton && (
                             <button
                                 type="button"
-                                onClick={() => window.history.back()}
+                                onClick={onBack || (() => window.history.back())}
                                 aria-label="Kembali ke halaman sebelumnya"
                                 className="mr-3 flex shrink-0 items-center text-gray-600 hover:text-gray-900"
                             >
@@ -130,17 +130,16 @@ export default function MitraLayout({ children, title }) {
                 >
                     {navItems.map(({ label, href, icon: Icon }) => {
                         // Memperbaiki logika active agar tidak bentrok dengan rute lain (seperti /mitra/profil)
-                        const active = href === '/mitra/dashboard' 
-                            ? url === '/mitra/dashboard' 
+                        const active = href === '/mitra/dashboard'
+                            ? url === '/mitra/dashboard'
                             : url === href || url.startsWith(href + '/');
 
                         return (
                             <Link
                                 key={href}
                                 href={href}
-                                className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${
-                                    active ? 'text-green-600' : 'text-gray-500'
-                                }`}
+                                className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${active ? 'text-green-600' : 'text-gray-500'
+                                    }`}
                             >
                                 <Icon size={20} />
                                 {label}
