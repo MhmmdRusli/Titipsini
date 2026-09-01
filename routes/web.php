@@ -59,6 +59,7 @@ use App\Http\Controllers\Mitra\RekeningController;
 use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\SuperAdmin\UserController as SuperAdminUserController;
+use App\Http\Controllers\SuperAdmin\KotaController as SuperAdminKotaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -500,4 +501,10 @@ Route::prefix('super-admin/user')->name('super-admin.user.')->middleware(['auth'
 
     Route::get('/tambah', [SuperAdminUserController::class, 'create'])->name('create');
     Route::post('/tambah', [SuperAdminUserController::class, 'store'])->name('store');
+});
+Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
+
+    Route::resource('kota', SuperAdminKotaController::class)->except(['show', 'create', 'edit']);
+
+    // ... route User (customer/vendor/finance/admin/tambah) yang sudah ada
 });
