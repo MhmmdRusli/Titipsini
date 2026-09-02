@@ -189,6 +189,7 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/pengembalian-dana', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'index'])->name('pengembalian-dana.index');
     Route::get('/penarikan-saldo', [\App\Http\Controllers\SuperAdmin\PenarikanSaldoController::class, 'index'])->name('penarikan-saldo.index');
+    Route::get('/total-transaksi', [\App\Http\Controllers\SuperAdmin\TotalTransaksiController::class, 'index'])->name('total-transaksi.index');
 });
 
 /*
