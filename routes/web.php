@@ -192,6 +192,11 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::get('/total-transaksi', [\App\Http\Controllers\SuperAdmin\TotalTransaksiController::class, 'index'])->name('total-transaksi.index');
     Route::get('/laporan', [\App\Http\Controllers\SuperAdmin\LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/{report}', [\App\Http\Controllers\SuperAdmin\LaporanController::class, 'show'])->name('laporan.show');
+    
+    Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
+        Route::get('/keamanan', [\App\Http\Controllers\SuperAdmin\PengaturanKeamananController::class, 'index'])->name('keamanan.index');
+        Route::put('/keamanan', [\App\Http\Controllers\SuperAdmin\PengaturanKeamananController::class, 'update'])->name('keamanan.update');
+    });
 });
 
 /*
