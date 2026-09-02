@@ -188,6 +188,7 @@ Route::middleware(['auth', 'role:finance,super_admin'])->prefix('finance')->name
 Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
     Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/pengembalian-dana', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'index'])->name('pengembalian-dana.index');
+    Route::get('/penarikan-saldo', [\App\Http\Controllers\SuperAdmin\PenarikanSaldoController::class, 'index'])->name('penarikan-saldo.index');
 });
 
 /*
