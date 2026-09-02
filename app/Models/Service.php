@@ -80,4 +80,8 @@ class Service extends Model
             && $this->vendor->verification_status === 'terverifikasi'
             && ! empty($this->vendor->jadwal_operasional);
     }
+    public function user()
+{
+    return $this->belongsTo(\App\Models\User::class);
+}
 }

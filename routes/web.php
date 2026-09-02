@@ -59,6 +59,9 @@ use App\Http\Controllers\Mitra\RekeningController;
 use App\Http\Controllers\Mitra\ServiceController as MitraServiceController;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\SuperAdmin\UserController as SuperAdminUserController;
+use App\Http\Controllers\SuperAdmin\KotaController as SuperAdminKotaController;
+use App\Http\Controllers\SuperAdmin\ServiceController as SuperAdminServiceController;
+use App\Http\Controllers\SuperAdmin\OrderController as SuperAdminOrderController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -479,6 +482,27 @@ Route::middleware(['auth', 'role:customer'])->prefix('buat-pin')->name('customer
     Route::get('/', [PinController::class, 'create'])->name('create');
     Route::post('/', [PinController::class, 'store'])->name('store');
 });
+/*
+|--------------------------------------------------------------------------
+| Super Admin routes -> /super-admin/* (role: super_admin)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
+    Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('kota', SuperAdminKotaController::class)->except(['show', 'create', 'edit']);
+
+    Route::get('/layanan', [SuperAdminServiceController::class, 'index'])->name('layanan.index');
+    Route::get('/layanan/{layanan}', [SuperAdminServiceController::class, 'show'])->name('layanan.show');
+    Route::patch('/layanan/{layanan}/status', [SuperAdminServiceController::class, 'updateStatus'])->name('layanan.updateStatus');
+    Route::patch('/layanan/{layanan}/toggle-active', [SuperAdminServiceController::class, 'toggleActive'])->name('layanan.toggleActive');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Super Admin - User routes -> /super-admin/user/* (role: super_admin)
+|--------------------------------------------------------------------------
+*/
 Route::prefix('super-admin/user')->name('super-admin.user.')->middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/customer', [SuperAdminUserController::class, 'customerIndex'])->name('customer.index');
     Route::get('/customer/{user}', [SuperAdminUserController::class, 'customerShow'])->name('customer.show');
@@ -500,4 +524,18 @@ Route::prefix('super-admin/user')->name('super-admin.user.')->middleware(['auth'
 
     Route::get('/tambah', [SuperAdminUserController::class, 'create'])->name('create');
     Route::post('/tambah', [SuperAdminUserController::class, 'store'])->name('store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Super Admin - Pesanan routes -> /super-admin/pesanan/* (role: super_admin)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('super-admin/pesanan')->name('super-admin.pesanan.')->middleware(['auth', 'role:super_admin'])->group(function () {
+    Route::get('/', [SuperAdminOrderController::class, 'index'])->name('index');
+    Route::patch('/{order}/status', [SuperAdminOrderController::class, 'updateStatus'])->name('updateStatus');
+    Route::patch('/{order}/approve-denda', [SuperAdminOrderController::class, 'approveDenda'])->name('approveDenda');
+    Route::post('/{order}/konfirmasi-cash', [SuperAdminOrderController::class, 'confirmCashPayment'])->name('konfirmasiCash');
+    Route::delete('/bulk-delete', [SuperAdminOrderController::class, 'bulkDestroy'])->name('bulkDestroy');
+    Route::delete('/{order}', [SuperAdminOrderController::class, 'destroy'])->name('destroy');
 });
