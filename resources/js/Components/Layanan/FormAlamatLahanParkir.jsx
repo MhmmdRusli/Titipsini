@@ -2,6 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm, router, Head } from '@inertiajs/react';
 import { ChevronDown, ImagePlus, X } from 'lucide-react';
 
+const JENIS_KENDARAAN_OPTIONS = [
+    { value: 'motor', label: 'Motor' },
+    { value: 'mobil', label: 'Mobil' },
+    { value: 'truk', label: 'Truk' },
+    { value: 'becak', label: 'Becak' },
+    { value: 'sepeda', label: 'Sepeda' },
+    { value: 'bus', label: 'Bus' },
+    { value: 'mobil_pick_up', label: 'Mobil pick up' },
+];
+
 const inputClass = (hasError) =>
     `mt-1 w-full rounded-lg border-none bg-gray-100 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 disabled:opacity-50 ${
         hasError ? 'ring-2 ring-red-400' : 'focus:ring-green-500'
@@ -10,18 +20,19 @@ const inputClass = (hasError) =>
 const MAKS_FOTO = 8;
 
 export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, onSukses }) {
-    const { data, setData, post, processing, errors } = useForm({
-        kategori,
-        nama_usaha: editingItem?.nama_usaha ?? '',
-        provinsi: editingItem?.provinsi ?? '',
-        kabupaten_kota: editingItem?.kabupaten_kota ?? '',
-        kecamatan: editingItem?.kecamatan ?? '',
-        alamat_lengkap: editingItem?.alamat_lengkap ?? '',
-        catatan_alamat: editingItem?.catatan_alamat ?? '',
-        foto_lahan: [], // array File baru yang mau diupload
-        panjang: editingItem?.panjang ?? '',
-        lebar: editingItem?.lebar ?? '',
-    });
+    const { data, setData, post, put, processing, errors, transform } = useForm({
+    kategori,
+    nama_usaha: editingItem?.nama_usaha ?? '',
+    jenis_kendaraan: editingItem?.jenis_kendaraan ?? '',
+    provinsi: editingItem?.provinsi ?? '',
+    kabupaten_kota: editingItem?.kabupaten_kota ?? '',
+    kecamatan: editingItem?.kecamatan ?? '',
+    alamat_lengkap: editingItem?.alamat_lengkap ?? '',
+    catatan_alamat: editingItem?.catatan_alamat ?? '',
+    foto_lahan: [],
+    panjang: editingItem?.panjang ?? '',
+    lebar: editingItem?.lebar ?? '',
+});
 
     // Data wilayah bertingkat: provinsi -> kabupaten/kota -> kecamatan.
     // Memakai endpoint /api/wilayah yang sudah ada di project.
@@ -136,20 +147,29 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
     }
 
     const submit = (e) => {
-        e.preventDefault();
+    e.preventDefault();
 
-        if (editingItem) {
-            router.post(`/mitra/layanan/${editingItem.id}`, { ...data, _method: 'put' }, {
-                forceFormData: true,
-                onSuccess: onSukses,
-            });
-        } else {
-            post('/mitra/layanan', {
-                forceFormData: true,
-                onSuccess: onSukses,
-            });
+    transform((currentData) => {
+        const payload = { ...currentData };
+        if (kategori === 'kendaraan') {
+            payload.nama = payload.nama_usaha;
+            payload.kota = payload.kabupaten_kota;
         }
-    };
+        return payload;
+    });
+
+    if (editingItem) {
+        put(`/mitra/layanan/${editingItem.id}`, {
+            forceFormData: true,
+            onSuccess: onSukses,
+        });
+    } else {
+        post('/mitra/layanan', {
+            forceFormData: true,
+            onSuccess: onSukses,
+        });
+    }
+};
 
     return (
         <div className="flex min-h-dvh flex-col bg-white">
@@ -167,8 +187,28 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
             <form onSubmit={submit} className="flex-1 space-y-4 px-4 py-4">
                 <div>
                     <h2 className="text-base font-bold text-gray-900">Alamat Lahan Parkir</h2>
-                    <p className="text-xs text-gray-400">Isikan alamat gudang anda di bawah sini</p>
+                    <p className="text-xs text-gray-400">Isikan alamat lahan parkir anda di bawah sini</p>
                 </div>
+
+                {kategori === 'kendaraan' && (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Jenis Kendaraan</label>
+                        <div className="relative">
+                            <select
+                                value={data.jenis_kendaraan}
+                                onChange={(e) => setData('jenis_kendaraan', e.target.value)}
+                                className={`${inputClass(errors.jenis_kendaraan)} appearance-none pr-8`}
+                            >
+                                <option value="">Jenis Kendaraan</option>
+                                {JENIS_KENDARAAN_OPTIONS.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                            <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        </div>
+                        {errors.jenis_kendaraan && <p className="mt-1 text-xs text-red-600">{errors.jenis_kendaraan}</p>}
+                    </div>
+                )}
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Nama Usaha</label>
@@ -177,9 +217,9 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
                         placeholder="Ex : Titipsini_buanguntapan"
                         value={data.nama_usaha}
                         onChange={(e) => setData('nama_usaha', e.target.value)}
-                        className={inputClass(errors.nama_usaha)}
+                        className={inputClass(errors.nama_usaha || errors.nama)}
                     />
-                    {errors.nama_usaha && <p className="mt-1 text-xs text-red-600">{errors.nama_usaha}</p>}
+                    {(errors.nama_usaha || errors.nama) && <p className="mt-1 text-xs text-red-600">{errors.nama_usaha || errors.nama}</p>}
                 </div>
 
                 <div>
@@ -217,6 +257,7 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
                         <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     </div>
                     {errors.kabupaten_kota && <p className="mt-1 text-xs text-red-600">{errors.kabupaten_kota}</p>}
+                    {errors.kota && <p className="mt-1 text-xs text-red-600">{errors.kota}</p>}
                 </div>
 
                 <div>

@@ -43,9 +43,6 @@ class ServiceController extends Controller
 
         return Inertia::render('Mitra/Layanan/Detail', [
             'layanan' => $layanan,
-            // 👇 DITAMBAHKAN: dibutuhkan halaman Detail Gudang supaya toggle
-            // "Status Gudang" tahu apakah boleh diubah manual atau tidak
-            // (lihat aturan #3: hanya bisa diubah kalau Fitur Penuh kategori ini ON).
             'fiturPenuhAktif' => (bool) (($request->user()->fitur_penuh_kategori ?? [])[$layanan->kategori] ?? false),
         ]);
     }
@@ -86,14 +83,6 @@ class ServiceController extends Controller
 
     /**
      * PATCH /mitra/layanan/{kategori}/fitur-penuh
-     *
-     * Master switch per kategori. Aturan sinkronisasi (sesuai permintaan):
-     * - OFF -> SEMUA gudang/layanan milik mitra di kategori ini otomatis
-     *          is_active = false (tutup paksa, tidak bisa terima pesanan).
-     * - ON  -> SEMUA gudang/layanan milik mitra di kategori ini otomatis
-     *          is_active = true (buka kembali, siap terima pesanan).
-     * Toggle individual per gudang (toggleAktif) hanya boleh dipakai kalau
-     * switch ini sedang ON - lihat guard di toggleAktif().
      */
     public function toggleFiturPenuh(Request $request, string $kategori): RedirectResponse
     {
@@ -109,7 +98,6 @@ class ServiceController extends Controller
         $pengaturan[$kategori] = $validated['aktif'];
         $user->update(['fitur_penuh_kategori' => $pengaturan]);
 
-        // Sinkronkan status SEMUA gudang milik mitra ini di kategori terkait.
         Service::where('user_id', $user->id)
             ->where('kategori', $kategori)
             ->update(['is_active' => $validated['aktif']]);
@@ -122,12 +110,6 @@ class ServiceController extends Controller
 
     /**
      * PATCH /mitra/layanan/{layanan}/toggle-aktif
-     * Buka/tutup manual 1 gudang/layanan tertentu.
-     *
-     * Sesuai aturan #3: hanya boleh diubah manual kalau Fitur Penuh untuk
-     * kategori gudang ini sedang AKTIF. Kalau Fitur Penuh OFF, request
-     * ditolak (400) supaya toggle individual tidak bisa "menyelundup"
-     * menyalakan gudang saat master switch sedang mematikan semuanya.
      */
     public function toggleAktif(Request $request, Service $layanan): RedirectResponse
     {
@@ -156,8 +138,11 @@ class ServiceController extends Controller
     {
         $validated = $this->validated($request);
 
-        if ($validated['kategori'] === 'barang') {
+        // Form alamat lahan (dipakai barang & kendaraan, kemungkinan juga
+        // bangunan/pindahan) — deteksi lewat keberadaan 'nama_usaha'.
+        if (isset($validated['nama_usaha'])) {
             $validated['nama'] = $validated['nama_usaha'];
+            $validated['kota'] = $validated['kabupaten_kota'];
 
             $validated['foto_lahan'] = $request->hasFile('foto_lahan')
                 ? $this->simpanFotoLahan($request)
@@ -168,9 +153,6 @@ class ServiceController extends Controller
             $validated['foto'] = $request->file('foto')->store('services', 'public');
         }
 
-        // Gudang baru mengikuti status Fitur Penuh kategori ini saat ini -
-        // kalau Fitur Penuh sedang OFF, gudang baru pun langsung nonaktif
-        // supaya tetap konsisten dengan aturan sinkronisasi.
         $fiturPenuhAktif = (bool) (($request->user()->fitur_penuh_kategori ?? [])[$validated['kategori']] ?? false);
         $validated['is_active'] = $fiturPenuhAktif;
 
@@ -188,8 +170,9 @@ class ServiceController extends Controller
 
         $validated = $this->validated($request, isUpdate: true);
 
-        if ($validated['kategori'] === 'barang') {
+        if (isset($validated['nama_usaha'])) {
             $validated['nama'] = $validated['nama_usaha'];
+            $validated['kota'] = $validated['kabupaten_kota'];
 
             if ($request->hasFile('foto_lahan')) {
                 $this->hapusFotoLahan($layanan);
@@ -254,17 +237,36 @@ class ServiceController extends Controller
         }
     }
 
+    /**
+     * Dua bentuk validasi tergantung form yang dipakai:
+     * - Form alamat lahan (barang, kendaraan, dan kategori lain yang sudah
+     *   pakai FormAlamatLahanParkir/sejenisnya) — dideteksi dari field
+     *   'nama_usaha' yang cuma ada di form ini.
+     * - Form generik lama (modal bawaan KategoriLayananView) — masih
+     *   dipakai kategori yang belum punya FormKustom.
+     */
     protected function validated(Request $request, bool $isUpdate = false): array
     {
         $kategori = $request->input('kategori');
+        $pakaiFormLahan = $request->has('nama_usaha');
 
-        if ($kategori === 'barang') {
+        if ($kategori === 'barang' || $pakaiFormLahan) {
             $fotoLahanRule = $isUpdate
                 ? ['nullable', 'array', 'max:8']
                 : ['required', 'array', 'min:1', 'max:8'];
 
             return $request->validate([
                 'kategori' => ['required', 'in:barang,bangunan,kendaraan,pindahan'],
+                'jenis_kendaraan' => [
+                    'nullable',
+                    'required_if:kategori,kendaraan',
+                    'in:motor,mobil,truk,becak,sepeda,bus,mobil_pick_up',
+                ],
+                'jenis_bangunan' => [
+                    'nullable',
+                    'required_if:kategori,bangunan',
+                    'in:rumah,apartemen,kosan,gudang,kamar',
+                ],
                 'nama_usaha' => ['required', 'string', 'max:150'],
                 'provinsi' => ['required', 'string', 'max:100'],
                 'kabupaten_kota' => ['required', 'string', 'max:100'],
@@ -275,7 +277,7 @@ class ServiceController extends Controller
                 'foto_lahan.*' => ['image', 'max:5120'],
                 'panjang' => ['required', 'integer', 'min:1'],
                 'lebar' => ['required', 'integer', 'min:1'],
-                'jumlah_tampung' => ['required', 'integer', 'min:1'],
+                'jumlah_tampung' => [$kategori === 'barang' ? 'required' : 'nullable', 'integer', 'min:1'],
             ]);
         }
 
