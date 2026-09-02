@@ -165,37 +165,43 @@ class ServiceController extends Controller
      * PUT /mitra/layanan/{service}
      */
     public function update(Request $request, Service $layanan): RedirectResponse
-    {
-        $this->authorizeOwnership($request, $layanan);
+{
+    $this->authorizeOwnership($request, $layanan);
 
-        $validated = $this->validated($request, isUpdate: true);
+    $validated = $this->validated($request, isUpdate: true);
 
-        if (isset($validated['nama_usaha'])) {
-            $validated['nama'] = $validated['nama_usaha'];
-            $validated['kota'] = $validated['kabupaten_kota'];
+    if ($validated['kategori'] === 'barang') {
+        $validated['nama'] = $validated['nama_usaha'];
 
-            if ($request->hasFile('foto_lahan')) {
-                $this->hapusFotoLahan($layanan);
-                $validated['foto_lahan'] = $this->simpanFotoLahan($request);
-            } else {
-                unset($validated['foto_lahan']);
-            }
+        if ($request->hasFile('foto_lahan')) {
+            $this->hapusFotoLahan($layanan);
+            $validated['foto_lahan'] = $this->simpanFotoLahan($request);
+        } else {
+            unset($validated['foto_lahan']);
         }
-
-        $validated['verification_status'] = 'pending';
-        $validated['rejection_reason'] = null;
-
-        if ($request->hasFile('foto')) {
-            if ($layanan->foto) {
-                Storage::delete($layanan->foto);
-            }
-            $validated['foto'] = $request->file('foto')->store('services', 'public');
-        }
-
-        $layanan->update($validated);
-
-        return redirect()->back()->with('success', 'Layanan berhasil diperbarui.');
     }
+
+    // 👇 DITAMBAHKAN: sama seperti store(), untuk kategori Bangunan.
+    if ($validated['kategori'] === 'bangunan') {
+        $validated['nama'] = $validated['nama_usaha'];
+        $validated['status_kepemilikan'] = $validated['status'];
+        unset($validated['status']);
+    }
+
+    $validated['verification_status'] = 'pending';
+    $validated['rejection_reason'] = null;
+
+    if ($request->hasFile('foto')) {
+        if ($layanan->foto) {
+            Storage::delete($layanan->foto);
+        }
+        $validated['foto'] = $request->file('foto')->store('services', 'public');
+    }
+
+    $layanan->update($validated);
+
+    return redirect()->back()->with('success', 'Layanan berhasil diperbarui.');
+}
 
     /**
      * DELETE /mitra/layanan/{service}
@@ -246,63 +252,67 @@ class ServiceController extends Controller
      *   dipakai kategori yang belum punya FormKustom.
      */
     protected function validated(Request $request, bool $isUpdate = false): array
-    {
-        $kategori = $request->input('kategori');
-        $pakaiFormLahan = $request->has('nama_usaha');
+{
+    $kategori = $request->input('kategori');
 
-        if ($kategori === 'barang' || $pakaiFormLahan) {
-            $fotoLahanRule = $isUpdate
-                ? ['nullable', 'array', 'max:8']
-                : ['required', 'array', 'min:1', 'max:8'];
-
-            return $request->validate([
-                'kategori' => ['required', 'in:barang,bangunan,kendaraan,pindahan'],
-                'jenis_kendaraan' => [
-                    'nullable',
-                    'required_if:kategori,kendaraan',
-                    'in:motor,mobil,truk,becak,sepeda,bus,mobil_pick_up',
-                ],
-                'jenis_bangunan' => [
-                    'nullable',
-                    'required_if:kategori,bangunan',
-                    'in:rumah,apartemen,kosan,gudang,kamar',
-                ],
-                'nama_usaha' => ['required', 'string', 'max:150'],
-                'provinsi' => ['required', 'string', 'max:100'],
-                'kabupaten_kota' => ['required', 'string', 'max:100'],
-                'kecamatan' => ['required', 'string', 'max:100'],
-                'alamat_lengkap' => ['required', 'string', 'max:500'],
-                'catatan_alamat' => ['nullable', 'string', 'max:500'],
-                'foto_lahan' => $fotoLahanRule,
-                'foto_lahan.*' => ['image', 'max:5120'],
-                'panjang' => ['required', 'integer', 'min:1'],
-                'lebar' => ['required', 'integer', 'min:1'],
-                'jumlah_tampung' => [$kategori === 'barang' ? 'required' : 'nullable', 'integer', 'min:1'],
-            ]);
-        }
+    if ($kategori === 'barang') {
+        $fotoLahanRule = $isUpdate
+            ? ['nullable', 'array', 'max:8']
+            : ['required', 'array', 'min:1', 'max:8'];
 
         return $request->validate([
             'kategori' => ['required', 'in:barang,bangunan,kendaraan,pindahan'],
-            'jenis_kendaraan' => [
-                'nullable',
-                'required_if:kategori,kendaraan',
-                'in:motor,mobil,truk,becak,sepeda,bus,mobil_pick_up',
-            ],
-            'jenis_bangunan' => [
-                'nullable',
-                'required_if:kategori,bangunan',
-                'in:rumah,apartemen,kosan,gudang,kamar',
-            ],
-            'nama' => ['required', 'string', 'max:150'],
-            'kota' => ['required', 'string', 'max:100', \Illuminate\Validation\Rule::exists('kota', 'nama')->where('is_active', true)],
+            'nama_usaha' => ['required', 'string', 'max:150'],
+            'provinsi' => ['required', 'string', 'max:100'],
+            'kabupaten_kota' => ['required', 'string', 'max:100'],
             'kecamatan' => ['required', 'string', 'max:100'],
-            'harga' => ['nullable', 'numeric', 'min:0'],
-            'is_active' => ['boolean'],
-            'foto' => ['nullable', 'image', 'max:2048'],
-        ], [
-            'kota.exists' => 'Kota belum terdaftar atau tidak aktif. Hubungi Admin untuk menambahkan kota ini.',
+            'alamat_lengkap' => ['required', 'string', 'max:500'],
+            'catatan_alamat' => ['nullable', 'string', 'max:500'],
+            'foto_lahan' => $fotoLahanRule,
+            'foto_lahan.*' => ['image', 'max:5120'],
+            'panjang' => ['required', 'integer', 'min:1'],
+            'lebar' => ['required', 'integer', 'min:1'],
+            'jumlah_tampung' => ['required', 'integer', 'min:1'],
         ]);
     }
+
+    // 👇 DITAMBAHKAN: kategori Bangunan pakai form Identitas Penjaga,
+    // field-nya beda total dari modal standar - dipisah jadi cabang sendiri.
+    if ($kategori === 'bangunan') {
+        return $request->validate([
+            'kategori' => ['required', 'in:bangunan'],
+            'jenis_bangunan' => ['nullable', 'in:rumah,apartemen,kosan,gudang,kamar'],
+            'nama_usaha' => ['required', 'string', 'max:150'],
+            'nama_penjaga' => ['required', 'string', 'max:150'],
+            'nomor_telepon' => ['required', 'string', 'max:20'],
+            'tanggal_lahir' => ['required', 'string', 'max:20'],
+            'provinsi' => ['required', 'string', 'max:100'],
+            'kabupaten_kota' => ['required', 'string', 'max:100'],
+            'kecamatan' => ['required', 'string', 'max:100'],
+            'alamat_lengkap' => ['required', 'string', 'max:500'],
+            'status' => ['required', 'in:pemilik,penyewa,pengelola'],
+            'upload_berkas' => ['required', 'string', 'max:500'],
+        ]);
+    }
+
+    // Kendaraan & Pindahan tetap pakai modal standar (KategoriLayananView).
+    return $request->validate([
+        'kategori' => ['required', 'in:kendaraan,pindahan'],
+        'jenis_kendaraan' => [
+            'nullable',
+            'required_if:kategori,kendaraan',
+            'in:motor,mobil,truk,becak,sepeda,bus,mobil_pick_up',
+        ],
+        'nama' => ['required', 'string', 'max:150'],
+        'kota' => ['required', 'string', 'max:100', \Illuminate\Validation\Rule::exists('kota', 'nama')->where('is_active', true)],
+        'kecamatan' => ['required', 'string', 'max:100'],
+        'harga' => ['nullable', 'numeric', 'min:0'],
+        'is_active' => ['boolean'],
+        'foto' => ['nullable', 'image', 'max:2048'],
+    ], [
+        'kota.exists' => 'Kota belum terdaftar atau tidak aktif. Hubungi Admin untuk menambahkan kota ini.',
+    ]);
+}
 
     protected function authorizeOwnership(Request $request, Service $service): void
     {

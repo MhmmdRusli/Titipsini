@@ -32,10 +32,10 @@ export default function KelolaKendaraan({ layanan = [], daftarKota = [], menungg
                 ilustrasi={<IlustrasiKendaraan />}
                 judulKosong="Layanan Kendaraan Masih Kosong"
                 subjudulKosong="Daftarkan Tempat anda sebagai penitipan kendaraan"
-                heading="Layanan Kendaraan"
-                subheading="Daftar Tempat anda dan isi data penitipan"
-                labelBox="Tempat Penitipan Kendaraan"
-                labelTambah="Tambah Tempat"
+                judulHub="Tambah Layanan Lahan Parkir!"
+                subheading="Daftarkan tempat parkir dengan mengisi data dibawah ini"
+                labelBox="Alamat Lahan Parkir"
+                labelTambah="Tambah Alamat Lahan Parkir"
                 layanan={layanan}
                 daftarKota={daftarKota}
                 menungguVerifikasi={menungguVerifikasi}
@@ -44,4 +44,4 @@ export default function KelolaKendaraan({ layanan = [], daftarKota = [], menungg
             />
         </>
     );
-}   
+}

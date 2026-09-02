@@ -459,7 +459,7 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
 
     return (
         <div className="relative pb-6 pt-4">
-            {judulHub && <p className="text-base font-bold text-gray-900">{judulHub}</p>}
+            {judulHub && <p className="text-lg font-extrabold text-gray-900">{judulHub}</p>}
             <p className="mt-1 text-xs text-gray-400">{subheading}</p>
 
             {menungguVerifikasi && (
@@ -470,33 +470,29 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
             )}
 
             {/* Toggle Fitur Penuh */}
-            <div className="mt-4 flex items-center justify-between">
-                <p className="flex items-center gap-1.5 text-sm font-bold text-gray-900">
-                    Mengaktifkan Fitur Penuh
-                    <button type="button" onClick={() => setShowPerhatian(true)} className="text-gray-400">
-                        <Info size={14} />
-                    </button>
-                </p>
+            <div className="mt-5 flex items-center gap-1.5 text-sm font-bold text-gray-900">
+                Mengaktifkan Fitur Penuh
+                <button type="button" onClick={() => setShowPerhatian(true)} className="text-green-600">
+                    <Info size={16} />
+                </button>
             </div>
-            <button
-                type="button"
-                onClick={toggleFiturPenuh}
-                disabled={savingFitur}
-                className={`mt-2 flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${fiturPenuh
-                    ? 'border-green-600 bg-green-600 text-white'
-                    : 'border-gray-300 bg-gray-100 text-gray-500'
+            <div className="mt-2 inline-flex items-center gap-2.5 rounded-xl border border-gray-200 px-3 py-2">
+                <button
+                    type="button"
+                    onClick={toggleFiturPenuh}
+                    disabled={savingFitur}
+                    className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+                        fiturPenuh ? 'bg-green-600' : 'bg-gray-300'
                     }`}
-            >
-                <span
-                    className={`h-4 w-7 shrink-0 rounded-full transition-colors ${fiturPenuh ? 'bg-white/30' : 'bg-gray-300'}`}
                 >
                     <span
-                        className={`block h-4 w-4 rounded-full bg-white shadow transition-transform ${fiturPenuh ? 'translate-x-3' : 'translate-x-0'
-                            }`}
+                        className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                            fiturPenuh ? 'translate-x-5' : 'translate-x-0'
+                        }`}
                     />
-                </span>
-                {fiturPenuh ? 'Aktifkan' : 'Nonaktifkan'}
-            </button>
+                </button>
+                <span className="text-sm font-medium text-gray-600">{fiturPenuh ? 'Aktif' : 'Non-Aktif'}</span>
+            </div>
 
             {/* Box Alamat/List */}
             <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
@@ -524,7 +520,7 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
                                     </div>
                                 </div>
 
-                                    {modeDetail ? (
+                                {modeDetail ? (
                                     <Link
                                         href={`/mitra/layanan/${item.id}`}
                                         className="shrink-0 text-xs font-semibold text-green-600 hover:underline"
@@ -565,23 +561,25 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
                 </div>
             </div>
 
-            {/* Popup Perhatian */}
+            {/* Modal Perhatian */}
             {showPerhatian && (
-                <div className="absolute left-0 right-0 top-24 z-30 rounded-xl border border-green-200 bg-green-50 p-4 shadow-lg">
-                    <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-start gap-2">
-                            <Info size={16} className="mt-0.5 shrink-0 text-green-700" />
-                            <div>
-                                <p className="text-xs font-bold text-gray-900">Perhatian</p>
-                                <p className="mt-1 text-xs leading-relaxed text-gray-600">
-                                    Saat aktif, fitur ini berguna untuk menutup layanan secara otomatis apabila
-                                    jumlah tampung sudah terpenuhi, Dan berlaku hanya untuk layanan yang diaktifkan
-                                </p>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
+                    <div className="w-full max-w-sm rounded-2xl bg-emerald-50 p-5 shadow-xl">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-2.5">
+                                <AlertCircle size={20} className="mt-0.5 shrink-0 text-green-700" />
+                                <div>
+                                    <p className="text-sm font-bold text-gray-900">Perhatian</p>
+                                    <p className="mt-1.5 text-xs font-semibold leading-relaxed text-gray-700">
+                                        Saat aktif, fitur ini berguna untuk menutup layanan secara otomatis apabila
+                                        jumlah tampung sudah terpenuhi, dan berlaku hanya untuk layanan yang diaktifkan
+                                    </p>
+                                </div>
                             </div>
+                            <button onClick={() => setShowPerhatian(false)} className="shrink-0 text-gray-500 hover:text-gray-700">
+                                <X size={20} />
+                            </button>
                         </div>
-                        <button onClick={() => setShowPerhatian(false)} className="shrink-0 text-gray-400 hover:text-gray-600">
-                            <X size={16} />
-                        </button>
                     </div>
                 </div>
             )}

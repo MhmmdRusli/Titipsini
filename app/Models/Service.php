@@ -30,6 +30,11 @@ class Service extends Model
         'jumlah_tampung',
         'verification_status',
         'rejection_reason',
+        'nama_penjaga',
+        'nomor_telepon',
+        'tanggal_lahir',
+        'status_kepemilikan',
+        'upload_berkas',
     ];
 
             protected function casts(): array
