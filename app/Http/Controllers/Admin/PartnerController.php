@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -191,7 +192,7 @@ class PartnerController extends Controller
      */
     public function suspendedNotice(): Response|RedirectResponse
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if (!$user || $user->role !== 'partner' || !$user->suspended_at) {
             return redirect('/mitra/dashboard');
@@ -209,7 +210,7 @@ class PartnerController extends Controller
      */
     public function requestRestoration(Request $request): RedirectResponse
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if (!$user || $user->role !== 'partner') {
             return redirect()->route('login');
@@ -221,4 +222,4 @@ class PartnerController extends Controller
 
         return back()->with('success', 'Permintaan pemulihan akun berhasil dikirim ke administrator.');
     }
-}
+} 
