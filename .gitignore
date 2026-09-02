@@ -14,3 +14,4 @@ yarn-error.log
 /.vscode
 /storage/logs/*.log
 /public/storage
+_ide_helper.php
