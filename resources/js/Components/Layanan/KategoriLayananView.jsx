@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import MitraLayout from '@/Layouts/MitraLayout';
-import { Plus, Pencil, Trash2, X, MapPin, AlertCircle, Home, Info, CheckCircle2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, MapPin, AlertCircle, Home, Info, CheckCircle2, Truck, Building2, Car, Package } from 'lucide-react';
 const JENIS_KENDARAAN_OPTIONS = [
     { value: 'motor', label: 'Motor' },
     { value: 'mobil', label: 'Mobil' },
@@ -500,25 +500,68 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
 
                 {layanan.length > 0 && (
                     <div className="divide-y divide-gray-100">
-                        {layanan.map((item) => (
-                            <div key={item.id} className="flex items-start justify-between gap-2 px-4 py-3">
-                                <div className="flex min-w-0 items-start gap-2.5">
-                                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500">
-                                        <Home size={16} />
-                                    </span>
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold text-gray-900">{item.nama}</p>
-                                        <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-                                            <MapPin size={11} />
-                                            {item.kecamatan}, {item.kota}
-                                        </p>
-                                        {!item.is_active && (
-                                            <span className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
-                                                Nonaktif
-                                            </span>
-                                        )}
+                        {layanan.map((item) => {
+                            // Tentukan icon berdasarkan kategori
+                            const getIcon = () => {
+                                switch(kategori) {
+                                    case 'pindahan':
+                                        return <Truck size={16} />;
+                                    case 'bangunan':
+                                        return <Building2 size={16} />;
+                                    case 'kendaraan':
+                                        return <Car size={16} />;
+                                    case 'barang':
+                                        return <Package size={16} />;
+                                    default:
+                                        return <Home size={16} />;
+                                }
+                            };
+
+                            const getBackgroundColor = () => {
+                                switch(kategori) {
+                                    case 'pindahan':
+                                        return 'bg-emerald-50 text-emerald-500';
+                                    case 'bangunan':
+                                        return 'bg-green-50 text-green-500';
+                                    case 'kendaraan':
+                                        return 'bg-green-50 text-green-500';
+                                    case 'barang':
+                                        return 'bg-green-50 text-green-500';
+                                    default:
+                                        return 'bg-red-50 text-red-500';
+                                }
+                            };
+
+                            return (
+                                <div key={item.id} className="flex items-start justify-between gap-2 px-4 py-3">
+                                    <div className="flex min-w-0 items-start gap-2.5">
+                                        <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${getBackgroundColor()}`}>
+                                            {getIcon()}
+                                        </span>
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-semibold text-gray-900">{item.nama}</p>
+                                            {kategori === 'pindahan' ? (
+                                                <>
+                                                    <p className="mt-0.5 text-xs text-gray-600">
+                                                        {item.jenis_pickup && <span>{item.jenis_pickup}</span>}
+                                                    </p>
+                                                    <p className="mt-0.5 text-xs text-gray-600">
+                                                        {item.nomor_polisi && <span>{item.nomor_polisi}</span>}
+                                                    </p>
+                                                </>
+                                            ) : (
+                                                <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                                                    <MapPin size={11} />
+                                                    {item.kecamatan}, {item.kota}
+                                                </p>
+                                            )}
+                                            {!item.is_active && (
+                                                <span className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
+                                                    Nonaktif
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
 
                                 {modeDetail ? (
                                     <Link
@@ -544,7 +587,8 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
                                     </div>
                                 )}
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
 

@@ -35,6 +35,11 @@ class Service extends Model
         'tanggal_lahir',
         'status_kepemilikan',
         'upload_berkas',
+        // Kolom khusus kategori Pindahan (identitas kendaraan)
+        'nomor_polisi',
+        'nomor_kir',
+        'merek_kendaraan',
+        'jenis_pickup',
     ];
 
             protected function casts(): array
