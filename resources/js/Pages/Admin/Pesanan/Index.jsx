@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, router, useForm } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2, ChevronDown, ChevronRight, Package, HandCoins, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2, ChevronDown, ChevronRight, Package, HandCoins, CheckCircle2, AlertTriangle, Download } from 'lucide-react';
 
 const SERVICE_TYPES = [
     { value: '', label: 'Semua Layanan' },
@@ -68,6 +68,11 @@ function formatRupiah(value) {
 }
 
 export default function PesananIndex({ orders, filters, cities = [] }) {
+    const { auth } = usePage().props;
+    const userRole = auth?.user?.role ?? 'admin';
+    const isSuperAdmin = userRole === 'super_admin';
+    const canManageSensitiveActions = isSuperAdmin;
+
     const [search, setSearch] = useState(filters?.search ?? '');
     const [serviceType, setServiceType] = useState(filters?.service_type ?? '');
     const [status, setStatus] = useState(filters?.status ?? '');
@@ -107,6 +112,94 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
     function handleSearchSubmit(e) {
         e.preventDefault();
         applyFilters();
+    }
+
+    function handleDownloadPdf() {
+        const rows = orders?.data ?? [];
+        const tableHtml = rows.map((order) => {
+            const statusLabel = displayStatusLabel(order);
+            const total = formatRupiah(order.total_price);
+            const customer = order.customer?.name ?? '-';
+            const partner = order.partner?.name ?? '-';
+            const periode = order.start_date && order.end_date
+                ? `${order.start_date} - ${order.end_date}`
+                : '-';
+            const service = SERVICE_LABEL[order.service_type] ?? order.service_type ?? '-';
+
+            return `
+                <tr>
+                    <td>${order.order_code ?? '-'}</td>
+                    <td>${customer}</td>
+                    <td>${partner}</td>
+                    <td>${service}</td>
+                    <td>${periode}</td>
+                    <td>${order.city ?? '-'}</td>
+                    <td>${total}</td>
+                    <td>${statusLabel}</td>
+                </tr>
+            `;
+        }).join('');
+
+        const printWindow = window.open('', '_blank', 'width=1200,height=900');
+        if (!printWindow) {
+            alert('Browser memblokir popup. Izinkan popup untuk men-download PDF.');
+            return;
+        }
+
+        const html = `
+            <!doctype html>
+            <html>
+            <head>
+                <meta charset="utf-8" />
+                <title>Rincian Pesanan Admin</title>
+                <style>
+                    body { font-family: Arial, sans-serif; color: #1f2937; margin: 32px; }
+                    h1 { font-size: 24px; margin-bottom: 8px; }
+                    .meta { font-size: 12px; color: #6b7280; margin-bottom: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
+                    th, td { border: 1px solid #d1d5db; padding: 8px 10px; text-align: left; vertical-align: top; }
+                    th { background: #f3f4f6; }
+                    .totals { margin-top: 16px; font-size: 12px; color: #374151; }
+                    @media print {
+                        body { margin: 0; }
+                        button { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Rincian Pesanan Admin</h1>
+                <div class="meta">Dicetak: ${new Date().toLocaleString('id-ID')} · Total data: ${rows.length}</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode Pesanan</th>
+                            <th>Customer</th>
+                            <th>Vendor</th>
+                            <th>Layanan</th>
+                            <th>Periode</th>
+                            <th>Kota</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableHtml || '<tr><td colspan="8">Tidak ada data</td></tr>'}
+                    </tbody>
+                </table>
+                <div class="totals">Catatan: File PDF ini dihasilkan dari tampilan data aktif di halaman Admin.</div>
+                <script>
+                    window.onload = function () {
+                        window.print();
+                        setTimeout(() => window.close(), 1000);
+                    };
+                </script>
+            </body>
+            </html>
+        `;
+
+        printWindow.document.open();
+        printWindow.document.write(html);
+        printWindow.document.close();
     }
 
     function handleDelete() {
@@ -233,6 +326,15 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
 
                 <button
                     type="button"
+                    onClick={handleDownloadPdf}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-xs font-semibold text-blue-700 shadow-sm transition hover:bg-blue-600 hover:text-white dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-600 dark:hover:text-white"
+                >
+                    <Download size={14} />
+                    Download PDF
+                </button>
+
+                <button
+                    type="button"
                     onClick={toggleSelectMode}
                     className={`ml-auto rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all ${
                         selectMode
@@ -244,7 +346,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                 </button>
             </div>
 
-            {selectMode && selectedIds.length > 0 && (
+            {selectMode && selectedIds.length > 0 && isSuperAdmin && (
                 <div className="mb-4 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm dark:border-emerald-900/50 dark:bg-emerald-950/30">
                     <span className="text-xs font-semibold text-green-800 dark:text-emerald-300">
                         {selectedIds.length} pesanan dipilih
@@ -425,7 +527,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                         Konfirmasi Cash
                                                     </button>
                                                 )}
-                                                {order.denda > 0 && !order.denda_paid_at && order.denda_payment_receipt && (
+                                                {order.denda > 0 && !order.denda_paid_at && order.denda_payment_receipt && canManageSensitiveActions && (
                                                     <button
                                                         type="button"
                                                         onClick={() => setDendaApproveTarget(order)}
@@ -444,14 +546,16 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                     Detail
                                                     <ChevronRight size={14} />
                                                 </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setDeleteTarget(order)}
-                                                    className="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
-                                                    title="Hapus Pesanan"
-                                                >
-                                                    <Trash2 size={15} />
-                                                </button>
+                                                {canManageSensitiveActions && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setDeleteTarget(order)}
+                                                        className="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                                                        title="Hapus Pesanan"
+                                                    >
+                                                        <Trash2 size={15} />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -496,10 +600,11 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                     onClose={() => setSelectedOrder(null)}
                     onConfirmCash={(order) => setCashConfirmTarget(order)}
                     onApproveDenda={(order) => setDendaApproveTarget(order)}
+                    isSuperAdmin={isSuperAdmin}
                 />
             )}
 
-            {deleteTarget && (
+            {canManageSensitiveActions && deleteTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
                     <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
                         <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Hapus Pesanan?</h2>
@@ -526,7 +631,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                 </div>
             )}
 
-            {bulkDeleteConfirm && (
+            {isSuperAdmin && bulkDeleteConfirm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
                     <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
                         <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
@@ -595,7 +700,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
             )}
 
             {/* Modal konfirmasi verifikasi denda - terpisah, sama pola dengan cash */}
-            {dendaApproveTarget && (
+            {isSuperAdmin && dendaApproveTarget && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
                     <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
                         <div className="flex items-center gap-2">
@@ -689,7 +794,7 @@ function CustomSelect({ value, options, onChange }) {
     );
 }
 
-function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda }) {
+function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda, isSuperAdmin = false }) {
     const [previewImage, setPreviewImage] = useState(false);
     const { data, setData, errors } = useForm({
         status: order.status,
@@ -701,14 +806,16 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda }) {
     const cashPending = isCashPendingConfirmation(order);
     const readyToComplete = isReadyToComplete(order);
 
-    const nextActions = {
-        baru: ['diproses', 'dibatalkan'],
-        // Penyelesaian normal dilakukan oleh customer setelah barang diterima.
-        // Admin tetap dapat memantau dan membatalkan bila ada masalah.
-        diproses: ['dibatalkan'],
-        selesai: [],
-        dibatalkan: [],
-    }[order.status] ?? [];
+    const nextActions = (() => {
+        if (isSuperAdmin) {
+            if (order.status === 'baru') return ['diproses', 'dibatalkan'];
+            if (order.status === 'diproses') return ['dibatalkan'];
+            return [];
+        }
+
+        if (order.status === 'baru') return ['diproses'];
+        return [];
+    })();
 
     const actionLabel = {
         diproses: 'Verifikasi & Proses',
@@ -895,14 +1002,16 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda }) {
                                         className="h-32 w-full object-contain"
                                     />
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => onApproveDenda(order)}
-                                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
-                                >
-                                    <CheckCircle2 size={15} />
-                                    Verifikasi Denda
-                                </button>
+                                {isSuperAdmin && (
+                                    <button
+                                        type="button"
+                                        onClick={() => onApproveDenda(order)}
+                                        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
+                                    >
+                                        <CheckCircle2 size={15} />
+                                        Verifikasi Denda
+                                    </button>
+                                )}
                             </>
                         ) : (
                             <p className="mt-2 text-xs text-amber-700/80 dark:text-amber-300/80">
@@ -956,7 +1065,12 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda }) {
                                 {statusError}
                             </div>
                         )}
-                        {nextActions.includes('dibatalkan') && (
+                        {!isSuperAdmin && nextActions.includes('dibatalkan') && (
+                            <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-400">
+                                Aksi pembatalan hanya dapat disetujui oleh Super Admin. Silakan ajukan permintaan untuk review.
+                            </div>
+                        )}
+                        {nextActions.includes('dibatalkan') && isSuperAdmin && (
                             <div className="mb-3">
                                 <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
                                     Alasan pembatalan (wajib jika membatalkan)
@@ -978,7 +1092,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda }) {
                                 <button
                                     key={next}
                                     type="button"
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || (!isSuperAdmin && next === 'dibatalkan')}
                                     onClick={() => submitStatus(next)}
                                     className={`rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition disabled:opacity-60 ${
                                         next === 'dibatalkan'
