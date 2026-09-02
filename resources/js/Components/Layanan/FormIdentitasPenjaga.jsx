@@ -28,14 +28,14 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
         upload_berkas: editingItem?.upload_berkas ?? '',
     });
 
-    // Data wilayah bertingkat: provinsi -> kabupaten/kota -> kecamatan.
-    // Memakai endpoint /api/wilayah yang sudah ada di project.
     const [daftarProvinsi, setDaftarProvinsi] = useState([]);
     const [daftarKabupaten, setDaftarKabupaten] = useState([]);
     const [daftarKecamatan, setDaftarKecamatan] = useState([]);
 
     const [provinsiId, setProvinsiId] = useState('');
     const [kabupatenId, setKabupatenId] = useState('');
+
+    const [openDropdown, setOpenDropdown] = useState(null);
 
     useEffect(() => {
         fetch('/api/wilayah/provinces')
@@ -44,41 +44,39 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
             .catch(() => setDaftarProvinsi([]));
     }, []);
 
-    function handleProvinsiChange(e) {
-        const id = e.target.value;
-        const nama = e.target.options[e.target.selectedIndex]?.text ?? '';
-        setProvinsiId(id);
-        setData((prev) => ({ ...prev, provinsi: nama, kabupaten_kota: '', kecamatan: '' }));
+    function handleSelectProvinsi(p) {
+        setProvinsiId(p.id);
+        setData((prev) => ({ ...prev, provinsi: p.name, kabupaten_kota: '', kecamatan: '' }));
         setDaftarKabupaten([]);
         setDaftarKecamatan([]);
         setKabupatenId('');
+        setOpenDropdown(null);
 
-        if (id) {
-            fetch(`/api/wilayah/regencies/${id}`)
+        if (p.id) {
+            fetch(`/api/wilayah/regencies/${p.id}`)
                 .then((res) => res.json())
                 .then(setDaftarKabupaten)
                 .catch(() => setDaftarKabupaten([]));
         }
     }
 
-    function handleKabupatenChange(e) {
-        const id = e.target.value;
-        const nama = e.target.options[e.target.selectedIndex]?.text ?? '';
-        setKabupatenId(id);
-        setData((prev) => ({ ...prev, kabupaten_kota: nama, kecamatan: '' }));
+    function handleSelectKabupaten(k) {
+        setKabupatenId(k.id);
+        setData((prev) => ({ ...prev, kabupaten_kota: k.name, kecamatan: '' }));
         setDaftarKecamatan([]);
+        setOpenDropdown(null);
 
-        if (id) {
-            fetch(`/api/wilayah/districts/${id}`)
+        if (k.id) {
+            fetch(`/api/wilayah/districts/${k.id}`)
                 .then((res) => res.json())
                 .then(setDaftarKecamatan)
                 .catch(() => setDaftarKecamatan([]));
         }
     }
 
-    function handleKecamatanChange(e) {
-        const nama = e.target.options[e.target.selectedIndex]?.text ?? '';
-        setData('kecamatan', nama);
+    function handleSelectKecamatan(k) {
+        setData('kecamatan', k.name);
+        setOpenDropdown(null);
     }
 
     const submit = (e) => {
@@ -86,17 +84,21 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
 
         if (editingItem) {
             router.post(`/mitra/layanan/${editingItem.id}`, { ...data, _method: 'put' }, {
+                preserveScroll: true,
+                preserveState: true,
                 onSuccess: onSukses,
             });
         } else {
             post('/mitra/layanan', {
+                preserveScroll: true,
+                preserveState: true,
                 onSuccess: onSukses,
             });
         }
     };
 
     return (
-        <div className="flex min-h-dvh flex-col bg-white">
+        <div className="flex min-h-dvh flex-col bg-white relative">
             <Head title="Identitas Penjaga" />
 
             <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
@@ -111,7 +113,7 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
                 <div className="h-1.5 flex-1 rounded-full bg-gray-200" />
             </div>
 
-            <form onSubmit={submit} className="flex-1 space-y-4 px-4 py-4">
+            <form onSubmit={submit} className="flex-1 space-y-4 px-4 py-4 pb-28">
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Nama Usaha</label>
                     <input
@@ -161,59 +163,90 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
                     {errors.tanggal_lahir && <p className="mt-1 text-xs text-red-600">{errors.tanggal_lahir}</p>}
                 </div>
 
-                <div>
+                {/* Dropdown Provinsi Custom */}
+                <div className="relative">
                     <label className="block text-sm font-medium text-gray-700">Provinsi</label>
-                    <div className="relative">
-                        <select
-                            value={provinsiId}
-                            onChange={handleProvinsiChange}
-                            className={`${inputClass(errors.provinsi)} appearance-none pr-8`}
-                        >
-                            <option value="">Provinsi</option>
-                            {daftarProvinsi.map((p) => (
-                                <option key={p.id} value={p.id}>{p.name}</option>
-                            ))}
-                        </select>
-                        <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <div
+                        onClick={() => setOpenDropdown(openDropdown === 'provinsi' ? null : 'provinsi')}
+                        className={`${inputClass(errors.provinsi)} flex items-center justify-between cursor-pointer`}
+                    >
+                        <span className={data.provinsi ? 'text-gray-900' : 'text-gray-400'}>
+                            {data.provinsi || 'Provinsi'}
+                        </span>
+                        <ChevronDown size={15} className="text-gray-400" />
                     </div>
+
+                    {openDropdown === 'provinsi' && (
+                        <div className="absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto rounded-lg bg-white shadow-lg border border-gray-200 z-50">
+                            {daftarProvinsi.map((p) => (
+                                <div
+                                    key={p.id}
+                                    onClick={() => handleSelectProvinsi(p)}
+                                    className="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 cursor-pointer"
+                                >
+                                    {p.name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                     {errors.provinsi && <p className="mt-1 text-xs text-red-600">{errors.provinsi}</p>}
                 </div>
 
-                <div>
+                {/* Dropdown Kabupaten/Kota Custom */}
+                <div className="relative">
                     <label className="block text-sm font-medium text-gray-700">Kabupaten/Kota</label>
-                    <div className="relative">
-                        <select
-                            value={kabupatenId}
-                            onChange={handleKabupatenChange}
-                            disabled={!provinsiId}
-                            className={`${inputClass(errors.kabupaten_kota)} appearance-none pr-8`}
-                        >
-                            <option value="">Kabupaten/Kota</option>
-                            {daftarKabupaten.map((k) => (
-                                <option key={k.id} value={k.id}>{k.name}</option>
-                            ))}
-                        </select>
-                        <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <div
+                        onClick={() => provinsiId && setOpenDropdown(openDropdown === 'kabupaten' ? null : 'kabupaten')}
+                        className={`${inputClass(errors.kabupaten_kota)} flex items-center justify-between cursor-pointer ${!provinsiId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        <span className={data.kabupaten_kota ? 'text-gray-900' : 'text-gray-400'}>
+                            {data.kabupaten_kota || 'Kabupaten/Kota'}
+                        </span>
+                        <ChevronDown size={15} className="text-gray-400" />
                     </div>
+
+                    {openDropdown === 'kabupaten' && (
+                        <div className="absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto rounded-lg bg-white shadow-lg border border-gray-200 z-50">
+                            {daftarKabupaten.map((k) => (
+                                <div
+                                    key={k.id}
+                                    onClick={() => handleSelectKabupaten(k)}
+                                    className="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 cursor-pointer"
+                                >
+                                    {k.name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                     {errors.kabupaten_kota && <p className="mt-1 text-xs text-red-600">{errors.kabupaten_kota}</p>}
                 </div>
 
-                <div>
+                {/* Dropdown Kecamatan Custom */}
+                <div className="relative">
                     <label className="block text-sm font-medium text-gray-700">Kecamatan</label>
-                    <div className="relative">
-                        <select
-                            onChange={handleKecamatanChange}
-                            disabled={!kabupatenId}
-                            defaultValue=""
-                            className={`${inputClass(errors.kecamatan)} appearance-none pr-8`}
-                        >
-                            <option value="">Kecamatan</option>
-                            {daftarKecamatan.map((k) => (
-                                <option key={k.id} value={k.id}>{k.name}</option>
-                            ))}
-                        </select>
-                        <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <div
+                        onClick={() => kabupatenId && setOpenDropdown(openDropdown === 'kecamatan' ? null : 'kecamatan')}
+                        className={`${inputClass(errors.kecamatan)} flex items-center justify-between cursor-pointer ${!kabupatenId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        <span className={data.kecamatan ? 'text-gray-900' : 'text-gray-400'}>
+                            {data.kecamatan || 'Kecamatan'}
+                        </span>
+                        <ChevronDown size={15} className="text-gray-400" />
                     </div>
+
+                    {openDropdown === 'kecamatan' && (
+                        <div className="absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto rounded-lg bg-white shadow-lg border border-gray-200 z-50">
+                            {daftarKecamatan.map((k) => (
+                                <div
+                                    key={k.id}
+                                    onClick={() => handleSelectKecamatan(k)}
+                                    className="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 cursor-pointer"
+                                >
+                                    {k.name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                     {errors.kecamatan && <p className="mt-1 text-xs text-red-600">{errors.kecamatan}</p>}
                 </div>
 
@@ -229,20 +262,35 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
                     {errors.alamat_lengkap && <p className="mt-1 text-xs text-red-600">{errors.alamat_lengkap}</p>}
                 </div>
 
-                <div>
+                {/* Dropdown Status Custom */}
+                <div className="relative">
                     <label className="block text-sm font-medium text-gray-700">Status</label>
-                    <div className="relative">
-                        <select
-                            value={data.status}
-                            onChange={(e) => setData('status', e.target.value)}
-                            className={`${inputClass(errors.status)} appearance-none pr-8`}
-                        >
-                            {STATUS_OPTIONS.map((opt) => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                        </select>
-                        <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <div
+                        onClick={() => setOpenDropdown(openDropdown === 'status' ? null : 'status')}
+                        className={`${inputClass(errors.status)} flex items-center justify-between cursor-pointer`}
+                    >
+                        <span className="text-gray-900 capitalize">
+                            {STATUS_OPTIONS.find(o => o.value === data.status)?.label || 'Pemilik'}
+                        </span>
+                        <ChevronDown size={15} className="text-gray-400" />
                     </div>
+
+                    {openDropdown === 'status' && (
+                        <div className="absolute left-0 right-0 top-full mt-1 rounded-lg bg-white shadow-lg border border-gray-200 z-50 overflow-hidden">
+                            {STATUS_OPTIONS.map((opt) => (
+                                <div
+                                    key={opt.value}
+                                    onClick={() => {
+                                        setData('status', opt.value);
+                                        setOpenDropdown(null);
+                                    }}
+                                    className="px-3 py-2.5 text-sm text-gray-800 hover:bg-gray-100 cursor-pointer"
+                                >
+                                    {opt.label}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                     {errors.status && <p className="mt-1 text-xs text-red-600">{errors.status}</p>}
                 </div>
 
