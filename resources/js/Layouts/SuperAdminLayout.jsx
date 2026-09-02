@@ -28,7 +28,17 @@ const navItems = [
         ],
     },
     { label: 'Layanan', href: '/super-admin/layanan', icon: Package },
-    { label: 'Pesanan', href: '/super-admin/pesanan', icon: ClipboardList },
+    {
+        label: 'Pesanan',
+        href: '/super-admin/pesanan',
+        icon: ClipboardList,
+        children: [
+            { label: 'Barang', href: '/super-admin/pesanan?service_type=barang' },
+            { label: 'Kendaraan', href: '/super-admin/pesanan?service_type=kendaraan' },
+            { label: 'Bangunan', href: '/super-admin/pesanan?service_type=bangunan' },
+            { label: 'Pick Up', href: '/super-admin/pesanan?is_pickup=1' },
+        ],
+    },
     { label: 'Pengembalian Dana', href: '/super-admin/pengembalian-dana', icon: Undo2 },
     { label: 'Penarikan Saldo', href: '/super-admin/penarikan-saldo', icon: Wallet },
     { label: 'Total Transaksi', href: '/super-admin/total-transaksi', icon: ArrowLeftRight },

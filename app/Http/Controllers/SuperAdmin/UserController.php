@@ -14,12 +14,12 @@ use Inertia\Response;
 
 /**
  * Halaman "User" di panel Super Admin Titipsini: Customer, Vendor,
- * Finance, Admin, dan form "Tambah Akun" — sesuai grup menu di
- * SuperAdminLayout.jsx.
+ * Finance, Admin, dan form "Tambah Akun".
  *
- * Customer & Vendor memakai alur verifikasi (KTP/lahan) yang sudah ada
- * (verification_status). Finance & Admin adalah akun staf internal
- * biasa, jadi tidak melalui alur verifikasi — cukup aktif/nonaktif.
+ * PENTING: Vendor BUKAN model terpisah — sama seperti di
+ * Admin\PartnerController, vendor adalah User dengan role='partner'.
+ * (Versi sebelumnya controller ini salah asumsi memakai model Partner
+ * tersendiri — sudah diperbaiki di sini.)
  */
 class UserController extends Controller
 {
@@ -27,9 +27,6 @@ class UserController extends Controller
        CUSTOMER
     ───────────────────────────────────────────── */
 
-    /**
-     * GET /super-admin/user/customer
-     */
     public function customerIndex(Request $request): Response
     {
         $request->validate([
@@ -59,16 +56,10 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * GET /super-admin/user/customer/{user}
-     */
     public function customerShow(User $user): Response
     {
         abort_unless($user->role === 'customer', 404);
 
-        // Relasi camelCase (ordersAsCustomer) otomatis diserialisasi
-        // Laravel jadi snake_case (orders_as_customer) saat dikirim ke
-        // Inertia — sesuai field yang dibaca CustomerShow.jsx.
         $user->load(['ordersAsCustomer' => function ($query) {
             $query->select(['id', 'customer_id', 'order_code', 'service_type', 'total_price', 'status', 'created_at'])
                 ->latest();
@@ -79,9 +70,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * PATCH /super-admin/user/customer/{user}/status
-     */
     public function updateCustomerStatus(Request $request, User $user): RedirectResponse
     {
         abort_unless($user->role === 'customer', 404);
@@ -93,12 +81,8 @@ class UserController extends Controller
 
         $user->update([
             'verification_status' => $validated['verification_status'],
-            'rejection_reason' => $validated['verification_status'] === 'ditolak'
-                ? $validated['rejection_reason']
-                : null,
-            'verified_at' => $validated['verification_status'] === 'terverifikasi'
-                ? now()
-                : $user->verified_at,
+            'rejection_reason' => $validated['verification_status'] === 'ditolak' ? $validated['rejection_reason'] : null,
+            'verified_at' => $validated['verification_status'] === 'terverifikasi' ? now() : $user->verified_at,
         ]);
 
         return redirect()->back()->with('success', 'Status customer berhasil diperbarui.');
@@ -106,16 +90,13 @@ class UserController extends Controller
 
     /* ─────────────────────────────────────────────
        VENDOR (MITRA)
-       Vendor disimpan sebagai baris tabel `users` dengan
-       role='partner' — sama seperti Admin\PartnerController.
-       TIDAK ada model Partner terpisah, jadi query & update di
-       sini memakai User::where('role', 'partner') supaya tetap
-       satu sumber data yang sama dengan panel Admin biasa.
+       Sama seperti Admin\PartnerController: vendor = User dengan
+       role='partner'. Parameter route tetap dinamai {partner} untuk
+       konsistensi URL/penamaan, tapi type-hint-nya User — Laravel route
+       model binding otomatis resolve berdasarkan primary key, nama
+       parameter tidak harus sama dengan nama class model.
     ───────────────────────────────────────────── */
 
-    /**
-     * GET /super-admin/user/vendor
-     */
     public function vendorIndex(Request $request): Response
     {
         $request->validate([
@@ -129,7 +110,7 @@ class UserController extends Controller
                 if ($request->status === 'ditangguhkan') {
                     $q->whereNotNull('suspended_at');
                 } else {
-                    $q->whereNull('suspended_at')->where('verification_status', $request->status);
+                    $q->where('verification_status', $request->status)->whereNull('suspended_at');
                 }
             })
             ->when($request->filled('search'), function ($q) use ($request) {
@@ -151,9 +132,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * GET /super-admin/user/vendor/{partner}
-     */
     public function vendorShow(User $partner): Response
     {
         abort_unless($partner->role === 'partner', 404);
@@ -166,8 +144,9 @@ class UserController extends Controller
     }
 
     /**
-     * Update status verifikasi identitas / penangguhan vendor.
      * PATCH /super-admin/user/vendor/{partner}/status
+     * Setujui / tolak / tangguhkan identitas vendor — persis logic
+     * Admin\PartnerController@updateStatus.
      */
     public function updateVendorStatus(Request $request, User $partner): RedirectResponse
     {
@@ -180,23 +159,20 @@ class UserController extends Controller
 
         $partner->update([
             'verification_status' => $validated['verification_status'],
-            'rejection_reason' => in_array($validated['verification_status'], ['ditolak', 'ditangguhkan'])
+            'rejection_reason' => in_array($validated['verification_status'], ['ditolak', 'ditangguhkan'], true)
                 ? $validated['rejection_reason']
                 : null,
-            'suspended_at' => $validated['verification_status'] === 'ditangguhkan'
-                ? now()
-                : null,
-            'verified_at' => $validated['verification_status'] === 'terverifikasi'
-                ? now()
-                : $partner->verified_at,
+            'suspended_at' => $validated['verification_status'] === 'ditangguhkan' ? now() : null,
+            'verified_at' => $validated['verification_status'] === 'terverifikasi' ? now() : $partner->verified_at,
         ]);
 
         return redirect()->back()->with('success', 'Status identitas vendor berhasil diperbarui.');
     }
 
     /**
-     * Update status verifikasi layanan/lahan milik vendor.
      * PATCH /super-admin/user/vendor/{partner}/services/{service}/status
+     * Setujui / tolak validasi lahan satu layanan vendor — persis logic
+     * Admin\PartnerController@updateServiceStatus.
      */
     public function updateVendorServiceStatus(Request $request, User $partner, Service $service): RedirectResponse
     {
@@ -210,7 +186,7 @@ class UserController extends Controller
 
         $service->update([
             'verification_status' => $validated['verification_status'],
-            'rejection_reason' => in_array($validated['verification_status'], ['ditolak', 'ditangguhkan'])
+            'rejection_reason' => in_array($validated['verification_status'], ['ditolak', 'ditangguhkan'], true)
                 ? $validated['rejection_reason']
                 : null,
         ]);
@@ -219,8 +195,9 @@ class UserController extends Controller
     }
 
     /**
-     * Memulihkan akun vendor yang ditangguhkan.
      * PATCH /super-admin/user/vendor/{partner}/restore
+     * Pulihkan akun vendor yang ditangguhkan — persis logic
+     * Admin\PartnerController@restore.
      */
     public function restoreVendor(User $partner): RedirectResponse
     {
@@ -240,9 +217,6 @@ class UserController extends Controller
        FINANCE (staf internal, tanpa alur verifikasi)
     ───────────────────────────────────────────── */
 
-    /**
-     * GET /super-admin/user/finance
-     */
     public function financeIndex(Request $request): Response
     {
         $request->validate(['search' => 'nullable|string|max:100']);
@@ -255,9 +229,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * GET /super-admin/user/finance/{user}
-     */
     public function financeShow(User $user): Response
     {
         abort_unless($user->role === 'finance', 404);
@@ -271,9 +242,6 @@ class UserController extends Controller
        ADMIN (staf internal, tanpa alur verifikasi)
     ───────────────────────────────────────────── */
 
-    /**
-     * GET /super-admin/user/admin
-     */
     public function adminIndex(Request $request): Response
     {
         $request->validate(['search' => 'nullable|string|max:100']);
@@ -286,9 +254,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * GET /super-admin/user/admin/{user}
-     */
     public function adminShow(User $user): Response
     {
         abort_unless($user->role === 'admin', 404);
@@ -298,11 +263,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Query dasar untuk daftar staf internal (finance/admin) — nggak
-     * ada tab status karena akun staf cukup aktif/nonaktif, bukan
-     * alur verifikasi identitas seperti customer/vendor.
-     */
     private function staffQuery(string $role, Request $request)
     {
         return User::query()
@@ -319,11 +279,6 @@ class UserController extends Controller
             ->orderBy('created_at', 'desc');
     }
 
-    /**
-     * Aktifkan / nonaktifkan akun staf (finance/admin). Dipakai lewat
-     * tombol toggle di FinanceShow.jsx / AdminShow.jsx.
-     * PATCH /super-admin/user/{user}/toggle-active
-     */
     public function toggleActive(User $user): RedirectResponse
     {
         abort_unless(in_array($user->role, ['finance', 'admin'], true), 404);
@@ -338,23 +293,13 @@ class UserController extends Controller
 
     /* ─────────────────────────────────────────────
        TAMBAH AKUN
-       Form untuk membuat akun staf baru (finance/admin) — dipicu dari
-       tombol "Tambah Akun" di sidebar. Sengaja dibatasi hanya boleh
-       membuat role finance/admin: akun customer & vendor dibuat lewat
-       alur registrasi masing-masing (bukan dibuatkan manual di sini).
     ───────────────────────────────────────────── */
 
-    /**
-     * GET /super-admin/user/tambah
-     */
     public function create(): Response
     {
         return Inertia::render('SuperAdmin/User/AccountCreate');
     }
 
-    /**
-     * POST /super-admin/user/tambah
-     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
