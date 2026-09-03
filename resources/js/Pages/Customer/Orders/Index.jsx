@@ -26,8 +26,13 @@ const STATUS_LABEL = {
 };
 
 function getStatusLabel(order) {
-    if (order.status === 'diproses' && !order.payment_verified_at) {
-        return order.payment_receipt ? 'Menunggu Verifikasi Pembayaran' : 'Menunggu Pembayaran';
+    if (order.status === 'diproses') {
+        if (!order.payment_verified_at) {
+            return order.payment_receipt ? 'Menunggu Verifikasi Pembayaran' : 'Menunggu Pembayaran';
+        }
+        if (order.fase === 'menunggu') {
+            return 'Menunggu Verifikasi';
+        }
     }
 
     return STATUS_LABEL[order.status] ?? order.status;
@@ -166,7 +171,7 @@ export default function OrdersIndex({ orders, filters }) {
                         )}
 
                         {orders.data.map((order) => {
-                            const isDititipkan = order.status === 'diproses' && Boolean(order.payment_verified_at);
+                            const isDititipkan = order.status === 'diproses' && Boolean(order.payment_verified_at) && order.fase !== 'menunggu';
                             const isSelesai = order.status === 'selesai';
                             const isBelumBayar = order.status === 'baru';
                             const isBarang = order.service_type === 'barang';

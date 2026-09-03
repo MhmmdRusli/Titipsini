@@ -1,6 +1,10 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowLeft, MapPin, Home, User, Package, XCircle, CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, HandCoins, Clock, ArrowRightCircle, AlertTriangle } from 'lucide-react';
+import { 
+    ArrowLeft, MapPin, Home, User, Package, XCircle, 
+    CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, 
+    HandCoins, Clock, ArrowRightCircle, AlertTriangle 
+} from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
 function formatRupiah(value) {
@@ -90,7 +94,7 @@ function ShowBaru({ order }) {
                         {ALASAN_TOLAK.map((opt) => (
                             <label
                                 key={opt.value}
-                                className="flex items-center gap-3 py-3.5 text-sm text-gray-800 dark:text-gray-200"
+                                className="flex items-center gap-3 py-3.5 text-sm text-gray-800 dark:text-gray-200 cursor-pointer"
                             >
                                 <input
                                     type="radio"
@@ -251,7 +255,6 @@ function ShowBaru({ order }) {
 
 /* ====================================================================
    TAMPILAN PESANAN YANG SUDAH DI-ACCEPT (diproses/selesai/dibatalkan)
-   — tidak berubah dari versi sebelumnya
    ==================================================================== */
 function ShowDiproses({ order }) {
     const [isVerifying, setIsVerifying] = useState(false);
@@ -341,6 +344,10 @@ function ShowDiproses({ order }) {
                                 <ArrowRightCircle size={16} />
                                 {isAdvancingFase ? 'Memproses...' : order.next_fase_action_label}
                             </button>
+                        ) : order.advance_fase_blocked_reason ? (
+                            <p className="mt-2 text-xs italic text-amber-500 dark:text-amber-400">
+                                {order.advance_fase_blocked_reason}
+                            </p>
                         ) : order.status !== 'diproses' ? (
                             <p className="mt-2 text-xs italic text-gray-400 dark:text-gray-500">
                                 Status operasional hanya bisa diubah selagi pesanan sedang diproses.
@@ -565,30 +572,7 @@ function ShowDiproses({ order }) {
                         )}
                     </div>
                 )}
-
-                <div className="space-y-2 border-t border-green-200/70 pt-4 dark:border-green-900/40">
-                    <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Nota Finansial Pembayaran</p>
-                    <div className="space-y-2 text-xs">
-                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                            <span>Subtotal</span>
-                            <span>{formatRupiah(order.subtotal)}</span>
-                        </div>
-                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                            <span>Diskon</span>
-                            <span className="text-red-500">- {formatRupiah(order.discount)}</span>
-                        </div>
-                        <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                            <span>Biaya Penjemputan</span>
-                            <span>{formatRupiah(order.pickup_fee)}</span>
-                        </div>
-                        <div className="mt-2 flex justify-between border-t border-gray-100 dark:border-gray-700/60 pt-2.5 text-sm font-bold text-gray-900 dark:text-gray-100">
-                            <span>Total Pembayaran</span>
-                            <span className="text-[#15803d] dark:text-[#4ade80]">{formatRupiah(order.total)}</span>
-                        </div>
-                    </div>
-                </div>
             </div>
-
         </MitraLayout>
     );
 }
