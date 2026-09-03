@@ -152,6 +152,12 @@ class ServiceController extends Controller
             403,
             'Layanan ini belum siap menerima pesanan (masih dalam proses verifikasi atau belum mengatur jam operasional).'
         );
+
+        abort_unless(
+            ! $this->sedangTutupHariIni($service),
+            403,
+            'Mitra sedang tutup saat ini. Silakan coba lagi di jam operasional.'
+        );
     }
 
     /**
@@ -228,6 +234,7 @@ class ServiceController extends Controller
             ->through(function ($service) {
                 $service->foto = $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null;
                 $service->is_orderable = $service->isOrderable();
+                $service->sedang_tutup_hari_ini = $this->sedangTutupHariIni($service);
                 return $service;
             });
 
@@ -309,6 +316,7 @@ class ServiceController extends Controller
                 ...$this->reviewSummary($service),
                 'jadwalOperasional' => $this->jadwalUntukCustomer($service),
                 'isOrderable' => $service->isOrderable(),
+                'sedangTutupHariIni' => $this->sedangTutupHariIni($service),
             ],
         ]);
     }
@@ -389,6 +397,7 @@ class ServiceController extends Controller
                 [
                     'jadwalOperasional' => $this->jadwalUntukCustomer($service),
                     'isOrderable' => $service->isOrderable(),
+                    'sedangTutupHariIni' => $this->sedangTutupHariIni($service),
                 ]
             ),
         ]);
@@ -596,7 +605,7 @@ class ServiceController extends Controller
             'mitra' => array_merge(
                 $this->formatMitraKendaraan($service),
                 $this->reviewSummary($service),
-                ['jadwalOperasional' => $this->jadwalUntukCustomer($service)]
+                ['jadwalOperasional' => $this->jadwalUntukCustomer($service), 'sedangTutupHariIni' => $this->sedangTutupHariIni($service)]
             ),
         ]);
     }
@@ -609,7 +618,7 @@ class ServiceController extends Controller
             'mitra' => array_merge(
                 $this->formatMitraKendaraan($service),
                 $this->reviewSummary($service),
-                ['jadwalOperasional' => $this->jadwalUntukCustomer($service)]
+                ['jadwalOperasional' => $this->jadwalUntukCustomer($service), 'sedangTutupHariIni' => $this->sedangTutupHariIni($service)]
             ),
         ]);
     }
@@ -1029,7 +1038,50 @@ class ServiceController extends Controller
             'jam_tutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
             'is_buka' => (bool) $service->is_active,
             'is_orderable' => $service->isOrderable(),
+            'sedang_tutup_hari_ini' => $this->sedangTutupHariIni($service),
         ];
+    }
+
+    /**
+     * True kalau layanan orderable, hari ini ada di jadwal_operasional tapi
+     * TIDAK ada slot yang sedang berjalan (toko tutup sekarang). Dipakai
+     * supaya list menampilkan "Sedang Tutup" (bukan "Segera Tersedia" yang
+     * membingungkan), dan tombol "Titip Disini" dinonaktifkan.
+     */
+    protected function sedangTutupHariIni(Service $service): bool
+    {
+        if (! $service->isOrderable()) {
+            return false;
+        }
+
+        $jadwal = $service->vendor?->jadwal_operasional ?? [];
+        if (! is_array($jadwal) || empty($jadwal)) {
+            return false;
+        }
+
+        $hariIni = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'][now('Asia/Jakarta')->dayOfWeek];
+
+        $h = $jadwal[$hariIni] ?? null;
+        if (! $h || empty($h['aktif'])) {
+            return true;
+        }
+
+        $jamSekarang = now('Asia/Jakarta')->format('H:i:s');
+
+        foreach (($h['slots'] ?? []) as $slot) {
+            if (empty($slot['aktif']) || empty($slot['jam_buka']) || empty($slot['jam_tutup'])) {
+                continue;
+            }
+
+            $buka = substr($slot['jam_buka'], 0, 8);
+            $tutup = substr($slot['jam_tutup'], 0, 8);
+
+            if ($jamSekarang >= $buka && $jamSekarang <= $tutup) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function reviewSummary(Service $service): array

@@ -47,16 +47,31 @@ export default function DetailMitra({ service }) {
                     <ReviewList averageRating={service.averageRating} reviewCount={service.reviewCount} reviews={service.reviews} />
                 </div>
 
-                <Link
-                    href={`/app/services/barang/paket-pilihan?service_id=${service.id}`}
-                    className={`mt-6 block w-full rounded-xl py-3 text-center text-sm font-bold text-white ${
-                        service.isOrderable
-                            ? 'bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600'
-                            : 'pointer-events-none bg-gray-300 dark:bg-gray-700'
-                    }`}
-                >
-                    Titip Disini
-                </Link>
+                {service.isOrderable && service.sedangTutupHariIni ? (
+                    <>
+                        <button
+                            type="button"
+                            disabled
+                            className="mt-6 block w-full cursor-not-allowed rounded-xl bg-gray-300 py-3 text-center text-sm font-bold text-white dark:bg-gray-700"
+                        >
+                            Sedang Tutup
+                        </button>
+                        <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">
+                            Mitra sedang tutup saat ini. Silakan pesan di jam operasional.
+                        </p>
+                    </>
+                ) : (
+                    <Link
+                        href={`/app/services/barang/paket-pilihan?service_id=${service.id}`}
+                        className={`mt-6 block w-full rounded-xl py-3 text-center text-sm font-bold text-white ${
+                            service.isOrderable
+                                ? 'bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600'
+                                : 'pointer-events-none bg-gray-300 dark:bg-gray-700'
+                        }`}
+                    >
+                        Titip Disini
+                    </Link>
+                )}
                 {!service.isOrderable && (
                     <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">
                         Layanan ini belum bisa dipesan (masih dalam proses verifikasi atau belum mengatur jam operasional).

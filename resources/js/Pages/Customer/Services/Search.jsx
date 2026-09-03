@@ -173,12 +173,15 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                 {/* Results */}
                 {kota && mitras && mitras.data.length > 0 && (
                     <div className="mt-4 space-y-3">
-                        {mitras.data.map((m) => (
+                        {mitras.data.map((m) => {
+                            const sedangTutup = m.is_orderable !== false && m.sedang_tutup_hari_ini === true;
+                            const dimmed = m.is_orderable === false || sedangTutup;
+                            return (
                             <div
                                 key={m.id}
-                                className={`rounded-xl border p-4 shadow-sm ${m.is_buka
-                                    ? 'border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800'
-                                    : 'border-gray-100 bg-gray-50 opacity-60 dark:border-gray-800 dark:bg-gray-900'
+                                className={`rounded-xl border p-4 shadow-sm ${dimmed
+                                    ? 'border-gray-100 bg-gray-50 opacity-60 dark:border-gray-800 dark:bg-gray-900'
+                                    : 'border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800'
                                     }`}
                             >
                                 <div className="flex items-start justify-between gap-3">
@@ -192,13 +195,11 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                         <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
                                             Segera Tersedia
                                         </span>
-                                    ) : (
-                                        !m.is_buka && (
-                                            <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-500 dark:bg-red-950/40 dark:text-red-400">
-                                                Tutup
-                                            </span>
-                                        )
-                                    )}
+                                    ) : sedangTutup ? (
+                                        <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-500 dark:bg-red-950/40 dark:text-red-400">
+                                            Sedang Tutup
+                                        </span>
+                                    ) : null}
                                 </div>
                                 <p className="mt-1.5 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                                     <MapPin size={12} /> {m.alamat}, {m.kecamatan}
@@ -210,11 +211,11 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                 <div className="mt-3 flex gap-2">
                                     <button
                                         type="button"
-                                        disabled={!m.is_buka || m.is_orderable === false}
-                                        onClick={() => { if (m.is_orderable !== false) router.visit(`/app/services/${kategori}/${m.id}/titip`); }}
+                                        disabled={!m.is_buka || m.is_orderable === false || sedangTutup}
+                                        onClick={() => { if (m.is_orderable !== false && ! sedangTutup) router.visit(`/app/services/${kategori}/${m.id}/titip`); }}
                                         className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-[#22c55e] dark:disabled:bg-gray-700"
                                     >
-                                        Titip Disini
+                                        {sedangTutup ? 'Sedang Tutup' : 'Titip Disini'}
                                     </button>
                                     <Link
                                         href={`/app/services/${kategori}/${m.id}/detail`}
@@ -224,7 +225,8 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                     </Link>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
 

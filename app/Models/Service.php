@@ -72,8 +72,10 @@ class Service extends Model
             ->where('services.is_active', true)
             ->where('services.verification_status', 'terverifikasi')
             ->whereHas('vendor', function ($q) {
-                $q->where('verification_status', 'terverifikasi')
-                    ->whereNotNull('jadwal_operasional')
+                $q->where('verification_status', 'terverifikasi');
+            })
+            ->whereHas('vendor', function ($q) {
+                $q->whereNotNull('jadwal_operasional')
                     ->where('jadwal_operasional', '<>', '[]');
             });
     }
@@ -88,7 +90,7 @@ class Service extends Model
             && $this->verification_status === 'terverifikasi'
             && $this->vendor
             && $this->vendor->verification_status === 'terverifikasi'
-            && ! empty($this->vendor->jadwal_operasional);
+            && $this->vendor->jadwalOperasionalValid();
     }
     public function user()
 {

@@ -28,14 +28,17 @@ export default function Detail({ mitra }) {
                         <JadwalOperasional jadwal={mitra.jadwalOperasional} />
                     </div>
                     <Reviews mitra={mitra} />
-                    {mitra.isOrderable ? (
+                    {!mitra.isOrderable ? (
+                        <button type="button" disabled className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-300 py-3.5 text-sm font-bold text-white dark:bg-gray-700">Titip Disini</button>
+                    ) : mitra.sedangTutupHariIni ? (
+                        <>
+                            <button type="button" disabled className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-300 py-3.5 text-sm font-bold text-white dark:bg-gray-700">Sedang Tutup</button>
+                            <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">Mitra sedang tutup saat ini. Silakan pesan di jam operasional.</p>
+                        </>
+                    ) : (
                         <Link href={`/app/services/kendaraan/${mitra.id}/titip`} className="mt-7 flex w-full items-center justify-center rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white dark:bg-[#22c55e]">
                             Titip Disini
                         </Link>
-                    ) : (
-                        <button type="button" disabled className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-300 py-3.5 text-sm font-bold text-white dark:bg-gray-700">
-                            Titip Disini
-                        </button>
                     )}
                     {!mitra.isOrderable && (
                         <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">

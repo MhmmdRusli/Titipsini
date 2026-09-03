@@ -92,6 +92,37 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'partner' && $this->verification_status === 'terverifikasi';
     }
 
+    /**
+     * True kalau mitra sudah memasang jam operasional dengan BENAR:
+     * ada minimal satu hari yang `aktif = true` dan punya minimal satu slot
+     * dengan jam buka & jam tutup terisi. Tanpa ini, scopeOrderable() salah
+     * menganggap mitra yang data jadwal_operasional-nya ada tapi tidak ada
+     * hari aktif/slot aktif sebagai "sudah lengkap" - padahal customer
+     * tetap tidak punya jam operasional yang valid.
+     */
+    public function jadwalOperasionalValid(): bool
+    {
+        $jadwal = $this->jadwal_operasional;
+
+        if (! is_array($jadwal) || empty($jadwal)) {
+            return false;
+        }
+
+        foreach ($jadwal as $hari) {
+            if (empty($hari['aktif'])) {
+                continue;
+            }
+
+            foreach ($hari['slots'] ?? [] as $slot) {
+                if (! empty($slot['aktif']) && ! empty($slot['jam_buka']) && ! empty($slot['jam_tutup'])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public function getVendorIdAttribute(): string
     {
         return 'VDR-'.str_pad((string) $this->id, 5, '0', STR_PAD_LEFT);
