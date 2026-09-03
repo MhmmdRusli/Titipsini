@@ -67,12 +67,29 @@ const DEFAULT_PESANAN_BREAKDOWN = [
   { label: "Bangunan", value: 0, color: COLOR_BANGUNAN },
 ];
 
+// PENTING (fix): field `icon` di sini (Package/Building2/Truck/Car) HANYA
+// berlaku untuk data default/fallback ini, karena di sini komponennya
+// didefinisikan langsung di file yang sama. Begitu data datang dari
+// backend lewat Inertia, komponen React tidak bisa ikut ter-serialize ke
+// JSON — jadi `item.icon` dari props asli akan selalu undefined. Itu
+// sebabnya LayananVendorCard di bawah TIDAK boleh baca `item.icon`
+// langsung; harus lookup lewat ICON_BY_KEY berdasarkan `item.key`.
 const DEFAULT_LAYANAN_VENDOR = [
   { key: "barang", label: "Total Layanan Barang", value: 0, icon: Package, color: COLOR_BARANG },
   { key: "bangunan", label: "Total Layanan Bangunan", value: 0, icon: Building2, color: COLOR_BANGUNAN },
   { key: "pickup", label: "Total Layanan Pick Up", value: 0, icon: Truck, color: COLOR_PICKUP },
   { key: "kendaraan", label: "Total Layanan Kendaraan", value: 0, icon: Car, color: COLOR_KENDARAAN },
 ];
+
+// Lookup ikon berdasarkan key — dipakai LayananVendorCard supaya tidak
+// bergantung pada field `icon` dari props (yang hilang/undefined saat
+// datanya datang dari backend via Inertia).
+const ICON_BY_KEY = {
+  barang: Package,
+  bangunan: Building2,
+  pickup: Truck,
+  kendaraan: Car,
+};
 
 const DEFAULT_KEUANGAN = {
   total_saldo: 0,
@@ -422,7 +439,13 @@ function PesananBreakdownCard({ data, tahun }) {
 }
 
 function LayananVendorCard({ item }) {
-  const Icon = item.icon;
+  // FIX: sebelumnya `const Icon = item.icon;` — ini undefined begitu
+  // `item` datang dari backend (komponen React tidak ikut ter-serialize
+  // lewat Inertia/JSON), makanya crash "Element type is invalid".
+  // Sekarang ikon di-lookup dari ICON_BY_KEY berdasarkan `item.key`
+  // (string biasa, aman dikirim lewat JSON), dengan fallback ke Package
+  // supaya tidak pernah undefined meski key-nya belum terdaftar.
+  const Icon = ICON_BY_KEY[item.key] ?? Package;
   return (
     <div className="rounded-2xl border bg-white p-3.5 shadow-sm dark:bg-slate-900" style={{ borderColor: `${item.color}33` }}>
       <div className="flex h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: `${item.color}1a`, color: item.color }}>

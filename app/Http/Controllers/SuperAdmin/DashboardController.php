@@ -16,7 +16,16 @@ class DashboardController extends Controller
     public function index(Request $request): Response
     {
         $tahun = (int) $request->query('tahun', now()->year);
-        $bulan = (int) $request->query('bulan', now()->month);
+
+        // PENTING: default 0 (artinya "semua bulan"), BUKAN now()->month.
+        // Sebelumnya default-nya bulan berjalan, sehingga card "Total
+        // Pesanan" selalu memfilter cuma pesanan yang dibuat bulan ini —
+        // begitu data historis (mis. Agustus) tidak ada pesanan baru di
+        // bulan berjalan (September), card itu selalu tampil 0 meski
+        // sebenarnya ada banyak data di bulan-bulan lain tahun yang sama.
+        // UI card ini sendiri cuma punya badge TAHUN (tanpa selector
+        // bulan), jadi defaultnya memang harus agregasi satu tahun penuh.
+        $bulan = (int) $request->query('bulan', 0);
 
         return Inertia::render('SuperAdmin/Dashboard', [
             'user' => $request->user()->only(['id', 'name', 'email', 'role']),
@@ -110,10 +119,10 @@ class DashboardController extends Controller
             ->pluck('total', 'kategori');
 
         return [
-            ['key' => 'barang',    'label' => 'Total Layanan Barang',    'value' => (int) ($countByKategori['barang'] ?? 0),    'icon' => 'Package',   'color' => '#16a34a'],
-            ['key' => 'bangunan',  'label' => 'Total Layanan Bangunan',  'value' => (int) ($countByKategori['bangunan'] ?? 0),  'icon' => 'Building2', 'color' => '#ef4444'],
-            ['key' => 'pickup',    'label' => 'Total Layanan Pick Up',   'value' => Order::where('is_pickup', true)->count(),   'icon' => 'Truck',     'color' => '#0ea5e9'],
-            ['key' => 'kendaraan', 'label' => 'Total Layanan Kendaraan', 'value' => (int) ($countByKategori['kendaraan'] ?? 0), 'icon' => 'Car',       'color' => '#f59e0b'],
+            ['key' => 'barang',    'label' => 'Total Layanan Barang',    'value' => (int) ($countByKategori['barang'] ?? 0)],
+            ['key' => 'bangunan',  'label' => 'Total Layanan Bangunan',  'value' => (int) ($countByKategori['bangunan'] ?? 0)],
+            ['key' => 'pickup',    'label' => 'Total Layanan Pick Up',   'value' => Order::where('is_pickup', true)->count()],
+            ['key' => 'kendaraan', 'label' => 'Total Layanan Kendaraan', 'value' => (int) ($countByKategori['kendaraan'] ?? 0)],
         ];
     }
 
