@@ -197,7 +197,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                         </span>
                                     ) : sedangTutup ? (
                                         <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-500 dark:bg-red-950/40 dark:text-red-400">
-                                            Sedang Tutup
+                                            Layanan Sedang Tutup
                                         </span>
                                     ) : null}
                                 </div>
@@ -215,7 +215,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                         onClick={() => { if (m.is_orderable !== false && ! sedangTutup) router.visit(`/app/services/${kategori}/${m.id}/titip`); }}
                                         className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-[#22c55e] dark:disabled:bg-gray-700"
                                     >
-                                        {sedangTutup ? 'Sedang Tutup' : 'Titip Disini'}
+                                        {sedangTutup ? 'Layanan Sedang Tutup' : 'Titip Disini'}
                                     </button>
                                     <Link
                                         href={`/app/services/${kategori}/${m.id}/detail`}

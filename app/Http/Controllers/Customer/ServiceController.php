@@ -241,7 +241,7 @@ class ServiceController extends Controller
                         ->orWhere('kecamatan', 'like', "%{$search}%");
                 });
             })
-            ->with('vendor:id,name')
+            ->with('vendor:id,name,verification_status,jadwal_operasional')
             ->orderBy('kota')
             ->paginate(10)
             ->withQueryString()
@@ -1001,7 +1001,7 @@ class ServiceController extends Controller
         $services = Service::query()
             ->where('kategori', $kategori)
             ->where('is_active', true)
-            ->with('vendor:id,name')
+            ->with('vendor:id,name,verification_status,jadwal_operasional')
             ->when($request->filled('kota'), fn ($query) => $query->where('kota', $request->string('kota')))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');

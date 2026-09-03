@@ -32,7 +32,7 @@ export default function Detail({ mitra }) {
                         <button type="button" disabled className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-300 py-3.5 text-sm font-bold text-white dark:bg-gray-700">Titip Disini</button>
                     ) : mitra.sedangTutupHariIni ? (
                         <>
-                            <button type="button" disabled className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-300 py-3.5 text-sm font-bold text-white dark:bg-gray-700">Sedang Tutup</button>
+                            <button type="button" disabled className="mt-7 flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-gray-300 py-3.5 text-sm font-bold text-white dark:bg-gray-700">Layanan Sedang Tutup</button>
                             <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">Mitra sedang tutup saat ini. Silakan pesan di jam operasional.</p>
                         </>
                     ) : (
@@ -52,3 +52,4 @@ export default function Detail({ mitra }) {
 function Reviews({ mitra }) {
     return <div className="mt-5 border-t border-gray-100 pt-4 dark:border-gray-700"><div className="flex items-center gap-2 text-sm font-bold"><Star size={17} className="fill-yellow-400 text-yellow-400" /> {mitra.averageRating || '-'} / 5 <span className="text-xs font-normal text-gray-400">({mitra.reviewCount || 0} ulasan)</span></div>{mitra.reviews?.length ? <div className="mt-3 space-y-2">{mitra.reviews.map((item) => <div key={item.id} className="rounded-lg bg-gray-50 p-2.5 dark:bg-gray-900/50"><div className="flex justify-between text-xs font-semibold"><span>{item.customerName}</span><span className="flex">{[1, 2, 3, 4, 5].map((star) => <Star key={star} size={11} className={star <= item.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'} />)}</span></div><p className="mt-1 text-xs text-gray-600 dark:text-gray-300">{item.review}</p></div>)}</div> : <p className="mt-3 text-xs text-gray-400">Belum ada ulasan.</p>}</div>;
 }
+

@@ -54,7 +54,7 @@ export default function DetailMitra({ service }) {
                             disabled
                             className="mt-6 block w-full cursor-not-allowed rounded-xl bg-gray-300 py-3 text-center text-sm font-bold text-white dark:bg-gray-700"
                         >
-                            Sedang Tutup
+                            Layanan Sedang Tutup
                         </button>
                         <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">
                             Mitra sedang tutup saat ini. Silakan pesan di jam operasional.
