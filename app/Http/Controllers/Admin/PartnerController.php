@@ -109,7 +109,7 @@ class PartnerController extends Controller
      * Update status verifikasi layanan / lahan mitra.
      * PATCH /admin/partners/{partner}/services/{service}/status
      */
-    public function updateServiceStatus(Request $request, User $partner, \App\Models\Service $service): RedirectResponse
+        public function updateServiceStatus(Request $request, User $partner, \App\Models\Service $service): RedirectResponse
     {
         abort_unless($partner->role === 'partner', 404);
         abort_unless($service->user_id === $partner->id, 403);
@@ -124,6 +124,7 @@ class PartnerController extends Controller
             'rejection_reason' => in_array($validated['verification_status'], ['ditolak', 'ditangguhkan'])
                 ? $validated['rejection_reason']
                 : null,
+            'is_active' => $validated['verification_status'] === 'terverifikasi',
         ]);
 
         return redirect()

@@ -91,52 +91,64 @@ class ServiceController extends Controller
         /**
          * PATCH /mitra/layanan/{kategori}/fitur-penuh
          */
-        public function toggleFiturPenuh(Request $request, string $kategori): RedirectResponse
-        {
-            abort_unless(in_array($kategori, ['barang', 'kendaraan', 'bangunan', 'pindahan']), 404);
+            public function toggleFiturPenuh(Request $request, string $kategori): RedirectResponse
+    {
+        abort_unless(in_array($kategori, ['barang', 'kendaraan', 'bangunan', 'pindahan']), 404);
 
-            $validated = $request->validate([
-                'aktif' => ['required', 'boolean'],
-            ]);
+        $validated = $request->validate([
+            'aktif' => ['required', 'boolean'],
+        ]);
 
-            $user = $request->user();
+        $user = $request->user();
 
-            $pengaturan = $user->fitur_penuh_kategori ?? [];
-            $pengaturan[$kategori] = $validated['aktif'];
-            $user->update(['fitur_penuh_kategori' => $pengaturan]);
+        $pengaturan = $user->fitur_penuh_kategori ?? [];
+        $pengaturan[$kategori] = $validated['aktif'];
+        $user->update(['fitur_penuh_kategori' => $pengaturan]);
 
-            Service::where('user_id', $user->id)
-                ->where('kategori', $kategori)
-                ->update(['is_active' => $validated['aktif']]);
+        // Sinkronkan status SEMUA gudang milik mitra ini di kategori terkait
+        // — TAPI cuma yang sudah diverifikasi admin. Gudang yang masih
+        // pending/ditolak tidak boleh ikut kebuka hanya karena mitra
+        // nyalain toggle ini, dan gudang yang sudah diverifikasi tidak
+        // boleh ikut ketutup hanya karena filter kategori yang salah.
+        Service::where('user_id', $user->id)
+            ->where('kategori', $kategori)
+            ->where('verification_status', 'terverifikasi')
+            ->update(['is_active' => $validated['aktif']]);
 
-            return back()->with('success', $validated['aktif']
-                ? 'Fitur Penuh diaktifkan. Semua gudang kembali menerima pesanan.'
-                : 'Fitur Penuh dinonaktifkan. Semua gudang otomatis ditutup sementara.'
-            );
-        }
+        return back()->with('success', $validated['aktif']
+            ? 'Fitur Penuh diaktifkan. Semua gudang kembali menerima pesanan.'
+            : 'Fitur Penuh dinonaktifkan. Semua gudang otomatis ditutup sementara.'
+        );
+    }
 
         /**
          * PATCH /mitra/layanan/{layanan}/toggle-aktif
          */
-        public function toggleAktif(Request $request, Service $layanan): RedirectResponse
-        {
-            $this->authorizeOwnership($request, $layanan);
+            public function toggleAktif(Request $request, Service $layanan): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $layanan);
 
-            $fiturPenuhAktif = (bool) (($request->user()->fitur_penuh_kategori ?? [])[$layanan->kategori] ?? false);
+        abort_unless(
+            $layanan->verification_status === 'terverifikasi',
+            400,
+            'Gudang ini belum diverifikasi admin, belum bisa diaktifkan.'
+        );
 
-            abort_unless(
-                $fiturPenuhAktif,
-                400,
-                'Aktifkan "Fitur Penuh" untuk kategori ini terlebih dahulu sebelum mengubah status gudang secara manual.'
-            );
+        $fiturPenuhAktif = (bool) (($request->user()->fitur_penuh_kategori ?? [])[$layanan->kategori] ?? false);
 
-            $layanan->update(['is_active' => ! $layanan->is_active]);
+        abort_unless(
+            $fiturPenuhAktif,
+            400,
+            'Aktifkan "Fitur Penuh" untuk kategori ini terlebih dahulu sebelum mengubah status gudang secara manual.'
+        );
 
-            return back()->with('success', $layanan->is_active
-                ? 'Layanan berhasil diaktifkan kembali.'
-                : 'Layanan berhasil ditutup sementara.'
-            );
-        }
+        $layanan->update(['is_active' => ! $layanan->is_active]);
+
+        return back()->with('success', $layanan->is_active
+            ? 'Layanan berhasil diaktifkan kembali.'
+            : 'Layanan berhasil ditutup sementara.'
+        );
+    }
 
         /**
          * POST /mitra/layanan

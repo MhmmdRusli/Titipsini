@@ -177,6 +177,20 @@ class ServiceController extends Controller
     }
 
     /**
+     * Ambil user login dengan tipe data yang jelas (App\Models\User), supaya
+     * Intelephense tidak menganggap method seperti addresses(), saldo, dsb.
+     * "tidak ada" — karena $request->user()/auth()->user() secara tipe cuma
+     * balikin interface Authenticatable yang tidak mendeklarasikan itu.
+     */
+    protected function authUser(Request $request): \App\Models\User
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        return $user;
+    }
+
+    /**
      * GET /app/services?kategori=kendaraan&jenis=mobil&search=Yogyakarta
      */
     public function index(Request $request): Response|RedirectResponse
@@ -265,7 +279,7 @@ class ServiceController extends Controller
      */
     public function formBarang(Request $request)
     {
-        $addresses = $request->user()
+        $addresses = $this->authUser($request)
             ->addresses()
             ->latest('is_primary')
             ->latest()
@@ -345,7 +359,7 @@ class ServiceController extends Controller
             'service' => $service?->only(['id', 'nama', 'harga', 'jenis_bangunan']),
             'buildingOptions' => collect(['rumah', 'apartemen', 'kosan', 'gudang', 'kamar'])
                 ->map(fn ($value) => ['value' => $value, 'label' => ucfirst($value)])->values(),
-            'addresses' => $request->user()->addresses()->latest('is_primary')->latest()->get(['id', 'address', 'is_primary']),
+            'addresses' => $this->authUser($request)->addresses()->latest('is_primary')->latest()->get(['id', 'address', 'is_primary']),
         ]);
     }
 
@@ -358,19 +372,19 @@ class ServiceController extends Controller
             'keterangan' => 'nullable|string|max:500',
             'tanggalMasuk' => 'required|date',
             'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
-            'address_id' => ['required', 'integer', Rule::exists('addresses', 'id')->where('user_id', $request->user()->id)],
+            'address_id' => ['required', 'integer', Rule::exists('addresses', 'id')->where('user_id', $this->authUser($request)->id)],
             'setuju' => ['accepted'],
         ]);
 
         $service = Service::where('kategori', 'bangunan')->findOrFail($data['service_id']);
         $this->ensureOrderable($service);
-        $address = $request->user()->addresses()->findOrFail($data['address_id']);
+        $address = $this->authUser($request)->addresses()->findOrFail($data['address_id']);
         $duration = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
         $subtotal = (float) $service->harga * $data['jumlahBangunan'] * $duration;
         $fee = round($subtotal * self::PERSEN_BIAYA_LAYANAN / 100);
 
         $order = Order::create([
-            'order_code' => 'TS-'.strtoupper(uniqid()), 'customer_id' => $request->user()->id,
+            'order_code' => 'TS-'.strtoupper(uniqid()), 'customer_id' => $this->authUser($request)->id,
             'partner_id' => $service->user_id, 'service_id' => $service->id, 'service_type' => 'bangunan',
             'item_name' => $data['namaBangunan'], 'item_description' => $data['keterangan'] ?? null,
             'jumlah_barang' => $data['jumlahBangunan'], 'ukuran_barang' => $service->jenis_bangunan ?: 'bangunan',
@@ -457,7 +471,7 @@ class ServiceController extends Controller
             'address_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('addresses', 'id')->where('user_id', $request->user()->id),
+                Rule::exists('addresses', 'id')->where('user_id', $this->authUser($request)->id),
             ],
             'setuju' => ['accepted'],
         ], [
@@ -489,7 +503,7 @@ class ServiceController extends Controller
             ]);
         }
 
-        $customer = $request->user();
+        $customer = $this->authUser($request);
         $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
 
         if ($service) {
@@ -708,7 +722,7 @@ class ServiceController extends Controller
 
         $tier = self::JENIS_KENDARAAN[$data['jenisKendaraan']];
 
-        $customer = $request->user();
+        $customer = $this->authUser($request);
         $service = !empty($data['service_id']) ? Service::find($data['service_id']) : null;
 
         if ($service) {
@@ -842,7 +856,7 @@ class ServiceController extends Controller
                 'jenisLabel' => $this->jenisLabel($service),
                 'harga' => (float) $service->harga,
             ],
-            'addresses' => $request->user()
+            'addresses' => $this->authUser($request)
                 ->addresses()
                 ->latest('is_primary')
                 ->latest()
@@ -864,11 +878,11 @@ class ServiceController extends Controller
         $data = $request->validate([
             'tanggalMasuk' => 'required|date',
             'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
-            'address_id' => ['required', 'integer', Rule::exists('addresses', 'id')->where('user_id', $request->user()->id)],
+            'address_id' => ['required', 'integer', Rule::exists('addresses', 'id')->where('user_id', $this->authUser($request)->id)],
             'setuju' => ['accepted'],
         ]);
 
-        $customer = $request->user();
+        $customer = $this->authUser($request);
         $address = $customer->addresses()->findOrFail($data['address_id']);
         $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
         $hargaPerHari = (float) $service->harga;
@@ -928,7 +942,7 @@ class ServiceController extends Controller
         return Inertia::render('Customer/Services/MetodePembayaranLayanan', [
             'serviceId' => $service->id,
             'total' => (float) $service->harga * $jumlahHari,
-            'saldo' => (float) auth()->user()->saldo,
+            'saldo' => (float) $this->authUser($request)->saldo,
             'tanggalMasuk' => $tanggalMasuk,
             'tanggalKeluar' => $tanggalKeluar,
             'jumlahHari' => $jumlahHari,
@@ -949,7 +963,7 @@ class ServiceController extends Controller
             'tanggalKeluar' => 'required|date|after_or_equal:tanggalMasuk',
         ]);
 
-        $customer = auth()->user();
+        $customer = $this->authUser($request);
         $isSaldo = $data['payment_method'] === 'saldo';
         $jumlahHari = $this->hitungJumlahHari($data['tanggalMasuk'], $data['tanggalKeluar']);
         $total = (float) $service->harga * $jumlahHari;
