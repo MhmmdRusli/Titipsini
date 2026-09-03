@@ -9,6 +9,7 @@ use App\Models\Service;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -165,7 +166,7 @@ class ServiceController extends Controller
      * Melempar ValidationException kalau saldo tidak mencukupi, supaya
      * ditangkap otomatis oleh Inertia sebagai error form (payment_method).
      */
-    protected function potongSaldo($customer, float $total): void
+    protected function potongSaldo(\App\Models\User $customer, float $total): void
     {
         if ((float) $customer->saldo < $total) {
             throw ValidationException::withMessages([
@@ -428,7 +429,7 @@ class ServiceController extends Controller
 
     public function invoiceBangunan(Order $order)
     {
-        abort_unless($order->customer_id === auth()->id() && $order->service_type === 'bangunan', 403);
+        abort_unless($order->customer_id === Auth::id() && $order->service_type === 'bangunan', 403);
         $customer = $order->customer;
 
         return Inertia::render('Customer/Services/Bangunan/Invoice', ['order' => [
@@ -566,7 +567,7 @@ class ServiceController extends Controller
      */
     public function invoiceBarang(Order $order)
     {
-        abort_unless($order->customer_id === auth()->id(), 403);
+        abort_unless($order->customer_id === Auth::id(), 403);
 
         $tier = self::UKURAN_BARANG[$order->ukuran_barang] ?? null;
 
@@ -639,7 +640,7 @@ class ServiceController extends Controller
 
     public function invoicePindahan(Order $order)
     {
-        abort_unless($order->customer_id === auth()->id() && $order->service_type === 'pindahan', 403);
+        abort_unless($order->customer_id === Auth::id() && $order->service_type === 'pindahan', 403);
 
         return Inertia::render('Customer/Services/Pindahan/Invoice', [
             'order' => [
@@ -778,7 +779,7 @@ class ServiceController extends Controller
      */
     public function invoiceKendaraan(Order $order)
     {
-        abort_unless($order->customer_id === auth()->id(), 403);
+        abort_unless($order->customer_id === Auth::id(), 403);
 
         $tier = self::JENIS_KENDARAAN[$order->ukuran_barang] ?? null;
 
