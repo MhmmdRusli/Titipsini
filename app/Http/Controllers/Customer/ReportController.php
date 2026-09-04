@@ -47,8 +47,7 @@ class ReportController extends Controller
             'evidence_url' => $evidenceUrl,
         ]);
 
-        return redirect()
-            ->route('customer.orders.show', $order->id)
+        return back()
             ->with('success', 'Laporan kamu berhasil dikirim. Tim kami akan segera meninjaunya.');
     }
 }

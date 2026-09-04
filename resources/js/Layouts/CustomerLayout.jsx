@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Package, Bell, User, LayoutGrid, ChevronLeft } from 'lucide-react';
+import { Package, Bell, User, LayoutGrid, ChevronLeft, CheckCircle2, XCircle, X } from 'lucide-react';
 
 const navItems = [
     { label: 'Beranda', href: '/app/dashboard', icon: LayoutGrid },
@@ -10,12 +10,27 @@ const navItems = [
 ];
 
 export default function CustomerLayout({ children, title, backHref }) {
-    const { url } = usePage();
+    const { url, props } = usePage();
+    const [toast, setToast] = useState(null);
 
     useEffect(() => {
         const isDark = typeof window !== 'undefined' && localStorage.getItem('titipsini_theme') === 'dark';
         document.documentElement.classList.toggle('dark', isDark);
     }, []);
+
+    useEffect(() => {
+        if (props.flash?.success) {
+            setToast({ type: 'success', message: props.flash.success });
+        } else if (props.flash?.error) {
+            setToast({ type: 'error', message: props.flash.error });
+        }
+    }, [props.flash?.success, props.flash?.error]);
+
+    useEffect(() => {
+        if (!toast) return;
+        const t = setTimeout(() => setToast(null), 3500);
+        return () => clearTimeout(t);
+    }, [toast]);
 
     return (
         <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">
@@ -59,7 +74,7 @@ export default function CustomerLayout({ children, title, backHref }) {
                     {children}
                 </main>
 
-                <nav
+                                <nav
                     className="sticky bottom-0 z-30 flex w-full justify-around border-t border-gray-200 bg-white/95 py-2 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95"
                     style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
                 >
@@ -79,6 +94,39 @@ export default function CustomerLayout({ children, title, backHref }) {
                         );
                     })}
                 </nav>
+
+                {toast && (
+                    <div className="pointer-events-none absolute inset-x-0 top-3 z-[60] flex justify-center px-4">
+                        <div
+                            role="status"
+                            className={`pointer-events-auto flex w-full max-w-[400px] items-start gap-2 rounded-xl border px-3.5 py-3 shadow-lg ${
+                                toast.type === 'success'
+                                    ? 'border-green-200 bg-green-50 dark:border-green-900/60 dark:bg-green-950/80'
+                                    : 'border-red-200 bg-red-50 dark:border-red-900/60 dark:bg-red-950/80'
+                            }`}
+                        >
+                            {toast.type === 'success' ? (
+                                <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-green-600 dark:text-green-400" />
+                            ) : (
+                                <XCircle size={18} className="mt-0.5 shrink-0 text-red-600 dark:text-red-400" />
+                            )}
+                            <p
+                                className={`flex-1 text-sm ${
+                                    toast.type === 'success' ? 'text-green-800 dark:text-green-200' : 'text-red-700 dark:text-red-200'
+                                }`}
+                            >
+                                {toast.message}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => setToast(null)}
+                                className={toast.type === 'success' ? 'text-green-500' : 'text-red-400'}
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

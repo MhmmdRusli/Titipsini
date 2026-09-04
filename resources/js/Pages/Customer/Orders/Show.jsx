@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
-    ShieldCheck, Truck, Car, Building2, Package, XCircle, X, Clock, AlertTriangle,
+    ShieldCheck, Truck, XCircle, X, Clock, AlertTriangle,
     QrCode, WalletMinimal, Upload, CheckCircle2, ArrowLeft, FileText,
 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
@@ -200,13 +200,6 @@ export default function OrderShow({ order, qris_url }) {
         : order.service_type === 'bangunan'
             ? 'Ukuran Bangunan'
             : 'Jenis Kendaraan';
-    const ServiceIcon = order.service_type === 'barang'
-        ? Package
-        : order.service_type === 'kendaraan'
-            ? Car
-            : order.service_type === 'bangunan'
-                ? Building2
-                : Truck;
     const itemLabel = order.service_type === 'barang'
         ? 'Barang'
         : order.service_type === 'kendaraan'
@@ -236,12 +229,14 @@ export default function OrderShow({ order, qris_url }) {
                     {/* Header hijau: logo brand + tanggal & ID pesanan */}
                     <div className="flex items-center justify-between gap-3 bg-[#15803d] px-5 py-4 dark:bg-[#0f5c2c]">
                         <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15">
-                                <ServiceIcon size={18} className="text-white" />
+                            <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white/15">
+                                <img src="/images/admin-titipsini.png" alt="Titipsini" className="h-full w-full object-contain" />
                             </div>
                             <div>
-                                <p className="text-sm font-extrabold leading-tight text-white">Titipsini&nbsp;•&nbsp;Com</p>
-                                <p className="text-[10px] leading-tight text-green-100">Titip Aman, Hidup Tenang</p>
+                                <p className="text-sm font-extrabold leading-tight text-white">
+                                    Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
+                                </p>
+                                <p className="text-[10px] leading-tight text-green-100">Tempat yang aman untuk barang berharga kamu</p>
                             </div>
                         </div>
                         <div className="text-right">
@@ -524,16 +519,6 @@ export default function OrderShow({ order, qris_url }) {
                             {order.cancel_reason}
                         </p>
                     </div>
-                )}
-
-                {/* ================= LAPOR MASALAH VENDOR ================= */}
-                {order.partner && order.status === 'selesai' && (
-                    <Link
-                        href={`/app/orders/${order.id}/lapor`}
-                        className="mt-4 block w-full rounded-xl border border-red-100 bg-red-50 py-2.5 text-center text-xs font-semibold text-red-600 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-900/40 transition"
-                    >
-                        Laporkan Masalah Vendor
-                    </Link>
                 )}
 
                 {/* ================= TOMBOL AKSI ================= */}
