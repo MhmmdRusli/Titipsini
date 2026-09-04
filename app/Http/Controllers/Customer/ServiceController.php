@@ -1051,7 +1051,7 @@ class ServiceController extends Controller
             'kecamatan' => $service->kecamatan,
             'jam_buka' => $service->jam_buka ? Carbon::parse($service->jam_buka)->format('H.i') : '08.00',
             'jam_tutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
-            'is_buka' => (bool) $service->is_active,
+            'isBuka' => (bool) $service->is_active,
             'is_orderable' => $service->isOrderable(),
             'sedang_tutup_hari_ini' => $this->sedangTutupHariIni($service),
         ];
