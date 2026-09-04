@@ -149,6 +149,13 @@ class OrderController extends Controller
 
         $nextFaseAction = self::FASE_ACTION_LABELS[$order->service_type][$order->fase] ?? null;
 
+        // Approve "dititipkan" (menunggu -> berjalan) baru boleh dilakukan
+        // setelah pembayaran diverifikasi. Untuk saldo, payment_verified_at
+        // sudah otomatis terisi saat bayar (mitra cukup 1x approve). Untuk
+        // transfer/QRIS/COD, mitra wajib approve pembayaran dulu (approve 1)
+        // sebelum bisa approve tahap ini (approve 2).
+        $paymentBelumVerified = $order->fase === 'menunggu' && $order->payment_verified_at === null;
+
         return Inertia::render('Mitra/Orders/Show', [
             'order' => [
                 'id' => $order->id,
@@ -188,7 +195,11 @@ class OrderController extends Controller
                 'next_fase_action_label' => $nextFaseAction,
                 'can_advance_fase' => $order->status === 'diproses'
                     && $nextFaseAction !== null
-                    && ! ($order->service_type === 'barang' && $order->fase === 'berjalan' && ! $order->pickup_requested_at),
+                    && ! ($order->service_type === 'barang' && $order->fase === 'berjalan' && ! $order->pickup_requested_at)
+                    && ! $paymentBelumVerified,
+                'advance_fase_blocked_reason' => $paymentBelumVerified
+                    ? 'Verifikasi pembayaran terlebih dahulu sebelum bisa menandai status ini.'
+                    : null,
                 'can_accept' => $order->status === 'baru',
             ],
         ]);
@@ -236,6 +247,20 @@ class OrderController extends Controller
         $next = self::NEXT_FASE[$fase] ?? null;
 
         abort_unless($next, 400, 'Pesanan ini sudah berada di fase akhir.');
+
+        // Approve "dititipkan" (menunggu -> berjalan) baru boleh jalan setelah
+        // pembayaran diverifikasi. Untuk saldo, payment_verified_at sudah
+        // otomatis terisi saat bayar (mitra cukup 1x approve di sini). Untuk
+        // transfer/QRIS/COD, mitra wajib approve pembayaran dulu lewat
+        // verifikasiPembayaran() sebelum bisa approve tahap ini (2x approve).
+        if ($next === 'berjalan') {
+            abort_unless(
+                $order->payment_verified_at !== null,
+                400,
+                'Verifikasi pembayaran terlebih dahulu sebelum menandai status ini.'
+            );
+        }
+
         if ($serviceType === 'barang' && $next === 'akhir') {
             abort_unless($order->pickup_requested_at, 400, 'Customer belum mengajukan pengambilan barang.');
         }
