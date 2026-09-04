@@ -29,7 +29,6 @@ import {
   Boxes,
   Sparkles,
   Calendar,
-  MapPin,
 } from "lucide-react";
 import ProtectedRoute from "@/Components/ProtectedRoute";
 import SuperAdminLayout from "@/Layouts/SuperAdminLayout";
@@ -67,13 +66,6 @@ const DEFAULT_PESANAN_BREAKDOWN = [
   { label: "Bangunan", value: 0, color: COLOR_BANGUNAN },
 ];
 
-// PENTING (fix): field `icon` di sini (Package/Building2/Truck/Car) HANYA
-// berlaku untuk data default/fallback ini, karena di sini komponennya
-// didefinisikan langsung di file yang sama. Begitu data datang dari
-// backend lewat Inertia, komponen React tidak bisa ikut ter-serialize ke
-// JSON — jadi `item.icon` dari props asli akan selalu undefined. Itu
-// sebabnya LayananVendorCard di bawah TIDAK boleh baca `item.icon`
-// langsung; harus lookup lewat ICON_BY_KEY berdasarkan `item.key`.
 const DEFAULT_LAYANAN_VENDOR = [
   { key: "barang", label: "Total Layanan Barang", value: 0, icon: Package, color: COLOR_BARANG },
   { key: "bangunan", label: "Total Layanan Bangunan", value: 0, icon: Building2, color: COLOR_BANGUNAN },
@@ -81,9 +73,6 @@ const DEFAULT_LAYANAN_VENDOR = [
   { key: "kendaraan", label: "Total Layanan Kendaraan", value: 0, icon: Car, color: COLOR_KENDARAAN },
 ];
 
-// Lookup ikon berdasarkan key — dipakai LayananVendorCard supaya tidak
-// bergantung pada field `icon` dari props (yang hilang/undefined saat
-// datanya datang dari backend via Inertia).
 const ICON_BY_KEY = {
   barang: Package,
   bangunan: Building2,
@@ -161,9 +150,8 @@ export default function Dashboard({
     <ProtectedRoute allowedRoles={["super_admin"]}>
       <SuperAdminLayout title="Dashboard Super Admin">
         
-        {/* Banner Hijau Sesuai Gambar Referensi (bg-[#007A4B] / emerald-800) */}
+        {/* Banner Hijau */}
         <div className="relative overflow-hidden rounded-2xl bg-[#007b49] p-6 text-white shadow-md">
-          {/* Efek Lingkaran Estetis Transparan di Kanan */}
           <div className="pointer-events-none absolute -right-10 -top-10 h-64 w-64 rounded-full bg-white/10 blur-xl" />
           <div className="pointer-events-none absolute -bottom-12 right-24 h-48 w-48 rounded-full bg-white/5 blur-lg" />
 
@@ -181,17 +169,18 @@ export default function Dashboard({
               </p>
             </div>
 
-            {/* Filter Dropdown Berbentuk Kapsul dengan Divider */}
+            {/* Filter Dropdown Berbentuk Kapsul Fix Transparan Dark Mode */}
             <div className="flex items-center rounded-xl border border-white/30 bg-white/10 p-1 backdrop-blur-md">
               <div className="relative flex items-center border-r border-white/20 px-3 py-1.5">
                 <Calendar size={14} className="mr-2 text-amber-300" />
                 <select
                   value={BULAN_FULL[Number(bulan) - 1] ?? "Januari"}
                   onChange={(e) => handleBulanChange(e.target.value)}
-                  className="appearance-none bg-transparent pr-5 text-xs font-semibold text-white focus:outline-none cursor-pointer"
+                  style={{ backgroundColor: "transparent", color: "white" }}
+                  className="appearance-none !bg-transparent dark:!bg-transparent text-xs font-semibold !text-white border-none outline-none focus:outline-none focus:ring-0 focus:!bg-transparent active:!bg-transparent shadow-none cursor-pointer pr-5"
                 >
                   {BULAN_FULL.map((opt) => (
-                    <option key={opt} value={opt} className="bg-[#007b49] text-white">
+                    <option key={opt} value={opt} className="bg-[#007b49] text-white dark:bg-[#007b49]">
                       {opt}
                     </option>
                   ))}
@@ -203,10 +192,11 @@ export default function Dashboard({
                 <select
                   value={tahun}
                   onChange={(e) => handleTahunChange(e.target.value)}
-                  className="appearance-none bg-transparent pr-5 text-xs font-semibold text-white focus:outline-none cursor-pointer"
+                  style={{ backgroundColor: "transparent", color: "white" }}
+                  className="appearance-none !bg-transparent dark:!bg-transparent text-xs font-semibold !text-white border-none outline-none focus:outline-none focus:ring-0 focus:!bg-transparent active:!bg-transparent shadow-none cursor-pointer pr-5"
                 >
                   {TAHUN_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt} className="bg-[#007b49] text-white">
+                    <option key={opt} value={opt} className="bg-[#007b49] text-white dark:bg-[#007b49]">
                       {opt}
                     </option>
                   ))}
@@ -217,7 +207,7 @@ export default function Dashboard({
           </div>
         </div>
 
-        {/* Kartu Statistik: Warna Kartu Asli (Putih/Dark Slate) + Icon SVG Besar Watermark di Pojok Kanan */}
+        {/* Kartu Statistik */}
         <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard
             label="Total Pesanan"
@@ -250,10 +240,8 @@ export default function Dashboard({
         </div>
 
         <div className="mt-6 flex flex-col gap-6">
-          {/* Chart Pesanan */}
           <ChartPesananCard data={chartPesanan} tahun={tahun} />
 
-          {/* Section Pie Chart + Vendor + Keuangan */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <PesananBreakdownCard data={pesananBreakdown} tahun={tahun} />
 
@@ -298,11 +286,9 @@ export default function Dashboard({
   );
 }
 
-// --- Component Card Statistik (Kartu Putih/Bersih + Icon SVG Watermark Besar di Belakang) ---
 function StatCard({ label, value, icon: Icon, iconColor, badgeBg }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      {/* Watermark Icon SVG Besar di Pojok Kanan Bawah */}
       <Icon
         size={100}
         strokeWidth={1}
@@ -439,12 +425,6 @@ function PesananBreakdownCard({ data, tahun }) {
 }
 
 function LayananVendorCard({ item }) {
-  // FIX: sebelumnya `const Icon = item.icon;` — ini undefined begitu
-  // `item` datang dari backend (komponen React tidak ikut ter-serialize
-  // lewat Inertia/JSON), makanya crash "Element type is invalid".
-  // Sekarang ikon di-lookup dari ICON_BY_KEY berdasarkan `item.key`
-  // (string biasa, aman dikirim lewat JSON), dengan fallback ke Package
-  // supaya tidak pernah undefined meski key-nya belum terdaftar.
   const Icon = ICON_BY_KEY[item.key] ?? Package;
   return (
     <div className="rounded-2xl border bg-white p-3.5 shadow-sm dark:bg-slate-900" style={{ borderColor: `${item.color}33` }}>
