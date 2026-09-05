@@ -7,12 +7,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Concerns\HasTrashMeta;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
 
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+   
+       use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasTrashMeta;
 
     /**
      * role: admin | finance | super_admin | customer | partner
@@ -69,6 +72,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'layanan_kategori' => 'array',
             'jadwal_operasional' => 'array',
             'fitur_penuh_kategori' => 'array',
+            'deleted_at' => 'datetime',
         ];
     }
 

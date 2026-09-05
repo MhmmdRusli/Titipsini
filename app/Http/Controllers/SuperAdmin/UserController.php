@@ -324,4 +324,13 @@ class UserController extends Controller
             ->route('super-admin.user.' . $validated['role'] . '.index')
             ->with('success', 'Akun ' . $validated['role'] . ' baru berhasil dibuat.');
     }
+        public function destroy(User $user): RedirectResponse
+    {
+        abort_if($user->role === 'super_admin', 403, 'Akun Super Admin tidak dapat dihapus.');
+        abort_if($user->id === auth()->id(), 403, 'Anda tidak dapat menghapus akun Anda sendiri.');
+
+        $user->delete();
+
+        return redirect()->back()->with('success', 'Akun berhasil dipindahkan ke Sampah.');
+    }
 }

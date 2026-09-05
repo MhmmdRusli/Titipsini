@@ -62,6 +62,7 @@ use App\Http\Controllers\SuperAdmin\UserController as SuperAdminUserController;
 use App\Http\Controllers\SuperAdmin\KotaController as SuperAdminKotaController;
 use App\Http\Controllers\SuperAdmin\ServiceController as SuperAdminServiceController;
 use App\Http\Controllers\SuperAdmin\OrderController as SuperAdminOrderController;
+use App\Http\Controllers\SuperAdmin\TrashController as SuperAdminTrashController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -506,6 +507,8 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::get('/layanan/{layanan}', [SuperAdminServiceController::class, 'show'])->name('layanan.show');
     Route::patch('/layanan/{layanan}/status', [SuperAdminServiceController::class, 'updateStatus'])->name('layanan.updateStatus');
     Route::patch('/layanan/{layanan}/toggle-active', [SuperAdminServiceController::class, 'toggleActive'])->name('layanan.toggleActive');
+
+        Route::delete('/layanan/{layanan}', [SuperAdminServiceController::class, 'destroy'])->name('layanan.destroy');
 });
 
 /*
@@ -534,6 +537,8 @@ Route::prefix('super-admin/user')->name('super-admin.user.')->middleware(['auth'
 
     Route::get('/tambah', [SuperAdminUserController::class, 'create'])->name('create');
     Route::post('/tambah', [SuperAdminUserController::class, 'store'])->name('store');
+
+        Route::delete('/{user}', [SuperAdminUserController::class, 'destroy'])->name('destroy');    
 });
 
 /*
@@ -548,4 +553,9 @@ Route::prefix('super-admin/pesanan')->name('super-admin.pesanan.')->middleware([
     Route::post('/{order}/konfirmasi-cash', [SuperAdminOrderController::class, 'confirmCashPayment'])->name('konfirmasiCash');
     Route::delete('/bulk-delete', [SuperAdminOrderController::class, 'bulkDestroy'])->name('bulkDestroy');
     Route::delete('/{order}', [SuperAdminOrderController::class, 'destroy'])->name('destroy');
+});
+Route::prefix('super-admin/sampah')->name('super-admin.sampah.')->middleware(['auth', 'role:super_admin'])->group(function () {
+    Route::get('/', [SuperAdminTrashController::class, 'index'])->name('index');
+    Route::patch('/{type}/{id}/restore', [SuperAdminTrashController::class, 'restore'])->name('restore');
+    Route::delete('/{type}/{id}', [SuperAdminTrashController::class, 'forceDelete'])->name('forceDelete');
 });

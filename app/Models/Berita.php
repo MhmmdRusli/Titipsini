@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasTrashMeta;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Berita extends Model
 {
-    use HasFactory;
+     use HasFactory, SoftDeletes, HasTrashMeta;
 
     protected $table = 'berita';
 
@@ -20,5 +22,6 @@ class Berita extends Model
 
     protected $casts = [
         'published_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 }

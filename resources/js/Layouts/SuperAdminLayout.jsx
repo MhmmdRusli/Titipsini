@@ -4,8 +4,10 @@ import {
     MapPin, LayoutDashboard, Users, Package, ClipboardList, Undo2,
     Wallet, ArrowLeftRight, FileBarChart, Settings, ShieldCheck,
     LogOut, ChevronDown, Clock, Calendar, Sun, Cloud, CloudRain,
-    CloudFog, CloudLightning, CloudSnow, Moon, AlertCircle, X, Plus
+    CloudFog, CloudLightning, CloudSnow, Moon, AlertCircle, X, Plus,
+    Trash2,
 } from 'lucide-react';
+
 
 // Menu Super Admin — sesuai struktur sidebar yang dipakai.
 const navItems = [
@@ -25,6 +27,8 @@ const navItems = [
             // sesuai mockup dimana item ini terlihat seperti tombol, bukan
             // item navigasi biasa.
             { label: 'Tambah Akun', href: '/super-admin/user/tambah', isAction: true },
+
+                { label: 'Sampah', href: '/super-admin/sampah', icon: Trash2 },
         ],
     },
     { label: 'Layanan', href: '/super-admin/layanan', icon: Package },

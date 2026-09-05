@@ -116,4 +116,10 @@ class ServiceController extends Controller
             $layanan->is_active ? 'Layanan diaktifkan kembali.' : 'Layanan ditutup paksa oleh Super Admin.'
         );
     }
+        public function destroy(Service $layanan): RedirectResponse
+    {
+        $layanan->delete();
+
+        return redirect()->back()->with('success', 'Layanan berhasil dipindahkan ke Sampah.');
+    }
 }

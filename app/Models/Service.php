@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Concerns\HasTrashMeta;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Service extends Model
 {
+      use SoftDeletes, HasTrashMeta;
     protected $fillable = [
         'user_id',
         'kategori',
@@ -51,6 +54,7 @@ class Service extends Model
             'lebar' => 'integer',
             'jumlah_tampung' => 'integer',
             'foto_lahan' => 'array',
+            'deleted_at' => 'datetime',
         ];
     }
     public function vendor(): BelongsTo

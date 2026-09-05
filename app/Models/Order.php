@@ -6,10 +6,13 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Concerns\HasTrashMeta;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
-    use HasFactory;
+    
+     use HasFactory, SoftDeletes, HasTrashMeta;
 
     protected $fillable = [
         'order_code',
@@ -98,6 +101,8 @@ class Order extends Model
             'extend_end_date' => 'date',
             'extend_requested_at' => 'datetime',
             'extend_paid_at' => 'datetime',
+            'deleted_at' => 'datetime',
+            
         ];
     }
 
