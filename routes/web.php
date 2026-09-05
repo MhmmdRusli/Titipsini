@@ -63,6 +63,7 @@ use App\Http\Controllers\SuperAdmin\KotaController as SuperAdminKotaController;
 use App\Http\Controllers\SuperAdmin\ServiceController as SuperAdminServiceController;
 use App\Http\Controllers\SuperAdmin\OrderController as SuperAdminOrderController;
 use App\Http\Controllers\SuperAdmin\TrashController as SuperAdminTrashController;
+use App\Http\Controllers\SuperAdmin\ProfileController as SuperAdminProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -509,6 +510,11 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::patch('/layanan/{layanan}/toggle-active', [SuperAdminServiceController::class, 'toggleActive'])->name('layanan.toggleActive');
 
         Route::delete('/layanan/{layanan}', [SuperAdminServiceController::class, 'destroy'])->name('layanan.destroy');
+
+         Route::get('/profil', [SuperAdminProfileController::class, 'edit'])->name('profil.edit');
+    Route::put('/profil', [SuperAdminProfileController::class, 'update'])->name('profil.update');
+    Route::post('/profil/avatar', [SuperAdminProfileController::class, 'updateAvatar'])->name('profil.avatar.update');
+    Route::delete('/profil/sesi/{sessionId}', [SuperAdminProfileController::class, 'destroySession'])->name('profil.sessions.destroy');
 });
 
 /*

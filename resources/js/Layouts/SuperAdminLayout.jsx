@@ -5,7 +5,7 @@ import {
     Wallet, ArrowLeftRight, FileBarChart, Settings, ShieldCheck,
     LogOut, ChevronDown, Clock, Calendar, Sun, Cloud, CloudRain,
     CloudFog, CloudLightning, CloudSnow, Moon, AlertCircle, X, Plus,
-    Trash2,
+    Trash2, UserCircle,
 } from 'lucide-react';
 
 
@@ -42,6 +42,9 @@ const navItems = [
     { label: 'Total Transaksi', href: '/super-admin/total-transaksi', icon: ArrowLeftRight },
     { label: 'Laporan', href: '/super-admin/laporan', icon: FileBarChart },
     { label: 'Sampah', href: '/super-admin/sampah', icon: Trash2 },
+    // 👇 DITAMBAHKAN: menu Profil Saya di sidebar, mengarah ke halaman
+    // SuperAdmin\ProfileController@edit (edit nama/email, avatar, riwayat sesi).
+    { label: 'Profil Saya', href: '/super-admin/profil', icon: UserCircle },
     {
         label: 'Pengaturan',
         href: '/super-admin/pengaturan',
@@ -348,7 +351,14 @@ export default function SuperAdminLayout({ children, title }) {
 
                         <div className="h-6 w-px bg-gray-200 dark:bg-gray-800" />
 
-                        <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-200">
+                        {/* 👇 DIUBAH: blok nama + avatar sekarang dibungkus Link menuju
+                            halaman Profil Super Admin. Tampilan/style tidak diubah
+                            sedikit pun, cuma jadi bisa diklik. */}
+                        <Link
+                            href="/super-admin/profil"
+                            className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-200 rounded-xl transition hover:opacity-80"
+                            title="Lihat Profil Saya"
+                        >
                             <span className="text-xs font-semibold">{user?.name ?? 'Super Admin'}</span>
                             {user?.avatar ? (
                                 <img
@@ -361,7 +371,7 @@ export default function SuperAdminLayout({ children, title }) {
                                     {(user?.name ?? 'S').charAt(0).toUpperCase()}
                                 </div>
                             )}
-                        </div>
+                        </Link>
                     </div>
                 </header>
 
