@@ -1,4 +1,4 @@
-import { usePage, router } from "@inertiajs/react";
+import { Link, usePage, router } from "@inertiajs/react";
 import { useState } from "react";
 import {
   LineChart,
@@ -215,6 +215,7 @@ export default function Dashboard({
             icon={LayoutDashboard}
             iconColor="text-indigo-500"
             badgeBg="bg-indigo-50 dark:bg-indigo-950/50"
+            href={route("super-admin.pesanan.index")}
           />
           <StatCard
             label="Total Customer"
@@ -222,6 +223,7 @@ export default function Dashboard({
             icon={Users}
             iconColor="text-sky-500"
             badgeBg="bg-sky-50 dark:bg-sky-950/50"
+            href={route("super-admin.user.customer.index")}
           />
           <StatCard
             label="Total Vendor"
@@ -229,6 +231,7 @@ export default function Dashboard({
             icon={UserCheck}
             iconColor="text-amber-500"
             badgeBg="bg-amber-50 dark:bg-amber-950/50"
+            href={route("super-admin.user.vendor.index")}
           />
           <StatCard
             label="Total Layanan"
@@ -236,6 +239,7 @@ export default function Dashboard({
             icon={Boxes}
             iconColor="text-rose-500"
             badgeBg="bg-rose-50 dark:bg-rose-950/50"
+            href={route("super-admin.layanan.index")}
           />
         </div>
 
@@ -286,7 +290,7 @@ export default function Dashboard({
   );
 }
 
-function StatCard({ label, value, icon: Icon, iconColor, badgeBg }) {
+function StatCard({ label, value, icon: Icon, iconColor, badgeBg, href }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <Icon
@@ -310,13 +314,13 @@ function StatCard({ label, value, icon: Icon, iconColor, badgeBg }) {
         </div>
 
         <div className="mt-4 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <button
-            type="button"
+          <Link
+            href={href}
             className={`inline-flex items-center gap-1 text-[11px] font-bold ${iconColor} hover:underline`}
           >
             Lihat Detail
             <ChevronDown size={12} className="-rotate-90" />
-          </button>
+          </Link>
         </div>
       </div>
     </div>
