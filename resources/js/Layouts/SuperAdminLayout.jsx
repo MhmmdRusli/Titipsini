@@ -22,13 +22,7 @@ const navItems = [
             { label: 'Vendor', href: '/super-admin/user/vendor' },
             { label: 'Finance', href: '/super-admin/user/finance' },
             { label: 'Admin', href: '/super-admin/user/admin' },
-            // "Tambah Akun" ditandai isAction supaya tampil beda (ikon +,
-            // latar menonjol) dibanding sub-menu daftar role di atasnya —
-            // sesuai mockup dimana item ini terlihat seperti tombol, bukan
-            // item navigasi biasa.
             { label: 'Tambah Akun', href: '/super-admin/user/tambah', isAction: true },
-
-                { label: 'Sampah', href: '/super-admin/sampah', icon: Trash2 },
         ],
     },
     { label: 'Layanan', href: '/super-admin/layanan', icon: Package },
@@ -47,6 +41,7 @@ const navItems = [
     { label: 'Penarikan Saldo', href: '/super-admin/penarikan-saldo', icon: Wallet },
     { label: 'Total Transaksi', href: '/super-admin/total-transaksi', icon: ArrowLeftRight },
     { label: 'Laporan', href: '/super-admin/laporan', icon: FileBarChart },
+    { label: 'Sampah', href: '/super-admin/sampah', icon: Trash2 },
     {
         label: 'Pengaturan',
         href: '/super-admin/pengaturan',
