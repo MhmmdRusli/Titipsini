@@ -4,7 +4,7 @@ import {
     MapPin, LayoutDashboard, CircleUserRound, Users, Handshake,
     Package, BarChart3, Settings, LogOut, ChevronDown, Newspaper,
     HelpCircle, Clock, Calendar, Sun, Cloud, CloudRain, CloudFog, CloudLightning,
-    CloudSnow, Moon, AlertCircle, X
+    CloudSnow, Moon, AlertCircle, X, ShieldCheck
 } from 'lucide-react';
 
 const navItems = [
@@ -13,6 +13,7 @@ const navItems = [
     { label: 'Profil', href: '/admin/profil', icon: CircleUserRound },
     { label: 'Customer', href: '/admin/pengguna', icon: Users },
     { label: 'Vendor', href: '/admin/partners', icon: Handshake },
+    { label: 'Validasi Laporan', href: '/admin/laporan-validasi', icon: ShieldCheck },
     { label: 'Berita', href: '/admin/berita', icon: Newspaper },
     { label: 'FAQ', href: '/admin/faq', icon: HelpCircle },
     {

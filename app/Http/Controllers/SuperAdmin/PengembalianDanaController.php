@@ -31,11 +31,16 @@ class PengembalianDanaController extends Controller
 
         $query = Report::query()
             ->where('category', 'kerugian')
+            // Untuk finance/super-admin: tampilkan laporan yang SUDAH lewat
+            // verifikasi admin (approved/rejected) atau sudah final. Laporan
+            // yang masih admin_approval='pending' ditangani oleh Admin Validasi.
+            ->whereIn('admin_approval', ['approved', 'rejected'])
             ->with([
                 'order:id,order_code,customer_id,partner_id,total_price,status,service_type,item_name',
                 'order.customer:id,name,email,saldo',
                 'order.partner:id,name,email',
                 'reviewer:id,name',
+                'adminApprover:id,name',
             ])
             ->when($search !== '', function ($q) use ($search) {
                 $q->whereHas('order', function ($orderQuery) use ($search) {
@@ -60,6 +65,10 @@ class PengembalianDanaController extends Controller
                 'estimated_loss' => $report->estimated_loss !== null ? (float) $report->estimated_loss : null,
                 'evidence_url' => $report->evidence_url,
                 'status' => $report->status,
+                'admin_approval' => $report->admin_approval,
+                'admin_approver_name' => $report->adminApprover?->name,
+                'admin_approval_at' => $report->admin_approval_at?->format('d M Y H:i'),
+                'admin_approval_note' => $report->admin_approval_note,
                 'refund_estimasi' => $refundEstimasi,
                 'refund_amount' => $order?->refund_amount ? (float) $order->refund_amount : null,
                 'refund_percentage' => $order?->refund_percentage,
@@ -79,7 +88,7 @@ class PengembalianDanaController extends Controller
                 'search' => $search,
             ],
             'summary' => [
-                'menunggu' => Report::where('category', 'kerugian')->where('status', 'menunggu')->count(),
+                'siap_refund' => Report::where('category', 'kerugian')->where('admin_approval', 'approved')->where('status', 'siap_refund')->count(),
                 'disetujui' => Report::where('category', 'kerugian')->where('status', 'disetujui')->count(),
                 'ditolak' => Report::where('category', 'kerugian')->where('status', 'ditolak')->count(),
                 'totalNilai' => (float) Order::whereNotNull('refunded_at')->sum('refund_amount'),
@@ -99,7 +108,9 @@ class PengembalianDanaController extends Controller
     {
         abort_unless($report->category === 'kerugian', 404,
             'Action ini hanya untuk laporan Kerugian / Refund.');
-        abort_if($report->status !== 'menunggu', 400, 'Laporan ini sudah diproses sebelumnya.');
+        abort_if($report->status !== 'siap_refund', 400, 'Laporan ini belum disetujui admin atau sudah diproses.');
+        abort_if($report->admin_approval !== 'approved', 403,
+            'Laporan belum diverifikasi admin. Finance tidak dapat memproses refund sampai admin approve.');
 
         $order = $report->order;
         abort_unless($order, 404);
@@ -196,7 +207,9 @@ class PengembalianDanaController extends Controller
     {
         abort_unless($report->category === 'kerugian', 404,
             'Action ini hanya untuk laporan Kerugian / Refund.');
-        abort_if($report->status !== 'menunggu', 400, 'Laporan ini sudah diproses sebelumnya.');
+        abort_if($report->status !== 'siap_refund', 400, 'Laporan ini belum disetujui admin atau sudah diproses.');
+        abort_if($report->admin_approval !== 'approved', 403,
+            'Laporan belum diverifikasi admin. Finance tidak dapat menolak laporan yang belum di-approve admin.');
 
         $validated = $request->validate([
             'admin_note' => ['required', 'string', 'max:500'],

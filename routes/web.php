@@ -185,6 +185,13 @@ Route::middleware(['auth', 'role:finance,super_admin'])->prefix('finance')->name
         Route::post('/{penarikan}/approve', [FinancePenarikanController::class, 'approve'])->name('approve');
         Route::post('/{penarikan}/reject', [FinancePenarikanController::class, 'reject'])->name('reject');
     });
+
+    // Pengembalian Dana - re-use SuperAdmin\PengembalianDanaController untuk konsistensi logika refund.
+    Route::prefix('pengembalian-dana')->name('pengembalian-dana.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'index'])->name('index');
+        Route::patch('/{report}/setujui', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'setujui'])->name('setujui');
+        Route::patch('/{report}/tolak', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'tolak'])->name('tolak');
+    });
 });
 
 Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
@@ -219,6 +226,15 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
 */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Validasi Laporan Kerugian - admin verifikasi data+foto sebelum finance
+    // bisa proses refund. 2-tier approval flow.
+    Route::prefix('laporan-validasi')->name('laporan-validasi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\ValidasiLaporanController::class, 'index'])->name('index');
+        Route::get('{report}', [\App\Http\Controllers\Admin\ValidasiLaporanController::class, 'show'])->name('show');
+        Route::patch('{report}/approve', [\App\Http\Controllers\Admin\ValidasiLaporanController::class, 'approve'])->name('approve');
+        Route::patch('{report}/reject', [\App\Http\Controllers\Admin\ValidasiLaporanController::class, 'reject'])->name('reject');
+    });
 
     Route::get('/pengguna', [AdminUserController::class, 'index'])->name('pengguna.index');
     Route::get('/pengguna/{user}', [AdminUserController::class, 'show'])->name('pengguna.show');

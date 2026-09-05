@@ -18,6 +18,10 @@ class Report extends Model
         'estimated_loss',
         'evidence_url',
         'status',
+        'admin_approval',
+        'admin_approval_by',
+        'admin_approval_at',
+        'admin_approval_note',
         'reviewed_by',
         'reviewed_at',
         'admin_note',
@@ -27,6 +31,7 @@ class Report extends Model
     {
         return [
             'reviewed_at' => 'datetime',
+            'admin_approval_at' => 'datetime',
             'estimated_loss' => 'decimal:2',
         ];
     }
@@ -39,5 +44,10 @@ class Report extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function adminApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'admin_approval_by');
     }
 }

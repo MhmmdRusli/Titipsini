@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Clock, LayoutDashboard, LogOut, Receipt, Wallet, Sun, Moon, X, Menu, Calendar } from 'lucide-react';
+import { Clock, LayoutDashboard, LogOut, Receipt, Wallet, Sun, Moon, X, Menu, Calendar, Undo2 } from 'lucide-react';
 
 const navItems = [
     { label: 'Dashboard', href: '/finance/dashboard', icon: LayoutDashboard },
     { label: 'Top Up', href: '/finance/topup', icon: Wallet },
     { label: 'Penarikan', href: '/finance/penarikan', icon: Wallet },
+    { label: 'Pengembalian Dana', href: '/finance/pengembalian-dana', icon: Undo2 },
     { label: 'Pendapatan', href: '/finance/pendapatan', icon: Receipt },
 ];
 
