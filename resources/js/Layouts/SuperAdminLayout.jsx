@@ -40,7 +40,7 @@ const navItems = [
     { label: 'Pengembalian Dana', href: '/super-admin/pengembalian-dana', icon: Undo2 },
     { label: 'Penarikan Saldo', href: '/super-admin/penarikan-saldo', icon: Wallet },
     { label: 'Total Transaksi', href: '/super-admin/total-transaksi', icon: ArrowLeftRight },
-    { label: 'Laporan', href: '/super-admin/laporan', icon: FileBarChart },
+    { label: 'Laporan Pelayanan', href: '/super-admin/laporan-layanan', icon: FileBarChart },
     { label: 'Sampah', href: '/super-admin/sampah', icon: Trash2 },
     {
         label: 'Pengaturan',

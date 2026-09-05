@@ -182,46 +182,64 @@ class User extends Authenticatable implements MustVerifyEmail
      * konsisten dengan titik finalisasi keuangan yang sama dipakai
      * Admin\OrderController::catatPendapatanPlatform().
      */
-    public function saldoMitra(): int
-{
-    // 1. Ambil semua order selesai milik mitra ini SEKALI saja, dipakai
-    // ulang untuk hitung total kotor maupun total denda - supaya query-nya
-    // tidak dobel dan datanya pasti konsisten (order yang sama).
-    $ordersSelesai = \App\Models\Order::where('partner_id', $this->id)
-        ->whereIn('status', ['selesai', 'completed', 'success'])
-        ->get();
+        public function saldoMitra(): int
+    {
+        $ordersSelesai = \App\Models\Order::where('partner_id', $this->id)
+            ->whereIn('status', ['selesai', 'completed', 'success'])
+            ->get();
 
-    // 2. Total Pendapatan Kotor dari Order Selesai
-    $totalKotor = $ordersSelesai->sum('total_price');
+        return (int) max(0, $this->hitungSaldoKotorMitra($ordersSelesai) - $this->totalPenarikanMitra());
+    }
 
-    // 3. Ambil Persentase Komisi dari PaymentSetting
-    $paymentSetting = \App\Models\PaymentSetting::first();
-    
-    $komisiPersen = $paymentSetting->komisi_persen 
-        ?? $paymentSetting->persen_komisi 
-        ?? $paymentSetting->platform_fee 
-        ?? 0;
+    /**
+     * Utang mitra akibat refund - kejadian kalau mitra SUDAH menarik dana
+     * lebih besar dari hak yang tersisa SETELAH sebagian order-nya
+     * di-refund ke customer. Dihitung dinamis (bukan kolom tersimpan),
+     * konsisten dengan cara saldoMitra() dihitung.
+     */
+    public function utangRefund(): int
+    {
+        $ordersSelesai = \App\Models\Order::where('partner_id', $this->id)
+            ->whereIn('status', ['selesai', 'completed', 'success'])
+            ->get();
 
-    // 4. Hitung Hak Saldo Bersih Mitra dari transaksi normal (kena komisi)
-    $persentaseMitra = max(0, (100 - $komisiPersen) / 100);
-    $saldoBersihTransaksi = $totalKotor * $persentaseMitra;
+        $selisih = $this->totalPenarikanMitra() - $this->hitungSaldoKotorMitra($ordersSelesai);
 
-    // 5. Total denda keterlambatan - 100% masuk mitra, TIDAK kena komisi.
-    // PENTING: cuma dihitung kalau denda_paid_at sudah terisi (customer
-    // benar-benar sudah bayar) - order dengan denda tapi belum dibayar
-    // TIDAK menambah saldo mitra, supaya platform tidak "membayar duluan"
-    // pakai uang yang belum ditagih dari customer.
-    $totalDenda = $ordersSelesai->sum(fn ($order) => $order->denda_paid_at ? $order->hitungDenda() : 0);
+        return (int) max(0, $selisih);
+    }
 
-    $saldoBersih = $saldoBersihTransaksi + $totalDenda;
+    protected function hitungSaldoKotorMitra($ordersSelesai): float
+    {
+        // Kotor dikurangi bagian yang sudah dikembalikan ke customer -
+        // itu bukan lagi hak mitra begitu refund disetujui admin.
+        $totalKotor = $ordersSelesai->sum(
+            fn ($order) => (float) $order->total_price - (float) ($order->refund_amount ?? 0)
+        );
 
-    // 6. Hitung Total Penarikan (Hanya menggunakan user_id)
-    $totalPenarikan = \App\Models\Penarikan::where('user_id', $this->id)
-        ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal'])
-        ->sum('jumlah');
+        $paymentSetting = \App\Models\PaymentSetting::first();
+        $komisiPersen = $paymentSetting->komisi_persen
+            ?? $paymentSetting->persen_komisi
+            ?? $paymentSetting->platform_fee
+            ?? 0;
 
-    // 7. Kembalikan Sisa Saldo Bersih
-    return (int) max(0, $saldoBersih - $totalPenarikan);
-}
+        $persentaseMitra = max(0, (100 - $komisiPersen) / 100);
+        $saldoBersihTransaksi = $totalKotor * $persentaseMitra;
+
+        // Denda 100% masuk mitra, tidak ikut dikurangi persentase komisi -
+        // dan TIDAK disentuh refund (refund cuma memotong total_price,
+        // bukan denda yang memang komponen terpisah).
+        $totalDenda = $ordersSelesai->sum(
+            fn ($order) => $order->denda_paid_at ? $order->hitungDenda() : 0
+        );
+
+        return $saldoBersihTransaksi + $totalDenda;
+    }
+
+    protected function totalPenarikanMitra(): float
+    {
+        return (float) \App\Models\Penarikan::where('user_id', $this->id)
+            ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal'])
+            ->sum('jumlah');
+    }
 
 }

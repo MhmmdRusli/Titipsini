@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Report extends Model
 {
@@ -11,12 +12,32 @@ class Report extends Model
 
     protected $fillable = [
         'order_id',
+        'category',
         'description',
+        'item_condition',
+        'estimated_loss',
         'evidence_url',
+        'status',
+        'reviewed_by',
+        'reviewed_at',
+        'admin_note',
     ];
 
-    public function order()
+    protected function casts(): array
+    {
+        return [
+            'reviewed_at' => 'datetime',
+            'estimated_loss' => 'decimal:2',
+        ];
+    }
+
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

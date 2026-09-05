@@ -191,9 +191,20 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::get('/pengembalian-dana', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'index'])->name('pengembalian-dana.index');
     Route::get('/penarikan-saldo', [\App\Http\Controllers\SuperAdmin\PenarikanSaldoController::class, 'index'])->name('penarikan-saldo.index');
     Route::get('/total-transaksi', [\App\Http\Controllers\SuperAdmin\TotalTransaksiController::class, 'index'])->name('total-transaksi.index');
-    Route::get('/laporan', [\App\Http\Controllers\SuperAdmin\LaporanController::class, 'index'])->name('laporan.index');
-    Route::get('/laporan/{report}', [\App\Http\Controllers\SuperAdmin\LaporanController::class, 'show'])->name('laporan.show');
-    
+
+    // Halaman khusus untuk laporan Komplain Pelayanan (tanpa refund).
+    Route::prefix('laporan-layanan')->name('laporan-layanan.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SuperAdmin\LaporanController::class, 'index'])->name('index');
+        Route::get('{report}', [\App\Http\Controllers\SuperAdmin\LaporanController::class, 'show'])->name('show');
+        Route::patch('{report}/status', [\App\Http\Controllers\SuperAdmin\LaporanController::class, 'updateStatus'])->name('updateStatus');
+    });
+
+    Route::prefix('pengembalian-dana')->name('pengembalian-dana.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'index'])->name('index');
+        Route::patch('/{report}/setujui', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'setujui'])->name('setujui');
+        Route::patch('/{report}/tolak', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'tolak'])->name('tolak');
+    });
+
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/keamanan', [\App\Http\Controllers\SuperAdmin\PengaturanKeamananController::class, 'index'])->name('keamanan.index');
         Route::put('/keamanan', [\App\Http\Controllers\SuperAdmin\PengaturanKeamananController::class, 'update'])->name('keamanan.update');

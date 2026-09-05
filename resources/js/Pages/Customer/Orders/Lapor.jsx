@@ -1,15 +1,35 @@
 import { useState } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { AlertTriangle, Upload, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Upload, CheckCircle2, MessageSquareWarning, PackageX, X } from 'lucide-react';
+
+const CATEGORIES = [
+    {
+        key: 'complain',
+        label: 'Komplain Pelayanan',
+        desc: 'Layanan tidak sesuai, mitra tidak responsif, dll.',
+        Icon: MessageSquareWarning,
+    },
+    {
+        key: 'kerugian',
+        label: 'Kerugian / Kerusakan Barang',
+        desc: 'Barang rusak/hilang selama penitipan. Bisa diajukan refund.',
+        Icon: PackageX,
+    },
+];
 
 export default function Lapor({ order }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
+        category: 'complain',
         description: '',
+        item_condition: '',
+        estimated_loss: '',
         evidence: null,
     });
 
     const [previewUrl, setPreviewUrl] = useState(null);
+
+    const isKerugian = data.category === 'kerugian';
 
     function handleFileChange(e) {
         const file = e.target.files?.[0];
@@ -18,29 +38,35 @@ export default function Lapor({ order }) {
         setPreviewUrl(URL.createObjectURL(file));
     }
 
+    function clearFile() {
+        setData('evidence', null);
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+    }
+
     function handleSubmit(e) {
         e.preventDefault();
         post(`/app/orders/${order.id}/lapor`, {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => {
-                setData('description', '');
-                setData('evidence', null);
+                reset();
+                if (previewUrl) URL.revokeObjectURL(previewUrl);
                 setPreviewUrl(null);
             },
         });
     }
 
     return (
-        <CustomerLayout backHref="/app/orders" title="Laporkan Vendor">
-            <Head title="Laporkan Vendor" />
+        <CustomerLayout backHref="/app/orders" title="Lapor Pesanan">
+            <Head title="Lapor Pesanan" />
 
             <div className="px-4 py-4">
                 <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-900/10">
                     <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
                     <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-300">
-                        Laporan ini akan ditinjau oleh tim kami. Pastikan alasan yang kamu sampaikan
-                        jelas dan sesuai fakta.
+                        Laporan akan ditinjau oleh tim admin. Pilih kategori yang sesuai
+                        dan sertakan bukti foto agar laporan lebih cepat diproses.
                     </p>
                 </div>
 
@@ -58,18 +84,126 @@ export default function Lapor({ order }) {
                                 {order.vendor_nama ?? '-'}
                             </span>
                         </div>
+                        {order.item_name && (
+                            <div className="flex justify-between py-1">
+                                <span className="text-gray-500 dark:text-gray-400">Barang</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    {order.item_name}
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-300">
-                                Alasan Laporan
+                                Kategori Laporan <span className="text-red-500">*</span>
+                            </label>
+                            <div className="grid gap-2">
+                                {CATEGORIES.map(({ key, label, desc, Icon }) => {
+                                    const active = data.category === key;
+                                    return (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            onClick={() => setData('category', key)}
+                                            className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition ${
+                                                active
+                                                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30'
+                                                    : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900/40 hover:border-gray-300 dark:hover:border-gray-600'
+                                            }`}
+                                        >
+                                            <Icon
+                                                size={20}
+                                                className={`mt-0.5 shrink-0 ${
+                                                    active
+                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                        : 'text-gray-400'
+                                                }`}
+                                            />
+                                            <div className="flex-1">
+                                                <p
+                                                    className={`text-sm font-semibold ${
+                                                        active
+                                                            ? 'text-emerald-700 dark:text-emerald-300'
+                                                            : 'text-gray-800 dark:text-gray-100'
+                                                    }`}
+                                                >
+                                                    {label}
+                                                </p>
+                                                <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                                                    {desc}
+                                                </p>
+                                            </div>
+                                            <span
+                                                className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 transition ${
+                                                    active
+                                                        ? 'border-emerald-600 bg-emerald-600'
+                                                        : 'border-gray-300 dark:border-gray-600'
+                                                }`}
+                                            />
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {errors.category && (
+                                <p className="mt-1 text-xs font-medium text-red-500">{errors.category}</p>
+                            )}
+                        </div>
+
+                        {isKerugian && (
+                            <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50/60 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                        Kondisi Barang <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={data.item_condition}
+                                        onChange={(e) => setData('item_condition', e.target.value)}
+                                        placeholder="cth: retak pada sisi kiri, penyok, hilang sebagian"
+                                        className="w-full rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-amber-900/60 dark:bg-gray-800 dark:text-gray-100"
+                                    />
+                                    {errors.item_condition && (
+                                        <p className="mt-1 text-xs font-medium text-red-500">
+                                            {errors.item_condition}
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                        Taksiran Nilai Kerugian (Rp) <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={data.estimated_loss}
+                                        onChange={(e) => setData('estimated_loss', e.target.value)}
+                                        placeholder="cth: 150000"
+                                        className="w-full rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-amber-900/60 dark:bg-gray-800 dark:text-gray-100"
+                                    />
+                                    {errors.estimated_loss && (
+                                        <p className="mt-1 text-xs font-medium text-red-500">
+                                            {errors.estimated_loss}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        <div>
+                            <label className="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-300">
+                                Kronologi / Deskripsi <span className="text-red-500">*</span>
                             </label>
                             <textarea
                                 rows={5}
                                 value={data.description}
                                 onChange={(e) => setData('description', e.target.value)}
-                                placeholder="Jelaskan masalah yang kamu alami dengan vendor ini..."
+                                placeholder={
+                                    isKerugian
+                                        ? 'Jelaskan kronologi kerusakan/kehilangan barang...'
+                                        : 'Jelaskan masalah yang kamu alami...'
+                                }
                                 className="w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/30 dark:bg-gray-700 dark:text-gray-100"
                             />
                             {errors.description && (
@@ -79,19 +213,27 @@ export default function Lapor({ order }) {
 
                         <div>
                             <label className="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-300">
-                                Bukti Foto (opsional)
+                                Bukti Foto <span className="text-red-500">*</span>
                             </label>
                             <div className="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-6 dark:border-gray-600 dark:bg-gray-900/40">
                                 {previewUrl ? (
-                                    <div className="flex flex-col items-center gap-2">
+                                    <div className="flex w-full flex-col items-center gap-2">
                                         <img
                                             src={previewUrl}
                                             alt="Preview bukti"
-                                            className="max-h-40 rounded-lg border object-contain dark:border-gray-600"
+                                            className="max-h-44 rounded-lg border object-contain dark:border-gray-600"
                                         />
                                         <span className="mt-1 flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
                                             <CheckCircle2 size={14} /> Foto siap diunggah
                                         </span>
+                                        <button
+                                            type="button"
+                                            onClick={clearFile}
+                                            className="absolute right-2 top-2 rounded-full bg-white/90 p-1 text-gray-500 shadow-sm hover:bg-red-50 hover:text-red-600 dark:bg-gray-800/80"
+                                            title="Hapus foto"
+                                        >
+                                            <X size={14} />
+                                        </button>
                                     </div>
                                 ) : (
                                     <>
@@ -118,8 +260,8 @@ export default function Lapor({ order }) {
 
                         <button
                             type="submit"
-                            disabled={processing || !data.description.trim()}
-                            className="w-full rounded-xl bg-red-600 py-3.5 text-sm font-bold text-white transition-all hover:bg-red-700 disabled:opacity-50"
+                            disabled={processing || !data.description.trim() || !data.evidence}
+                            className="w-full rounded-xl bg-red-600 py-3.5 text-sm font-bold text-white transition-all hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {processing ? 'Mengirim...' : 'Kirim Laporan'}
                         </button>

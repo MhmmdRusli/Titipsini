@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
-    
-     use HasFactory, SoftDeletes, HasTrashMeta;
+
+    use HasFactory, SoftDeletes, HasTrashMeta;
 
     protected $fillable = [
         'order_code',
@@ -102,7 +102,10 @@ class Order extends Model
             'extend_requested_at' => 'datetime',
             'extend_paid_at' => 'datetime',
             'deleted_at' => 'datetime',
-            
+            'refund_percentage' => 'integer',
+            'refund_amount' => 'decimal:2',
+            'refunded_at' => 'datetime',
+
         ];
     }
 
@@ -152,6 +155,16 @@ class Order extends Model
         }
 
         return $this->hitungDendaFormula();
+    }
+
+        public function sudahDirefund(): bool
+    {
+        return $this->refunded_at !== null;
+    }
+
+    public function refunder(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'refunded_by');
     }
 
     /**
