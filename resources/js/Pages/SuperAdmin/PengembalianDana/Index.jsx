@@ -1,14 +1,21 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
-import { Search, Wallet, CheckCircle2, Clock3, Download, FileText, ExternalLink, ShieldCheck, X, Ban } from 'lucide-react';
+import { Search, Wallet, CheckCircle2, Clock3, Download, FileText, ExternalLink, ShieldCheck, X, Ban, Filter, Clock, XCircle } from 'lucide-react';
 
 const FILTERS = [
-    { value: 'semua', label: 'Semua' },
-    { value: 'menunggu', label: 'Menunggu' },
-    { value: 'disetujui', label: 'Disetujui' },
-    { value: 'ditolak', label: 'Ditolak' },
+    { value: 'semua', label: 'Semua', icon: 'Filter' },
+    { value: 'menunggu', label: 'Menunggu', icon: 'Clock' },
+    { value: 'disetujui', label: 'Disetujui', icon: 'CheckCircle2' },
+    { value: 'ditolak', label: 'Ditolak', icon: 'XCircle' },
 ];
+
+const ICON_MAP = {
+    Filter: Filter,
+    Clock: Clock,
+    CheckCircle2: CheckCircle2,
+    XCircle: XCircle,
+};
 
 const STATUS_STYLE = {
     menunggu: 'bg-amber-100 text-amber-700',
@@ -501,23 +508,27 @@ export default function Index({ refunds, filters, summary = {}, persenRefund = 6
                 </form>
 
                 <div className="flex flex-wrap gap-2">
-                    {FILTERS.map((tab) => (
-                        <button
-                            key={tab.value}
-                            type="button"
-                            onClick={() => {
-                                setStatus(tab.value);
-                                applyFilters(tab.value);
-                            }}
-                            className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                                status === tab.value
-                                    ? 'bg-emerald-600 text-white shadow-sm'
-                                    : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-[#111827] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-gray-800'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                    {FILTERS.map((tab) => {
+                        const Icon = ICON_MAP[tab.icon];
+                        return (
+                            <button
+                                key={tab.value}
+                                type="button"
+                                onClick={() => {
+                                    setStatus(tab.value);
+                                    applyFilters(tab.value);
+                                }}
+                                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                                    status === tab.value
+                                        ? 'bg-emerald-600 text-white shadow-sm'
+                                        : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-[#111827] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-gray-800'
+                                }`}
+                            >
+                                <Icon size={12} />
+                                {tab.label}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
