@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
-    ShieldCheck, ArrowLeft, Clock, CheckCircle2, QrCode, WalletMinimal, Upload,
+    ArrowLeft, Clock, CheckCircle2, QrCode, WalletMinimal, Upload,
 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
@@ -99,12 +99,14 @@ export default function ExtendInvoice({ order, qris_url, saldo }) {
                 <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-800/90">
                     <div className="flex items-center justify-between gap-3 bg-[#15803d] px-5 py-4 dark:bg-[#0f5c2c]">
                         <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15">
-                                <ShieldCheck size={18} className="text-white" />
+                            <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white/15">
+                                <img src="/images/admin-titipsini.png" alt="Titipsini" className="h-full w-full object-contain" />
                             </div>
                             <div>
-                                <p className="text-sm font-extrabold leading-tight text-white">Titipsini&nbsp;•&nbsp;Com</p>
-                                <p className="text-[10px] leading-tight text-green-100">Titip Aman, Hidup Tenang</p>
+                                <p className="text-sm font-extrabold leading-tight text-white">
+                                    Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
+                                </p>
+                                <p className="text-[10px] leading-tight text-green-100">Tempat yang aman untuk barang berharga kamu</p>
                             </div>
                         </div>
                         <div className="text-right">

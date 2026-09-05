@@ -187,7 +187,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                 <div className="mt-3 flex gap-2">
                                     <button
                                         type="button"
-                                        disabled={!m.is_buka || m.is_orderable === false || sedangTutup}
+                                        disabled={!m.isBuka || m.is_orderable === false || sedangTutup}
                                         onClick={() => { if (m.is_orderable !== false && ! sedangTutup) router.visit(`/app/services/${kategori}/${m.id}/titip`); }}
                                         className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-[#22c55e] dark:disabled:bg-gray-700"
                                     >

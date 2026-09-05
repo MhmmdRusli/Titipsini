@@ -23,11 +23,16 @@ export default function Lapor({ order }) {
         post(`/app/orders/${order.id}/lapor`, {
             forceFormData: true,
             preserveScroll: true,
+            onSuccess: () => {
+                setData('description', '');
+                setData('evidence', null);
+                setPreviewUrl(null);
+            },
         });
     }
 
     return (
-        <CustomerLayout backHref={`/app/orders/${order.id}`} title="Laporkan Vendor">
+        <CustomerLayout backHref="/app/orders" title="Laporkan Vendor">
             <Head title="Laporkan Vendor" />
 
             <div className="px-4 py-4">
@@ -120,7 +125,7 @@ export default function Lapor({ order }) {
                         </button>
 
                         <Link
-                            href={`/app/orders/${order.id}`}
+                            href="/app/orders"
                             className="block w-full rounded-xl border border-gray-200 py-3 text-center text-sm font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
                             Batal

@@ -331,7 +331,7 @@ export default function OrdersIndex({ orders, filters }) {
                                                 </Link>
                                                 <button
                                                     type="button"
-                                                    onClick={() => router.get(`/app/orders/${order.id}/report`)}
+                                                    onClick={() => router.get(`/app/orders/${order.id}/lapor`)}
                                                     className="flex-1 rounded-lg border border-red-500 bg-white py-2 text-center text-xs font-medium text-red-500 transition active:bg-red-50 dark:bg-gray-800 dark:text-red-400"
                                                 >
                                                     Laporkan
