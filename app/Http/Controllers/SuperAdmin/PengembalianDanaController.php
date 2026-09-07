@@ -81,7 +81,11 @@ class PengembalianDanaController extends Controller
             ];
         });
 
-        return Inertia::render('SuperAdmin/PengembalianDana/Index', [
+        $view = $request->routeIs('finance.*')
+            ? 'Finance/PengembalianDana/Index'
+            : 'SuperAdmin/PengembalianDana/Index';
+
+        return Inertia::render($view, [
             'refunds' => $reports,
             'filters' => [
                 'status' => $status,
