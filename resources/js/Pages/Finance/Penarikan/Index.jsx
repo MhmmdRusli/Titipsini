@@ -42,7 +42,7 @@ function formatDate(value) {
     });
 }
 
-export default function PenarikanIndex({ penarikan, filter }) {
+export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = false }) {
     const { flash } = usePage().props;
     const activeStatus = filter?.status ?? 'pending';
 
@@ -158,6 +158,19 @@ export default function PenarikanIndex({ penarikan, filter }) {
                 </div>
             </div>
 
+            {(() => {
+                if (!hasAnyRefundDebt) return null;
+                return (
+                    <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                        <p className="font-bold">Perhatian: Ada mitra yang memiliki utang refund</p>
+                        <p className="mt-0.5">
+                            Saat ini ada pengajuan penarikan yang menunggu verifikasi dari mitra yang memiliki utang refund.
+                            Pastikan utang refund dipotong dari jumlah penarikan sebelum disetujui.
+                        </p>
+                    </div>
+                );
+            })()}
+
             {/* Main Table Card */}
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="overflow-x-auto">
@@ -169,13 +182,14 @@ export default function PenarikanIndex({ penarikan, filter }) {
                                 <th className="px-6 py-4">Rekening Tujuan</th>
                                 <th className="px-6 py-4">Waktu Pengajuan</th>
                                 <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4">Utang Refund</th>
                                 <th className="px-6 py-4 text-right">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
                             {penarikan.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-20 text-center">
+                                    <td colSpan={7} className="px-6 py-20 text-center">
                                         <div className="mx-auto flex max-w-sm flex-col items-center justify-center">
                                             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 border border-slate-200">
                                                 <Wallet size={32} />
@@ -253,6 +267,16 @@ export default function PenarikanIndex({ penarikan, filter }) {
                                                     </p>
                                                 )}
                                             </div>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {(item.utang_refund ?? 0) > 0 ? (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-bold text-red-700 border border-red-200">
+                                                <AlertTriangle size={12} />
+                                                Rp {formatRupiah(item.utang_refund)}
+                                            </span>
+                                        ) : (
+                                            <span className="text-[11px] text-slate-400">-</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -355,6 +379,16 @@ export default function PenarikanIndex({ penarikan, filter }) {
                                 <span className="text-base font-black text-emerald-700">{formatRupiah(approveTarget.jumlah)}</span>
                             </div>
                         </div>
+
+                        {(approveTarget.utang_refund ?? 0) > 0 && (
+                            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                                <p className="font-bold">Mitra memiliki utang refund</p>
+                                <p className="mt-0.5">
+                                    Utang refund sebesar <span className="font-semibold">{formatRupiah(approveTarget.utang_refund)}</span> akan dipotong dari saldo mitra.
+                                    Pastikan saldo mitra cukup setelah potongan utang.
+                                </p>
+                            </div>
+                        )}
 
                         <div className="mt-6 flex justify-end gap-3">
                             <button

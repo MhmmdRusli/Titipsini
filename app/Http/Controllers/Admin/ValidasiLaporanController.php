@@ -182,8 +182,6 @@ class ValidasiLaporanController extends Controller
             'id'                   => $r->id,
             'category'             => $r->category,
             'description'          => $r->description,
-            'item_condition'       => $r->item_condition,
-            'estimated_loss'       => $r->estimated_loss !== null ? (float) $r->estimated_loss : null,
             'evidence_url'         => $r->evidence_url,
             'status'               => $r->status,
             'admin_approval'       => $r->admin_approval,

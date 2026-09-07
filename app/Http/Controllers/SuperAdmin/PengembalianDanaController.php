@@ -61,8 +61,6 @@ class PengembalianDanaController extends Controller
                 'customer' => $order?->customer,
                 'partner' => $order?->partner,
                 'description' => $report->description,
-                'item_condition' => $report->item_condition,
-                'estimated_loss' => $report->estimated_loss !== null ? (float) $report->estimated_loss : null,
                 'evidence_url' => $report->evidence_url,
                 'status' => $report->status,
                 'admin_approval' => $report->admin_approval,
@@ -98,15 +96,14 @@ class PengembalianDanaController extends Controller
                 'totalNilai' => (float) Order::whereNotNull('refunded_at')->sum('refund_amount'),
             ],
             'persenRefund' => self::PERSEN_DEFAULT_ESTIMASI,
+            'hasAnyRefundDebt' => (bool) Order::whereNotNull('refund_amount')->where('refund_amount', '>', 0)->exists(),
         ]);
     }
 
     /**
      * PATCH /super-admin/pengembalian-dana/{report}/setujui
      *
-     * Support mode dinamis:
-     *   - refund_mode='percent' + refund_percent=1..100
-     *   - refund_mode='nominal' + refund_nominal=angka rupiah (tidak boleh > total order)
+     * Refund otomatis 60% dari total order.
      */
     public function setujui(Request $request, Report $report): RedirectResponse
     {
@@ -120,32 +117,19 @@ class PengembalianDanaController extends Controller
         abort_unless($order, 404);
         abort_if($order->sudahDirefund(), 400, 'Order ini sudah pernah di-refund sebelumnya.');
 
-        $data = $request->validate([
-            'refund_mode'    => ['required', Rule::in(['percent', 'nominal'])],
-            'refund_percent' => ['nullable', 'required_if:refund_mode,percent', 'numeric', 'min:1', 'max:100'],
-            'refund_nominal' => ['nullable', 'required_if:refund_mode,nominal', 'numeric', 'min:1'],
-            'admin_note'     => ['nullable', 'string', 'max:500'],
-        ]);
-
         $total = (float) $order->total_price;
         abort_if($total <= 0, 422, 'Order ini tidak memiliki total pembayaran.');
 
-        if ($data['refund_mode'] === 'percent') {
-            $percentage = (int) $data['refund_percent'];
-            $amount = round($total * $percentage / 100, 2);
-        } else {
-            $amount = (float) $data['refund_nominal'];
-            abort_if($amount > $total, 422, 'Nominal refund tidak boleh melebihi total pesanan.');
-            $percentage = (int) round($amount / $total * 100);
-        }
+        $percentage = 60;
+        $amount = round($total * $percentage / 100, 2);
 
         $admin = Auth::user();
 
-        DB::transaction(function () use ($report, $order, $data, $amount, $percentage, $admin) {
+        DB::transaction(function () use ($report, $order, $amount, $percentage, $admin) {
             $order->update([
                 'refund_percentage' => $percentage,
                 'refund_amount'     => $amount,
-                'refund_reason'     => $data['admin_note'] ?? $report->description,
+                'refund_reason'     => $report->description,
                 'refunded_at'       => now(),
                 'refunded_by'       => $admin->id,
             ]);
@@ -167,7 +151,6 @@ class PengembalianDanaController extends Controller
                 'status'      => 'disetujui',
                 'reviewed_by' => $admin->id,
                 'reviewed_at' => now(),
-                'admin_note'  => $data['admin_note'] ?? null,
             ]);
 
             if ($order->customer_id) {

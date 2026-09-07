@@ -87,6 +87,8 @@ class PenarikanController extends Controller
             'saldo' => $user->saldoMitra(),
             'mutasi' => $mutasi,
             'filter' => ['tipe' => $tipe, 'dari' => $dari, 'sampai' => $sampai],
+            'utangRefund' => $user->utangRefund(),
+            'adaRefund' => $user->adaRefund(),
         ]);
     }
 
@@ -124,6 +126,8 @@ class PenarikanController extends Controller
             'saldo' => $user->saldoMitra(),
             'initialRekeningList' => $rekeningList,
             'rekening' => $firstRekening,
+            'utangRefund' => $user->utangRefund(),
+            'adaRefund' => $user->adaRefund(),
         ]);
     }
 

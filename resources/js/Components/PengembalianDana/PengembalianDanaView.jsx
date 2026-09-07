@@ -66,72 +66,16 @@ function formatDate(value) {
 }
 
 /* ─────────────────────────────────────────────
-   MODAL SETUJUI REFUND (dengan mode persen/nominal dinamis)
+   MODAL SETUJUI REFUND (otomatis 60%)
 ───────────────────────────────────────────── */
-function ApproveModal({ refund, onClose, urlSetujui }) {
-    const total = Number(refund.total_price ?? 0);
-    const isAlready = refund.refund_amount != null;
-
-    const [mode, setMode] = useState('percent');
-    const [percent, setPercent] = useState(50);
-    const [nominal, setNominal] = useState('');
-    const [adminNote, setAdminNote] = useState('');
-    const [processing, setProcessing] = useState(false);
-    const [error, setError] = useState(null);
-
-    const computedAmount = mode === 'percent'
-        ? Math.round((total * (Number(percent) || 0)) / 100)
-        : Number(nominal || 0);
-
-    const computedPercent = mode === 'percent'
-        ? Number(percent || 0)
-        : total > 0
-            ? Math.round((Number(nominal || 0) / total) * 100)
-            : 0;
-
-    function submit() {
-        setError(null);
-
-        if (mode === 'percent') {
-            if (!percent || percent < 1 || percent > 100) {
-                setError('Persentase harus 1-100.');
-                return;
-            }
-        } else {
-            if (!nominal || Number(nominal) <= 0) {
-                setError('Nominal refund harus lebih dari 0.');
-                return;
-            }
-            if (Number(nominal) > total) {
-                setError('Nominal refund tidak boleh melebihi total pesanan.');
-                return;
-            }
-        }
-
-        setProcessing(true);
-        router.patch(
-            urlSetujui.replace('__ID__', refund.id),
-            {
-                refund_mode: mode,
-                refund_percent: mode === 'percent' ? percent : undefined,
-                refund_nominal: mode === 'nominal' ? nominal : undefined,
-                admin_note: adminNote,
-            },
-            {
-                preserveScroll: true,
-                onFinish: () => setProcessing(false),
-                onSuccess: () => onClose(),
-            }
-        );
-    }
-
+function ApproveModal({ refund, persenRefund, onClose, onConfirm }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+            <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
                 <div className="flex items-start justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-                            <ShieldCheck size={18} />
+                            <CheckCircle2 size={18} />
                         </div>
                         <div>
                             <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
@@ -148,139 +92,26 @@ function ApproveModal({ refund, onClose, urlSetujui }) {
                 </div>
 
                 <div className="space-y-4 px-5 py-4">
-                    {isAlready && (
-                        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
-                            <X size={14} className="mt-0.5 shrink-0" />
-                            Order ini sudah pernah di-refund. Aksi tidak dapat dibatalkan.
-                        </div>
-                    )}
-
                     <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
                             Total Pesanan
                         </p>
                         <p className="mt-0.5 text-xl font-bold text-emerald-700 dark:text-emerald-300">
-                            {formatRupiah(total)}
+                            {formatRupiah(refund.total_price ?? 0)}
                         </p>
                     </div>
 
-                    {refund.estimated_loss != null && (
-                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/40 dark:bg-amber-950/30">
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
-                                Taksiran Kerugian dari Customer
-                            </p>
-                            <p className="mt-0.5 text-base font-bold text-amber-900 dark:text-amber-200">
-                                {formatRupiah(refund.estimated_loss)}
-                            </p>
-                            {refund.item_condition && (
-                                <p className="mt-1 text-[11px] text-amber-800 dark:text-amber-200">
-                                    Kondisi: {refund.item_condition}
-                                </p>
-                            )}
-                        </div>
-                    )}
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-200">
-                            Mode Refund
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {[
-                                { v: 'percent', l: 'Persentase (%)' },
-                                { v: 'nominal', l: 'Nominal (Rp)' },
-                            ].map((m) => (
-                                <button
-                                    key={m.v}
-                                    type="button"
-                                    onClick={() => setMode(m.v)}
-                                    className={`rounded-xl border px-3 py-2 text-xs font-semibold transition ${
-                                        mode === m.v
-                                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300'
-                                    }`}
-                                >
-                                    {m.l}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {mode === 'percent' ? (
-                        <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                Persentase Refund (1-100%)
-                            </label>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="100"
-                                    value={percent}
-                                    onChange={(e) => setPercent(e.target.value)}
-                                    className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900"
-                                />
-                                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">%</span>
-                            </div>
-                            <div className="mt-2 flex flex-wrap gap-1">
-                                {[10, 25, 50, 75, 100].map((p) => (
-                                    <button
-                                        key={p}
-                                        type="button"
-                                        onClick={() => setPercent(p)}
-                                        className="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-                                    >
-                                        {p}%
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    ) : (
-                        <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                Nominal Refund (Rp)
-                            </label>
-                            <input
-                                type="number"
-                                min="1"
-                                max={total}
-                                value={nominal}
-                                onChange={(e) => setNominal(e.target.value)}
-                                placeholder={`Maks ${formatRupiah(total)}`}
-                                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900"
-                            />
-                        </div>
-                    )}
-
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/40">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                            Akan dikreditkan ke saldo customer
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                            Refund Akan Diproses
                         </p>
-                        <p className="mt-0.5 text-xl font-bold text-emerald-700 dark:text-emerald-400">
-                            {formatRupiah(computedAmount)}
+                        <p className="mt-0.5 text-xl font-bold text-emerald-700 dark:text-emerald-300">
+                            {formatRupiah(Math.round((refund.total_price ?? 0) * persenRefund / 100))}
                         </p>
-                        {computedPercent > 0 && (
-                            <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                                ≈ {computedPercent}% dari total pesanan
-                            </p>
-                        )}
+                        <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            ≈ {persenRefund}% dari total pesanan
+                        </p>
                     </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-200">
-                            Catatan Admin <span className="font-normal text-gray-400">(opsional)</span>
-                        </label>
-                        <textarea
-                            rows={3}
-                            value={adminNote}
-                            onChange={(e) => setAdminNote(e.target.value)}
-                            placeholder="cth: Kerusakan barang sesuai bukti foto, refund disetujui."
-                            className="w-full resize-none rounded-xl border border-gray-200 bg-white p-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900"
-                        />
-                    </div>
-
-                    {error && (
-                        <p className="rounded-xl border border-red-200 bg-red-50 p-2 text-xs text-red-700">{error}</p>
-                    )}
                 </div>
 
                 <div className="flex gap-3 border-t border-gray-200 bg-gray-50 px-5 py-3 dark:border-gray-700 dark:bg-gray-900/40">
@@ -293,11 +124,10 @@ function ApproveModal({ refund, onClose, urlSetujui }) {
                     </button>
                     <button
                         type="button"
-                        onClick={submit}
-                        disabled={processing}
-                        className="flex-1 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={onConfirm}
+                        className="flex-1 rounded-xl border border-emerald-500 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-gray-900 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
                     >
-                        {processing ? 'Memproses...' : 'Konfirmasi Setujui'}
+                        Konfirmasi Setujui
                     </button>
                 </div>
             </div>
@@ -409,6 +239,19 @@ export default function PengembalianDanaView({
         applyFilters();
     }
 
+    function handleApprove(refund) {
+        router.patch(
+            urlSetujui.replace('__ID__', refund.id),
+            {},
+            {
+                onSuccess: () => {
+                    setModal(null);
+                    router.reload({ only: ['refunds', 'summary'] });
+                },
+            }
+        );
+    }
+
     function exportPdf() {
         const rows = refunds?.data ?? [];
         if (!rows.length) return;
@@ -468,7 +311,7 @@ export default function PengembalianDanaView({
 
             {modal && (
                 modal.mode === 'approve' ? (
-                    <ApproveModal refund={modal.refund} onClose={() => setModal(null)} urlSetujui={urlSetujui} />
+                    <ApproveModal refund={modal.refund} persenRefund={persenRefund} onClose={() => setModal(null)} onConfirm={() => handleApprove(modal.refund)} />
                 ) : (
                     <RejectModal refund={modal.refund} onClose={() => setModal(null)} urlTolak={urlTolak} />
                 )
@@ -563,32 +406,31 @@ export default function PengembalianDanaView({
 
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-[#111827]">
                 <div className="overflow-x-auto">
-                    <table className="min-w-full text-left text-sm">
+                    <table className="min-w-full text-left text-xs">
                         <thead className="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-900/60">
                             <tr>
-                                <th className="px-5 py-3">Order</th>
-                                <th className="px-5 py-3">Customer / Vendor</th>
-                                <th className="px-5 py-3">Kondisi / Taksiran</th>
-                                <th className="px-5 py-3">Bukti</th>
-                                <th className="px-5 py-3">Nominal Refund</th>
-                                <th className="px-5 py-3">Approval Admin</th>
-                                <th className="px-5 py-3">Status</th>
-                                <th className="px-5 py-3">Tanggal</th>
-                                <th className="px-5 py-3">Aksi</th>
+                                <th className="px-3 py-2">Order</th>
+                                <th className="px-3 py-2">Customer / Vendor</th>
+                                <th className="px-3 py-2">Bukti</th>
+                                <th className="px-3 py-2">Nominal Refund</th>
+                                <th className="px-3 py-2">Approval Admin</th>
+                                <th className="px-3 py-2">Status</th>
+                                <th className="px-3 py-2">Tanggal</th>
+                                <th className="px-3 py-2">Aksi</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                             {(refunds?.data ?? []).length === 0 ? (
                                 <tr>
-                                    <td colSpan={9} className="px-5 py-16 text-center">
+                                    <td colSpan={8} className="px-3 py-10 text-center">
                                         <div className="mx-auto max-w-md">
-                                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-                                                <FileText size={28} />
+                                            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                                                <FileText size={22} />
                                             </div>
-                                            <h3 className="text-base font-bold text-gray-800 dark:text-gray-200">
+                                            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">
                                                 Belum ada data refund
                                             </h3>
-                                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                                 Data pengembalian dana akan muncul di sini setelah admin memverifikasi laporan kerugian customer.
                                             </p>
                                         </div>
@@ -603,48 +445,34 @@ export default function PengembalianDanaView({
 
                                     return (
                                         <tr key={item.id} className="hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20">
-                                            <td className="px-5 py-4">
+                                            <td className="px-3 py-2.5">
                                                 <div className="font-semibold text-gray-900 dark:text-gray-100">
                                                     {item.order_code ?? '-'}
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-3 py-2.5">
                                                 <div className="font-medium text-gray-800 dark:text-gray-200">
                                                     {item.customer?.name ?? '-'}
                                                 </div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                <div className="text-[11px] text-gray-500 dark:text-gray-400">
                                                     Vendor: {item.partner?.name ?? '-'}
                                                 </div>
                                             </td>
-                                            <td className="max-w-[200px] px-5 py-4">
-                                                {item.estimated_loss != null ? (
-                                                    <>
-                                                        <p className="line-clamp-1 text-xs text-gray-700 dark:text-gray-300">
-                                                            {item.item_condition || '-'}
-                                                        </p>
-                                                        <p className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-400">
-                                                            Taksiran: {formatRupiah(item.estimated_loss)}
-                                                        </p>
-                                                    </>
-                                                ) : (
-                                                    <span className="text-[11px] text-gray-400">-</span>
-                                                )}
-                                            </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-3 py-2.5">
                                                 {item.evidence_url ? (
                                                     <a href={item.evidence_url}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-400"
+                                                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-400"
                                                     >
                                                         <ExternalLink size={12} />
                                                         Lihat
                                                     </a>
                                                 ) : (
-                                                    <span className="text-xs text-gray-400">Tidak ada</span>
+                                                    <span className="text-[11px] text-gray-400">Tidak ada</span>
                                                 )}
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-3 py-2.5">
                                                 <div className="font-bold text-emerald-700 dark:text-emerald-400">
                                                     {formatRupiah(item.refund_amount ?? item.refund_estimasi)}
                                                 </div>
@@ -659,8 +487,8 @@ export default function PengembalianDanaView({
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className="px-5 py-4">
-                                                <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                                            <td className="px-3 py-2.5">
+                                                <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
                                                     ADMIN_APPROVAL_STYLE[item.admin_approval] ?? 'bg-gray-100 text-gray-600'
                                                 }`}>
                                                     {ADMIN_APPROVAL_LABEL[item.admin_approval] ?? '-'}
@@ -671,17 +499,17 @@ export default function PengembalianDanaView({
                                                     </div>
                                                 )}
                                             </td>
-                                            <td className="px-5 py-4">
-                                                <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                                            <td className="px-3 py-2.5">
+                                                <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
                                                     STATUS_STYLE[item.status] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
                                                 }`}>
                                                     {STATUS_LABEL[item.status] ?? item.status}
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-4 text-xs text-gray-500 dark:text-gray-400">
+                                            <td className="px-3 py-2.5 text-[11px] text-gray-500 dark:text-gray-400">
                                                 {formatDate(item.created_at)}
                                             </td>
-                                            <td className="px-5 py-4">
+                                            <td className="px-3 py-2.5">
                                                 {adminPending ? (
                                                     <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 dark:text-amber-400">
                                                         <Clock size={12} />
@@ -696,19 +524,22 @@ export default function PengembalianDanaView({
                                                     <div className="flex gap-1.5">
                                                         <button
                                                             onClick={() => setModal({ mode: 'approve', refund: item })}
-                                                            className="rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                                                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-500 bg-white px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-gray-900 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
                                                         >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                                <polyline points="20 6 9 17 4 12" />
+                                                            </svg>
                                                             Setujui
                                                         </button>
                                                         <button
                                                             onClick={() => setModal({ mode: 'reject', refund: item })}
-                                                            className="rounded-lg border border-red-300 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400"
+                                                            className="rounded-lg border border-red-300 bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400"
                                                         >
                                                             Tolak
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-xs text-gray-400">
+                                                    <span className="text-[11px] text-gray-400">
                                                         {item.reviewer ? `oleh ${item.reviewer}` : '-'}
                                                     </span>
                                                 )}

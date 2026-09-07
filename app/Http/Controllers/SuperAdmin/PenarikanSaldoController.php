@@ -32,10 +32,11 @@ class PenarikanSaldoController extends Controller
         }
 
         $withdrawals = $query->latest()->paginate(15)->through(function (Penarikan $item) {
+            $user = $item->user;
             return [
                 'id' => $item->id,
                 'user_id' => $item->user_id,
-                'user' => $item->user,
+                'user' => $user,
                 'jumlah' => (float) $item->jumlah,
                 'nama_bank' => $item->nama_bank,
                 'nomor_rekening' => $item->nomor_rekening,
@@ -44,6 +45,7 @@ class PenarikanSaldoController extends Controller
                 'catatan' => $item->catatan,
                 'created_at' => $item->created_at?->format('d M Y H:i'),
                 'processed_at' => $item->processed_at?->format('d M Y H:i'),
+                'utang_refund' => $user ? $user->utangRefund() : 0,
             ];
         })->withQueryString();
 

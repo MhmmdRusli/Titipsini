@@ -40,16 +40,7 @@ class ReportController extends Controller
             'category'        => ['required', Rule::in(['complain', 'kerugian'])],
             'description'     => ['required', 'string', 'max:1000'],
             'evidence'        => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:4096'],
-            'item_condition'  => ['nullable', 'string', 'max:255'],
-            'estimated_loss'  => ['nullable', 'numeric', 'min:0'],
         ]);
-
-        if ($validated['category'] === 'kerugian') {
-            $request->validate([
-                'item_condition' => ['required', 'string', 'max:255'],
-                'estimated_loss' => ['required', 'numeric', 'min:0'],
-            ]);
-        }
 
         $path = $request->file('evidence')->store('report-evidence', 'public');
 
@@ -57,8 +48,6 @@ class ReportController extends Controller
             'order_id'       => $order->id,
             'category'       => $validated['category'],
             'description'    => $validated['description'],
-            'item_condition' => $validated['item_condition'] ?? null,
-            'estimated_loss' => $validated['estimated_loss'] ?? null,
             'evidence_url'   => Storage::url($path),
             'status'         => 'menunggu',
         ]);

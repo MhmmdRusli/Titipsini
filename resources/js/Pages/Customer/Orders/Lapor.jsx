@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
-import { AlertTriangle, Upload, CheckCircle2, MessageSquareWarning, PackageX, X } from 'lucide-react';
+import { AlertTriangle, Upload, CheckCircle2, MessageSquareWarning, PackageX, X, Check } from 'lucide-react';
 
 const CATEGORIES = [
     {
@@ -12,8 +12,8 @@ const CATEGORIES = [
     },
     {
         key: 'kerugian',
-        label: 'Kerugian / Kerusakan Barang',
-        desc: 'Barang rusak/hilang selama penitipan. Bisa diajukan refund.',
+        label: 'Ajukan Pengembalian Dana',
+        desc: 'Ajukan permintaan pengembalian dana untuk barang rusak/hilang.',
         Icon: PackageX,
     },
 ];
@@ -22,14 +22,10 @@ export default function Lapor({ order }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         category: 'complain',
         description: '',
-        item_condition: '',
-        estimated_loss: '',
         evidence: null,
     });
 
     const [previewUrl, setPreviewUrl] = useState(null);
-
-    const isKerugian = data.category === 'kerugian';
 
     function handleFileChange(e) {
         const file = e.target.files?.[0];
@@ -135,13 +131,15 @@ export default function Lapor({ order }) {
                                                     {desc}
                                                 </p>
                                             </div>
-                                            <span
-                                                className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 transition ${
+                                            <div
+                                                className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition ${
                                                     active
-                                                        ? 'border-emerald-600 bg-emerald-600'
-                                                        : 'border-gray-300 dark:border-gray-600'
+                                                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                                                        : 'border-gray-300 dark:border-gray-600 bg-transparent'
                                                 }`}
-                                            />
+                                            >
+                                                {active && <Check size={10} strokeWidth={3} />}
+                                            </div>
                                         </button>
                                     );
                                 })}
@@ -151,46 +149,6 @@ export default function Lapor({ order }) {
                             )}
                         </div>
 
-                        {isKerugian && (
-                            <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50/60 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-                                <div>
-                                    <label className="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                        Kondisi Barang <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={data.item_condition}
-                                        onChange={(e) => setData('item_condition', e.target.value)}
-                                        placeholder="cth: retak pada sisi kiri, penyok, hilang sebagian"
-                                        className="w-full rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-amber-900/60 dark:bg-gray-800 dark:text-gray-100"
-                                    />
-                                    {errors.item_condition && (
-                                        <p className="mt-1 text-xs font-medium text-red-500">
-                                            {errors.item_condition}
-                                        </p>
-                                    )}
-                                </div>
-                                <div>
-                                    <label className="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                        Taksiran Nilai Kerugian (Rp) <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={data.estimated_loss}
-                                        onChange={(e) => setData('estimated_loss', e.target.value)}
-                                        placeholder="cth: 150000"
-                                        className="w-full rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-amber-900/60 dark:bg-gray-800 dark:text-gray-100"
-                                    />
-                                    {errors.estimated_loss && (
-                                        <p className="mt-1 text-xs font-medium text-red-500">
-                                            {errors.estimated_loss}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
                         <div>
                             <label className="mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-300">
                                 Kronologi / Deskripsi <span className="text-red-500">*</span>
@@ -199,11 +157,7 @@ export default function Lapor({ order }) {
                                 rows={5}
                                 value={data.description}
                                 onChange={(e) => setData('description', e.target.value)}
-                                placeholder={
-                                    isKerugian
-                                        ? 'Jelaskan kronologi kerusakan/kehilangan barang...'
-                                        : 'Jelaskan masalah yang kamu alami...'
-                                }
+                                placeholder="Jelaskan masalah yang kamu alami..."
                                 className="w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/30 dark:bg-gray-700 dark:text-gray-100"
                             />
                             {errors.description && (
