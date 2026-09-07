@@ -73,6 +73,11 @@ class Order extends Model
         'harga_per_hari',
         'foto_barang_url',
         'biaya_layanan',
+        'refund_percentage',
+        'refund_amount',
+        'refund_reason',
+        'refunded_at',
+        'refunded_by',
     ];
     protected $appends = ['denda', 'vendor_name', 'vendor_address'];
 

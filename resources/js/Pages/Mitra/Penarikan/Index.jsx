@@ -17,6 +17,8 @@ export default function PenarikanIndex({
     saldo = 8000000,
     mutasi = [],
     filter = {},
+    utangRefund = 0,
+    adaRefund = false,
     rekening = null // Tambahkan prop rekening dari Controller
 }) {
     const tipe = filter.tipe ?? 'semua';
@@ -82,6 +84,24 @@ export default function PenarikanIndex({
                         Tarik Saldo
                     </Link>
                 </div>
+
+                {utangRefund > 0 ? (
+                    <div className="mx-4 mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                        <p className="font-bold">Ada utang refund yang belum dilunasi</p>
+                        <p className="mt-1">
+                            Kamu memiliki utang refund sebesar <span className="font-semibold">{formatRupiah(utangRefund)}</span>.
+                            Utang ini akan dipotong otomatis dari penarikan saldo berikutnya.
+                        </p>
+                    </div>
+                ) : adaRefund ? (
+                    <div className="mx-4 mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
+                        <p className="font-bold">Refund telah dipotong dari saldo</p>
+                        <p className="mt-1">
+                            Ada refund yang telah disetujui dan dipotong dari penghasilan kamu.
+                            Saldo yang bisa ditarik sudah disesuaikan.
+                        </p>
+                    </div>
+                ) : null}
 
                 {/* --- INFORMASI REKENING BANK MITRA (DITAMBAHKAN) --- */}
                 <div className="mx-4 mt-4">

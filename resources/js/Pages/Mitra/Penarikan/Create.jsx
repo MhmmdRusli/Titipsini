@@ -10,7 +10,7 @@ function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID').format(value ?? 0);
 }
 
-export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], rekening = null }) {
+export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], rekening = null, utangRefund = 0, adaRefund = false }) {
     const saldoNum = Number(saldo || 0);
 
     // Dapatkan daftar rekening awal dari Props
@@ -298,6 +298,24 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                         <p className="text-[10px] text-gray-400">Total Saldo Aktif <span className="text-[8px]">▼</span></p>
                         <p className="mt-0.5 text-base font-extrabold text-gray-900">Rp{formatRupiah(saldoNum)}</p>
                     </div>
+
+                    {utangRefund > 0 ? (
+                        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] text-red-700">
+                            <p className="font-bold">Ada utang refund</p>
+                            <p className="mt-0.5">
+                                Kamu memiliki utang refund sebesar <span className="font-semibold">Rp{formatRupiah(utangRefund)}</span>.
+                                Utang ini akan dipotong otomatis dari penarikan saldo berikutnya.
+                            </p>
+                        </div>
+                    ) : adaRefund ? (
+                        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-700">
+                            <p className="font-bold">Refund telah dipotong dari saldo</p>
+                            <p className="mt-0.5">
+                                Ada refund yang telah disetujui dan dipotong dari penghasilan kamu.
+                                Saldo yang bisa ditarik sudah disesuaikan.
+                            </p>
+                        </div>
+                    ) : null}
 
                     {/* Preset Nominal */}
                     <p className="mt-4 text-xs font-bold text-gray-900">Jumlah Penarikan (Rp)</p>

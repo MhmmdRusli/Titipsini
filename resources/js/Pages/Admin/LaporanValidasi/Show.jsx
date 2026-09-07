@@ -99,8 +99,11 @@ function ApproveModal({ report, onClose }) {
                         type="button"
                         onClick={submit}
                         disabled={processing}
-                        className="flex-1 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-gray-900 dark:text-emerald-400 dark:hover:bg-emerald-950/40 disabled:cursor-not-allowed disabled:opacity-50"
                     >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
                         {processing ? 'Memproses...' : 'Setujui & Teruskan'}
                     </button>
                 </div>
@@ -245,34 +248,13 @@ export default function Show({ report }) {
                                 </p>
                             </div>
 
-                            {report.item_condition && (
-                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/40 dark:bg-amber-950/30">
-                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
-                                        Kondisi Barang (Customer)
-                                    </p>
-                                    <p className="mt-1 text-sm font-medium text-amber-900 dark:text-amber-200">
-                                        {report.item_condition}
-                                    </p>
-                                </div>
-                            )}
-
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/40 dark:bg-amber-950/30">
-                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
-                                        Taksiran Kerugian
-                                    </p>
-                                    <p className="mt-1 text-base font-bold text-amber-900 dark:text-amber-200">
-                                        {formatRupiah(report.estimated_loss)}
-                                    </p>
-                                </div>
-                                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
-                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
-                                        Total Pesanan
-                                    </p>
-                                    <p className="mt-1 text-base font-bold text-emerald-700 dark:text-emerald-300">
-                                        {formatRupiah(report.total_price)}
-                                    </p>
-                                </div>
+                            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+                                <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                                    Total Pesanan
+                                </p>
+                                <p className="mt-1 text-base font-bold text-emerald-700 dark:text-emerald-300">
+                                    {formatRupiah(report.total_price)}
+                                </p>
                             </div>
 
                             <div>
@@ -360,9 +342,11 @@ export default function Show({ report }) {
                                 <button
                                     type="button"
                                     onClick={() => setModal({ kind: 'approve' })}
-                                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-gray-900 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
                                 >
-                                    <ShieldCheck size={14} />
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
                                     Setujui & Teruskan ke Finance
                                 </button>
                                 <button

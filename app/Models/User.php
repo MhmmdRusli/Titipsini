@@ -208,6 +208,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return (int) max(0, $selisih);
     }
 
+    public function adaRefund(): bool
+    {
+        return \App\Models\Order::where('partner_id', $this->id)
+            ->whereIn('status', ['selesai', 'completed', 'success'])
+            ->whereNotNull('refund_amount')
+            ->exists();
+    }
+
     protected function hitungSaldoKotorMitra($ordersSelesai): float
     {
         // Kotor dikurangi bagian yang sudah dikembalikan ke customer -

@@ -153,7 +153,6 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                         <tr>
                             <th className="px-4 py-3 font-bold">Order</th>
                             <th className="px-4 py-3 font-bold">Customer / Vendor</th>
-                            <th className="px-4 py-3 font-bold">Taksiran</th>
                             <th className="px-4 py-3 font-bold">Approval Admin</th>
                             <th className="px-4 py-3 font-bold">Status</th>
                             <th className="px-4 py-3 font-bold">Tanggal</th>
@@ -163,7 +162,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800/60">
                         {rows.length === 0 ? (
                             <tr>
-                                <td colSpan={7} className="px-4 py-14 text-center text-gray-400 dark:text-gray-500">
+                                <td colSpan={6} className="px-4 py-14 text-center text-gray-400 dark:text-gray-500">
                                     <div className="flex flex-col items-center justify-center">
                                         <FileText size={32} className="mb-2 text-gray-300 dark:text-gray-600" />
                                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -192,15 +191,6 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                                         <div className="text-[11px] text-gray-500 dark:text-gray-400">
                                             Vendor: {r.partner_name ?? '-'}
                                         </div>
-                                    </td>
-                                    <td className="px-4 py-3.5">
-                                        {r.estimated_loss != null ? (
-                                            <div className="font-semibold text-amber-700 dark:text-amber-400">
-                                                {formatRupiah(r.estimated_loss)}
-                                            </div>
-                                        ) : (
-                                            <span className="text-[11px] text-gray-400">-</span>
-                                        )}
                                     </td>
                                     <td className="px-4 py-3.5">
                                         <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${

@@ -21,11 +21,29 @@ class PenarikanController extends Controller
             ->when($status !== 'semua', fn ($q) => $q->where('status', $status))
             ->latest()
             ->paginate(15)
+            ->through(function (Penarikan $item) {
+                $user = $item->user;
+                return [
+                    'id' => $item->id,
+                    'user_id' => $item->user_id,
+                    'user' => $user,
+                    'jumlah' => (float) $item->jumlah,
+                    'nama_bank' => $item->nama_bank,
+                    'nomor_rekening' => $item->nomor_rekening,
+                    'nama_pemilik' => $item->nama_pemilik,
+                    'status' => $item->status,
+                    'catatan' => $item->catatan,
+                    'created_at' => $item->created_at?->format('d M Y H:i'),
+                    'processed_at' => $item->processed_at?->format('d M Y H:i'),
+                    'utang_refund' => $user ? $user->utangRefund() : 0,
+                ];
+            })
             ->withQueryString();
 
         return Inertia::render('Finance/Penarikan/Index', [
             'penarikan' => $penarikan,
             'filter' => ['status' => $status],
+            'hasAnyRefundDebt' => (bool) \App\Models\Order::whereNotNull('refund_amount')->where('refund_amount', '>', 0)->exists(),
         ]);
     }
 
