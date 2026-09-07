@@ -51,6 +51,9 @@ const navItems = [
         icon: Settings,
         children: [
             { label: 'Keamanan', href: '/super-admin/pengaturan/keamanan' },
+            { label: 'Komisi', href: '/super-admin/pengaturan/komisi' },
+            { label: 'Denda', href: '/super-admin/pengaturan/denda' },
+            { label: 'QRIS', href: '/super-admin/pengaturan/qris' },
         ],
     },
 ];

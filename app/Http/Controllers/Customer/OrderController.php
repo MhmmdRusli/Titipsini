@@ -258,6 +258,7 @@ class OrderController extends Controller
                 'created_at',
             ]),
             'qris_url' => $qrisUrl,
+            'merchant_name' => $setting?->merchant_name,
             'saldo' => (float) $request->user()->saldo,
             'sudahLunas' => $order->payment_verified_at !== null,
         ]);
@@ -281,6 +282,7 @@ class OrderController extends Controller
                 'created_at',
             ]),
             'qris_url' => $qrisUrl,
+            'merchant_name' => $setting?->merchant_name,
             'saldo' => (float) $request->user()->saldo,
             'sudahLunas' => $order->payment_verified_at !== null,
         ]);

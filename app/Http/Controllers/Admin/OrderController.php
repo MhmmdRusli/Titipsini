@@ -251,6 +251,46 @@ class OrderController extends Controller
         return back()->with('success', 'Pembayaran tunai untuk pesanan '.$order->order_code.' berhasil dikonfirmasi.');
     }
 
+    public function verifyPayment(Order $order)
+    {
+        abort_if($order->payment_verified_at, 400, 'Pembayaran untuk pesanan ini sudah diverifikasi sebelumnya.');
+
+        $isTransfer = in_array($order->payment_method, ['transfer', 'qris', 'pending'], true);
+        $isCash = $order->payment_method === 'cod';
+
+        abort_unless($isTransfer || $isCash, 400, 'Order ini tidak memiliki bukti pembayaran yang bisa diverifikasi.');
+        abort_unless($order->payment_receipt || $isCash, 422, 'Belum ada bukti pembayaran yang diunggah untuk pesanan ini.');
+
+        $order->update([
+            'payment_verified_at' => now(),
+            'status' => $order->status === 'baru' ? 'diproses' : $order->status,
+        ]);
+
+        $this->notifikasiUntukStatus($order, 'diproses', null);
+
+        if ($order->customer_id) {
+            Notifikasi::create([
+                'user_id' => $order->customer_id,
+                'order_id' => $order->id,
+                'type' => 'pembayaran_diterima',
+                'judul' => 'Pembayaran Diverifikasi',
+                'pesan' => 'Pembayaran untuk pesanan '.$order->order_code.' telah diverifikasi oleh admin.',
+            ]);
+        }
+
+        if ($order->partner_id) {
+            Notifikasi::create([
+                'user_id' => $order->partner_id,
+                'order_id' => $order->id,
+                'type' => 'pembayaran_diterima',
+                'judul' => 'Pembayaran Diverifikasi',
+                'pesan' => 'Pembayaran untuk pesanan '.$order->order_code.' telah diverifikasi oleh admin.',
+            ]);
+        }
+
+        return back()->with('success', 'Pembayaran untuk pesanan '.$order->order_code.' berhasil diverifikasi.');
+    }
+
     public function approveDenda(Order $order)
     {
         abort_unless($order->bukti_denda || $order->denda_payment_receipt, 422, 'Bukti pembayaran denda belum diunggah.');
