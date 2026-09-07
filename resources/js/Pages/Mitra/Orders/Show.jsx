@@ -21,7 +21,10 @@ function getFileUrl(path) {
 
 const STATUS_CONFIG = {
     baru: { label: 'Pesanan Diproses', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400', icon: Loader2 },
+    pembayaran_diterima: { label: 'Pembayaran Diterima', color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400', icon: CheckCircle2 },
     diproses: { label: 'Pesanan Diproses', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400', icon: Loader2 },
+    diproses_mitra: { label: 'Diproses Mitra', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400', icon: Loader2 },
+    dikirim: { label: 'Dikirim', color: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400', icon: Loader2 },
     selesai: { label: 'Selesai', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-[#4ade80]', icon: CheckCircle2 },
     dibatalkan: { label: 'Dibatalkan', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
 };
@@ -33,7 +36,7 @@ const FASE_COLOR = {
 };
 
 export default function Show({ order }) {
-    if (order.status === 'baru') {
+    if (order.status === 'baru' || order.status === 'pembayaran_diterima') {
         return <ShowBaru order={order} />;
     }
 
@@ -260,6 +263,8 @@ function ShowDiproses({ order }) {
     const [isVerifying, setIsVerifying] = useState(false);
     const [isVerifyingDenda, setIsVerifyingDenda] = useState(false);
     const [isAdvancingFase, setIsAdvancingFase] = useState(false);
+    const [isConfirmingPickup, setIsConfirmingPickup] = useState(false);
+    const [isMarkingAsPickedUp, setIsMarkingAsPickedUp] = useState(false);
 
     const statusInfo = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.diproses;
     const StatusIcon = statusInfo.icon;
@@ -293,6 +298,26 @@ function ShowDiproses({ order }) {
         );
     }
 
+    function serahkanBarang() {
+        if (!confirm('Konfirmasi bahwa pesanan telah diserahkan kepada customer?')) return;
+        setIsConfirmingPickup(true);
+        router.patch(
+            `/mitra/pesanan/${order.id}/serahkan`,
+            {},
+            { preserveScroll: true, onFinish: () => setIsConfirmingPickup(false) }
+        );
+    }
+
+    function tandaiDititip() {
+        if (!confirm('Tandai pesanan ini sebagai sudah dititip?')) return;
+        setIsMarkingAsPickedUp(true);
+        router.patch(
+            `/mitra/pesanan/${order.id}/tandai-dititip`,
+            {},
+            { preserveScroll: true, onFinish: () => setIsMarkingAsPickedUp(false) }
+        );
+    }
+
     return (
         <MitraLayout title="Rincian Order">
             <Head title={`Rincian Order - ${order.order_number}`} />
@@ -322,7 +347,7 @@ function ShowDiproses({ order }) {
                     </div>
                 </div>
 
-                {order.fase_label && (
+                {order.status !== 'selesai' && order.fase_label && (
                     <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
                         <div className="flex items-center justify-between">
                             <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -348,7 +373,7 @@ function ShowDiproses({ order }) {
                             <p className="mt-2 text-xs italic text-amber-500 dark:text-amber-400">
                                 {order.advance_fase_blocked_reason}
                             </p>
-                        ) : order.status !== 'diproses' ? (
+                        ) : !['pembayaran_diterima', 'diproses_mitra', 'dititip'].includes(order.status) ? (
                             <p className="mt-2 text-xs italic text-gray-400 dark:text-gray-500">
                                 Status operasional hanya bisa diubah selagi pesanan sedang diproses.
                             </p>
@@ -357,6 +382,56 @@ function ShowDiproses({ order }) {
                                 Pesanan ini sudah berada di fase akhir.
                             </p>
                         )}
+                    </div>
+                )}
+
+                {order.status === 'selesai' && (
+                    <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
+                        <div className="flex items-center justify-between">
+                            <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <CheckCircle2 size={15} className="text-green-600" />
+                                Status Pesanan
+                            </p>
+                            <span className="rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-400">
+                                Pesanan Selesai
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {['pembayaran_diterima', 'diproses_mitra'].includes(order.status) && (
+                    <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
+                        <p className="mt-3 text-xs font-semibold text-gray-700 dark:text-gray-300">Tandai Sudah Dititip</p>
+                        <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            Tandai bahwa barang sudah diterima dan sedang disiapkan untuk customer.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={tandaiDititip}
+                            disabled={isMarkingAsPickedUp}
+                            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                        >
+                            <CheckCircle2 size={16} />
+                            {isMarkingAsPickedUp ? 'Memproses...' : 'Tandai Sudah Dititip'}
+                        </button>
+                    </div>
+                )}
+
+                {order.status === 'pengambilan_diajukan' && (
+                    <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
+                        <p className="mt-3 text-xs font-semibold text-gray-700 dark:text-gray-300">Serahkan Barang ke Customer</p>
+                        <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            Customer telah mengajukan pengambilan. Klik tombol di bawah jika barang sudah diserahkan.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={serahkanBarang}
+                            disabled={isConfirmingPickup}
+                            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                        >
+                            <CheckCircle2 size={16} />
+                            {isConfirmingPickup ? 'Memproses...' : 'Barang Telah Diserahkan / Selesai'}
+                        </button>
                     </div>
                 )}
 

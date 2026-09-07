@@ -18,10 +18,30 @@ const STATUS_CONFIG = {
         color: 'text-blue-600 dark:text-blue-400',
         icon: Clock,
     },
+    menunggu_verifikasi_finance: {
+        label: 'Pembayaran Sedang Diverifikasi oleh Finance',
+        color: 'text-amber-600 dark:text-amber-400',
+        icon: Clock,
+    },
+    pembayaran_diterima: {
+        label: 'Pembayaran Diterima',
+        color: 'text-emerald-600 dark:text-emerald-400',
+        icon: CheckCircle2,
+    },
     diproses: {
         label: 'Sedang di titipkan',
         color: 'text-cyan-600 dark:text-cyan-400',
         icon: Clock,
+    },
+    diproses_mitra: {
+        label: 'Sedang di proses mitra',
+        color: 'text-purple-600 dark:text-purple-400',
+        icon: Clock,
+    },
+    dikirim: {
+        label: 'Dikirim',
+        color: 'text-indigo-600 dark:text-indigo-400',
+        icon: Truck,
     },
     selesai: {
         label: 'Pesanan Selesai',
@@ -126,6 +146,35 @@ export default function OrderShow({ order, qris_url }) {
     const [dendaFile, setDendaFile] = useState(null);
     const [dendaPreview, setDendaPreview] = useState(null);
     const [uploadingDenda, setUploadingDenda] = useState(false);
+    const [isRequestingPickup, setIsRequestingPickup] = useState(false);
+    const [isCompleting, setIsCompleting] = useState(false);
+
+    function requestPickup() {
+        if (!confirm('Apakah kamu sudah mengambil pesanan ini?')) return;
+        setIsRequestingPickup(true);
+        router.patch(
+            `/app/orders/${order.id}/ajukan-pengambilan`,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setIsRequestingPickup(false),
+            }
+        );
+    }
+
+    function completeOrder() {
+        if (!confirm('Apakah kamu sudah menerima pesanan dan ingin menyelesaikan order ini?')) return;
+        setIsCompleting(true);
+        router.post(
+            `/app/orders/${order.id}/complete`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => setIsCompleting(false),
+                onError: () => setIsCompleting(false),
+            }
+        );
+    }
 
     function bayarDenda() {
         setPayingDenda(true);
@@ -537,6 +586,44 @@ export default function OrderShow({ order, qris_url }) {
                         >
                             Bayar Sekarang
                         </Link>
+                    </div>
+                )}
+
+                {!isBelumBayar && !isCancelled && order.status === 'pembayaran_diterima' && (
+                    <div className="mt-5">
+                        <button
+                            type="button"
+                            disabled
+                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white py-3 text-sm font-bold text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700"
+                        >
+                            Menunggu Mitra menitip
+                        </button>
+                    </div>
+                )}
+
+                {!isBelumBayar && !isCancelled && order.status === 'dititip' && !order.pickup_requested_at && (
+                    <div className="mt-5">
+                        <button
+                            type="button"
+                            onClick={requestPickup}
+                            disabled={isRequestingPickup}
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 transition duration-200 active:scale-[0.98] disabled:opacity-60"
+                        >
+                            {isRequestingPickup ? 'Memproses...' : 'Ambil Pesanan'}
+                        </button>
+                    </div>
+                )}
+
+                {!isBelumBayar && !isCancelled && order.status === 'pengambilan_diajukan' && (
+                    <div className="mt-5">
+                        <button
+                            type="button"
+                            onClick={completeOrder}
+                            disabled={isCompleting}
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 transition duration-200 active:scale-[0.98] disabled:opacity-60"
+                        >
+                            {isCompleting ? 'Memproses...' : 'Selesaikan Pesanan'}
+                        </button>
                     </div>
                 )}
 

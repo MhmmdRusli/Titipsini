@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import FinanceLayout from '@/Layouts/FinanceLayout';
-import { Search, CheckCircle2, Image, ExternalLink } from 'lucide-react';
+import { Search, CheckCircle2, XCircle, Image, ExternalLink } from 'lucide-react';
 
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID', {
@@ -15,6 +15,9 @@ export default function Index({ orders, filters = {} }) {
     const [search, setSearch] = useState(filters?.search ?? '');
     const [verifyTarget, setVerifyTarget] = useState(null);
     const [isVerifying, setIsVerifying] = useState(false);
+    const [rejectTarget, setRejectTarget] = useState(null);
+    const [isRejecting, setIsRejecting] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
     const [previewImage, setPreviewImage] = useState(false);
 
     function applyFilters(overrides = {}) {
@@ -40,6 +43,29 @@ export default function Index({ orders, filters = {} }) {
         );
     }
 
+    function openReject(order) {
+        setRejectTarget(order);
+        setRejectReason('');
+    }
+
+    function handleReject() {
+        if (!rejectTarget || !rejectReason.trim()) return;
+        setIsRejecting(true);
+        router.post(
+            `/finance/orders/${rejectTarget.id}/reject-payment`,
+            { rejection_reason: rejectReason },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setIsRejecting(false);
+                    setRejectTarget(null);
+                    setRejectReason('');
+                },
+                onError: () => setIsRejecting(false),
+            }
+        );
+    }
+
     return (
         <FinanceLayout title="Verifikasi Pembayaran">
             <Head title="Verifikasi Pembayaran" />
@@ -47,9 +73,9 @@ export default function Index({ orders, filters = {} }) {
             <div className="mx-auto max-w-5xl px-4 py-6">
                 <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">Verifikasi Pembayaran Transfer</h1>
+                        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">Verifikasi Pembayaran QRIS</h1>
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Daftar pesanan yang menunggu verifikasi bukti transfer dari customer.
+                            Daftar pesanan yang menunggu verifikasi bukti transfer QRIS dari customer.
                         </p>
                     </div>
 
@@ -121,6 +147,13 @@ export default function Index({ orders, filters = {} }) {
                                                         className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm transition hover:bg-emerald-700"
                                                     >
                                                         <CheckCircle2 size={13} /> Verifikasi
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openReject(order)}
+                                                        className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm transition hover:bg-red-700"
+                                                    >
+                                                        <XCircle size={13} /> Tolak
                                                     </button>
                                                 </div>
                                             </td>
@@ -210,7 +243,7 @@ export default function Index({ orders, filters = {} }) {
                         <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
                             Pastikan bukti transfer untuk pesanan <span className="font-semibold text-gray-800 dark:text-gray-200">{verifyTarget.order_code}</span> sebesar{' '}
                             <span className="font-semibold text-gray-800 dark:text-gray-200">{formatRupiah(verifyTarget.total_price)}</span> sudah benar sebelum melanjutkan.
-                            Status pesanan akan berubah menjadi <span className="font-semibold">Diproses</span>.
+                            Status pesanan akan berubah menjadi <span className="font-semibold">Pembayaran Diterima</span>.
                         </p>
                         <div className="mt-5 flex justify-end gap-2">
                             <button
@@ -228,6 +261,51 @@ export default function Index({ orders, filters = {} }) {
                                 className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60"
                             >
                                 {isVerifying ? 'Memproses...' : 'Ya, Verifikasi Pembayaran'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal konfirmasi penolakan pembayaran */}
+            {rejectTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400">
+                                <XCircle size={18} />
+                            </span>
+                            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Tolak Pembayaran?</h2>
+                        </div>
+                        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                            Anda akan menolak pembayaran untuk pesanan <span className="font-semibold text-gray-800 dark:text-gray-200">{rejectTarget.order_code}</span>. Alasan penolakan harus dicantumkan.
+                        </p>
+                        <div className="mt-3">
+                            <label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">Alasan Penolakan</label>
+                            <textarea
+                                value={rejectReason}
+                                onChange={(e) => setRejectReason(e.target.value)}
+                                rows={3}
+                                className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-100"
+                                placeholder="Contoh: Bukti transfer tidak jelas / jumlah tidak sesuai"
+                            />
+                        </div>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => { setRejectTarget(null); setRejectReason(''); }}
+                                disabled={isRejecting}
+                                className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 disabled:opacity-60 dark:text-gray-300 dark:hover:bg-slate-800"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleReject}
+                                disabled={isRejecting || !rejectReason.trim()}
+                                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                            >
+                                {isRejecting ? 'Memproses...' : 'Ya, Tolak Pembayaran'}
                             </button>
                         </div>
                     </div>

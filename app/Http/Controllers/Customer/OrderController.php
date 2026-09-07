@@ -22,7 +22,7 @@ class OrderController extends Controller
 
         return match ($status) {
             'baru', 'pending', 'unpaid', 'belum_bayar', 'belum-bayar' => ['baru', 'pending', 'unpaid'],
-            'diproses', 'dititipkan', 'active' => ['diproses', 'dititipkan', 'active'],
+            'diproses', 'dititipkan', 'active', 'pembayaran_diterima', 'diproses_mitra', 'dikirim' => ['diproses', 'dititipkan', 'active', 'pembayaran_diterima', 'diproses_mitra', 'dikirim'],
             'selesai' => ['selesai'],
             'dibatalkan' => ['dibatalkan'],
             default => [],
@@ -115,12 +115,8 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        if ($order->status !== 'diproses') {
-            return back()->withErrors(['finish' => 'Pesanan ini belum sedang diproses.']);
-        }
-
-        if ($order->fase !== 'akhir') {
-            return back()->withErrors(['finish' => 'Mitra belum menandai barang sudah diambil.']);
+        if (! in_array($order->status, ['pengambilan_diajukan'], true)) {
+            return back()->withErrors(['finish' => 'Pesanan ini belum bisa diselesaikan.']);
         }
 
         if ($order->payment_verified_at === null) {
@@ -156,23 +152,15 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        if ($order->status !== 'diproses') {
-            return back()->withErrors(['pickup' => 'Pesanan ini tidak sedang diproses.']);
-        }
-
-        if ($order->fase !== 'berjalan') {
-            return back()->withErrors(['pickup' => 'Pesanan belum berada pada tahap penitipan.']);
+        if ($order->status !== 'dititip') {
+            return back()->withErrors(['pickup' => 'Pesanan ini belum bisa diambil.']);
         }
 
         if ($order->payment_verified_at === null) {
             return back()->withErrors(['pickup' => 'Pembayaran pesanan belum diverifikasi.']);
         }
 
-        if ($order->pickup_requested_at) {
-            return back()->withErrors(['pickup' => 'Pengajuan pengambilan sudah dikirim.']);
-        }
-
-        $order->update(['pickup_requested_at' => now()]);
+        $order->update(['status' => 'pengambilan_diajukan']);
 
         if ($order->partner_id) {
             Notifikasi::create([
@@ -303,8 +291,8 @@ class OrderController extends Controller
 
             $order->update([
                 'payment_receipt' => $path,
-                'status' => 'diproses',
-                'payment_method' => $order->payment_method === 'pending' ? 'transfer' : $order->payment_method,
+                'status' => 'menunggu_verifikasi_finance',
+                'payment_method' => $order->payment_method === 'pending' ? 'qris' : $order->payment_method,
             ]);
 
             if ($order->partner_id) {
@@ -592,7 +580,7 @@ class OrderController extends Controller
 
         $order->update([
             'extend_payment_receipt' => $path,
-            'extend_payment_method' => 'transfer',
+            'extend_payment_method' => 'qris',
             'status_perpanjangan' => 'menunggu_verifikasi',
         ]);
 

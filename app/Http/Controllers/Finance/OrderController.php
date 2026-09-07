@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -13,8 +15,7 @@ class OrderController extends Controller
     public function index(Request $request): Response
     {
         $orders = Order::with(['customer:id,name,phone', 'partner:id,name,phone'])
-            ->whereNotNull('payment_receipt')
-            ->whereNull('payment_verified_at')
+            ->where('status', 'menunggu_verifikasi_finance')
             ->latest()
             ->paginate(10)
             ->through(function ($order) {
@@ -38,19 +39,14 @@ class OrderController extends Controller
         ]);
     }
 
-    public function verifyPayment(Order $order)
+    public function verifyPayment(Order $order): RedirectResponse
     {
-        abort_if($order->payment_verified_at, 400, 'Pembayaran untuk pesanan ini sudah diverifikasi sebelumnya.');
-
-        $isTransfer = in_array($order->payment_method, ['transfer', 'qris', 'pending'], true);
-        $isCash = $order->payment_method === 'cod';
-
-        abort_unless($isTransfer || $isCash, 400, 'Order ini tidak memiliki bukti pembayaran yang bisa diverifikasi.');
-        abort_unless($order->payment_receipt || $isCash, 422, 'Belum ada bukti pembayaran yang diunggah untuk pesanan ini.');
+        abort_unless($order->status === 'menunggu_verifikasi_finance', 400, 'Order ini tidak dalam status menunggu verifikasi finance.');
 
         $order->update([
+            'status' => 'pembayaran_diterima',
             'payment_verified_at' => now(),
-            'status' => $order->status === 'baru' ? 'diproses' : $order->status,
+            'verified_by' => Auth::id(),
         ]);
 
         if ($order->customer_id) {
@@ -59,7 +55,7 @@ class OrderController extends Controller
                 'order_id' => $order->id,
                 'type' => 'pembayaran_diterima',
                 'judul' => 'Pembayaran Diverifikasi',
-                'pesan' => 'Pembayaran untuk pesanan '.$order->order_code.' telah diverifikasi.',
+                'pesan' => 'Pembayaran untuk pesanan '.$order->order_code.' telah diverifikasi oleh Finance.',
             ]);
         }
 
@@ -68,11 +64,37 @@ class OrderController extends Controller
                 'user_id' => $order->partner_id,
                 'order_id' => $order->id,
                 'type' => 'pembayaran_diterima',
-                'judul' => 'Pembayaran Diverifikasi',
-                'pesan' => 'Pembayaran untuk pesanan '.$order->order_code.' telah diverifikasi.',
+                'judul' => 'Pesanan Baru Diterima',
+                'pesan' => 'Pesanan '.$order->order_code.' telah diverifikasi pembayarannya dan siap diproses.',
             ]);
         }
 
         return back()->with('success', 'Pembayaran untuk pesanan '.$order->order_code.' berhasil diverifikasi.');
+    }
+
+    public function rejectPayment(Request $request, Order $order): RedirectResponse
+    {
+        $validated = $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        abort_unless($order->status === 'menunggu_verifikasi_finance', 400, 'Order ini tidak dalam status menunggu verifikasi finance.');
+
+        $order->update([
+            'status' => 'dibatalkan',
+            'cancel_reason' => $validated['rejection_reason'],
+        ]);
+
+        if ($order->customer_id) {
+            \App\Models\Notifikasi::create([
+                'user_id' => $order->customer_id,
+                'order_id' => $order->id,
+                'type' => 'penitipan_dibatalkan',
+                'judul' => 'Pembayaran Ditolak',
+                'pesan' => 'Pembayaran untuk pesanan '.$order->order_code.' ditolak oleh Finance. Alasan: '.$validated['rejection_reason'],
+            ]);
+        }
+
+        return back()->with('success', 'Pembayaran untuk pesanan '.$order->order_code.' berhasil ditolak.');
     }
 }

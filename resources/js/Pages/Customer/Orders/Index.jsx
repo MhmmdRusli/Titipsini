@@ -171,13 +171,14 @@ export default function OrdersIndex({ orders, filters }) {
                         )}
 
                         {orders.data.map((order) => {
-                            const isDititipkan = order.status === 'diproses' && Boolean(order.payment_verified_at) && order.fase !== 'menunggu';
+                            const isDititip = order.status === 'dititip';
+                            const isPengambilanDiajukan = order.status === 'pengambilan_diajukan';
                             const isSelesai = order.status === 'selesai';
                             const isBelumBayar = order.status === 'baru';
                             const isBarang = order.service_type === 'barang';
                             const isPickupRequested = Boolean(order.pickup_requested_at);
-                            const isReadyToComplete = isBarang && order.fase === 'akhir';
                             const isProcessing = processingOrderId === order.id;
+                            const canRequestPickup = isDititip && !isPickupRequested;
 
                             return (
                                 <div
@@ -281,27 +282,36 @@ export default function OrdersIndex({ orders, filters }) {
 
                                     {/* Tombol Aksi */}
                                     <div className="mt-4">
-                                        {/* Tab Dititipkan: Selesai, Detail Pesanan, dan Perpanjang Penitipan */}
-                                        {isDititipkan && (
+                                        {/* Tab Menunggu Mitra menitip */}
+                                        {['pembayaran_diterima', 'diproses_mitra'].includes(order.status) && (
+                                            <div className="flex flex-col gap-2">
+                                                <button
+                                                    type="button"
+                                                    disabled
+                                                    className="flex-1 rounded-lg border border-gray-300 bg-white py-2 text-center text-xs font-medium text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700"
+                                                >
+                                                    Pesanan sedang diproses mitra
+                                                </button>
+                                                <Link
+                                                    href={`/app/orders/${order.id}`}
+                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                >
+                                                    Detail Pesanan
+                                                </Link>
+                                            </div>
+                                        )}
+
+                                        {/* Tab Dititip: Ajukan Pengambilan & Perpanjang */}
+                                        {isDititip && (
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => isBarang && (isReadyToComplete
-                                                            ? setCompleteConfirmOrder(order)
-                                                            : setPickupConfirmOrder(order))}
-                                                        disabled={!isBarang || isProcessing || isPickupRequested && !isReadyToComplete}
+                                                        onClick={() => setPickupConfirmOrder(order)}
+                                                        disabled={isProcessing}
                                                         className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
                                                     >
-                                                        {isProcessing
-                                                            ? 'Memproses...'
-                                                            : isReadyToComplete
-                                                            ? 'Selesaikan Pesanan'
-                                                            : isBarang && isPickupRequested
-                                                            ? 'Menunggu Mitra'
-                                                            : isBarang
-                                                            ? 'Ajukan Pengembalian'
-                                                            : 'Selesai'}
+                                                        {isProcessing ? 'Memproses...' : 'Ajukan Pengambilan'}
                                                     </button>
                                                     <Link
                                                         href={`/app/orders/${order.id}`}
@@ -315,8 +325,28 @@ export default function OrdersIndex({ orders, filters }) {
                                                     onClick={() => router.get(`/app/orders/${order.id}/extend`)}
                                                     className="w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
                                                 >
-                                                    Perpanjang Penitipan
+                                                    Perpanjang Waktu Jasa
                                                 </button>
+                                            </div>
+                                        )}
+
+                                        {/* Tab Pengambilan Diajukan: Selesaikan */}
+                                        {isPengambilanDiajukan && (
+                                            <div className="flex flex-col gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCompleteConfirmOrder(order)}
+                                                    disabled={isProcessing}
+                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                >
+                                                    {isProcessing ? 'Memproses...' : 'Selesaikan Pesanan'}
+                                                </button>
+                                                <Link
+                                                    href={`/app/orders/${order.id}`}
+                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                >
+                                                    Detail Pesanan
+                                                </Link>
                                             </div>
                                         )}
 
@@ -358,7 +388,7 @@ export default function OrdersIndex({ orders, filters }) {
                                         )}
 
                                         {/* Detail tetap tersedia saat pembayaran menunggu verifikasi atau order dibatalkan */}
-                                        {!isDititipkan && !isSelesai && !isBelumBayar && (
+                                        {!isDititip && !isSelesai && !isBelumBayar && (
                                             <Link
                                                 href={`/app/orders/${order.id}`}
                                                 className="block w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"

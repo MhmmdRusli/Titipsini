@@ -76,10 +76,17 @@ class OrderController extends Controller
         $query = Order::with(['customer', 'address'])->where('partner_id', $partner->id);
 
         if ($tab === 'baru') {
-            // "Baru" mencakup order yang belum di-accept (baru) DAN yang
-            // sudah di-accept & sedang berjalan (diproses) - keduanya
-            // masih dianggap "aktif" dari sudut pandang mitra.
-            $query->whereIn('status', ['baru', 'diproses']);
+            // Alur QRIS: Finance sudah verifikasi → status 'pembayaran_diterima',
+            // lalu mitra ambil → 'diproses_mitra' / 'dikirim'.
+            // Backward compatibility: tetap include 'baru' dan 'diproses'
+            // untuk data lama yang belum melalui verifikasi Finance.
+            $query->whereIn('status', [
+                'pembayaran_diterima',
+                'diproses_mitra',
+                'dikirim',
+                'baru',
+                'diproses',
+            ]);
         } else {
             $query->where('status', $tab === 'dibatalkan' ? 'dibatalkan' : 'selesai');
         }
@@ -122,7 +129,15 @@ class OrderController extends Controller
         });
 
         $counts = [
-            'baru' => Order::where('partner_id', $partner->id)->whereIn('status', ['baru', 'diproses'])->count(),
+            'baru' => Order::where('partner_id', $partner->id)
+                ->whereIn('status', [
+                    'pembayaran_diterima',
+                    'diproses_mitra',
+                    'dikirim',
+                    'baru',
+                    'diproses',
+                ])
+                ->count(),
             'selesai' => Order::where('partner_id', $partner->id)->where('status', 'selesai')->count(),
             'dibatalkan' => Order::where('partner_id', $partner->id)->where('status', 'dibatalkan')->count(),
         ];
@@ -293,9 +308,10 @@ class OrderController extends Controller
     public function ambilPesanan(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
-        abort_unless($order->status === 'baru', 400, 'Pesanan ini sudah tidak berstatus baru.');
+        abort_unless(in_array($order->status, ['baru', 'pembayaran_diterima'], true), 400, 'Pesanan ini sudah tidak bisa diambil.');
 
-        $order->update(['status' => 'diproses']);
+        $newStatus = $order->status === 'pembayaran_diterima' ? 'diproses_mitra' : 'diproses';
+        $order->update(['status' => $newStatus]);
 
         Notifikasi::create([
             'user_id' => $order->customer_id,
@@ -331,6 +347,42 @@ class OrderController extends Controller
         ]);
 
         return redirect()->route('mitra.orders.index')->with('success', 'Pesanan berhasil ditolak.');
+    }
+
+    public function confirmPickup(Order $order)
+    {
+        abort_unless($order->partner_id === Auth::id(), 403);
+        abort_unless($order->status === 'pengambilan_diajukan', 400, 'Pesanan ini belum dalam status pengambilan diajukan.');
+        abort_if($order->status === 'selesai', 400, 'Pesanan ini sudah selesai.');
+
+        $order->update(['status' => 'selesai']);
+
+        if ($order->customer_id) {
+            Notifikasi::create([
+                'user_id' => $order->customer_id,
+                'order_id' => $order->id,
+                'type' => 'transaksi_masuk',
+                'judul' => 'Pesanan Telah Diserahkan',
+                'pesan' => 'Mitra telah menyelesaikan pesanan '.$order->order_code.'. Pesanan sudah bisa diselesaikan oleh customer.',
+            ]);
+        }
+
+        return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil diserahkan.');
+    }
+
+    public function tandaiDititip(Order $order)
+    {
+        abort_unless($order->partner_id === Auth::id(), 403);
+
+        $allowedStatuses = ['pembayaran_diterima', 'diproses_mitra'];
+
+        if (! in_array($order->status, $allowedStatuses, true)) {
+            abort(400, 'Pesanan ini belum bisa ditandai sudah dititip.');
+        }
+
+        $order->update(['status' => 'dititip']);
+
+        return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil ditandai sudah dititip.');
     }
 
     private function hitungDurasi(Order $order): ?string

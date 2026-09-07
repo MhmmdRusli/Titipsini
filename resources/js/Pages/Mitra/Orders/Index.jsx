@@ -98,78 +98,128 @@ export default function Index({ orders, counts, filters }) {
                             const Icon = SERVICE_ICON[order.service_type] ?? Package;
                             const dibatalkan = filters.tab === 'dibatalkan';
                             const selesai = filters.tab === 'selesai';
+                            const canAccept = ['baru', 'pembayaran_diterima'].includes(order.status);
+                            const canReject = ['baru', 'pembayaran_diterima'].includes(order.status);
 
                             return (
-                                <Link
+                                <div
                                     key={order.id}
-                                    href={route('mitra.orders.show', order.id)}
-                                    className="block rounded-2xl border border-green-100 bg-green-50 p-4 transition hover:bg-green-100/70 dark:border-green-900/40 dark:bg-green-950/20 dark:hover:bg-green-950/30"
+                                    className="rounded-2xl border border-green-100 bg-green-50 p-4 transition hover:bg-green-100/70 dark:border-green-900/40 dark:bg-green-950/20 dark:hover:bg-green-950/30"
                                 >
-                                    {/* Baris atas: nama customer & status */}
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                            {order.customer_name ?? '-'}
-                                        </p>
-                                        {dibatalkan ? (
-                                            <span className="text-xs font-semibold text-red-500">Dibatalkan</span>
-                                        ) : selesai ? (
-                                            <span className="text-xs font-semibold text-green-800 dark:text-green-300">Selesai</span>
-                                        ) : (
-                                            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Diproses</span>
-                                        )}
-                                    </div>
-
-                                    {/* Alamat */}
-                                    <div className="mt-2 flex items-start gap-1.5 text-xs text-gray-700 dark:text-gray-300">
-                                        <MapPin size={14} className="mt-0.5 shrink-0 text-[#15803d] dark:text-[#4ade80]" />
-                                        <div className="min-w-0">
-                                            <p className="line-clamp-2 leading-relaxed">{order.address ?? '-'}</p>
-                                            {order.address_notes && (
-                                                <p className="mt-0.5 line-clamp-1 text-[11px] text-gray-500 dark:text-gray-400">Catatan: {order.address_notes}</p>
+                                    <Link href={route('mitra.orders.show', order.id)} className="block">
+                                        {/* Baris atas: nama customer & status */}
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                                {order.customer_name ?? '-'}
+                                            </p>
+                                            {dibatalkan ? (
+                                                <span className="text-xs font-semibold text-red-500">Dibatalkan</span>
+                                            ) : selesai ? (
+                                                <span className="text-xs font-semibold text-green-800 dark:text-green-300">Selesai</span>
+                                            ) : (
+                                                <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Diproses</span>
                                             )}
                                         </div>
-                                    </div>
 
-                                    {/* Jenis layanan spesifik dan nomor pesanan. */}
-                                    <div className="mt-3 flex items-center justify-between gap-3">
-                                        <span className="inline-flex items-center gap-1 rounded-lg border border-green-600 bg-white px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-700 dark:bg-gray-900 dark:text-[#4ade80]">
-                                            <Icon size={13} /> {order.service_label}
-                                        </span>
-                                        <span className="shrink-0 rounded-md bg-white px-2.5 py-1 text-xs font-bold text-gray-700 dark:bg-gray-800 dark:text-gray-200">
-                                            {order.order_number ?? '-'}
-                                        </span>
-                                    </div>
-
-                                    {/* Rincian utama pesanan. */}
-                                    <dl className="mt-3 space-y-2 text-sm text-gray-900 dark:text-gray-100">
-                                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                                            <dt>Durasi Penitipan</dt><span>:</span>
-                                            <dd className="text-right font-semibold">{order.duration ?? '-'}</dd>
-                                        </div>
-                                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                                            <dt>Total Pembayaran</dt><span>:</span>
-                                            <dd className="text-right font-semibold">{formatRupiah(order.total_price)}</dd>
-                                        </div>
-                                    </dl>
-
-                                    {/* Ulasan hanya relevan untuk pesanan yang telah selesai. */}
-                                    {selesai && order.review && (
-                                        <div className="mt-3 border-t border-dashed border-green-200 pt-3 dark:border-green-900/40">
-                                            <div className="mb-2 flex items-center gap-2">
-                                                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Ulasan</p>
-                                                {order.rating && (
-                                                    <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-amber-500">
-                                                        <Star size={12} fill="currentColor" />
-                                                        {order.rating}
-                                                    </span>
+                                        {/* Alamat */}
+                                        <div className="mt-2 flex items-start gap-1.5 text-xs text-gray-700 dark:text-gray-300">
+                                            <MapPin size={14} className="mt-0.5 shrink-0 text-[#15803d] dark:text-[#4ade80]" />
+                                            <div className="min-w-0">
+                                                <p className="line-clamp-2 leading-relaxed">{order.address ?? '-'}</p>
+                                                {order.address_notes && (
+                                                    <p className="mt-0.5 line-clamp-1 text-[11px] text-gray-500 dark:text-gray-400">Catatan: {order.address_notes}</p>
                                                 )}
                                             </div>
-                                            <p className="rounded-lg bg-white px-3 py-2.5 text-xs leading-relaxed text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-200">
-                                                {order.review}
-                                            </p>
+                                        </div>
+
+                                        {/* Jenis layanan spesifik dan nomor pesanan. */}
+                                        <div className="mt-3 flex items-center justify-between gap-3">
+                                            <span className="inline-flex items-center gap-1 rounded-lg border border-green-600 bg-white px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-700 dark:bg-gray-900 dark:text-[#4ade80]">
+                                                <Icon size={13} /> {order.service_label}
+                                            </span>
+                                            <span className="shrink-0 rounded-md bg-white px-2.5 py-1 text-xs font-bold text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                                                {order.order_number ?? '-'}
+                                            </span>
+                                        </div>
+
+                                        {/* Rincian utama pesanan. */}
+                                        <dl className="mt-3 space-y-2 text-sm text-gray-900 dark:text-gray-100">
+                                            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                                                <dt>Durasi Penitipan</dt><span>:</span>
+                                                <dd className="text-right font-semibold">{order.duration ?? '-'}</dd>
+                                            </div>
+                                            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                                                <dt>Total Pembayaran</dt><span>:</span>
+                                                <dd className="text-right font-semibold">{formatRupiah(order.total_price)}</dd>
+                                            </div>
+                                        </dl>
+
+                                        {/* Ulasan hanya relevan untuk pesanan yang telah selesai. */}
+                                        {selesai && order.review && (
+                                            <div className="mt-3 border-t border-dashed border-green-200 pt-3 dark:border-green-900/40">
+                                                <div className="mb-2 flex items-center gap-2">
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Ulasan</p>
+                                                    {order.rating && (
+                                                        <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-amber-500">
+                                                            <Star size={12} fill="currentColor" />
+                                                            {order.rating}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="rounded-lg bg-white px-3 py-2.5 text-xs leading-relaxed text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-200">
+                                                    {order.review}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </Link>
+
+                                    {/* Tombol Aksi Langsung di Card */}
+                                    {['pembayaran_diterima', 'diproses_mitra'].includes(order.status) && (
+                                        <div className="mt-4 flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    router.patch(route('mitra.orders.tandaiDititip', order.id), {}, {
+                                                        preserveScroll: true,
+                                                    });
+                                                }}
+                                                className="flex-1 rounded-xl bg-[#15803d] py-2.5 text-center text-xs font-bold text-white hover:bg-green-700 dark:bg-green-700"
+                                            >
+                                                Tandai Sudah Dititip
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    router.patch(route('mitra.orders.tolak', order.id), { cancel_reason: 'Ditolak oleh mitra' }, {
+                                                        preserveScroll: true,
+                                                    });
+                                                }}
+                                                className="flex-1 rounded-xl border border-red-500 py-2.5 text-center text-xs font-bold text-red-500 hover:bg-red-50 dark:border-red-600 dark:text-red-400"
+                                            >
+                                                Tolak
+                                            </button>
                                         </div>
                                     )}
-                                 </Link>
+
+                                    {order.status === 'pengambilan_diajukan' && (
+                                        <div className="mt-4">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    router.patch(route('mitra.orders.serahkan', order.id), {}, {
+                                                        preserveScroll: true,
+                                                    });
+                                                }}
+                                                className="w-full rounded-xl bg-[#15803d] py-2.5 text-center text-xs font-bold text-white hover:bg-green-700 dark:bg-green-700"
+                                            >
+                                                Serahkan Barang / Selesai
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             );
                         })
                     )}

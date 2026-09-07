@@ -196,6 +196,7 @@ Route::middleware(['auth', 'role:finance,super_admin'])->prefix('finance')->name
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('/', [FinanceOrderController::class, 'index'])->name('index');
         Route::post('/{order}/verify-payment', [FinanceOrderController::class, 'verifyPayment'])->name('verifyPayment');
+        Route::post('/{order}/reject-payment', [FinanceOrderController::class, 'rejectPayment'])->name('rejectPayment');
     });
 
     // Pengembalian Dana - re-use SuperAdmin\PengembalianDanaController untuk konsistensi logika refund.
@@ -295,6 +296,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/orders/{order}/lapor', [CustomerReportController::class, 'store'])->name('orders.lapor.store');
     Route::post('orders/{order}/konfirmasi-cash', [OrderController::class, 'confirmCashPayment'])->name('orders.konfirmasiCash');
     Route::post('orders/{order}/verify-payment', [OrderController::class, 'verifyPayment'])->name('orders.verifyPayment');
+    Route::post('orders/{order}/reject-payment', [OrderController::class, 'rejectPayment'])->name('orders.rejectPayment');
+    Route::post('orders/{order}/cancel-order', [OrderController::class, 'cancelOrder'])->name('orders.cancelOrder');
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
@@ -390,6 +393,8 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
     // transfer manual (bukan saldo). Baru di titik ini end_date & total_price
     // order benar-benar diperbarui - lihat Mitra\OrderController::verifikasiPerpanjangan().
     Route::patch('/pesanan/{order}/verifikasi-perpanjangan', [MitraOrderController::class, 'verifikasiPerpanjangan'])->name('orders.verifikasiPerpanjangan');
+    Route::patch('/pesanan/{order}/serahkan', [MitraOrderController::class, 'confirmPickup'])->name('orders.serahkan');
+    Route::patch('/pesanan/{order}/tandai-dititip', [MitraOrderController::class, 'tandaiDititip'])->name('orders.tandaiDititip');
 
     Route::patch('/pesanan/{order}/fase', [\App\Http\Controllers\Mitra\OrderController::class, 'updateFase'])
         ->name('orders.updateFase');
@@ -599,6 +604,7 @@ Route::prefix('super-admin/pesanan')->name('super-admin.pesanan.')->middleware([
     Route::patch('/{order}/status', [SuperAdminOrderController::class, 'updateStatus'])->name('updateStatus');
     Route::patch('/{order}/approve-denda', [SuperAdminOrderController::class, 'approveDenda'])->name('approveDenda');
     Route::post('/{order}/konfirmasi-cash', [SuperAdminOrderController::class, 'confirmCashPayment'])->name('konfirmasiCash');
+    Route::post('/{order}/cancel-order', [SuperAdminOrderController::class, 'cancelOrder'])->name('cancelOrder');
     Route::delete('/bulk-delete', [SuperAdminOrderController::class, 'bulkDestroy'])->name('bulkDestroy');
     Route::delete('/{order}', [SuperAdminOrderController::class, 'destroy'])->name('destroy');
 });

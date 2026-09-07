@@ -14,7 +14,11 @@ const SERVICE_TYPES = [
 const STATUSES = [
     { value: '', label: 'Semua Status' },
     { value: 'baru', label: 'Baru' },
+    { value: 'menunggu_verifikasi_finance', label: 'Menunggu Verifikasi Finance' },
+    { value: 'pembayaran_diterima', label: 'Pembayaran Diterima' },
     { value: 'diproses', label: 'Diproses' },
+    { value: 'diproses_mitra', label: 'Diproses Mitra' },
+    { value: 'dikirim', label: 'Dikirim' },
     { value: 'selesai', label: 'Selesai' },
     { value: 'dibatalkan', label: 'Dibatalkan' },
 ];
@@ -22,7 +26,11 @@ const STATUSES = [
 // Gaya badge disamakan dengan pola bordered di halaman Mitra & Dark Mode support
 const STATUS_STYLE = {
     baru: 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800/50',
+    menunggu_verifikasi_finance: 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/50',
+    pembayaran_diterima: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/50',
     diproses: 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/50',
+    diproses_mitra: 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-800/50',
+    dikirim: 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-800/50',
     selesai: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/50',
     dibatalkan: 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/50',
 };
@@ -45,18 +53,26 @@ function isCashPendingConfirmation(order) {
 // 2) fase operasionalnya sudah akhir (Mitra sudah tandai dititip lalu diambil/dst).
 // Setelah itu Admin menunggu customer mengonfirmasi "Selesaikan Pesanan".
 function isReadyToComplete(order) {
-    return !!order.payment_verified_at && order.fase === 'akhir' && order.status === 'diproses';
+    return !!order.payment_verified_at && order.fase === 'akhir' && ['diproses', 'diproses_mitra', 'dikirim'].includes(order.status);
 }
 
 // Label status yang ditampilkan ke Admin. Selagi pesanan masih 'diproses' dan
 // ada fase_label (mis. "Sedang Disewa", "Dititipkan"), tampilkan itu supaya
 // Admin lihat status operasional yang lebih jelas daripada tulisan "diproses"
-// yang generik. Untuk status lain (baru/selesai/dibatalkan) tetap apa adanya.
+// yang generik. Untuk status lain tetap apa adanya.
 function displayStatusLabel(order) {
-    if (order.status === 'diproses' && order.fase_label) {
-        return order.fase_label;
-    }
-    return order.status;
+    const map = {
+        baru: 'Baru',
+        menunggu_verifikasi_finance: 'Menunggu Verifikasi Finance',
+        pembayaran_diterima: 'Pembayaran Diterima',
+        diproses: order.fase_label || 'Diproses',
+        diproses_mitra: 'Diproses Mitra',
+        dikirim: 'Dikirim',
+        selesai: 'Selesai',
+        dibatalkan: 'Dibatalkan',
+    };
+
+    return map[order.status] || order.status;
 }
 
 function formatRupiah(value) {
@@ -79,6 +95,8 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
     const [city, setCity] = useState(filters?.city ?? '');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [cancelTarget, setCancelTarget] = useState(null);
+    const [isCancelling, setIsCancelling] = useState(false);
     const [cashConfirmTarget, setCashConfirmTarget] = useState(null);
     const [isCashConfirming, setIsCashConfirming] = useState(false);
 
@@ -210,6 +228,24 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
             preserveScroll: true,
             onSuccess: () => setDeleteTarget(null),
         });
+    }
+
+    function handleCancelOrder() {
+        if (!cancelTarget) return;
+        setIsCancelling(true);
+        router.post(
+            `/admin/orders/${cancelTarget.id}/cancel-order`,
+            { cancel_reason: cancelTarget.cancel_reason || 'Pembatalan oleh Admin' },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setIsCancelling(false);
+                    setCancelTarget(null);
+                    setSelectedOrder(null);
+                },
+                onError: () => setIsCancelling(false),
+            }
+        );
     }
 
     function handleConfirmCash() {
@@ -567,10 +603,19 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                     <ChevronRight size={14} />
                                                 </button>
                                                 {canManageSensitiveActions && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setDeleteTarget(order)}
-                                                        className="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                                                    <>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setCancelTarget(order)}
+                                                            className="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                                                            title="Batalkan Pesanan"
+                                                        >
+                                                            <XCircle size={16} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setDeleteTarget(order)}
+                                                            className="rounded-lg p-2 text-gray-500 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                                                         title="Hapus Pesanan"
                                                     >
                                                         <Trash2 size={15} />
@@ -623,6 +668,50 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                     onApproveDenda={(order) => setDendaApproveTarget(order)}
                     isSuperAdmin={isSuperAdmin}
                 />
+            )}
+
+            {canManageSensitiveActions && cancelTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400">
+                                <XCircle size={18} />
+                            </span>
+                            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Batalkan Pesanan?</h2>
+                        </div>
+                        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                            Anda akan membatalkan pesanan <span className="font-semibold text-gray-800 dark:text-gray-200">{cancelTarget.order_code}</span>. Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                        <div className="mt-3">
+                            <label className="mb-1 block text-xs font-semibold text-gray-700 dark:text-gray-300">Alasan Pembatalan</label>
+                            <input
+                                type="text"
+                                value={cancelTarget.cancel_reason || ''}
+                                onChange={(e) => setCancelTarget({ ...cancelTarget, cancel_reason: e.target.value })}
+                                className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-200"
+                                placeholder="Contoh: Indikasi fraud / permintaan customer"
+                            />
+                        </div>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setCancelTarget(null)}
+                                disabled={isCancelling}
+                                className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 disabled:opacity-60 dark:text-gray-300 dark:hover:bg-slate-800"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleCancelOrder}
+                                disabled={isCancelling}
+                                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+                            >
+                                {isCancelling ? 'Memproses...' : 'Ya, Batalkan Pesanan'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {canManageSensitiveActions && deleteTarget && (

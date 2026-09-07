@@ -165,7 +165,18 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['baru', 'diproses', 'selesai', 'dibatalkan'])],
+            'status' => ['required', Rule::in([
+                'baru',
+                'diproses',
+                'pembayaran_diterima',
+                'diproses_mitra',
+                'dikirim',
+                'dititip',
+                'pengambilan_diajukan',
+                'selesai',
+                'dibatalkan',
+                'menunggu_verifikasi_finance',
+            ])],
             'cancel_reason' => ['required_if:status,dibatalkan', 'nullable', 'string', 'max:255'],
         ]);
 
@@ -190,6 +201,22 @@ class OrderController extends Controller
         $this->notifikasiUntukStatus($order, $validated['status'], $validated['cancel_reason'] ?? null);
 
         return back()->with('success', 'Status pesanan berhasil diperbarui.');
+    }
+
+    public function cancelOrder(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'cancel_reason' => ['required', 'string', 'max:255'],
+        ]);
+
+        $order->update([
+            'status' => 'dibatalkan',
+            'cancel_reason' => $validated['cancel_reason'],
+        ]);
+
+        $this->notifikasiUntukStatus($order, 'dibatalkan', $validated['cancel_reason']);
+
+        return back()->with('success', 'Pesanan '.$order->order_code.' berhasil dibatalkan oleh Super Admin.');
     }
 
     /**
