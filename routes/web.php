@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Finance\DashboardController as FinanceDashboardController;
+use App\Http\Controllers\Finance\OrderController as FinanceOrderController;
 use App\Http\Controllers\Finance\PendapatanController as FinancePendapatanController;
 use App\Http\Controllers\Finance\PenarikanController as FinancePenarikanController;
 use App\Http\Controllers\Finance\TopupController as FinanceTopupController;
@@ -186,6 +187,17 @@ Route::middleware(['auth', 'role:finance,super_admin'])->prefix('finance')->name
         Route::post('/{penarikan}/reject', [FinancePenarikanController::class, 'reject'])->name('reject');
     });
 
+    Route::prefix('qris')->name('qris.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Finance\QrisController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\Finance\QrisController::class, 'update'])->name('update');
+        Route::delete('/', [\App\Http\Controllers\Finance\QrisController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', [FinanceOrderController::class, 'index'])->name('index');
+        Route::post('/{order}/verify-payment', [FinanceOrderController::class, 'verifyPayment'])->name('verifyPayment');
+    });
+
     // Pengembalian Dana - re-use SuperAdmin\PengembalianDanaController untuk konsistensi logika refund.
     Route::prefix('pengembalian-dana')->name('pengembalian-dana.')->group(function () {
         Route::get('/', [\App\Http\Controllers\SuperAdmin\PengembalianDanaController::class, 'index'])->name('index');
@@ -216,6 +228,16 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/keamanan', [\App\Http\Controllers\SuperAdmin\PengaturanKeamananController::class, 'index'])->name('keamanan.index');
         Route::put('/keamanan', [\App\Http\Controllers\SuperAdmin\PengaturanKeamananController::class, 'update'])->name('keamanan.update');
+
+        Route::get('/komisi', [\App\Http\Controllers\SuperAdmin\PengaturanKomisiController::class, 'index'])->name('komisi.index');
+        Route::put('/komisi', [\App\Http\Controllers\SuperAdmin\PengaturanKomisiController::class, 'update'])->name('komisi.update');
+
+        Route::get('/denda', [\App\Http\Controllers\SuperAdmin\PengaturanDendaController::class, 'index'])->name('denda.index');
+        Route::put('/denda', [\App\Http\Controllers\SuperAdmin\PengaturanDendaController::class, 'update'])->name('denda.update');
+
+        Route::get('/qris', [\App\Http\Controllers\SuperAdmin\PengaturanQrisController::class, 'index'])->name('qris.index');
+        Route::post('/qris', [\App\Http\Controllers\SuperAdmin\PengaturanQrisController::class, 'update'])->name('qris.update');
+        Route::delete('/qris', [\App\Http\Controllers\SuperAdmin\PengaturanQrisController::class, 'destroy'])->name('qris.destroy');
     });
 });
 
@@ -252,17 +274,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/profil', [AdminProfileController::class, 'update'])->name('profil.update');
 
     Route::prefix('pengaturan')->name('pengaturan.')->group(function () {
-        Route::get('komisi', [PengaturanController::class, 'komisi'])->name('komisi');
-        Route::put('komisi', [PengaturanController::class, 'updateKomisi'])->name('komisi.update');
-
         Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
         Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
         Route::delete('keamanan/sessions/{sessionId}', [PengaturanController::class, 'destroySession'])->name('keamanan.sessions.destroy');
-        Route::get('qris', [PengaturanController::class, 'qris'])->name('qris');
-        Route::post('qris', [PengaturanController::class, 'updateQris'])->name('qris.update');
-        Route::delete('qris', [PengaturanController::class, 'destroyQris'])->name('qris.destroy');
-        Route::get('denda', [PengaturanController::class, 'denda'])->name('denda');
-        Route::put('denda', [PengaturanController::class, 'updateDenda'])->name('denda.update');
     });
 
     Route::resource('berita', AdminBeritaController::class)
@@ -280,6 +294,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/orders/{order}/lapor', [CustomerReportController::class, 'create'])->name('orders.lapor');
     Route::post('/orders/{order}/lapor', [CustomerReportController::class, 'store'])->name('orders.lapor.store');
     Route::post('orders/{order}/konfirmasi-cash', [OrderController::class, 'confirmCashPayment'])->name('orders.konfirmasiCash');
+    Route::post('orders/{order}/verify-payment', [OrderController::class, 'verifyPayment'])->name('orders.verifyPayment');
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');

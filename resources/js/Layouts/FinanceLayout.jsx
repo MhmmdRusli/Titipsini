@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Clock, LayoutDashboard, LogOut, Receipt, Wallet, Sun, Moon, X, Menu, Calendar, Undo2 } from 'lucide-react';
+import { Clock, LayoutDashboard, LogOut, Receipt, Wallet, Sun, Moon, X, Menu, Calendar, Undo2, QrCode, ClipboardList } from 'lucide-react';
 
 const navItems = [
     { label: 'Dashboard', href: '/finance/dashboard', icon: LayoutDashboard },
@@ -8,6 +8,8 @@ const navItems = [
     { label: 'Penarikan', href: '/finance/penarikan', icon: Wallet },
     { label: 'Pengembalian Dana', href: '/finance/pengembalian-dana', icon: Undo2 },
     { label: 'Pendapatan', href: '/finance/pendapatan', icon: Receipt },
+    { label: 'Verifikasi Pembayaran', href: '/finance/orders', icon: ClipboardList },
+    { label: 'Kelola QRIS', href: '/finance/qris', icon: QrCode },
 ];
 
 const WEATHER_LAT = -7.7956;

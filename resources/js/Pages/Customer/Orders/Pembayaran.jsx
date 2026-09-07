@@ -7,7 +7,7 @@ function formatRupiah(value) {
     return 'Rp ' + Number(value || 0).toLocaleString('id-ID');
 }
 
-export default function BuktiPembayaran({ order, qris_url, saldo = 0, sudahLunas = false }) {
+export default function BuktiPembayaran({ order, qris_url, merchant_name, saldo = 0, sudahLunas = false }) {
     const { data, setData, post, processing, errors } = useForm({
         payment_receipt: null,
     });
@@ -108,7 +108,12 @@ export default function BuktiPembayaran({ order, qris_url, saldo = 0, sudahLunas
                                     alt="QRIS Pembayaran" 
                                     className="mx-auto w-52 h-52 rounded-xl border border-gray-200 dark:border-gray-700 p-2 bg-white object-contain shadow-xs"
                                 />
-                                <p className="mt-2 text-[11px] text-gray-400 dark:text-gray-500">
+                                {merchant_name && (
+                                    <p className="mt-2 text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                        {merchant_name}
+                                    </p>
+                                )}
+                                <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
                                     Silakan transfer sesuai total tagihan sebelum mengunggah bukti.
                                 </p>
                             </div>

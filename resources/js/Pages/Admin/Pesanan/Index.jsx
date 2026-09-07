@@ -93,6 +93,9 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
     const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
     const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
+    const [verifyTarget, setVerifyTarget] = useState(null);
+    const [isVerifying, setIsVerifying] = useState(false);
+
     const allOnPageSelected = orders.data.length > 0 && orders.data.every((o) => selectedIds.includes(o.id));
 
     function applyFilters(overrides = {}) {
@@ -222,6 +225,23 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                     setSelectedOrder(null);
                 },
                 onError: () => setIsCashConfirming(false),
+            }
+        );
+    }
+
+    function handleVerifyPayment() {
+        setIsVerifying(true);
+        router.post(
+            `/admin/orders/${verifyTarget.id}/verify-payment`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setIsVerifying(false);
+                    setVerifyTarget(null);
+                    setSelectedOrder(null);
+                },
+                onError: () => setIsVerifying(false),
             }
         );
     }
@@ -599,6 +619,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                     order={selectedOrder}
                     onClose={() => setSelectedOrder(null)}
                     onConfirmCash={(order) => setCashConfirmTarget(order)}
+                    onVerifyPayment={(order) => setVerifyTarget(order)}
                     onApproveDenda={(order) => setDendaApproveTarget(order)}
                     isSuperAdmin={isSuperAdmin}
                 />
@@ -693,6 +714,43 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 className="rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700 disabled:opacity-60"
                             >
                                 {isCashConfirming ? 'Memproses...' : 'Ya, Uang Sudah Diterima'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal konfirmasi verifikasi pembayaran transfer */}
+            {verifyTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                <CheckCircle2 size={18} />
+                            </span>
+                            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Verifikasi Pembayaran?</h2>
+                        </div>
+                        <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                            Pastikan bukti transfer untuk pesanan <span className="font-semibold text-gray-800 dark:text-gray-200">{verifyTarget.order_code}</span> sebesar{' '}
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{formatRupiah(verifyTarget.total_price)}</span> sudah benar sebelum melanjutkan.
+                            Status pesanan akan berubah menjadi <span className="font-semibold">Diproses</span>.
+                        </p>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setVerifyTarget(null)}
+                                disabled={isVerifying}
+                                className="rounded-xl px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 disabled:opacity-60 dark:text-gray-300 dark:hover:bg-slate-800"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleVerifyPayment}
+                                disabled={isVerifying}
+                                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60"
+                            >
+                                {isVerifying ? 'Memproses...' : 'Ya, Verifikasi Pembayaran'}
                             </button>
                         </div>
                     </div>
@@ -794,7 +852,7 @@ function CustomSelect({ value, options, onChange }) {
     );
 }
 
-function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda, isSuperAdmin = false }) {
+function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onApproveDenda, isSuperAdmin = false }) {
     const [previewImage, setPreviewImage] = useState(false);
     const { data, setData, errors } = useForm({
         status: order.status,
@@ -968,6 +1026,39 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onApproveDenda, isSup
                                 Uang tunai untuk pesanan ini sudah dikonfirmasi diterima oleh admin.
                             </p>
                         )}
+                    </div>
+                )}
+
+                {/* Blok verifikasi pembayaran transfer - tampil kalau ada bukti transfer tapi belum diverifikasi */}
+                {!order.payment_verified_at && order.payment_receipt && ['transfer', 'qris', 'pending'].includes(order.payment_method) && (
+                    <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
+                        <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">
+                                <CheckCircle2 size={14} /> Verifikasi Pembayaran Transfer
+                            </span>
+                        </div>
+
+                        <p className="mt-2 text-xs text-emerald-700/80 dark:text-emerald-300/80">
+                            Customer telah mengunggah bukti transfer. Periksa bukti pembayaran di bawah ini, lalu klik verifikasi jika sesuai.
+                        </p>
+
+                        <div className="mt-3 overflow-hidden rounded-xl border border-emerald-200 bg-white dark:border-emerald-800 dark:bg-slate-900">
+                            <img
+                                src={order.payment_receipt}
+                                alt="Bukti Transfer"
+                                className="h-40 w-full cursor-pointer object-contain"
+                                onClick={() => setPreviewImage(true)}
+                            />
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => onVerifyPayment(order)}
+                            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                        >
+                            <CheckCircle2 size={15} />
+                            Verifikasi / Setujui Pembayaran
+                        </button>
                     </div>
                 )}
 

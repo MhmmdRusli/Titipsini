@@ -34,9 +34,6 @@ const navItems = [
         icon: Settings,
         children: [
             { label: 'Keamanan', href: '/admin/pengaturan/keamanan' },
-            { label: 'Komisi', href: '/admin/pengaturan/komisi' },
-            { label: 'Denda', href: '/admin/pengaturan/denda' },
-            { label: 'Qris', href: '/admin/pengaturan/qris' },
         ],
     },
 ];

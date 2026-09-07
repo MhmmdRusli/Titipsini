@@ -9,6 +9,7 @@ class PaymentSetting extends Model
     protected $fillable = [
         'qris_image',
         'komisi_persen',
+        'merchant_name',
     ];
 
     protected function casts(): array
