@@ -347,7 +347,7 @@ function ShowDiproses({ order }) {
                     </div>
                 </div>
 
-                {order.status !== 'selesai' && order.fase_label && (
+                {order.has_pickup && order.status !== 'selesai' && order.fase_label && (
                     <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
                         <div className="flex items-center justify-between">
                             <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -401,23 +401,43 @@ function ShowDiproses({ order }) {
 
                 {['pembayaran_diterima', 'diproses_mitra'].includes(order.status) && (
                     <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
-                        <p className="mt-3 text-xs font-semibold text-gray-700 dark:text-gray-300">Tandai Sudah Dititip</p>
-                        <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                            Tandai bahwa barang sudah diterima dan sedang disiapkan untuk customer.
-                        </p>
-                        <button
-                            type="button"
-                            onClick={tandaiDititip}
-                            disabled={isMarkingAsPickedUp}
-                            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
-                        >
-                            <CheckCircle2 size={16} />
-                            {isMarkingAsPickedUp ? 'Memproses...' : 'Tandai Sudah Dititip'}
-                        </button>
+                        {order.has_pickup ? (
+                            <>
+                                <p className="mt-3 text-xs font-semibold text-gray-700 dark:text-gray-300">Tandai Sudah Dititip</p>
+                                <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                    Tandai bahwa barang sudah diterima dan sedang disiapkan untuk customer.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={tandaiDititip}
+                                    disabled={isMarkingAsPickedUp}
+                                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                                >
+                                    <CheckCircle2 size={16} />
+                                    {isMarkingAsPickedUp ? 'Memproses...' : 'Tandai Sudah Dititip'}
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <p className="mt-3 text-xs font-semibold text-gray-700 dark:text-gray-300">Selesaikan Pesanan</p>
+                                <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                    Tidak ada proses pickup untuk pesanan ini. Klik tombol di bawah jika jasa sudah selesai.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={serahkanBarang}
+                                    disabled={isConfirmingPickup}
+                                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                                >
+                                    <CheckCircle2 size={16} />
+                                    {isConfirmingPickup ? 'Memproses...' : 'Tandai Selesai'}
+                                </button>
+                            </>
+                        )}
                     </div>
                 )}
 
-                {order.status === 'pengambilan_diajukan' && (
+                {order.has_pickup && order.status === 'pengambilan_diajukan' && (
                     <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
                         <p className="mt-3 text-xs font-semibold text-gray-700 dark:text-gray-300">Serahkan Barang ke Customer</p>
                         <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">

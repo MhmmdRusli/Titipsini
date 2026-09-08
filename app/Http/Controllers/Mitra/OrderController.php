@@ -102,8 +102,6 @@ class OrderController extends Controller
                 'id' => $order->id,
                 'order_number' => $order->order_code,
                 'customer_name' => $order->customer->name ?? '-',
-                // Prioritaskan alamat tersimpan yang dipilih customer karena
-                // lebih rinci daripada nama kota pada pesanan.
                 'address' => $order->address?->address ?? $order->pickup_address ?? $order->city ?? '-',
                 'address_notes' => $order->address?->notes,
                 'service_type' => $order->service_type,
@@ -116,15 +114,13 @@ class OrderController extends Controller
                 },
                 'duration' => $this->hitungDurasi($order),
                 'total_price' => (float) $order->total_price,
-                // Ulasan diberikan customer setelah pesanan selesai. Data ini
-                // dikirim ke kartu daftar pesanan agar mitra dapat langsung
-                // melihat penilaian tanpa harus membuka detail pesanan.
                 'rating' => $order->rating,
                 'review' => $order->review,
                 'status' => $order->status,
                 'fase' => $order->fase,
-                'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
+                'fase_label' => \App\Services\OrderFaseService::label($order->service_type, $order->fase, (bool) $order->has_pickup),
                 'pickup_requested_at' => optional($order->pickup_requested_at)->format('d M Y, H:i'),
+                'has_pickup' => (bool) $order->has_pickup,
             ];
         });
 
@@ -178,6 +174,7 @@ class OrderController extends Controller
                 'status' => $order->status,
                 'cancel_reason' => $order->cancel_reason,
                 'service_type' => $order->service_type,
+                'has_pickup' => (bool) $order->has_pickup,
                 'customer' => [
                     'name' => $order->customer->name ?? '-',
                     'phone' => $order->customer->phone ?? '-',
@@ -200,13 +197,12 @@ class OrderController extends Controller
                 'payment_verified_at' => optional($order->payment_verified_at)->format('d M Y, H:i'),
                 'pickup_requested_at' => optional($order->pickup_requested_at)->format('d M Y, H:i'),
 
-                // 👇 Properti Denda yang ditambahkan agar muncul di halaman Mitra
                 'denda' => (float) $order->denda,
                 'bukti_denda' => $order->bukti_denda ? Storage::disk('public')->url($order->bukti_denda) : null,
                 'status_denda' => $order->status_denda,
 
                 'fase' => $order->fase,
-                'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
+                'fase_label' => \App\Services\OrderFaseService::label($order->service_type, $order->fase, (bool) $order->has_pickup),
                 'next_fase_action_label' => $nextFaseAction,
                 'can_advance_fase' => $order->status === 'diproses'
                     && $nextFaseAction !== null
@@ -255,7 +251,7 @@ class OrderController extends Controller
     public function updateFase(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
-        abort_unless($order->status === 'diproses', 400, 'Fase hanya bisa diubah selagi pesanan berstatus Diproses.');
+        abort_unless(in_array($order->status, ['diproses', 'diproses_mitra', 'dititip'], true), 400, 'Fase hanya bisa diubah selagi pesanan sedang diproses.');
 
         $fase = (string) $order->fase;
         $serviceType = (string) $order->service_type;
@@ -276,7 +272,7 @@ class OrderController extends Controller
             );
         }
 
-        if ($serviceType === 'barang' && $next === 'akhir') {
+        if ($order->has_pickup && $serviceType === 'barang' && $next === 'akhir') {
             abort_unless($order->pickup_requested_at, 400, 'Customer belum mengajukan pengambilan barang.');
         }
 
@@ -311,7 +307,14 @@ class OrderController extends Controller
         abort_unless(in_array($order->status, ['baru', 'pembayaran_diterima'], true), 400, 'Pesanan ini sudah tidak bisa diambil.');
 
         $newStatus = $order->status === 'pembayaran_diterima' ? 'diproses_mitra' : 'diproses';
-        $order->update(['status' => $newStatus]);
+
+        $updates = ['status' => $newStatus];
+
+        if (! $order->has_pickup) {
+            $updates['fase'] = 'berjalan';
+        }
+
+        $order->update($updates);
 
         Notifikasi::create([
             'user_id' => $order->customer_id,
@@ -352,8 +355,9 @@ class OrderController extends Controller
     public function confirmPickup(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
-        abort_unless($order->status === 'pengambilan_diajukan', 400, 'Pesanan ini belum dalam status pengambilan diajukan.');
+        abort_unless(in_array($order->status, ['pengambilan_diajukan', 'dititip'], true), 400, 'Pesanan ini belum bisa diselesaikan.');
         abort_if($order->status === 'selesai', 400, 'Pesanan ini sudah selesai.');
+        abort_if($order->has_pickup && $order->status === 'dititip', 400, 'Pesanan ini harus melalui tahap pengambilan customer.');
 
         $order->update(['status' => 'selesai']);
 
@@ -367,7 +371,7 @@ class OrderController extends Controller
             ]);
         }
 
-        return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil diserahkan.');
+        return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil diselesaikan.');
     }
 
     public function tandaiDititip(Order $order)

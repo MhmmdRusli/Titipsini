@@ -53,7 +53,7 @@ class OrderController extends Controller
                     'city' => $order->city,
                     'status' => $order->status,
                     'fase' => $order->fase,
-                    'fase_label' => OrderFaseService::label($order->service_type, $order->fase),
+                    'fase_label' => OrderFaseService::label($order->service_type, $order->fase, (bool) $order->has_pickup),
                     'denda' => $order->hitungDenda(),
                     'denda_payment_receipt' => ($order->bukti_denda ?? $order->denda_payment_receipt)
                         ? Storage::disk('public')->url($order->bukti_denda ?? $order->denda_payment_receipt)

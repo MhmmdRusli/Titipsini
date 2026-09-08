@@ -115,8 +115,14 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        if (! in_array($order->status, ['pengambilan_diajukan'], true)) {
-            return back()->withErrors(['finish' => 'Pesanan ini belum bisa diselesaikan.']);
+        if ($order->has_pickup) {
+            if (! in_array($order->status, ['pengambilan_diajukan'], true)) {
+                return back()->withErrors(['finish' => 'Pesanan ini belum bisa diselesaikan.']);
+            }
+        } else {
+            if (! in_array($order->status, ['dititip'], true)) {
+                return back()->withErrors(['finish' => 'Pesanan ini belum bisa diselesaikan.']);
+            }
         }
 
         if ($order->payment_verified_at === null) {
@@ -151,6 +157,10 @@ class OrderController extends Controller
     public function requestPickup(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
+
+        if (! $order->has_pickup) {
+            return back()->withErrors(['pickup' => 'Pesanan ini tidak memerlukan pengambilan.']);
+        }
 
         if ($order->status !== 'dititip') {
             return back()->withErrors(['pickup' => 'Pesanan ini belum bisa diambil.']);
@@ -243,6 +253,7 @@ class OrderController extends Controller
                 'payment_method',
                 'total_price',
                 'status',
+                'has_pickup',
                 'created_at',
             ]),
             'qris_url' => $qrisUrl,
@@ -267,6 +278,8 @@ class OrderController extends Controller
                 'service_type',
                 'payment_method',
                 'total_price',
+                'status',
+                'has_pickup',
                 'created_at',
             ]),
             'qris_url' => $qrisUrl,
@@ -427,7 +440,7 @@ class OrderController extends Controller
 
         return Inertia::render('Customer/Orders/Extend', [
             'order' => $order->only([
-                'id', 'order_code', 'item_name', 'service_type',
+                'id', 'order_code', 'item_name', 'service_type', 'has_pickup',
                 'start_date', 'end_date', 'city',
             ]),
             'hargaPerHari' => $hargaPerHari,
@@ -495,7 +508,7 @@ class OrderController extends Controller
 
         return Inertia::render('Customer/Orders/ExtendInvoice', [
             'order' => $order->only([
-                'id', 'order_code', 'item_name', 'service_type',
+                'id', 'order_code', 'item_name', 'service_type', 'has_pickup',
                 'start_date', 'end_date', 'extend_end_date', 'extend_price',
                 'extend_paid_at', 'extend_payment_receipt', 'status_perpanjangan',
                 'created_at',

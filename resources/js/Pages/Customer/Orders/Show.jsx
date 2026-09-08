@@ -596,25 +596,36 @@ export default function OrderShow({ order, qris_url }) {
                             disabled
                             className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white py-3 text-sm font-bold text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700"
                         >
-                            Menunggu Mitra menitip
+                            {order.has_pickup ? 'Menunggu Mitra menitip' : 'Pesanan sedang diproses mitra'}
                         </button>
                     </div>
                 )}
 
                 {!isBelumBayar && !isCancelled && order.status === 'dititip' && !order.pickup_requested_at && (
                     <div className="mt-5">
-                        <button
-                            type="button"
-                            onClick={requestPickup}
-                            disabled={isRequestingPickup}
-                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 transition duration-200 active:scale-[0.98] disabled:opacity-60"
-                        >
-                            {isRequestingPickup ? 'Memproses...' : 'Ambil Pesanan'}
-                        </button>
+                        {order.has_pickup ? (
+                            <button
+                                type="button"
+                                onClick={requestPickup}
+                                disabled={isRequestingPickup}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 transition duration-200 active:scale-[0.98] disabled:opacity-60"
+                            >
+                                {isRequestingPickup ? 'Memproses...' : 'Ambil Pesanan'}
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={completeOrder}
+                                disabled={isCompleting}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 transition duration-200 active:scale-[0.98] disabled:opacity-60"
+                            >
+                                {isCompleting ? 'Memproses...' : 'Selesaikan Pesanan'}
+                            </button>
+                        )}
                     </div>
                 )}
 
-                {!isBelumBayar && !isCancelled && order.status === 'pengambilan_diajukan' && (
+                {!isBelumBayar && !isCancelled && order.has_pickup && order.status === 'pengambilan_diajukan' && (
                     <div className="mt-5">
                         <button
                             type="button"

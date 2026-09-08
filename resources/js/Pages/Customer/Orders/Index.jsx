@@ -176,9 +176,10 @@ export default function OrdersIndex({ orders, filters }) {
                             const isSelesai = order.status === 'selesai';
                             const isBelumBayar = order.status === 'baru';
                             const isBarang = order.service_type === 'barang';
+                            const hasPickup = order.has_pickup !== false;
                             const isPickupRequested = Boolean(order.pickup_requested_at);
                             const isProcessing = processingOrderId === order.id;
-                            const canRequestPickup = isDititip && !isPickupRequested;
+                            const canRequestPickup = isDititip && hasPickup && !isPickupRequested;
 
                             return (
                                 <div
@@ -301,18 +302,29 @@ export default function OrdersIndex({ orders, filters }) {
                                             </div>
                                         )}
 
-                                        {/* Tab Dititip: Ajukan Pengambilan & Perpanjang */}
+                                        {/* Tab Dititip: Ajukan Pengambilan / Selesaikan */}
                                         {isDititip && (
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex gap-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setPickupConfirmOrder(order)}
-                                                        disabled={isProcessing}
-                                                        className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
-                                                    >
-                                                        {isProcessing ? 'Memproses...' : 'Ajukan Pengambilan'}
-                                                    </button>
+                                                    {hasPickup ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setPickupConfirmOrder(order)}
+                                                            disabled={isProcessing}
+                                                            className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                        >
+                                                            {isProcessing ? 'Memproses...' : 'Ajukan Pengambilan'}
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setCompleteConfirmOrder(order)}
+                                                            disabled={isProcessing}
+                                                            className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                        >
+                                                            {isProcessing ? 'Memproses...' : 'Selesaikan Pesanan'}
+                                                        </button>
+                                                    )}
                                                     <Link
                                                         href={`/app/orders/${order.id}`}
                                                         className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
@@ -320,13 +332,15 @@ export default function OrdersIndex({ orders, filters }) {
                                                         Detail Pesanan
                                                     </Link>
                                                 </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => router.get(`/app/orders/${order.id}/extend`)}
-                                                    className="w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
-                                                >
-                                                    Perpanjang Waktu Jasa
-                                                </button>
+                                                {hasPickup && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => router.get(`/app/orders/${order.id}/extend`)}
+                                                        className="w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                    >
+                                                        Perpanjang Waktu Jasa
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
 
