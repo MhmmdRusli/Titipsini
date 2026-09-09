@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\PaymentSetting;
-use App\Services\OrderFaseService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -111,32 +110,13 @@ class OrderController extends Controller
         return back()->with('success', 'Pesanan berhasil dibatalkan.');
     }
 
-    public function complete(Request $request, Order $order): RedirectResponse
-    {
-        abort_unless($order->customer_id === $request->user()->id, 403);
-
-        if ($order->has_pickup) {
-            if (! in_array($order->status, ['pengambilan_diajukan'], true)) {
-                return back()->withErrors(['finish' => 'Pesanan ini belum bisa diselesaikan.']);
-            }
-        } else {
-            if (! in_array($order->status, ['dititip'], true)) {
-                return back()->withErrors(['finish' => 'Pesanan ini belum bisa diselesaikan.']);
-            }
-        }
-
-        if ($order->payment_verified_at === null) {
-            return back()->withErrors(['finish' => 'Pembayaran pesanan belum diverifikasi.']);
-        }
-
-        if (! $order->tanggal_selesai_aktual) {
-            $order->update(['tanggal_selesai_aktual' => now()]);
-        }
-
-        OrderFaseService::completeOrder($order);
-
-        return back()->with('success', 'Pesanan berhasil diselesaikan.');
-    }
+    // 👇 DIHAPUS: method complete() dihapus total. Sejak perubahan business
+    // rule terbaru, customer TIDAK PERNAH menyelesaikan order sendiri - baik
+    // pickup maupun non-pickup. Yang berhak menandai order 'selesai' hanya
+    // Mitra, lewat Mitra\OrderController::confirmPickup() (yang sekarang
+    // memanggil OrderFaseService::completeOrder() untuk konsistensi dengan
+    // Admin). Route 'orders.complete' & 'orders.selesaikan' juga sudah
+    // dihapus dari routes/web.php.
 
     public function review(Request $request, Order $order): RedirectResponse
     {
@@ -158,9 +138,12 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        if (! $order->has_pickup) {
-            return back()->withErrors(['pickup' => 'Pesanan ini tidak memerlukan pengambilan.']);
-        }
+        // 👇 DIHAPUS: guard "! $order->has_pickup" dihapus. Sejak perubahan
+        // business rule terbaru, "Ajukan Pengambilan" berlaku untuk SEMUA
+        // order (pickup maupun non-pickup) - keduanya sekarang memakai alur
+        // penyelesaian yang sama: dititip -> pengambilan_diajukan -> selesai
+        // (dikonfirmasi Mitra via confirmPickup()). Bedanya hanya di awal
+        // (siapa yang mengantar barang saat drop-off), bukan di penyelesaian.
 
         if ($order->status !== 'dititip') {
             return back()->withErrors(['pickup' => 'Pesanan ini belum bisa diambil.']);
@@ -420,6 +403,12 @@ class OrderController extends Controller
      |  bukti transfer menunggu verifikasi mitra).
      |  end_date ASLI baru ikut berubah setelah status_perpanjangan jadi
      |  'terverifikasi' (lihat extendBayarSaldo & Mitra\OrderController::verifikasiPerpanjangan).
+     |
+     |  CATATAN: extendForm() di bawah masih mensyaratkan status === 'diproses'
+     |  (Alur A / alur lama). Ini BELUM disentuh - terkait temuan Alur A vs
+     |  Alur B di section 7 (tombol "Perpanjang Waktu Jasa" untuk status
+     |  'dititip' di alur baru). Jangan diubah sebelum business rule Q di
+     |  section 9-12 dikonfirmasi terpisah.
      * =====================================================================
      */
 
@@ -609,6 +598,6 @@ class OrderController extends Controller
 
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Bukti pembayaran perpanjangan berhasil diunggah! Menunggu verifikasi mitra.');
-            
+
     }
 }

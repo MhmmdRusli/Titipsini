@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mitra;
 use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Order;
+use App\Services\OrderFaseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -352,7 +353,7 @@ class OrderController extends Controller
         return redirect()->route('mitra.orders.index')->with('success', 'Pesanan berhasil ditolak.');
     }
 
-        public function confirmPickup(Order $order)
+    public function confirmPickup(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
 
@@ -369,17 +370,21 @@ class OrderController extends Controller
         abort_if($order->status === 'selesai', 400, 'Pesanan ini sudah selesai.');
         abort_if($order->has_pickup && $order->status === 'dititip', 400, 'Pesanan ini harus melalui tahap pengambilan customer.');
 
-        $order->update(['status' => 'selesai']);
-
-        if ($order->customer_id) {
-            Notifikasi::create([
-                'user_id' => $order->customer_id,
-                'order_id' => $order->id,
-                'type' => 'transaksi_masuk',
-                'judul' => 'Pesanan Telah Diserahkan',
-                'pesan' => 'Mitra telah menyelesaikan pesanan '.$order->order_code.'. Pesanan sudah bisa diselesaikan oleh customer.',
-            ]);
+        // 👇 DIUBAH: sebelumnya update status manual + notifikasi custom di
+        // sini. Sekarang memakai OrderFaseService::completeOrder() - sumber
+        // tunggal penyelesaian order yang juga dipakai Admin\OrderController
+        // dan (dulu) Customer\OrderController::complete() (sudah dihapus).
+        // Ini memperbaiki bug lama: sebelumnya order yang diselesaikan lewat
+        // confirmPickup() TIDAK PERNAH tercatat komisinya di
+        // PendapatanPlatform, karena catatPendapatanPlatform() hanya
+        // dipanggil dari completeOrder(). Sejak semua penyelesaian order
+        // (pickup & non-pickup) sekarang lewat method ini, bug itu akan
+        // berdampak ke SEMUA order kalau tidak diperbaiki di sini.
+        if (! $order->tanggal_selesai_aktual) {
+            $order->update(['tanggal_selesai_aktual' => now()]);
         }
+
+        OrderFaseService::completeOrder($order);
 
         return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil diselesaikan.');
     }
