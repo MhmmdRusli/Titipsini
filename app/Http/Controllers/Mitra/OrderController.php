@@ -352,10 +352,20 @@ class OrderController extends Controller
         return redirect()->route('mitra.orders.index')->with('success', 'Pesanan berhasil ditolak.');
     }
 
-    public function confirmPickup(Order $order)
+        public function confirmPickup(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
-        abort_unless(in_array($order->status, ['pengambilan_diajukan', 'dititip'], true), 400, 'Pesanan ini belum bisa diselesaikan.');
+
+        // Order non-pickup ("diantar sendiri oleh customer") tidak melalui
+        // tahap dititip/pengambilan_diajukan - barang sudah ada di lokasi
+        // mitra sejak awal, jadi boleh langsung diselesaikan dari status
+        // diproses_mitra. Order pickup tetap wajib lewat pengambilan_diajukan
+        // (lihat abort_if di bawah).
+        $statusDiizinkan = $order->has_pickup
+            ? ['pengambilan_diajukan', 'dititip']
+            : ['diproses_mitra', 'pengambilan_diajukan', 'dititip'];
+
+        abort_unless(in_array($order->status, $statusDiizinkan, true), 400, 'Pesanan ini belum bisa diselesaikan.');
         abort_if($order->status === 'selesai', 400, 'Pesanan ini sudah selesai.');
         abort_if($order->has_pickup && $order->status === 'dititip', 400, 'Pesanan ini harus melalui tahap pengambilan customer.');
 
