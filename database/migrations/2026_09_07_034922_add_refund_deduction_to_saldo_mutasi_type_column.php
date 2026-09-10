@@ -8,9 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('saldo_mutasi', function (Blueprint $table) {
-            $table->enum('type', ['penghasilan', 'penarikan', 'refund_deduction'])->change();
-        });
+        $currentType = \DB::select("SHOW COLUMNS FROM saldo_mutasi WHERE Field = 'type'")[0]->Type ?? '';
+        
+        if (strpos($currentType, 'refund_deduction') === false) {
+            Schema::table('saldo_mutasi', function (Blueprint $table) {
+                $table->enum('type', ['penghasilan', 'penarikan', 'refund_deduction'])->change();
+            });
+        }
     }
 
     public function down(): void

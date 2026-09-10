@@ -162,7 +162,35 @@ class PenarikanController extends Controller
             'pin.required' => 'PIN wajib diisi.',
         ]);
 
-        // ... sisa method (cek PIN, cari rekening, create Penarikan) tetap sama persis
+        if (! $user->pin || ! Hash::check($validated['pin'], $user->pin)) {
+            return back()->withErrors(['pin' => 'PIN yang kamu masukkan salah.']);
+        }
+
+        $rekening = null;
+        if (!empty($validated['rekening_bank_id'])) {
+            $rekening = RekeningBank::where('user_id', $user->id)
+                ->where('id', $validated['rekening_bank_id'])
+                ->first();
+        }
+
+        if (! $rekening) {
+            $rekening = RekeningBank::where('user_id', $user->id)->first();
+        }
+
+        if (! $rekening) {
+            return back()->withErrors(['jumlah' => 'Silakan tambahkan rekening bank terlebih dahulu.']);
+        }
+
+        $penarikan = Penarikan::create([
+            'user_id' => $user->id,
+            'jumlah' => $validated['jumlah'],
+            'nama_bank' => $rekening->nama_bank,
+            'nomor_rekening' => $rekening->nomor_rekening,
+            'nama_pemilik' => $rekening->nama_pemilik,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('mitra.penarikan.sukses', ['penarikan' => $penarikan->id]);
     }
 
     /**
