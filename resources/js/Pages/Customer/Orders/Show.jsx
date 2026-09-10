@@ -38,6 +38,16 @@ const STATUS_CONFIG = {
         color: 'text-purple-600 dark:text-purple-400',
         icon: Clock,
     },
+    dititip: {
+        label: 'Sedang Dititipkan',
+        color: 'text-cyan-600 dark:text-cyan-400',
+        icon: Clock,
+    },
+    pengambilan_diajukan: {
+        label: 'Menunggu Konfirmasi Mitra',
+        color: 'text-indigo-600 dark:text-indigo-400',
+        icon: Clock,
+    },
     dikirim: {
         label: 'Dikirim',
         color: 'text-indigo-600 dark:text-indigo-400',
@@ -154,7 +164,7 @@ export default function OrderShow({ order, qris_url }) {
     // /orders/{id}/complete juga sudah dihapus dari routes/web.php.
 
     function requestPickup() {
-        if (!confirm('Apakah kamu sudah mengambil pesanan ini?')) return;
+        if (!confirm('Apakah kamu ingin mengajukan pengambilan pesanan ini ke mitra?')) return;
         setIsRequestingPickup(true);
         router.patch(
             `/app/orders/${order.id}/ajukan-pengambilan`,
@@ -602,7 +612,7 @@ export default function OrderShow({ order, qris_url }) {
                             disabled={isRequestingPickup}
                             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 transition duration-200 active:scale-[0.98] disabled:opacity-60"
                         >
-                            {isRequestingPickup ? 'Memproses...' : 'Ambil Pesanan'}
+                            {isRequestingPickup ? 'Memproses...' : 'Ajukan Pengambilan'}
                         </button>
                     </div>
                 )}
