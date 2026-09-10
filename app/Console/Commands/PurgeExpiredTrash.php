@@ -21,6 +21,7 @@ class PurgeExpiredTrash extends Command
 
             $query = $model::onlyTrashed()->where('deleted_at', '<=', $batasWaktu);
             $jumlah = $query->count();
+            
 
             if ($jumlah === 0) {
                 continue;

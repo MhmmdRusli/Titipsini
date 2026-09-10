@@ -110,13 +110,10 @@ class OrderController extends Controller
         return back()->with('success', 'Pesanan berhasil dibatalkan.');
     }
 
-    // 👇 DIHAPUS: method complete() dihapus total. Sejak perubahan business
-    // rule terbaru, customer TIDAK PERNAH menyelesaikan order sendiri - baik
-    // pickup maupun non-pickup. Yang berhak menandai order 'selesai' hanya
-    // Mitra, lewat Mitra\OrderController::confirmPickup() (yang sekarang
-    // memanggil OrderFaseService::completeOrder() untuk konsistensi dengan
-    // Admin). Route 'orders.complete' & 'orders.selesaikan' juga sudah
-    // dihapus dari routes/web.php.
+    // 👇 DIHAPUS: method complete() dihapus total. Customer TIDAK PERNAH
+    // menyelesaikan order sendiri - hanya Mitra, lewat
+    // Mitra\OrderController::confirmPickup(). Route 'orders.complete' &
+    // 'orders.selesaikan' juga sudah dihapus dari routes/web.php.
 
     public function review(Request $request, Order $order): RedirectResponse
     {
@@ -138,12 +135,10 @@ class OrderController extends Controller
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
 
-        // 👇 DIHAPUS: guard "! $order->has_pickup" dihapus. Sejak perubahan
-        // business rule terbaru, "Ajukan Pengambilan" berlaku untuk SEMUA
-        // order (pickup maupun non-pickup) - keduanya sekarang memakai alur
-        // penyelesaian yang sama: dititip -> pengambilan_diajukan -> selesai
-        // (dikonfirmasi Mitra via confirmPickup()). Bedanya hanya di awal
-        // (siapa yang mengantar barang saat drop-off), bukan di penyelesaian.
+        // "Ajukan Pengambilan" berlaku untuk SEMUA order (pickup maupun
+        // non-pickup) - lihat patch sebelumnya. Keduanya sekarang memakai
+        // alur penyelesaian yang sama: dititip -> pengambilan_diajukan ->
+        // selesai (dikonfirmasi Mitra via confirmPickup()).
 
         if ($order->status !== 'dititip') {
             return back()->withErrors(['pickup' => 'Pesanan ini belum bisa diambil.']);
@@ -181,6 +176,16 @@ class OrderController extends Controller
         ]);
     }
 
+    /**
+     * 👇 DIUBAH: status hasil pembayaran saldo diubah dari 'diproses'
+     * menjadi 'pembayaran_diterima'. Pembayaran saldo tidak perlu lewat
+     * verifikasi Finance (saldo sudah dipotong & divalidasi sistem saat
+     * decrement di bawah berhasil), tapi status akhirnya HARUS masuk ke
+     * alur status baru (sejajar dengan hasil verifikasi Finance untuk
+     * transfer/QRIS) supaya Mitra bisa langsung ambilPesanan(). Sebelumnya
+     * status 'diproses' membuat order saldo baru ikut alur 'fase' lama
+     * yang seharusnya sudah tidak dipakai order baru sama sekali.
+     */
     public function bayarSaldo(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
@@ -203,7 +208,7 @@ class OrderController extends Controller
         $order->update([
             'payment_method' => 'saldo',
             'payment_verified_at' => now(),
-            'status' => 'diproses',
+            'status' => 'pembayaran_diterima',
         ]);
 
         if ($order->partner_id) {
@@ -404,11 +409,13 @@ class OrderController extends Controller
      |  end_date ASLI baru ikut berubah setelah status_perpanjangan jadi
      |  'terverifikasi' (lihat extendBayarSaldo & Mitra\OrderController::verifikasiPerpanjangan).
      |
-     |  CATATAN: extendForm() di bawah masih mensyaratkan status === 'diproses'
-     |  (Alur A / alur lama). Ini BELUM disentuh - terkait temuan Alur A vs
-     |  Alur B di section 7 (tombol "Perpanjang Waktu Jasa" untuk status
-     |  'dititip' di alur baru). Jangan diubah sebelum business rule Q di
-     |  section 9-12 dikonfirmasi terpisah.
+     |  CATATAN BELUM DIUBAH: extendForm()/extendStore() di bawah masih
+     |  mensyaratkan status === 'diproses' (alur lama). Untuk alur baru,
+     |  perpanjangan sekarang seharusnya bisa diajukan saat status
+     |  'dititip'. Ini terkait tombol "Perpanjang Waktu Pesanan" yang
+     |  diminta muncul saat status dititip - BELUM dipatch di sini, akan
+     |  dikerjakan terpisah supaya perubahan tidak terlalu besar sekaligus.
+     |  Beri tahu saya kalau ingin ini dikerjakan juga sekarang.
      * =====================================================================
      */
 

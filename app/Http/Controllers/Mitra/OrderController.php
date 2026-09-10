@@ -19,6 +19,11 @@ class OrderController extends Controller
     /**
      * Label fase yang ditampilkan ke user, beda-beda per kategori layanan
      * meskipun kode fase di database sama (menunggu/berjalan/akhir).
+     *
+     * CATATAN: sistem 'fase' ini HANYA relevan untuk order-order lama
+     * (peninggalan alur COD) yang statusnya masih 'diproses' dan kolom
+     * fase-nya sudah terisi. Order baru TIDAK PERNAH mengisi fase - lihat
+     * guard di updateFase() di bawah.
      */
     public const FASE_LABELS = [
         'barang' => [
@@ -249,9 +254,26 @@ class OrderController extends Controller
         return back()->with('success', $isCash ? 'Pembayaran tunai berhasil dikonfirmasi.' : 'Pembayaran berhasil diverifikasi.');
     }
 
+    /**
+     * 👇 DIUBAH: ditambahkan guard "$order->fase === null" di awal.
+     *
+     * Sistem 'fase' (menunggu/berjalan/akhir) HANYA dipakai oleh order-order
+     * lama peninggalan alur COD (statusnya 'diproses', kolom fase sudah
+     * terisi sejak awal dibuat). Order baru TIDAK PERNAH mengisi fase sama
+     * sekali - mereka pakai alur status baru (dititip/pengambilan_diajukan/
+     * selesai) yang tidak melibatkan method ini.
+     *
+     * Tanpa guard ini, kalau order baru entah bagaimana sampai di sini
+     * (misal salah klik / URL dipanggil manual), dia akan lolos abort_unless
+     * status di bawah (karena statusnya bisa 'diproses_mitra'/'dititip') dan
+     * malah membuat kolom fase-nya keisi - padahal seharusnya tidak pernah.
+     * Ini juga mencegah tombol aksi fase muncul dobel dengan tombol alur
+     * baru (Ambil Pesanan / Sudah Dititipkan / dll) di halaman Mitra.
+     */
     public function updateFase(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
+        abort_unless($order->fase !== null, 400, 'Pesanan ini menggunakan alur status baru dan tidak menggunakan sistem fase.');
         abort_unless(in_array($order->status, ['diproses', 'diproses_mitra', 'dititip'], true), 400, 'Fase hanya bisa diubah selagi pesanan sedang diproses.');
 
         $fase = (string) $order->fase;
@@ -302,20 +324,24 @@ class OrderController extends Controller
             : 'Status pesanan berhasil diperbarui menjadi "'.$label.'".');
     }
 
+    /**
+     * 👇 DIUBAH: bypass status 'baru' dihapus. Order baru WAJIB lewat
+     * Finance dulu (status jadi 'pembayaran_diterima') sebelum Mitra bisa
+     * mengambil - baik dibayar via transfer/QRIS (lewat Finance\OrderController)
+     * maupun saldo (instant tapi tetap diset ke 'pembayaran_diterima', lihat
+     * Customer\OrderController::bayarSaldo()).
+     *
+     * Ini AMAN untuk 10 order lama COD: mereka semua sudah berstatus
+     * 'diproses' (bukan 'baru' lagi) sejak lama, jadi tidak akan pernah lagi
+     * menyentuh method ini sama sekali - guard lama untuk status 'baru'
+     * sudah tidak relevan buat mereka.
+     */
     public function ambilPesanan(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
-        abort_unless(in_array($order->status, ['baru', 'pembayaran_diterima'], true), 400, 'Pesanan ini sudah tidak bisa diambil.');
+        abort_unless($order->status === 'pembayaran_diterima', 400, 'Pesanan ini sudah tidak bisa diambil.');
 
-        $newStatus = $order->status === 'pembayaran_diterima' ? 'diproses_mitra' : 'diproses';
-
-        $updates = ['status' => $newStatus];
-
-        if (! $order->has_pickup) {
-            $updates['fase'] = 'berjalan';
-        }
-
-        $order->update($updates);
+        $order->update(['status' => 'diproses_mitra']);
 
         Notifikasi::create([
             'user_id' => $order->customer_id,
@@ -353,33 +379,21 @@ class OrderController extends Controller
         return redirect()->route('mitra.orders.index')->with('success', 'Pesanan berhasil ditolak.');
     }
 
+    /**
+     * 👇 DIUBAH: disederhanakan total. Sekarang HANYA menerima status
+     * 'pengambilan_diajukan' - tidak ada lagi jalur langsung dari 'dititip'
+     * (baik untuk pickup maupun non-pickup, dan tidak ada lagi percabangan
+     * has_pickup). Satu-satunya cara order jadi 'selesai' sekarang:
+     * (1) customer ajukan pengembalian (requestPickup()) lalu Mitra
+     *     konfirmasi lewat method ini, atau
+     * (2) auto-complete oleh command orders:auto-complete saat batas waktu
+     *     (extend_end_date ?? end_date) habis tanpa pengajuan pengembalian.
+     */
     public function confirmPickup(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
+        abort_unless($order->status === 'pengambilan_diajukan', 400, 'Pesanan ini belum bisa diselesaikan.');
 
-        // Order non-pickup ("diantar sendiri oleh customer") tidak melalui
-        // tahap dititip/pengambilan_diajukan - barang sudah ada di lokasi
-        // mitra sejak awal, jadi boleh langsung diselesaikan dari status
-        // diproses_mitra. Order pickup tetap wajib lewat pengambilan_diajukan
-        // (lihat abort_if di bawah).
-        $statusDiizinkan = $order->has_pickup
-            ? ['pengambilan_diajukan', 'dititip']
-            : ['diproses_mitra', 'pengambilan_diajukan', 'dititip'];
-
-        abort_unless(in_array($order->status, $statusDiizinkan, true), 400, 'Pesanan ini belum bisa diselesaikan.');
-        abort_if($order->status === 'selesai', 400, 'Pesanan ini sudah selesai.');
-        abort_if($order->has_pickup && $order->status === 'dititip', 400, 'Pesanan ini harus melalui tahap pengambilan customer.');
-
-        // 👇 DIUBAH: sebelumnya update status manual + notifikasi custom di
-        // sini. Sekarang memakai OrderFaseService::completeOrder() - sumber
-        // tunggal penyelesaian order yang juga dipakai Admin\OrderController
-        // dan (dulu) Customer\OrderController::complete() (sudah dihapus).
-        // Ini memperbaiki bug lama: sebelumnya order yang diselesaikan lewat
-        // confirmPickup() TIDAK PERNAH tercatat komisinya di
-        // PendapatanPlatform, karena catatPendapatanPlatform() hanya
-        // dipanggil dari completeOrder(). Sejak semua penyelesaian order
-        // (pickup & non-pickup) sekarang lewat method ini, bug itu akan
-        // berdampak ke SEMUA order kalau tidak diperbaiki di sini.
         if (! $order->tanggal_selesai_aktual) {
             $order->update(['tanggal_selesai_aktual' => now()]);
         }
