@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Models\PaymentSetting;
-use App\Services\OrderFaseService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -111,26 +110,10 @@ class OrderController extends Controller
         return back()->with('success', 'Pesanan berhasil dibatalkan.');
     }
 
-    public function complete(Request $request, Order $order): RedirectResponse
-    {
-        abort_unless($order->customer_id === $request->user()->id, 403);
-
-        if (! in_array($order->status, ['pengambilan_diajukan'], true)) {
-            return back()->withErrors(['finish' => 'Pesanan ini belum bisa diselesaikan.']);
-        }
-
-        if ($order->payment_verified_at === null) {
-            return back()->withErrors(['finish' => 'Pembayaran pesanan belum diverifikasi.']);
-        }
-
-        if (! $order->tanggal_selesai_aktual) {
-            $order->update(['tanggal_selesai_aktual' => now()]);
-        }
-
-        OrderFaseService::completeOrder($order);
-
-        return back()->with('success', 'Pesanan berhasil diselesaikan.');
-    }
+    // 👇 DIHAPUS: method complete() dihapus total. Customer TIDAK PERNAH
+    // menyelesaikan order sendiri - hanya Mitra, lewat
+    // Mitra\OrderController::confirmPickup(). Route 'orders.complete' &
+    // 'orders.selesaikan' juga sudah dihapus dari routes/web.php.
 
     public function review(Request $request, Order $order): RedirectResponse
     {
@@ -151,6 +134,11 @@ class OrderController extends Controller
     public function requestPickup(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
+
+        // "Ajukan Pengambilan" berlaku untuk SEMUA order (pickup maupun
+        // non-pickup) - lihat patch sebelumnya. Keduanya sekarang memakai
+        // alur penyelesaian yang sama: dititip -> pengambilan_diajukan ->
+        // selesai (dikonfirmasi Mitra via confirmPickup()).
 
         if ($order->status !== 'dititip') {
             return back()->withErrors(['pickup' => 'Pesanan ini belum bisa diambil.']);
@@ -188,6 +176,16 @@ class OrderController extends Controller
         ]);
     }
 
+    /**
+     * 👇 DIUBAH: status hasil pembayaran saldo diubah dari 'diproses'
+     * menjadi 'pembayaran_diterima'. Pembayaran saldo tidak perlu lewat
+     * verifikasi Finance (saldo sudah dipotong & divalidasi sistem saat
+     * decrement di bawah berhasil), tapi status akhirnya HARUS masuk ke
+     * alur status baru (sejajar dengan hasil verifikasi Finance untuk
+     * transfer/QRIS) supaya Mitra bisa langsung ambilPesanan(). Sebelumnya
+     * status 'diproses' membuat order saldo baru ikut alur 'fase' lama
+     * yang seharusnya sudah tidak dipakai order baru sama sekali.
+     */
     public function bayarSaldo(Request $request, Order $order): RedirectResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 403);
@@ -210,7 +208,7 @@ class OrderController extends Controller
         $order->update([
             'payment_method' => 'saldo',
             'payment_verified_at' => now(),
-            'status' => 'diproses',
+            'status' => 'pembayaran_diterima',
         ]);
 
         if ($order->partner_id) {
@@ -243,6 +241,7 @@ class OrderController extends Controller
                 'payment_method',
                 'total_price',
                 'status',
+                'has_pickup',
                 'created_at',
             ]),
             'qris_url' => $qrisUrl,
@@ -267,6 +266,8 @@ class OrderController extends Controller
                 'service_type',
                 'payment_method',
                 'total_price',
+                'status',
+                'has_pickup',
                 'created_at',
             ]),
             'qris_url' => $qrisUrl,
@@ -407,6 +408,14 @@ class OrderController extends Controller
      |  bukti transfer menunggu verifikasi mitra).
      |  end_date ASLI baru ikut berubah setelah status_perpanjangan jadi
      |  'terverifikasi' (lihat extendBayarSaldo & Mitra\OrderController::verifikasiPerpanjangan).
+     |
+     |  CATATAN BELUM DIUBAH: extendForm()/extendStore() di bawah masih
+     |  mensyaratkan status === 'diproses' (alur lama). Untuk alur baru,
+     |  perpanjangan sekarang seharusnya bisa diajukan saat status
+     |  'dititip'. Ini terkait tombol "Perpanjang Waktu Pesanan" yang
+     |  diminta muncul saat status dititip - BELUM dipatch di sini, akan
+     |  dikerjakan terpisah supaya perubahan tidak terlalu besar sekaligus.
+     |  Beri tahu saya kalau ingin ini dikerjakan juga sekarang.
      * =====================================================================
      */
 
@@ -427,7 +436,7 @@ class OrderController extends Controller
 
         return Inertia::render('Customer/Orders/Extend', [
             'order' => $order->only([
-                'id', 'order_code', 'item_name', 'service_type',
+                'id', 'order_code', 'item_name', 'service_type', 'has_pickup',
                 'start_date', 'end_date', 'city',
             ]),
             'hargaPerHari' => $hargaPerHari,
@@ -495,7 +504,7 @@ class OrderController extends Controller
 
         return Inertia::render('Customer/Orders/ExtendInvoice', [
             'order' => $order->only([
-                'id', 'order_code', 'item_name', 'service_type',
+                'id', 'order_code', 'item_name', 'service_type', 'has_pickup',
                 'start_date', 'end_date', 'extend_end_date', 'extend_price',
                 'extend_paid_at', 'extend_payment_receipt', 'status_perpanjangan',
                 'created_at',
@@ -596,5 +605,6 @@ class OrderController extends Controller
 
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Bukti pembayaran perpanjangan berhasil diunggah! Menunggu verifikasi mitra.');
+
     }
 }

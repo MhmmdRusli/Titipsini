@@ -57,13 +57,19 @@ export default function OrdersIndex({ orders, filters }) {
     const activeStatus = filters?.status ?? '';
     const [processingOrderId, setProcessingOrderId] = useState(null);
     const [pickupConfirmOrder, setPickupConfirmOrder] = useState(null);
-    const [completeConfirmOrder, setCompleteConfirmOrder] = useState(null);
     const [reviewOrderId, setReviewOrderId] = useState(null);
     const [reviewText, setReviewText] = useState('');
     const [reviewRating, setReviewRating] = useState(0);
     const [reviewing, setReviewing] = useState(false);
     const [toast, setToast] = useState(null);
     const toastTimer = useRef(null);
+
+    // 👇 DIHAPUS: completeConfirmOrder (state) dan completeOrder() (fungsi)
+    // dihapus. Customer tidak lagi menyelesaikan order sendiri (pickup
+    // maupun non-pickup) - hanya Mitra yang bisa lewat confirmPickup().
+    // Route PATCH /orders/{id}/selesaikan juga sudah dihapus dari
+    // routes/web.php, jadi fungsi ini akan selalu gagal (404) kalau
+    // dibiarkan.
 
     function showToast(type, message) {
         setToast({ type, message });
@@ -101,15 +107,6 @@ export default function OrdersIndex({ orders, filters }) {
             onError: (errors) => {
                 showToast('error', errors.pickup ?? 'Pengajuan pengembalian belum bisa diproses.');
             },
-        });
-    }
-
-    function completeOrder(order) {
-        setProcessingOrderId(order.id);
-        router.patch(`/app/orders/${order.id}/selesaikan`, {}, {
-            preserveScroll: true,
-            onFinish: () => setProcessingOrderId(null),
-            onSuccess: () => setCompleteConfirmOrder(null),
         });
     }
 
@@ -176,9 +173,10 @@ export default function OrdersIndex({ orders, filters }) {
                             const isSelesai = order.status === 'selesai';
                             const isBelumBayar = order.status === 'baru';
                             const isBarang = order.service_type === 'barang';
+                            const hasPickup = order.has_pickup !== false;
                             const isPickupRequested = Boolean(order.pickup_requested_at);
                             const isProcessing = processingOrderId === order.id;
-                            const canRequestPickup = isDititip && !isPickupRequested;
+                            const canRequestPickup = isDititip && hasPickup && !isPickupRequested;
 
                             return (
                                 <div
@@ -301,7 +299,10 @@ export default function OrdersIndex({ orders, filters }) {
                                             </div>
                                         )}
 
-                                        {/* Tab Dititip: Ajukan Pengambilan & Perpanjang */}
+                                        {/* 👇 DIUBAH: Tab Dititip - percabangan hasPickup dihapus.
+                                            "Ajukan Pengambilan" sekarang berlaku untuk SEMUA order
+                                            (pickup & non-pickup). Tombol "Selesaikan Pesanan" milik
+                                            customer dihapus total dari tab ini. */}
                                         {isDititip && (
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex gap-2">
@@ -320,26 +321,36 @@ export default function OrdersIndex({ orders, filters }) {
                                                         Detail Pesanan
                                                     </Link>
                                                 </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => router.get(`/app/orders/${order.id}/extend`)}
-                                                    className="w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
-                                                >
-                                                    Perpanjang Waktu Jasa
-                                                </button>
+                                                {/* CATATAN: tombol ini masih dibatasi hasPickup (tidak diubah -
+                                                    belum ada keputusan business rule terpisah soal Alur A/B &
+                                                    extendForm() yang mensyaratkan status='diproses'). Kemungkinan
+                                                    besar tombol ini saat ini selalu gagal (400) untuk order
+                                                    berstatus 'dititip' karena backend extendForm() belum
+                                                    mendukung status ini - lihat temuan section 7 & 9 di
+                                                    rangkuman project. Jangan diubah sebelum dikonfirmasi. */}
+                                                {hasPickup && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => router.get(`/app/orders/${order.id}/extend`)}
+                                                        className="w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                    >
+                                                        Perpanjang Waktu Jasa
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
 
-                                        {/* Tab Pengambilan Diajukan: Selesaikan */}
+                                        {/* 👇 DIUBAH: Tab Pengambilan Diajukan - tombol "Selesaikan
+                                            Pesanan" milik customer dihapus, diganti status disabled.
+                                            Yang menyelesaikan sekarang hanya Mitra lewat confirmPickup(). */}
                                         {isPengambilanDiajukan && (
                                             <div className="flex flex-col gap-2">
                                                 <button
                                                     type="button"
-                                                    onClick={() => setCompleteConfirmOrder(order)}
-                                                    disabled={isProcessing}
-                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                    disabled
+                                                    className="flex-1 rounded-lg border border-gray-300 bg-white py-2 text-center text-xs font-medium text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700"
                                                 >
-                                                    {isProcessing ? 'Memproses...' : 'Selesaikan Pesanan'}
+                                                    Menunggu konfirmasi mitra
                                                 </button>
                                                 <Link
                                                     href={`/app/orders/${order.id}`}
@@ -388,7 +399,8 @@ export default function OrdersIndex({ orders, filters }) {
                                         )}
 
                                         {/* Detail tetap tersedia saat pembayaran menunggu verifikasi atau order dibatalkan */}
-                                        {!isDititip && !isSelesai && !isBelumBayar && (
+                                        {!isDititip && !isPengambilanDiajukan && !isSelesai && !isBelumBayar
+                                            && !['pembayaran_diterima', 'diproses_mitra'].includes(order.status) && (
                                             <Link
                                                 href={`/app/orders/${order.id}`}
                                                 className="block w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
@@ -447,48 +459,9 @@ export default function OrdersIndex({ orders, filters }) {
                 </div>
             )}
 
-            {completeConfirmOrder && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
-                        <div className="flex items-start gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400">
-                                <CheckCircle2 size={19} />
-                            </div>
-                            <div>
-                                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
-                                    Selesaikan Pesanan?
-                                </h2>
-                                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                                    Pastikan barang sudah kamu terima dari mitra sebelum menyelesaikan pesanan ini.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="mt-4 rounded-xl bg-green-50 px-3 py-2.5 text-xs leading-relaxed text-green-800 dark:bg-green-950/30 dark:text-green-300">
-                            Setelah dikonfirmasi, pesanan akan berubah menjadi selesai dan tidak dapat dikembalikan ke status sebelumnya.
-                        </div>
-
-                        <div className="mt-5 flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setCompleteConfirmOrder(null)}
-                                disabled={processingOrderId === completeConfirmOrder.id}
-                                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/60"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => completeOrder(completeConfirmOrder)}
-                                disabled={processingOrderId === completeConfirmOrder.id}
-                                className="flex-1 rounded-xl bg-[#15803d] py-2.5 text-xs font-bold text-white transition hover:bg-green-700 disabled:opacity-60"
-                            >
-                                {processingOrderId === completeConfirmOrder.id ? 'Memproses...' : 'Ya, Selesaikan'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* 👇 DIHAPUS: modal completeConfirmOrder ("Selesaikan Pesanan?")
+                dihapus total. Customer tidak lagi bisa menyelesaikan order
+                sendiri - lihat catatan di completeOrder() di atas. */}
 
             <style>{`
                 .no-scrollbar {

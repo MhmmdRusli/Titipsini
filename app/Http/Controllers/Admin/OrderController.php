@@ -48,7 +48,7 @@ class OrderController extends Controller
                     // Label fase yang enak dibaca (mis. "Sedang Disewa") - dipakai
                     // frontend untuk menggantikan tulisan "diproses" yang generik
                     // selagi pesanan masih berjalan.
-                    'fase_label' => OrderFaseService::label($order->service_type, $order->fase),
+                    'fase_label' => OrderFaseService::label($order->service_type, $order->fase, (bool) $order->has_pickup),
                     // Denda keterlambatan (0 kalau tidak terlambat). Karena
                     // updateStatus() di bawah sudah mewajibkan fase === 'akhir'
                     // sebelum status bisa 'selesai', tanggal_selesai_aktual

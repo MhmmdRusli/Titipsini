@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mitra;
 use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Order;
+use App\Services\OrderFaseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -18,6 +19,11 @@ class OrderController extends Controller
     /**
      * Label fase yang ditampilkan ke user, beda-beda per kategori layanan
      * meskipun kode fase di database sama (menunggu/berjalan/akhir).
+     *
+     * CATATAN: sistem 'fase' ini HANYA relevan untuk order-order lama
+     * (peninggalan alur COD) yang statusnya masih 'diproses' dan kolom
+     * fase-nya sudah terisi. Order baru TIDAK PERNAH mengisi fase - lihat
+     * guard di updateFase() di bawah.
      */
     public const FASE_LABELS = [
         'barang' => [
@@ -102,8 +108,6 @@ class OrderController extends Controller
                 'id' => $order->id,
                 'order_number' => $order->order_code,
                 'customer_name' => $order->customer->name ?? '-',
-                // Prioritaskan alamat tersimpan yang dipilih customer karena
-                // lebih rinci daripada nama kota pada pesanan.
                 'address' => $order->address?->address ?? $order->pickup_address ?? $order->city ?? '-',
                 'address_notes' => $order->address?->notes,
                 'service_type' => $order->service_type,
@@ -116,15 +120,13 @@ class OrderController extends Controller
                 },
                 'duration' => $this->hitungDurasi($order),
                 'total_price' => (float) $order->total_price,
-                // Ulasan diberikan customer setelah pesanan selesai. Data ini
-                // dikirim ke kartu daftar pesanan agar mitra dapat langsung
-                // melihat penilaian tanpa harus membuka detail pesanan.
                 'rating' => $order->rating,
                 'review' => $order->review,
                 'status' => $order->status,
                 'fase' => $order->fase,
-                'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
+                'fase_label' => \App\Services\OrderFaseService::label($order->service_type, $order->fase, (bool) $order->has_pickup),
                 'pickup_requested_at' => optional($order->pickup_requested_at)->format('d M Y, H:i'),
+                'has_pickup' => (bool) $order->has_pickup,
             ];
         });
 
@@ -178,6 +180,7 @@ class OrderController extends Controller
                 'status' => $order->status,
                 'cancel_reason' => $order->cancel_reason,
                 'service_type' => $order->service_type,
+                'has_pickup' => (bool) $order->has_pickup,
                 'customer' => [
                     'name' => $order->customer->name ?? '-',
                     'phone' => $order->customer->phone ?? '-',
@@ -200,13 +203,12 @@ class OrderController extends Controller
                 'payment_verified_at' => optional($order->payment_verified_at)->format('d M Y, H:i'),
                 'pickup_requested_at' => optional($order->pickup_requested_at)->format('d M Y, H:i'),
 
-                // 👇 Properti Denda yang ditambahkan agar muncul di halaman Mitra
                 'denda' => (float) $order->denda,
                 'bukti_denda' => $order->bukti_denda ? Storage::disk('public')->url($order->bukti_denda) : null,
                 'status_denda' => $order->status_denda,
 
                 'fase' => $order->fase,
-                'fase_label' => self::FASE_LABELS[$order->service_type][$order->fase] ?? null,
+                'fase_label' => \App\Services\OrderFaseService::label($order->service_type, $order->fase, (bool) $order->has_pickup),
                 'next_fase_action_label' => $nextFaseAction,
                 'can_advance_fase' => $order->status === 'diproses'
                     && $nextFaseAction !== null
@@ -252,10 +254,27 @@ class OrderController extends Controller
         return back()->with('success', $isCash ? 'Pembayaran tunai berhasil dikonfirmasi.' : 'Pembayaran berhasil diverifikasi.');
     }
 
+    /**
+     * 👇 DIUBAH: ditambahkan guard "$order->fase === null" di awal.
+     *
+     * Sistem 'fase' (menunggu/berjalan/akhir) HANYA dipakai oleh order-order
+     * lama peninggalan alur COD (statusnya 'diproses', kolom fase sudah
+     * terisi sejak awal dibuat). Order baru TIDAK PERNAH mengisi fase sama
+     * sekali - mereka pakai alur status baru (dititip/pengambilan_diajukan/
+     * selesai) yang tidak melibatkan method ini.
+     *
+     * Tanpa guard ini, kalau order baru entah bagaimana sampai di sini
+     * (misal salah klik / URL dipanggil manual), dia akan lolos abort_unless
+     * status di bawah (karena statusnya bisa 'diproses_mitra'/'dititip') dan
+     * malah membuat kolom fase-nya keisi - padahal seharusnya tidak pernah.
+     * Ini juga mencegah tombol aksi fase muncul dobel dengan tombol alur
+     * baru (Ambil Pesanan / Sudah Dititipkan / dll) di halaman Mitra.
+     */
     public function updateFase(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
-        abort_unless($order->status === 'diproses', 400, 'Fase hanya bisa diubah selagi pesanan berstatus Diproses.');
+        abort_unless($order->fase !== null, 400, 'Pesanan ini menggunakan alur status baru dan tidak menggunakan sistem fase.');
+        abort_unless(in_array($order->status, ['diproses', 'diproses_mitra', 'dititip'], true), 400, 'Fase hanya bisa diubah selagi pesanan sedang diproses.');
 
         $fase = (string) $order->fase;
         $serviceType = (string) $order->service_type;
@@ -276,7 +295,7 @@ class OrderController extends Controller
             );
         }
 
-        if ($serviceType === 'barang' && $next === 'akhir') {
+        if ($order->has_pickup && $serviceType === 'barang' && $next === 'akhir') {
             abort_unless($order->pickup_requested_at, 400, 'Customer belum mengajukan pengambilan barang.');
         }
 
@@ -305,13 +324,24 @@ class OrderController extends Controller
             : 'Status pesanan berhasil diperbarui menjadi "'.$label.'".');
     }
 
+    /**
+     * 👇 DIUBAH: bypass status 'baru' dihapus. Order baru WAJIB lewat
+     * Finance dulu (status jadi 'pembayaran_diterima') sebelum Mitra bisa
+     * mengambil - baik dibayar via transfer/QRIS (lewat Finance\OrderController)
+     * maupun saldo (instant tapi tetap diset ke 'pembayaran_diterima', lihat
+     * Customer\OrderController::bayarSaldo()).
+     *
+     * Ini AMAN untuk 10 order lama COD: mereka semua sudah berstatus
+     * 'diproses' (bukan 'baru' lagi) sejak lama, jadi tidak akan pernah lagi
+     * menyentuh method ini sama sekali - guard lama untuk status 'baru'
+     * sudah tidak relevan buat mereka.
+     */
     public function ambilPesanan(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
-        abort_unless(in_array($order->status, ['baru', 'pembayaran_diterima'], true), 400, 'Pesanan ini sudah tidak bisa diambil.');
+        abort_unless($order->status === 'pembayaran_diterima', 400, 'Pesanan ini sudah tidak bisa diambil.');
 
-        $newStatus = $order->status === 'pembayaran_diterima' ? 'diproses_mitra' : 'diproses';
-        $order->update(['status' => $newStatus]);
+        $order->update(['status' => 'diproses_mitra']);
 
         Notifikasi::create([
             'user_id' => $order->customer_id,
@@ -349,25 +379,28 @@ class OrderController extends Controller
         return redirect()->route('mitra.orders.index')->with('success', 'Pesanan berhasil ditolak.');
     }
 
+    /**
+     * 👇 DIUBAH: disederhanakan total. Sekarang HANYA menerima status
+     * 'pengambilan_diajukan' - tidak ada lagi jalur langsung dari 'dititip'
+     * (baik untuk pickup maupun non-pickup, dan tidak ada lagi percabangan
+     * has_pickup). Satu-satunya cara order jadi 'selesai' sekarang:
+     * (1) customer ajukan pengembalian (requestPickup()) lalu Mitra
+     *     konfirmasi lewat method ini, atau
+     * (2) auto-complete oleh command orders:auto-complete saat batas waktu
+     *     (extend_end_date ?? end_date) habis tanpa pengajuan pengembalian.
+     */
     public function confirmPickup(Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
-        abort_unless($order->status === 'pengambilan_diajukan', 400, 'Pesanan ini belum dalam status pengambilan diajukan.');
-        abort_if($order->status === 'selesai', 400, 'Pesanan ini sudah selesai.');
+        abort_unless($order->status === 'pengambilan_diajukan', 400, 'Pesanan ini belum bisa diselesaikan.');
 
-        $order->update(['status' => 'selesai']);
-
-        if ($order->customer_id) {
-            Notifikasi::create([
-                'user_id' => $order->customer_id,
-                'order_id' => $order->id,
-                'type' => 'transaksi_masuk',
-                'judul' => 'Pesanan Telah Diserahkan',
-                'pesan' => 'Mitra telah menyelesaikan pesanan '.$order->order_code.'. Pesanan sudah bisa diselesaikan oleh customer.',
-            ]);
+        if (! $order->tanggal_selesai_aktual) {
+            $order->update(['tanggal_selesai_aktual' => now()]);
         }
 
-        return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil diserahkan.');
+        OrderFaseService::completeOrder($order);
+
+        return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil diselesaikan.');
     }
 
     public function tandaiDititip(Order $order)

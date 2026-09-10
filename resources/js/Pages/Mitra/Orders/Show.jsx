@@ -347,7 +347,7 @@ function ShowDiproses({ order }) {
                     </div>
                 </div>
 
-                {order.status !== 'selesai' && order.fase_label && (
+                {order.fase !== null && order.status !== 'selesai' && order.fase_label && (
                     <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
                         <div className="flex items-center justify-between">
                             <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -419,9 +419,9 @@ function ShowDiproses({ order }) {
 
                 {order.status === 'pengambilan_diajukan' && (
                     <div className="border-b border-green-200/70 pb-4 dark:border-green-900/40">
-                        <p className="mt-3 text-xs font-semibold text-gray-700 dark:text-gray-300">Serahkan Barang ke Customer</p>
+                        <p className="mt-3 text-xs font-semibold text-gray-700 dark:text-gray-300">Customer mengajukan pengembalian pesanan.</p>
                         <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                            Customer telah mengajukan pengambilan. Klik tombol di bawah jika barang sudah diserahkan.
+                            Klik tombol di bawah jika barang sudah diserahkan kepada customer.
                         </p>
                         <button
                             type="button"
@@ -430,7 +430,7 @@ function ShowDiproses({ order }) {
                             className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
                         >
                             <CheckCircle2 size={16} />
-                            {isConfirmingPickup ? 'Memproses...' : 'Barang Telah Diserahkan / Selesai'}
+                            {isConfirmingPickup ? 'Memproses...' : 'Tandai Selesai'}
                         </button>
                     </div>
                 )}

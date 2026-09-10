@@ -38,6 +38,29 @@ class OrderFaseService
         ],
     ];
 
+    public const FASE_LABELS_NO_PICKUP = [
+        'barang' => [
+            'menunggu' => 'Sedang Diproses',
+            'berjalan' => 'Sedang Diproses',
+            'akhir' => 'Selesai',
+        ],
+        'bangunan' => [
+            'menunggu' => 'Menunggu Konfirmasi',
+            'berjalan' => 'Sedang Disewa',
+            'akhir' => 'Sewa Berakhir',
+        ],
+        'kendaraan' => [
+            'menunggu' => 'Menunggu Konfirmasi',
+            'berjalan' => 'Sedang Dipakai',
+            'akhir' => 'Dikembalikan',
+        ],
+        'pindahan' => [
+            'menunggu' => 'Dijadwalkan',
+            'berjalan' => 'Proses Pindahan',
+            'akhir' => 'Selesai Pindahan',
+        ],
+    ];
+
     public const FASE_ACTION_LABELS = [
         'barang' => [
             'menunggu' => 'Tandai Sudah Dititip',
@@ -62,13 +85,17 @@ class OrderFaseService
         'berjalan' => 'akhir',
     ];
 
-    public static function label(?string $serviceType, ?string $fase): ?string
+    public static function label(?string $serviceType, ?string $fase, bool $hasPickup = true): ?string
     {
         if (! $serviceType || ! $fase) {
             return null;
         }
 
-        return self::FASE_LABELS[$serviceType][$fase] ?? null;
+        if ($hasPickup) {
+            return self::FASE_LABELS[$serviceType][$fase] ?? null;
+        }
+
+        return self::FASE_LABELS_NO_PICKUP[$serviceType][$fase] ?? null;
     }
 
     public static function nextActionLabel(?string $serviceType, ?string $fase): ?string

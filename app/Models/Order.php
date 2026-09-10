@@ -113,6 +113,12 @@ class Order extends Model
 
         ];
     }
+     protected static function booted(): void
+    {
+        static::saving(function (Order $order) {
+            $order->has_pickup = (bool) $order->is_pickup;
+        });
+    }
 
     public function customer(): BelongsTo
     {
