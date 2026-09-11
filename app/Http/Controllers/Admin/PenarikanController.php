@@ -52,16 +52,13 @@ class PenarikanController extends Controller
             // yang dipakai di Mitra\PenarikanController & Mitra\DashboardController)
             $saldoUser = $user->saldoMitra();
 
-            $saldoTersediaUntukPenarikanIni = $user->saldoMitra() + $jumlahPenarikan;
+            $saldoTersediaUntukPenarikanIni = $user->saldoMitra();
 
-   if ($saldoTersediaUntukPenarikanIni < $jumlahPenarikan) {
-       abort(422, "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")");
-   }
-            // TIDAK decrement kolom `saldo` di sini. Saldo dinamis otomatis
-            // "berkurang" begitu status Penarikan bukan 'ditolak' — termasuk
-            // saat masih 'pending', jadi begitu penarikan diajukan, saldo
-            // yang tampil di Dashboard Mitra sudah otomatis terpotong.
-            // Baris `decrement('saldo', ...)` LAMA sengaja dihapus.
+            if ($saldoTersediaUntukPenarikanIni < $jumlahPenarikan) {
+                abort(422, "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")");
+            }
+            // Saldo hanya berkurang setelah withdrawal disetujui oleh Finance.
+            // Pending withdrawals tidak mempengaruhi saldo mitra yang tersedia.
 
             SaldoMutasi::create([
                 'user_id' => $user->id,

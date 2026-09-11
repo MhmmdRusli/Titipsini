@@ -124,7 +124,7 @@ class PengaturanController extends Controller
 
             $jumlahPenarikan = (int) preg_replace('/[^0-9]/', '', (string) $penarikan->jumlah);
 
-            $saldoTersediaUntukPenarikanIni = $user->saldoMitra() + $jumlahPenarikan;
+            $saldoTersediaUntukPenarikanIni = $user->saldoMitra();
 
             if ($saldoTersediaUntukPenarikanIni < $jumlahPenarikan) {
                 abort(422, "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")");

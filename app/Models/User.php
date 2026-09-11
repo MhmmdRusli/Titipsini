@@ -243,10 +243,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $saldoBersihTransaksi + $totalDenda;
     }
 
-    protected function totalPenarikanMitra(): float
+     protected function totalPenarikanMitra(): float
     {
         return (float) \App\Models\Penarikan::where('user_id', $this->id)
-            ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal'])
+            ->where('status', 'selesai')
             ->sum('jumlah');
     }
 

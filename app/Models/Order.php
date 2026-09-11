@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Concerns\HasTrashMeta;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -313,5 +315,20 @@ class Order extends Model
     public function hargaPerpanjangan(string $tanggalKeluarBaru): float
     {
         return round($this->hargaHarianPerpanjangan() * $this->jumlahHariPerpanjangan($tanggalKeluarBaru));
+    }
+
+    public function kondisiAwal(): HasOne
+    {
+        return $this->hasOne(KondisiAwal::class);
+    }
+
+    public function claims(): HasMany
+    {
+        return $this->hasMany(Claim::class);
+    }
+
+    public function activeClaim(): HasOne
+    {
+        return $this->hasOne(Claim::class)->whereNotIn('status', ['refund_berhasil', 'ditolak']);
     }
 }

@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { 
     ArrowLeft, MapPin, Home, User, Package, XCircle, 
     CheckCircle2, Loader2, Image, ShieldCheck, ExternalLink, 
-    HandCoins, Clock, ArrowRightCircle, AlertTriangle 
+    HandCoins, Clock, ArrowRightCircle, AlertTriangle,
+    Upload, X, Camera, FileImage, Trash2
 } from 'lucide-react';
 import MitraLayout from '@/Layouts/MitraLayout';
 
@@ -131,9 +132,10 @@ function ShowBaru({ order }) {
                             {isRejecting ? 'Memproses...' : 'Selanjutnya'}
                         </button>
                     </div>
-                </div>
-            </MitraLayout>
-        );
+</div>
+        </MitraLayout>
+    );
+
     }
 
     return (
@@ -265,6 +267,11 @@ function ShowDiproses({ order }) {
     const [isAdvancingFase, setIsAdvancingFase] = useState(false);
     const [isConfirmingPickup, setIsConfirmingPickup] = useState(false);
     const [isMarkingAsPickedUp, setIsMarkingAsPickedUp] = useState(false);
+    const [showKondisiAwalModal, setShowKondisiAwalModal] = useState(false);
+    const [kondisiAwalFiles, setKondisiAwalFiles] = useState([]);
+    const [kondisiAwalPreviews, setKondisiAwalPreviews] = useState([]);
+    const [kondisiAwalCatatan, setKondisiAwalCatatan] = useState('');
+    const [isSubmittingKondisiAwal, setIsSubmittingKondisiAwal] = useState(false);
 
     const statusInfo = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.diproses;
     const StatusIcon = statusInfo.icon;
@@ -308,13 +315,166 @@ function ShowDiproses({ order }) {
         );
     }
 
-    function tandaiDititip() {
-        if (!confirm('Tandai pesanan ini sebagai sudah dititip?')) return;
-        setIsMarkingAsPickedUp(true);
-        router.patch(
+    function openKondisiAwalModal() {
+        setShowKondisiAwalModal(true);
+    }
+
+    function closeKondisiAwalModal() {
+        setShowKondisiAwalModal(false);
+        setKondisiAwalFiles([]);
+        setKondisiAwalPreviews([]);
+        setKondisiAwalCatatan('');
+    }
+
+    function handleKondisiAwalFileChange(e) {
+        const files = Array.from(e.target.files);
+        const remainingSlots = 5 - kondisiAwalFiles.length;
+        const newFiles = files.slice(0, remainingSlots);
+        
+        newFiles.forEach(file => {
+            if (file.type.startsWith('image/') && file.size <= 4 * 1024 * 1024) {
+                setKondisiAwalFiles(prev => [...prev, file]);
+                setKondisiAwalPreviews(prev => [...prev, URL.createObjectURL(file)]);
+            }
+        });
+    }
+
+    function removeKondisiAwalFile(index) {
+        URL.revokeObjectURL(kondisiAwalPreviews[index]);
+        setKondisiAwalFiles(prev => prev.filter((_, i) => i !== index));
+        setKondisiAwalPreviews(prev => prev.filter((_, i) => i !== index));
+    }
+
+    function submitKondisiAwal() {
+        if (kondisiAwalFiles.length === 0) {
+            alert('Minimal 1 foto harus diunggah.');
+            return;
+        }
+
+        setIsSubmittingKondisiAwal(true);
+        const formData = new FormData();
+        kondisiAwalFiles.forEach(file => formData.append('foto[]', file));
+        if (kondisiAwalCatatan) {
+            formData.append('catatan', kondisiAwalCatatan);
+        }
+
+        const formData = new FormData();
+        kondisiAwalFiles.forEach(file => formData.append('foto[]', file));
+        if (kondisiAwalCatatan) {
+            formData.append('catatan', kondisiAwalCatatan);
+        }
+        formData.append('_method', 'patch');
+
+        router.post(
             `/mitra/pesanan/${order.id}/tandai-dititip`,
-            {},
-            { preserveScroll: true, onFinish: () => setIsMarkingAsPickedUp(false) }
+            formData,
+            {
+                forceFormData: true,
+                preserveScroll: true,
+                onFinish: () => setIsSubmittingKondisiAwal(false),
+                onSuccess: () => {
+                    closeKondisiAwalModal();
+                },
+            }
+        );
+    }
+
+    if (showKondisiAwalModal) {
+        return (
+            <MitraLayout title="Dokumentasi Kondisi Barang">
+                <Head title={`Dokumentasi Kondisi Barang - ${order.order_number}`} />
+
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-3 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800 max-h-[85vh] flex flex-col">
+                        <div className="flex items-center justify-between border-b border-gray-100 px-3 py-3 dark:border-gray-700">
+                            <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Dokumentasi Kondisi Barang</h2>
+                            <button
+                                type="button"
+                                onClick={closeKondisiAwalModal}
+                                className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-3 py-2.5 space-y-2.5">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                Upload minimal 1 foto kondisi barang saat diterima. Bisa menambahkan catatan kondisi.
+                            </p>
+
+                            <div className="space-y-2.5">
+                                <label className="flex flex-col gap-1.5 cursor-pointer">
+                                    <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">Foto Barang (minimal 1, maksimal 5)</span>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {kondisiAwalPreviews.map((preview, index) => (
+                                            <div key={index} className="relative group">
+                                                <img src={preview} alt={`Preview ${index + 1}`} className="h-20 w-20 object-cover rounded-md" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeKondisiAwalFile(index)}
+                                                    className="absolute -top-1.5 -right-1.5 rounded-full bg-red-500 text-white p-0.5 opacity-0 group-hover:opacity-100 transition"
+                                                >
+                                                    <Trash2 size={10} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {kondisiAwalFiles.length < 5 && (
+                                            <label className="flex h-20 w-20 items-center justify-center rounded-md border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#15803d] hover:bg-green-50 dark:border-gray-700 dark:hover:border-green-600 dark:hover:bg-green-950/30 transition">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleKondisiAwalFileChange}
+                                                    multiple
+                                                    className="hidden"
+                                                />
+                                                <div className="flex flex-col items-center gap-0.5 text-gray-400">
+                                                    <Camera size={18} />
+                                                    <span className="text-[10px]">Tambah</span>
+                                                </div>
+                                            </label>
+                                        )}
+                                    </div>
+                                    {kondisiAwalFiles.length === 0 && (
+                                        <p className="text-[11px] text-red-500">Minimal 1 foto wajib diunggah</p>
+                                    )}
+                                </label>
+
+                                <label className="flex flex-col gap-1.5">
+                                    <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">Catatan Kondisi (Opsional)</span>
+                                    <textarea
+                                        value={kondisiAwalCatatan}
+                                        onChange={(e) => setKondisiAwalCatatan(e.target.value)}
+                                        rows={2}
+                                        placeholder="Catatan kondisi barang..."
+                                        className="w-full rounded-lg border border-gray-200 p-2 text-xs text-gray-800 placeholder-gray-400 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="border-t border-gray-100 px-3 py-2.5 dark:border-gray-700">
+                            <div className="flex gap-2 justify-end">
+                                <button
+                                    type="button"
+                                    onClick={closeKondisiAwalModal}
+                                    disabled={isSubmittingKondisiAwal}
+                                    className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/60 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={submitKondisiAwal}
+                                    disabled={isSubmittingKondisiAwal || kondisiAwalFiles.length === 0}
+                                    className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700 transition"
+                                >
+                                    {isSubmittingKondisiAwal ? 'Menyimpan...' : 'Simpan & Tandai Dititip'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </MitraLayout>
         );
     }
 
@@ -407,12 +567,12 @@ function ShowDiproses({ order }) {
                         </p>
                         <button
                             type="button"
-                            onClick={tandaiDititip}
-                            disabled={isMarkingAsPickedUp}
+                            onClick={openKondisiAwalModal}
+                            disabled={isMarkingAsPickedUp || isSubmittingKondisiAwal}
                             className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
                         >
                             <CheckCircle2 size={16} />
-                            {isMarkingAsPickedUp ? 'Memproses...' : 'Tandai Sudah Dititip'}
+                            {isSubmittingKondisiAwal ? 'Menyimpan Dokumentasi...' : 'Tandai Sudah Dititip'}
                         </button>
                     </div>
                 )}

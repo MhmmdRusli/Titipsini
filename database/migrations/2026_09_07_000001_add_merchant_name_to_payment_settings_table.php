@@ -9,7 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('payment_settings', function (Blueprint $table) {
-            $table->string('merchant_name')->nullable()->after('qris_image');
+            if (! Schema::hasColumn('payment_settings', 'merchant_name')) {
+                $table->string('merchant_name')->nullable()->after('qris_image');
+            }
         });
     }
 

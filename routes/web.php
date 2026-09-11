@@ -25,6 +25,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\AddressController;
 use App\Http\Controllers\Customer\BantuanController;
 use App\Http\Controllers\Customer\BeritaController;
+use App\Http\Controllers\Customer\ClaimController as CustomerClaimController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\LengkapiDataController;
 use App\Http\Controllers\Customer\NotifikasiController;
@@ -259,6 +260,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::patch('{report}/reject', [\App\Http\Controllers\Admin\ValidasiLaporanController::class, 'reject'])->name('reject');
     });
 
+    // Manajemen Klaim/Refund - admin pemeriksaan klaim customer
+    Route::prefix('klaim')->name('klaim.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\ClaimController::class, 'index'])->name('index');
+        Route::get('{claim}', [\App\Http\Controllers\Admin\ClaimController::class, 'show'])->name('show');
+        Route::post('{claim}/mulai-pemeriksaan', [\App\Http\Controllers\Admin\ClaimController::class, 'mulaiPemeriksaan'])->name('mulaiPemeriksaan');
+        Route::patch('{claim}/setujui', [\App\Http\Controllers\Admin\ClaimController::class, 'setujui'])->name('setujui');
+        Route::patch('{claim}/tolak', [\App\Http\Controllers\Admin\ClaimController::class, 'tolak'])->name('tolak');
+        Route::patch('{claim}/sengketa', [\App\Http\Controllers\Admin\ClaimController::class, 'escalateSengketa'])->name('sengketa');
+    });
+
     Route::get('/pengguna', [AdminUserController::class, 'index'])->name('pengguna.index');
     Route::get('/pengguna/{user}', [AdminUserController::class, 'show'])->name('pengguna.show');
     Route::patch('/pengguna/{user}/status', [AdminUserController::class, 'updateStatus'])->name('pengguna.updateStatus');
@@ -482,6 +493,11 @@ Route::middleware(['auth', 'role:customer'])->prefix('app')->name('customer.')->
     Route::get('/orders/{order}/extend/invoice', [CustomerOrderController::class, 'extendInvoice'])->name('orders.extend.invoice');
     Route::post('/orders/{order}/extend/bayar-saldo', [CustomerOrderController::class, 'extendBayarSaldo'])->name('orders.extend.bayarSaldo');
     Route::post('/orders/{order}/extend/upload-bukti', [CustomerOrderController::class, 'extendUploadBukti'])->name('orders.extend.uploadBukti');
+
+    // Klaim/Refund routes
+    Route::get('/orders/{order}/klaim', [CustomerClaimController::class, 'create'])->name('orders.klaim.create');
+    Route::post('/orders/{order}/klaim', [CustomerClaimController::class, 'store'])->name('orders.klaim.store');
+    Route::get('/klaim/{claim}', [CustomerClaimController::class, 'show'])->name('klaim.show');
 
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::patch('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');

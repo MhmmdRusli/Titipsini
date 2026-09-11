@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mitra;
 
 use App\Http\Controllers\Controller;
+use App\Models\KondisiAwal;
 use App\Models\Notifikasi;
 use App\Models\Order;
 use App\Services\OrderFaseService;
@@ -403,7 +404,7 @@ class OrderController extends Controller
         return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil diselesaikan.');
     }
 
-    public function tandaiDititip(Order $order)
+    public function tandaiDititip(Request $request, Order $order)
     {
         abort_unless($order->partner_id === Auth::id(), 403);
 
@@ -413,9 +414,113 @@ class OrderController extends Controller
             abort(400, 'Pesanan ini belum bisa ditandai sudah dititip.');
         }
 
-        $order->update(['status' => 'dititip']);
+        // Jika request berisi dokumentasi (dari modal), simpan dulu
+        if ($request->has('foto_urls') || $request->hasFile('foto')) {
+            $validated = $request->validate([
+                'foto' => ['required', 'array', 'min:1'],
+                'foto.*' => ['image', 'mimes:jpeg,png,jpg', 'max:4096'],
+                'catatan' => ['nullable', 'string', 'max:1000'],
+            ]);
 
-        return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Pesanan berhasil ditandai sudah dititip.');
+            $fotoUrls = [];
+            if ($request->hasFile('foto')) {
+                foreach ($request->file('foto') as $file) {
+                    $path = $file->store('kondisi-awal', 'public');
+                    $fotoUrls[] = Storage::url($path);
+                }
+            } elseif ($request->input('foto_urls')) {
+                $fotoUrls = $request->input('foto_urls');
+            }
+
+            if (empty($fotoUrls)) {
+                return back()->withErrors(['foto' => 'Minimal 1 foto harus diunggah.']);
+            }
+
+            // Simpan dokumentasi kondisi awal
+            KondisiAwal::create([
+                'order_id' => $order->id,
+                'mitra_id' => Auth::id(),
+                'foto_urls' => $fotoUrls,
+                'catatan' => $validated['catatan'] ?? null,
+                'dokumentasi_at' => now(),
+            ]);
+
+            // Baru update status setelah dokumentasi berhasil
+            $order->update(['status' => 'dititip']);
+
+            Notifikasi::create([
+                'user_id' => $order->customer_id,
+                'order_id' => $order->id,
+                'type' => 'transaksi_masuk',
+                'judul' => 'Barang Sudah Dititip',
+                'pesan' => 'Barang untuk pesanan '.$order->order_code.' sudah diterima dan dititipkan oleh mitra.',
+            ]);
+
+            return redirect()->route('mitra.orders.show', $order->id)->with('success', 'Dokumentasi kondisi awal tersimpan. Pesanan berhasil ditandai sudah dititip.');
+        }
+
+        // Jika tidak ada dokumentasi, return view dengan data untuk modal
+        return Inertia::render('Mitra/Orders/Show', [
+            'order' => $this->serializeOrderForShow($order),
+            'showKondisiAwalModal' => true,
+        ]);
+    }
+
+    private function serializeOrderForShow(Order $order): array
+    {
+        $order->load(['customer', 'address']);
+        
+        $subtotal = $order->subtotal > 0 ? $order->subtotal : $order->total_price;
+        $discount = $order->discount ?? 0;
+        $pickupFee = $order->pickup_fee ?? 0;
+
+        $nextFaseAction = self::FASE_ACTION_LABELS[$order->service_type][$order->fase] ?? null;
+
+        $paymentBelumVerified = $order->fase === 'menunggu' && $order->payment_verified_at === null;
+
+        return [
+            'id' => $order->id,
+            'order_number' => $order->order_code,
+            'status' => $order->status,
+            'cancel_reason' => $order->cancel_reason,
+            'service_type' => $order->service_type,
+            'has_pickup' => (bool) $order->has_pickup,
+            'customer' => [
+                'name' => $order->customer->name ?? '-',
+                'phone' => $order->customer->phone ?? '-',
+                'code' => $order->customer?->customer_code,
+            ],
+            'pickup_address' => $order->pickup_address,
+            'dropoff_address' => $order->dropoff_address,
+            'address_notes' => $order->address?->notes,
+            'item_description' => $order->item_name,
+            'duration' => $this->hitungDurasi($order),
+            'pickup_status' => $order->is_pickup ? 'Dijemput oleh mitra' : 'Diantar sendiri oleh customer',
+            'jam_pickup' => $order->jam_pickup ? Carbon::parse($order->jam_pickup)->format('H:i') : null,
+            'subtotal' => (float) $subtotal,
+            'discount' => (float) $discount,
+            'pickup_fee' => (float) $pickupFee,
+            'total' => (float) $order->total_price,
+            'created_at' => optional($order->created_at)->format('d M Y, H:i'),
+            'payment_method' => $order->payment_method,
+            'payment_receipt' => $order->payment_receipt ? Storage::disk('public')->url($order->payment_receipt) : null,
+            'payment_verified_at' => optional($order->payment_verified_at)->format('d M Y, H:i'),
+            'pickup_requested_at' => optional($order->pickup_requested_at)->format('d M Y, H:i'),
+            'denda' => (float) $order->denda,
+            'bukti_denda' => $order->bukti_denda ? Storage::disk('public')->url($order->bukti_denda) : null,
+            'status_denda' => $order->status_denda,
+            'fase' => $order->fase,
+            'fase_label' => \App\Services\OrderFaseService::label($order->service_type, $order->fase, (bool) $order->has_pickup),
+            'next_fase_action_label' => $nextFaseAction,
+            'can_advance_fase' => $order->status === 'diproses'
+                && $nextFaseAction !== null
+                && ! ($order->service_type === 'barang' && $order->fase === 'berjalan' && ! $order->pickup_requested_at)
+                && ! $paymentBelumVerified,
+            'advance_fase_blocked_reason' => $paymentBelumVerified
+                ? 'Verifikasi pembayaran terlebih dahulu sebelum bisa menandai status ini.'
+                : null,
+            'can_accept' => $order->status === 'baru',
+        ];
     }
 
     private function hitungDurasi(Order $order): ?string
