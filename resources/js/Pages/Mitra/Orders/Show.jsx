@@ -136,106 +136,7 @@ function ShowBaru({ order }) {
         </MitraLayout>
     );
 
-    // Modal Dokumentasi Kondisi Awal
-    if (showKondisiAwalModal) {
-        return (
-            <MitraLayout title="Dokumentasi Kondisi Barang">
-                <Head title={`Dokumentasi Kondisi Barang - ${order.order_number}`} />
-
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-2xl rounded-2xl border border-gray-100 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800 max-h-[90vh] flex flex-col">
-                        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-700">
-                            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Dokumentasi Kondisi Barang</h2>
-                            <button
-                                type="button"
-                                onClick={closeKondisiAwalModal}
-                                className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition"
-                            >
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Upload minimal 1 foto kondisi barang saat diterima. Bisa menambahkan catatan kondisi.
-                            </p>
-
-                            <div className="space-y-3">
-                                <label className="flex flex-col gap-2 cursor-pointer">
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Foto Barang (minimal 1, maksimal 5)</span>
-                                    <div className="flex flex-wrap gap-2">
-                                        {kondisiAwalPreviews.map((preview, index) => (
-                                            <div key={index} className="relative group">
-                                                <img src={preview} alt={`Preview ${index + 1}`} className="h-24 w-24 object-cover rounded-lg" />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeKondisiAwalFile(index)}
-                                                    className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white p-1 opacity-0 group-hover:opacity-100 transition"
-                                                >
-                                                    <Trash2 size={12} />
-                                                </button>
-                                            </div>
-                                        ))}
-                                        {kondisiAwalFiles.length < 5 && (
-                                            <label className="flex h-24 w-24 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#15803d] hover:bg-green-50 dark:border-gray-700 dark:hover:border-green-600 dark:hover:bg-green-950/30 transition">
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleKondisiAwalFileChange}
-                                                    multiple
-                                                    className="hidden"
-                                                />
-                                                <div className="flex flex-col items-center gap-1 text-gray-400">
-                                                    <Camera size={24} />
-                                                    <span className="text-xs">Tambah Foto</span>
-                                                </div>
-                                            </label>
-                                        )}
-                                    </div>
-                                    {kondisiAwalFiles.length === 0 && (
-                                        <p className="text-xs text-red-500">Minimal 1 foto wajib diunggah</p>
-                                    )}
-                                </label>
-
-                                <label className="flex flex-col gap-2">
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Catatan Kondisi (Opsional)</span>
-                                    <textarea
-                                        value={kondisiAwalCatatan}
-                                        onChange={(e) => setKondisiAwalCatatan(e.target.value)}
-                                        rows={3}
-                                        placeholder="Tulis catatan kondisi barang di sini (mis: ada goresan di sudut, kondisi baik, dll.)"
-                                        className="w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
-                                    />
-                                </label>
-                            </div>
-                        </div>
-
-                        <div className="border-t border-gray-100 px-5 py-4 dark:border-gray-700">
-                            <div className="flex gap-3 justify-end">
-                                <button
-                                    type="button"
-                                    onClick={closeKondisiAwalModal}
-                                    disabled={isSubmittingKondisiAwal}
-                                    className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/60 transition"
-                                >
-                                    Batal
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={submitKondisiAwal}
-                                    disabled={isSubmittingKondisiAwal || kondisiAwalFiles.length === 0}
-                                    className="flex-1 rounded-xl bg-[#15803d] py-2.5 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700 transition"
-                                >
-                                    {isSubmittingKondisiAwal ? 'Menyimpan...' : 'Simpan & Tandai Dititip'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </MitraLayout>
-        );
     }
-}
 
     return (
         <MitraLayout title="Rincian Order">
@@ -457,7 +358,14 @@ function ShowDiproses({ order }) {
             formData.append('catatan', kondisiAwalCatatan);
         }
 
-        router.patch(
+        const formData = new FormData();
+        kondisiAwalFiles.forEach(file => formData.append('foto[]', file));
+        if (kondisiAwalCatatan) {
+            formData.append('catatan', kondisiAwalCatatan);
+        }
+        formData.append('_method', 'patch');
+
+        router.post(
             `/mitra/pesanan/${order.id}/tandai-dititip`,
             formData,
             {
@@ -468,6 +376,105 @@ function ShowDiproses({ order }) {
                     closeKondisiAwalModal();
                 },
             }
+        );
+    }
+
+    if (showKondisiAwalModal) {
+        return (
+            <MitraLayout title="Dokumentasi Kondisi Barang">
+                <Head title={`Dokumentasi Kondisi Barang - ${order.order_number}`} />
+
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-3 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800 max-h-[85vh] flex flex-col">
+                        <div className="flex items-center justify-between border-b border-gray-100 px-3 py-3 dark:border-gray-700">
+                            <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">Dokumentasi Kondisi Barang</h2>
+                            <button
+                                type="button"
+                                onClick={closeKondisiAwalModal}
+                                className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-3 py-2.5 space-y-2.5">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                Upload minimal 1 foto kondisi barang saat diterima. Bisa menambahkan catatan kondisi.
+                            </p>
+
+                            <div className="space-y-2.5">
+                                <label className="flex flex-col gap-1.5 cursor-pointer">
+                                    <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">Foto Barang (minimal 1, maksimal 5)</span>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {kondisiAwalPreviews.map((preview, index) => (
+                                            <div key={index} className="relative group">
+                                                <img src={preview} alt={`Preview ${index + 1}`} className="h-20 w-20 object-cover rounded-md" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeKondisiAwalFile(index)}
+                                                    className="absolute -top-1.5 -right-1.5 rounded-full bg-red-500 text-white p-0.5 opacity-0 group-hover:opacity-100 transition"
+                                                >
+                                                    <Trash2 size={10} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {kondisiAwalFiles.length < 5 && (
+                                            <label className="flex h-20 w-20 items-center justify-center rounded-md border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#15803d] hover:bg-green-50 dark:border-gray-700 dark:hover:border-green-600 dark:hover:bg-green-950/30 transition">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleKondisiAwalFileChange}
+                                                    multiple
+                                                    className="hidden"
+                                                />
+                                                <div className="flex flex-col items-center gap-0.5 text-gray-400">
+                                                    <Camera size={18} />
+                                                    <span className="text-[10px]">Tambah</span>
+                                                </div>
+                                            </label>
+                                        )}
+                                    </div>
+                                    {kondisiAwalFiles.length === 0 && (
+                                        <p className="text-[11px] text-red-500">Minimal 1 foto wajib diunggah</p>
+                                    )}
+                                </label>
+
+                                <label className="flex flex-col gap-1.5">
+                                    <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">Catatan Kondisi (Opsional)</span>
+                                    <textarea
+                                        value={kondisiAwalCatatan}
+                                        onChange={(e) => setKondisiAwalCatatan(e.target.value)}
+                                        rows={2}
+                                        placeholder="Catatan kondisi barang..."
+                                        className="w-full rounded-lg border border-gray-200 p-2 text-xs text-gray-800 placeholder-gray-400 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="border-t border-gray-100 px-3 py-2.5 dark:border-gray-700">
+                            <div className="flex gap-2 justify-end">
+                                <button
+                                    type="button"
+                                    onClick={closeKondisiAwalModal}
+                                    disabled={isSubmittingKondisiAwal}
+                                    className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700/60 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={submitKondisiAwal}
+                                    disabled={isSubmittingKondisiAwal || kondisiAwalFiles.length === 0}
+                                    className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700 transition"
+                                >
+                                    {isSubmittingKondisiAwal ? 'Menyimpan...' : 'Simpan & Tandai Dititip'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </MitraLayout>
         );
     }
 

@@ -186,7 +186,7 @@ export default function AdminLayout({ children, title }) {
             <aside className="w-64 shrink-0 bg-[#0d5235] dark:bg-[#093221] text-gray-100 flex flex-col border-r border-[#0a422a] dark:border-gray-800 shadow-md h-full transition-colors">
                 <div className="px-5 py-6 border-b border-white/10 flex flex-col items-center text-center shrink-0">
                     <img
-                        src="/images/admin-titipsini.png"
+                        src="/images/logo-titipsini.png"
                         alt="Logo"
                         className="h-24 w-auto object-contain mb-2 drop-shadow-sm"
                     />

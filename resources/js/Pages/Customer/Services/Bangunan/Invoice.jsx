@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Building2, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 function formatRupiah(value) {
@@ -42,12 +42,14 @@ export default function InvoiceBangunan({ order }) {
                 <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-xl shadow-gray-900/5 dark:border-gray-800 dark:bg-gray-900">
                     {/* Header */}
                     <div className="flex items-start justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
-                        <div className="flex items-center gap-1.5">
-                            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#15803d] text-white dark:bg-[#22c55e]">
-                                <Building2 size={14} />
-                            </span>
+                        <div className="flex items-center gap-2">
+                            <img
+                                src="/images/logo-titipsini.png"
+                                alt="Titipsini"
+                                className="h-8 w-8 object-contain"
+                            />
                             <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">
-                                Titipsini<span className="text-[#15803d] dark:text-[#4ade80]">•</span>Com
+                                Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                             </p>
                         </div>
                         <div className="text-right">
