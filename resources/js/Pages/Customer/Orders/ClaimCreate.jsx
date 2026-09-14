@@ -106,7 +106,7 @@ export default function ClaimCreate({ order, kondisiAwal }) {
                     </div>
                 </div>
 
-                {/* Kondisi Awal Reference */}
+               
                 {kondisiAwal && (
                     <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-950/30">
                         <div className="flex items-center gap-2 text-blue-800 dark:text-blue-300">
