@@ -78,7 +78,7 @@ class ValidasiLaporanController extends Controller
         abort_unless($report->category === 'kerugian', 404,
             'Halaman validasi khusus laporan Kerugian / Refund.');
 
-        $report->load(['order.customer', 'order.partner', 'order.service', 'adminApprover', 'reviewer']);
+        $report->load(['order.customer', 'order.partner', 'order.service', 'order.kondisiAwal', 'adminApprover', 'reviewer']);
 
         return Inertia::render('Admin/LaporanValidasi/Show', [
             'report' => $this->serialize($report, withOrder: true),
@@ -210,6 +210,13 @@ class ValidasiLaporanController extends Controller
                 'refunded_at' => $order->refunded_at?->format('d M Y H:i'),
                 'sudah'      => $order->sudahDirefund(),
             ];
+
+            $kondisiAwal = $order->kondisiAwal;
+            $base['kondisi_awal'] = $kondisiAwal ? [
+                'foto_urls' => $kondisiAwal->foto_urls,
+                'catatan'   => $kondisiAwal->catatan,
+                'dokumentasi_at' => $kondisiAwal->dokumentasi_at?->format('d M Y H:i'),
+            ] : null;
         }
 
         return $base;

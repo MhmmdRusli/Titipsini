@@ -357,12 +357,6 @@ function ShowDiproses({ order }) {
         if (kondisiAwalCatatan) {
             formData.append('catatan', kondisiAwalCatatan);
         }
-
-        const formData = new FormData();
-        kondisiAwalFiles.forEach(file => formData.append('foto[]', file));
-        if (kondisiAwalCatatan) {
-            formData.append('catatan', kondisiAwalCatatan);
-        }
         formData.append('_method', 'patch');
 
         router.post(

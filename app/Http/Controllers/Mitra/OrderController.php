@@ -84,12 +84,14 @@ class OrderController extends Controller
 
         if ($tab === 'baru') {
             // Alur QRIS: Finance sudah verifikasi → status 'pembayaran_diterima',
-            // lalu mitra ambil → 'diproses_mitra' / 'dikirim'.
+            // lalu mitra ambil → 'diproses_mitra' / 'dititip' / 'pengambilan_diajukan'.
             // Backward compatibility: tetap include 'baru' dan 'diproses'
             // untuk data lama yang belum melalui verifikasi Finance.
             $query->whereIn('status', [
                 'pembayaran_diterima',
                 'diproses_mitra',
+                'dititip',
+                'pengambilan_diajukan',
                 'dikirim',
                 'baru',
                 'diproses',
@@ -136,6 +138,8 @@ class OrderController extends Controller
                 ->whereIn('status', [
                     'pembayaran_diterima',
                     'diproses_mitra',
+                    'dititip',
+                    'pengambilan_diajukan',
                     'dikirim',
                     'baru',
                     'diproses',

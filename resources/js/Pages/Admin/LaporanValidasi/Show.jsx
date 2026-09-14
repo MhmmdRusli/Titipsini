@@ -257,23 +257,69 @@ export default function Show({ report }) {
                                 </p>
                             </div>
 
-                            <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                                    Bukti Foto
+                            <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-[#111827]">
+                                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
+                                    Perbandingan Bukti Foto
                                 </p>
-                                {report.evidence_url ? (
-                                    <a
-                                        href={report.evidence_url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="mt-1 inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-gray-700 dark:bg-gray-900/40 dark:text-emerald-400"
-                                    >
-                                        <ExternalLink size={14} />
-                                        Lihat bukti foto
-                                    </a>
-                                ) : (
-                                    <p className="mt-1 text-xs text-gray-400">Tidak ada bukti.</p>
-                                )}
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    {/* Foto Customer */}
+                                    <div>
+                                        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                            Foto Customer
+                                        </p>
+                                        {report.evidence_url ? (
+                                            <a
+                                                href={report.evidence_url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700"
+                                            >
+                                                <img
+                                                    src={report.evidence_url}
+                                                    alt="Bukti Customer"
+                                                    className="h-full w-full object-cover"
+                                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                                />
+                                            </a>
+                                        ) : (
+                                            <p className="text-xs text-gray-400 italic">Tidak ada bukti.</p>
+                                        )}
+                                    </div>
+
+                                    {/* Foto Mitra (Kondisi Awal) */}
+                                    <div>
+                                        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                                            Foto Mitra (Kondisi Awal)
+                                        </p>
+                                        {report.kondisi_awal?.foto_urls?.length ? (
+                                            <div className="grid grid-cols-2 gap-1.5">
+                                                {report.kondisi_awal.foto_urls.map((url, i) => (
+                                                    <a
+                                                        key={i}
+                                                        href={url}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="block overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700"
+                                                    >
+                                                        <img
+                                                            src={url}
+                                                            alt={`Mitra ${i + 1}`}
+                                                            className="h-full w-full object-cover"
+                                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                                        />
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-gray-400 italic">Mitra belum mengirim dokumentasi.</p>
+                                        )}
+                                        {report.kondisi_awal?.catatan && (
+                                            <p className="mt-2 text-[10px] text-gray-500 dark:text-gray-400">
+                                                Catatan: {report.kondisi_awal.catatan}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
 
                             {report.admin_approval_note && (
