@@ -6,12 +6,7 @@ import {
 } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
-/**
- * Tampilan status di baris "Status" paling atas invoice.
- * Teks & warna disamakan dengan 4 varian invoice fisik yang dipakai
- * sebagai acuan desain (Menunggu Pembayaran / Sedang di titipkan /
- * Pesanan Selesai / Pesanan di batalkan).
- */
+
 const STATUS_CONFIG = {
     baru: {
         label: 'Menunggu Pembayaran',
