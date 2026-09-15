@@ -20,9 +20,11 @@ class AuthenticatedSessionController extends Controller
     {
         $request->validate([
             'identifier' => ['required', 'string'],
+
             'password' => ['required'],
         ]);
 
+ 
         $field = filter_var($request->identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
 
         $credentials = [
@@ -38,13 +40,18 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        if ($user->role === 'admin') {
+
+        // Admin tidak boleh login lewat halaman ini, hanya lewat /admin/login
+        if ($user->role === 'admin' || $user->role === 'finance' || $user->role === 'super_admin') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return back()->withErrors([
+
                 'identifier' => 'Akun admin harus login melalui halaman khusus admin.',
+
+     
             ])->onlyInput('identifier');
         }
 

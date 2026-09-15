@@ -2,6 +2,8 @@ import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { CheckCircle2, ChevronLeft, Eye, EyeOff, Mail } from 'lucide-react';
 
+
+
 /**
  * Halaman login tunggal untuk Customer dan Mitra.
  *
@@ -26,8 +28,9 @@ export default function Login() {
         post('/login');
     };
 
+    const isEmail = data.identifier.includes('@');
+
     return (
-        // Backdrop abu-abu di layar lebar (desktop)
         <div className="min-h-dvh bg-gray-100 sm:flex sm:items-center sm:justify-center sm:py-6">
             {/* Bodi Aplikasi Mobile */}
             <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-white sm:min-h-[850px] sm:shadow-xl">
@@ -38,9 +41,11 @@ export default function Login() {
                     className="flex items-center justify-between border-b border-gray-100 px-4 pb-4"
                     style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
                 >
+
                     <Link
                         href="/"
                         className="flex items-center justify-center rounded-lg p-1 text-gray-800 hover:opacity-70 active:bg-gray-50"
+
                     >
                         <ChevronLeft size={22} strokeWidth={2.5} />
                     </Link>
@@ -80,16 +85,19 @@ export default function Login() {
 
                     {/* Form Login */}
                     <form onSubmit={submit} className="space-y-5">
+
                         {/* Input Email / Nomor Telepon */}
                         <div className="space-y-1.5">
                             <label htmlFor="identifier" className="block text-sm font-semibold text-gray-700">
                                 <span className="mr-0.5 text-red-500">*</span>Email/No Telp
+
                             </label>
                             <div className="relative">
                                 <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                                    <Mail size={16} />
+                                    {isEmail ? <Mail size={16} /> : <Phone size={16} />}
                                 </span>
                                 <input
+
                                     id="identifier"
                                     type="text"
                                     autoComplete="username"
@@ -97,13 +105,17 @@ export default function Login() {
                                     value={data.identifier}
                                     onChange={(e) => setData('identifier', e.target.value)}
                                     className={`w-full rounded-xl border-none bg-[#f4f7fc] py-3.5 pr-4 pl-11 text-sm text-gray-800 placeholder-gray-400 transition-all focus:ring-2 focus:ring-[#15803d]/30 focus:outline-none ${
+
                                         errors.identifier ? 'ring-2 ring-red-500' : ''
                                     }`}
                                 />
                             </div>
+
                             {errors.identifier && (
                                 <p className="mt-1 text-xs font-medium text-red-500">{errors.identifier}</p>
                             )}
+
+                            
                         </div>
 
                         {/* Input Password */}
