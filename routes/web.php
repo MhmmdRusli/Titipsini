@@ -38,12 +38,10 @@ use App\Http\Controllers\Customer\ServiceController;
 use App\Http\Controllers\Customer\TentangController;
 use App\Http\Controllers\Customer\TopUpController;
 use App\Http\Controllers\Mitra\AlamatController;
-use App\Http\Controllers\Mitra\Auth\AuthenticatedSessionController as MitraAuthenticatedSessionController;
 use App\Http\Controllers\Mitra\Auth\EmailVerificationNotificationController as MitraEmailVerificationNotificationController;
 use App\Http\Controllers\Mitra\Auth\EmailVerificationPromptController as MitraEmailVerificationPromptController;
 use App\Http\Controllers\Mitra\Auth\NewPasswordController as MitraNewPasswordController;
 use App\Http\Controllers\Mitra\Auth\PasswordResetLinkController as MitraPasswordResetLinkController;
-use App\Http\Controllers\Mitra\Auth\RegisteredUserController as MitraRegisteredUserController;
 use App\Http\Controllers\Mitra\Auth\VerifyEmailController as MitraVerifyEmailController;
 use App\Http\Controllers\Mitra\BantuanController as MitraBantuanController;
 use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
@@ -119,6 +117,14 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password/verify', [ForgotPasswordController::class, 'verifyOtp'])->name('password.verify');
     Route::get('/forgot-password/reset', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset.form');
     Route::post('/forgot-password/reset', [ForgotPasswordController::class, 'resetPassword'])->name('password.reset');
+
+    // Alias routes for mitra - redirect to unified login/register
+    Route::get('/mitra/login', function () {
+        return redirect()->route('login');
+    })->name('mitra.login');
+    Route::get('/mitra/register', function () {
+        return redirect()->route('register');
+    })->name('mitra.register');
 });
 
 Route::middleware('auth')->post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
@@ -142,11 +148,14 @@ Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
 Route::middleware('guest')->prefix('mitra')->name('mitra.')->group(function () {
     Route::get('/', [MitraOnboardingController::class, 'index'])->name('onboarding');
 
-    Route::get('/daftar', [MitraRegisteredUserController::class, 'create'])->name('register');
-    Route::post('/daftar', [MitraRegisteredUserController::class, 'store'])->name('register.store');
-
-    Route::get('/masuk', [MitraAuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/masuk', [MitraAuthenticatedSessionController::class, 'store'])->name('login.store');
+    // Login/Register now use unified routes (/login, /register)
+    // These routes are kept for backward compatibility but redirect to unified pages
+    Route::get('/masuk', function () {
+        return redirect()->route('login');
+    })->name('login');
+    Route::get('/daftar', function () {
+        return redirect()->route('register');
+    })->name('register');
 
     Route::get('/lupa-password', [MitraPasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('/lupa-password', [MitraPasswordResetLinkController::class, 'store'])->name('password.email');

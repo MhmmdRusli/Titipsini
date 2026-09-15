@@ -1,11 +1,11 @@
 import { Head, useForm, Link } from '@inertiajs/react';
 import { useState } from 'react';
-import { ChevronLeft, Mail, Eye, EyeOff } from 'lucide-react';
+import { ChevronLeft, Mail, Phone, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
-        email: '',
+        identifier: '',
         password: '',
     });
 
@@ -14,10 +14,10 @@ export default function Login() {
         post('/login');
     };
 
+    const isEmail = data.identifier.includes('@');
+
     return (
-        // Backdrop abu-abu di layar lebar (desktop)
         <div className="min-h-dvh bg-gray-100 sm:flex sm:items-center sm:justify-center sm:py-6">
-            
             {/* Bodi Aplikasi Mobile */}
             <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-white sm:min-h-[850px] sm:shadow-xl">
                 <Head title="Masuk" />
@@ -27,9 +27,8 @@ export default function Login() {
                     className="flex items-center justify-between border-b border-gray-100 px-4 pb-4"
                     style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
                 >
-                    {/* Mengubah button menjadi Link Inertia */}
                     <Link 
-                        href="/" // Sesuaikan dengan route halaman onboarding Anda (misal '/' atau '/onboarding')
+                        href="/" 
                         className="text-gray-800 hover:opacity-70 flex items-center justify-center p-1 rounded-lg active:bg-gray-50"
                     >
                         <ChevronLeft size={22} strokeWidth={2.5} />
@@ -60,26 +59,27 @@ export default function Login() {
 
                     {/* Form Login */}
                     <form onSubmit={submit} className="space-y-5">
-                        {/* Input Email */}
+                        {/* Input Email/No Telepon */}
                         <div className="space-y-1.5">
                             <label className="block text-sm font-semibold text-gray-700">
-                                <span className="text-red-500 mr-0.5">*</span>Email
+                                <span className="text-red-500 mr-0.5">*</span>Email / No Telepon
                             </label>
                             <div className="relative">
                                 <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                                    <Mail size={16} />
+                                    {isEmail ? <Mail size={16} /> : <Phone size={16} />}
                                 </span>
                                 <input
-                                    type="email"
-                                    placeholder="Email"
-                                    value={data.email}
-                                    onChange={(e) => setData('email', e.target.value)}
+                                    type="text"
+                                    autoComplete={isEmail ? 'email' : 'tel'}
+                                    placeholder={isEmail ? 'Email' : 'Nomor Telepon'}
+                                    value={data.identifier}
+                                    onChange={(e) => setData('identifier', e.target.value)}
                                     className={`w-full rounded-xl border-none bg-[#f4f7fc] pl-11 pr-4 py-3.5 text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#15803d]/30 transition-all ${
-                                        errors.email ? 'ring-2 ring-red-500' : ''
+                                        errors.identifier ? 'ring-2 ring-red-500' : ''
                                     }`}
                                 />
                             </div>
-                            {errors.email && <p className="text-xs font-medium text-red-500 mt-1">{errors.email}</p>}
+                            {errors.identifier && <p className="text-xs font-medium text-red-500 mt-1">{errors.identifier}</p>}
                         </div>
 
                         {/* Input Password */}
