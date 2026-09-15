@@ -27,8 +27,10 @@ class ForgotPasswordController extends Controller
             'email' => ['required', 'email'],
         ]);
 
+        // Dipakai Customer maupun Mitra, karena keduanya login lewat satu
+        // halaman yang sama dan memakai satu alur lupa kata sandi.
         $user = User::where('email', $validated['email'])
-            ->where('role', 'customer')
+            ->whereIn('role', ['customer', 'partner'])
             ->first();
 
         if ($user) {
@@ -121,7 +123,7 @@ class ForgotPasswordController extends Controller
 
         $email = $request->session()->get('password_reset_email');
 
-        $user = User::where('email', $email)->where('role', 'customer')->first();
+        $user = User::where('email', $email)->whereIn('role', ['customer', 'partner'])->first();
 
         if (! $user) {
             return redirect()->route('password.email.form')

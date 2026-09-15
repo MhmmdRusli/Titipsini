@@ -36,7 +36,7 @@ export default function ResetPassword({ token, email }) {
                     style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
                 >
                     <Link 
-                        href={route('mitra.login')} 
+                        href={route('login')}
                         className="flex items-center justify-center p-1 text-gray-800 hover:opacity-70 active:bg-gray-50 rounded-lg"
                     >
                         <ChevronLeft size={22} strokeWidth={2.5} />

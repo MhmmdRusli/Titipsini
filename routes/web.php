@@ -38,7 +38,6 @@ use App\Http\Controllers\Customer\ServiceController;
 use App\Http\Controllers\Customer\TentangController;
 use App\Http\Controllers\Customer\TopUpController;
 use App\Http\Controllers\Mitra\AlamatController;
-use App\Http\Controllers\Mitra\Auth\AuthenticatedSessionController as MitraAuthenticatedSessionController;
 use App\Http\Controllers\Mitra\Auth\EmailVerificationNotificationController as MitraEmailVerificationNotificationController;
 use App\Http\Controllers\Mitra\Auth\EmailVerificationPromptController as MitraEmailVerificationPromptController;
 use App\Http\Controllers\Mitra\Auth\NewPasswordController as MitraNewPasswordController;
@@ -145,14 +144,21 @@ Route::middleware('guest')->prefix('mitra')->name('mitra.')->group(function () {
     Route::get('/daftar', [MitraRegisteredUserController::class, 'create'])->name('register');
     Route::post('/daftar', [MitraRegisteredUserController::class, 'store'])->name('register.store');
 
-    Route::get('/masuk', [MitraAuthenticatedSessionController::class, 'create'])->name('login');
-    Route::post('/masuk', [MitraAuthenticatedSessionController::class, 'store'])->name('login.store');
-
     Route::get('/lupa-password', [MitraPasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('/lupa-password', [MitraPasswordResetLinkController::class, 'store'])->name('password.email');
     Route::get('/reset-password/{token}', [MitraNewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password', [MitraNewPasswordController::class, 'store'])->name('password.update');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Login Mitra sudah digabung ke satu halaman login (/login)
+|--------------------------------------------------------------------------
+| Halaman login Mitra lama dihapus, sehingga URL /mitra/masuk tidak lagi
+| menampilkan form login apa pun. Permintaan ke URL lama dialihkan ke
+| halaman login utama supaya tautan/bookmark lama tidak menjadi 404.
+*/
+Route::redirect('/mitra/masuk', '/login')->name('mitra.login.redirect');
 
 // Verifikasi email mitra
 Route::middleware(['auth'])->prefix('mitra')->name('mitra.')->group(function () {

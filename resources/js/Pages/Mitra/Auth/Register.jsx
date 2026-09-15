@@ -67,7 +67,7 @@ export default function Register() {
                 {/* Header */}
                 <div className="flex items-center gap-3 px-4 pt-4">
                     <Link
-                        href={route('mitra.login')}
+                        href={route('login')}
                         className="flex h-9 w-9 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100"
                     >
                         <ChevronLeft size={22} />
@@ -244,7 +244,7 @@ export default function Register() {
 
                 <p className="mt-4 text-center text-sm text-gray-500">
                     Sudah punya akun?{' '}
-                    <Link href={route('mitra.login')} className="font-semibold text-green-700 hover:underline">
+                    <Link href={route('login')} className="font-semibold text-green-700 hover:underline">
                         Masuk disini
                     </Link>
                 </p>

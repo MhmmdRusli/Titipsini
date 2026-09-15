@@ -18,34 +18,49 @@ class AuthenticatedSessionController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        $request->validate([
+            'identifier' => ['required', 'string'],
             'password' => ['required'],
         ]);
 
+        $field = filter_var($request->identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+
+        $credentials = [
+            $field => $request->identifier,
+            'password' => $request->password,
+        ];
+
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()->withErrors([
-                'email' => 'Email atau password salah.',
-            ])->onlyInput('email');
+                'identifier' => 'Email/nomor telepon belum terdaftar atau kata sandi salah.',
+            ])->onlyInput('identifier');
         }
 
         $user = $request->user();
 
-        // Admin tidak boleh login lewat halaman ini, hanya lewat /admin/login
         if ($user->role === 'admin') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-                'email' => 'Akun admin harus login melalui halaman khusus admin.',
-            ])->onlyInput('email');
+                'identifier' => 'Akun admin harus login melalui halaman khusus admin.',
+            ])->onlyInput('identifier');
         }
 
-        // Cek jika akun partner sedang ditangguhkan
-        if ($user->role === 'partner' && $user->suspended_at) {
-            $request->session()->regenerate();
-            return redirect()->route('partner.suspended.notice');
+        // Halaman ini dipakai bersama oleh Customer dan Mitra. Untuk akun Mitra
+        // (role partner) tetap perlu cek status ditangguhkan & verifikasi email
+        // sebelum diarahkan ke /mitra/dashboard.
+        if ($user->role === 'partner') {
+            if ($user->suspended_at) {
+                $request->session()->regenerate();
+                return redirect()->route('mitra.suspended.notice');
+            }
+
+            if (! $user->hasVerifiedEmail()) {
+                $request->session()->regenerate();
+                return redirect()->route('mitra.verify-email.notice');
+            }
         }
 
         $request->session()->regenerate();

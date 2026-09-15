@@ -60,6 +60,7 @@ class NewPasswordController extends Controller
             ]);
         }
 
-        return redirect()->route('mitra.login')->with('status', 'Kata sandi berhasil diubah. Silakan masuk kembali.');
+        // Login Mitra sudah digabung ke halaman login utama.
+        return redirect()->route('login')->with('status', 'Kata sandi berhasil diubah. Silakan masuk kembali.');
     }
 }

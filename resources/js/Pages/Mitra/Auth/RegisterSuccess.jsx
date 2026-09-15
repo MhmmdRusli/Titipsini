@@ -16,7 +16,7 @@ export default function RegisterSuccess({ name }) {
                 </p>
 
                 <Link
-                    href={route('mitra.login')}
+                    href={route('login')}
                     className="mt-8 w-full rounded-full bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700"
                 >
                     Masuk ke Akun

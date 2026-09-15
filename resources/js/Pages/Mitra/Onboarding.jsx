@@ -148,7 +148,7 @@ export default function Onboarding() {
                                         Daftar Jadi Mitra
                                     </Link>
                                     <Link
-                                        href={route('mitra.login')}
+                                        href={route('login')}
                                         className="flex w-full items-center justify-center rounded-full border border-gray-200 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                                     >
                                         Masuk
