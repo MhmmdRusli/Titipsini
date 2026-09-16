@@ -183,6 +183,9 @@ Route::get('/mitra/verifikasi-email/{id}/{hash}', [MitraVerifyEmailController::c
 Route::middleware(['auth', 'role:finance,super_admin'])->prefix('finance')->name('finance.')->group(function () {
     Route::get('/dashboard', [FinanceDashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/profil', [\App\Http\Controllers\Finance\ProfileController::class, 'edit'])->name('profil.edit');
+    Route::put('/profil', [\App\Http\Controllers\Finance\ProfileController::class, 'update'])->name('profil.update');
+
     Route::prefix('topup')->name('topup.')->group(function () {
         Route::get('/', [FinanceTopupController::class, 'index'])->name('index');
         Route::get('/{topup}', [FinanceTopupController::class, 'show'])->name('show');
