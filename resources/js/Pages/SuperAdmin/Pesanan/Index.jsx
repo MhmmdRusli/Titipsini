@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, router, useForm } from '@inertiajs/react';
 import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
-import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2, ChevronDown, ChevronRight, Package, HandCoins, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Search, Eye, Truck, X, FileText, Image, ExternalLink, Trash2, ChevronDown, ChevronRight, Package, HandCoins, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 
 const SERVICE_TYPES = [
     { value: '', label: 'Semua Layanan' },
