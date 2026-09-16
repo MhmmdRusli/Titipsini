@@ -31,7 +31,7 @@ class DashboardController extends Controller
             'user' => $request->user()->only(['id', 'name', 'email', 'role']),
 
             // Kartu statistik utama
-            'stats' => $this->getStats(),
+            'stats' => $this->getStats($tahun, $bulan),
 
             // Grafik jumlah pesanan per bulan, dipisah per jenis layanan
             'chartPesanan' => $this->getChartPesanan($tahun),
@@ -40,10 +40,10 @@ class DashboardController extends Controller
             'pesananBreakdown' => $this->getPesananBreakdown($tahun, $bulan),
 
             // Kartu "Layanan Vendor"
-            'layananVendor' => $this->getLayananVendor(),
+            'layananVendor' => $this->getLayananVendor($tahun, $bulan),
 
             // Catatan keuangan
-            'keuangan' => $this->getKeuangan(),
+            'keuangan' => $this->getKeuangan($tahun, $bulan),
 
             // Area chart pembayaran berdasarkan layanan
             'pembayaranLayanan' => $this->getPembayaranLayanan($tahun),
@@ -55,12 +55,22 @@ class DashboardController extends Controller
         ]);
     }
 
-    private function getStats(): array
+    private function getStats(int $tahun, int $bulan): array
     {
+        $orderQuery = Order::query()
+            ->whereYear('created_at', $tahun)
+            ->when($bulan > 0, fn ($q) => $q->whereMonth('created_at', $bulan));
+
         return [
-            'total_pesanan'  => Order::count(),
-            'total_customer' => User::where('role', 'customer')->count(),
-            'total_vendor'   => User::where('role', 'partner')->count(),
+            'total_pesanan'  => $orderQuery->count(),
+            'total_customer' => User::where('role', 'customer')
+                ->when($bulan > 0, fn ($q) => $q->whereMonth('created_at', $bulan))
+                ->whereYear('created_at', $tahun)
+                ->count(),
+            'total_vendor'   => User::where('role', 'partner')
+                ->when($bulan > 0, fn ($q) => $q->whereMonth('created_at', $bulan))
+                ->whereYear('created_at', $tahun)
+                ->count(),
             'total_layanan'  => Service::count(),
         ];
     }
@@ -112,24 +122,32 @@ class DashboardController extends Controller
         ];
     }
 
-    private function getLayananVendor(): array
+    private function getLayananVendor(int $tahun, int $bulan): array
     {
         $countByKategori = Service::selectRaw('kategori, COUNT(*) as total')
             ->groupBy('kategori')
             ->pluck('total', 'kategori');
 
+        $orderQuery = Order::query()
+            ->whereYear('created_at', $tahun)
+            ->when($bulan > 0, fn ($q) => $q->whereMonth('created_at', $bulan));
+
         return [
             ['key' => 'barang',    'label' => 'Total Layanan Barang',    'value' => (int) ($countByKategori['barang'] ?? 0)],
             ['key' => 'bangunan',  'label' => 'Total Layanan Bangunan',  'value' => (int) ($countByKategori['bangunan'] ?? 0)],
-            ['key' => 'pickup',    'label' => 'Total Layanan Pick Up',   'value' => Order::where('is_pickup', true)->count()],
+            ['key' => 'pickup',    'label' => 'Total Layanan Pick Up',   'value' => (clone $orderQuery)->where('is_pickup', true)->count()],
             ['key' => 'kendaraan', 'label' => 'Total Layanan Kendaraan', 'value' => (int) ($countByKategori['kendaraan'] ?? 0)],
         ];
     }
 
-    private function getKeuangan(): array
+    private function getKeuangan(int $tahun, int $bulan): array
     {
-        $penghasilan = (int) SaldoMutasi::where('type', 'penghasilan')->sum('jumlah');
-        $penarikan   = (int) SaldoMutasi::where('type', 'penarikan')->sum('jumlah');
+        $query = SaldoMutasi::query()
+            ->whereYear('created_at', $tahun)
+            ->when($bulan > 0, fn ($q) => $q->whereMonth('created_at', $bulan));
+
+        $penghasilan = (int) (clone $query)->where('type', 'penghasilan')->sum('jumlah');
+        $penarikan   = (int) (clone $query)->where('type', 'penarikan')->sum('jumlah');
 
         return [
             'total_saldo'      => $penghasilan - $penarikan,

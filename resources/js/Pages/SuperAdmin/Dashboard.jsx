@@ -119,7 +119,7 @@ export default function Dashboard({
   filter = null,
 }) {
   const pageUser = usePage().props.auth?.user || user;
-  const [bulan, setBulan] = useState(String(filter?.bulan ?? new Date().getMonth() + 1));
+  const [bulan, setBulan] = useState(String(filter?.bulan ?? 0));
   const [tahun, setTahun] = useState(String(filter?.tahun ?? new Date().getFullYear()));
 
   const applyPeriode = (bulanBaru, tahunBaru) => {
@@ -135,6 +135,11 @@ export default function Dashboard({
   };
 
   const handleBulanChange = (value) => {
+    if (value === "Semua") {
+      setBulan("0");
+      applyPeriode(0, tahun);
+      return;
+    }
     const idx = BULAN_FULL.indexOf(value);
     if (idx === -1) return;
     setBulan(String(idx + 1));
@@ -174,7 +179,7 @@ export default function Dashboard({
               <div className="relative flex items-center border-r border-white/20 px-3 py-1.5">
                 <Calendar size={14} className="mr-2 text-amber-300" />
                 <select
-                  value={BULAN_FULL[Number(bulan) - 1] ?? "Januari"}
+                  value={bulan === "0" ? "Semua" : (BULAN_FULL[Number(bulan) - 1] ?? "Januari")}
                   onChange={(e) => handleBulanChange(e.target.value)}
                   style={{ backgroundColor: "transparent", color: "white" }}
                   className="appearance-none !bg-transparent dark:!bg-transparent text-xs font-semibold !text-white border-none outline-none focus:outline-none focus:ring-0 focus:!bg-transparent active:!bg-transparent shadow-none cursor-pointer pr-5"
@@ -184,6 +189,9 @@ export default function Dashboard({
                       {opt}
                     </option>
                   ))}
+                  <option value="Semua" className="bg-[#007b49] text-white dark:bg-[#007b49]">
+                    Semua
+                  </option>
                 </select>
                 <ChevronDown size={12} className="pointer-events-none absolute right-2 text-white/80" />
               </div>
