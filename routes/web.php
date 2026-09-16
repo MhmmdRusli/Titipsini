@@ -293,6 +293,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::patch('/partners/{partner}/restore', [AdminPartnerController::class, 'restore'])->name('partners.restore');
     Route::post('/partners/bulk-destroy', [AdminPartnerController::class, 'bulkDestroy'])->name('partners.bulkDestroy');
+    Route::delete('/partners/{partner}', [AdminPartnerController::class, 'destroy'])->name('partners.destroy');
 
     Route::get('/profil', [AdminProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [AdminProfileController::class, 'update'])->name('profil.update');
