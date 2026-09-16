@@ -20,11 +20,9 @@ class AuthenticatedSessionController extends Controller
     {
         $request->validate([
             'identifier' => ['required', 'string'],
-
             'password' => ['required'],
         ]);
 
- 
         $field = filter_var($request->identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
 
         $credentials = [
@@ -40,24 +38,16 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-
-        // Admin tidak boleh login lewat halaman ini, hanya lewat /admin/login
         if ($user->role === 'admin' || $user->role === 'finance' || $user->role === 'super_admin') {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-
-                'identifier' => 'Akun admin harus login melalui halaman khusus admin.',
-
-     
+                'identifier' => 'Akun ini harus login melalui halaman khusus yang sesuai.',
             ])->onlyInput('identifier');
         }
 
-        // Halaman ini dipakai bersama oleh Customer dan Mitra. Untuk akun Mitra
-        // (role partner) tetap perlu cek status ditangguhkan & verifikasi email
-        // sebelum diarahkan ke /mitra/dashboard.
         if ($user->role === 'partner') {
             if ($user->suspended_at) {
                 $request->session()->regenerate();

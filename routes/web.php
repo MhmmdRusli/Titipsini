@@ -117,14 +117,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password/verify', [ForgotPasswordController::class, 'verifyOtp'])->name('password.verify');
     Route::get('/forgot-password/reset', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset.form');
     Route::post('/forgot-password/reset', [ForgotPasswordController::class, 'resetPassword'])->name('password.reset');
-
-    // Alias routes for mitra - redirect to unified login/register
-    Route::get('/mitra/login', function () {
-        return redirect()->route('login');
-    })->name('mitra.login');
-    Route::get('/mitra/register', function () {
-        return redirect()->route('register');
-    })->name('mitra.register');
 });
 
 Route::middleware('auth')->post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
@@ -148,16 +140,13 @@ Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
 Route::middleware('guest')->prefix('mitra')->name('mitra.')->group(function () {
     Route::get('/', [MitraOnboardingController::class, 'index'])->name('onboarding');
 
+    // Login Mitra sudah digabung ke halaman utama (/login).
+    // URL lama /mitra/masuk dan /mitra/login dialihkan ke /login.
+    Route::get('/masuk', fn () => redirect('/login'))->name('login');
+    Route::post('/masuk', fn () => redirect('/login'))->name('login.store');
+    Route::get('/login', fn () => redirect('/login'))->name('login.alias');
 
-    // Login/Register now use unified routes (/login, /register)
-    // These routes are kept for backward compatibility but redirect to unified pages
-    Route::get('/masuk', function () {
-        return redirect()->route('login');
-    })->name('login');
-    Route::get('/daftar', function () {
-        return redirect()->route('register');
-    })->name('register');
-
+    Route::get('/daftar', fn () => redirect('/register'))->name('register');
 
     Route::get('/lupa-password', [MitraPasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('/lupa-password', [MitraPasswordResetLinkController::class, 'store'])->name('password.email');
@@ -173,7 +162,6 @@ Route::middleware('guest')->prefix('mitra')->name('mitra.')->group(function () {
 | menampilkan form login apa pun. Permintaan ke URL lama dialihkan ke
 | halaman login utama supaya tautan/bookmark lama tidak menjadi 404.
 */
-Route::redirect('/mitra/masuk', '/login')->name('mitra.login.redirect');
 
 // Verifikasi email mitra
 Route::middleware(['auth'])->prefix('mitra')->name('mitra.')->group(function () {

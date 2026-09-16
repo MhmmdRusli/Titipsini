@@ -1,6 +1,6 @@
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import { useState } from 'react';
-import { CheckCircle2, ChevronLeft, Eye, EyeOff, Mail } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, Eye, EyeOff, Mail, Phone } from 'lucide-react';
 
 
 
@@ -41,15 +41,15 @@ export default function Login() {
                     className="flex items-center justify-between border-b border-gray-100 px-4 pb-4"
                     style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
                 >
-
                     <Link
                         href="/"
                         className="flex items-center justify-center rounded-lg p-1 text-gray-800 hover:opacity-70 active:bg-gray-50"
-
                     >
                         <ChevronLeft size={22} strokeWidth={2.5} />
                     </Link>
+
                     <h2 className="text-base font-bold text-gray-900">Masuk</h2>
+
                     <div className="w-6" />
                 </div>
 
@@ -63,10 +63,14 @@ export default function Login() {
                                 alt="Logo Titipsini"
                                 className="h-10 w-auto object-contain"
                             />
+
                             <div className="text-2xl font-bold tracking-tight text-[#15803d]">
-                                Titipsini<span className="mx-0.5 text-[#fbbf24]">•</span>Com
+                                Titipsini
+                                <span className="mx-0.5 text-[#fbbf24]">•</span>
+                                Com
                             </div>
                         </div>
+
                         <p className="mt-2.5 text-[10px] font-medium tracking-wide text-gray-400">
                             Tempat Terbaik untuk Barang Berharga Anda
                         </p>
@@ -74,8 +78,14 @@ export default function Login() {
 
                     {flash?.success && (
                         <div className="mb-5 flex items-start gap-2 rounded-xl border border-green-200 bg-green-50 px-3.5 py-3">
-                            <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-green-600" />
-                            <p className="flex-1 text-sm text-green-800">{flash.success}</p>
+                            <CheckCircle2
+                                size={18}
+                                className="mt-0.5 shrink-0 text-green-600"
+                            />
+
+                            <p className="flex-1 text-sm text-green-800">
+                                {flash.success}
+                            </p>
                         </div>
                     )}
 
@@ -88,41 +98,57 @@ export default function Login() {
 
                         {/* Input Email / Nomor Telepon */}
                         <div className="space-y-1.5">
-                            <label htmlFor="identifier" className="block text-sm font-semibold text-gray-700">
-                                <span className="mr-0.5 text-red-500">*</span>Email/No Telp
-
+                            <label
+                                htmlFor="identifier"
+                                className="block text-sm font-semibold text-gray-700"
+                            >
+                                <span className="mr-0.5 text-red-500">*</span>
+                                Email/No Telp
                             </label>
+
                             <div className="relative">
                                 <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                                    {isEmail ? <Mail size={16} /> : <Phone size={16} />}
+                                    {isEmail ? (
+                                        <Mail size={16} />
+                                    ) : (
+                                        <Phone size={16} />
+                                    )}
                                 </span>
-                                <input
 
+                                <input
                                     id="identifier"
                                     type="text"
                                     autoComplete="username"
                                     placeholder="Email atau Nomor Telepon"
                                     value={data.identifier}
-                                    onChange={(e) => setData('identifier', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('identifier', e.target.value)
+                                    }
                                     className={`w-full rounded-xl border-none bg-[#f4f7fc] py-3.5 pr-4 pl-11 text-sm text-gray-800 placeholder-gray-400 transition-all focus:ring-2 focus:ring-[#15803d]/30 focus:outline-none ${
-
-                                        errors.identifier ? 'ring-2 ring-red-500' : ''
+                                        errors.identifier
+                                            ? 'ring-2 ring-red-500'
+                                            : ''
                                     }`}
                                 />
                             </div>
 
                             {errors.identifier && (
-                                <p className="mt-1 text-xs font-medium text-red-500">{errors.identifier}</p>
+                                <p className="mt-1 text-xs font-medium text-red-500">
+                                    {errors.identifier}
+                                </p>
                             )}
-
-                            
                         </div>
 
                         {/* Input Password */}
                         <div className="space-y-1.5">
-                            <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
-                                <span className="mr-0.5 text-red-500">*</span>Kata Sandi
+                            <label
+                                htmlFor="password"
+                                className="block text-sm font-semibold text-gray-700"
+                            >
+                                <span className="mr-0.5 text-red-500">*</span>
+                                Kata Sandi
                             </label>
+
                             <div className="relative">
                                 <input
                                     id="password"
@@ -130,22 +156,40 @@ export default function Login() {
                                     autoComplete="current-password"
                                     placeholder="Min. 8 Karakter"
                                     value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('password', e.target.value)
+                                    }
                                     className={`w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 pr-11 text-sm text-gray-800 placeholder-gray-400 transition-all focus:ring-2 focus:ring-[#15803d]/30 focus:outline-none ${
-                                        errors.password ? 'ring-2 ring-red-500' : ''
+                                        errors.password
+                                            ? 'ring-2 ring-red-500'
+                                            : ''
                                     }`}
                                 />
+
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword((v) => !v)}
-                                    aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                                    onClick={() =>
+                                        setShowPassword((v) => !v)
+                                    }
+                                    aria-label={
+                                        showPassword
+                                            ? 'Sembunyikan kata sandi'
+                                            : 'Tampilkan kata sandi'
+                                    }
                                     className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
                                 >
-                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    {showPassword ? (
+                                        <EyeOff size={16} />
+                                    ) : (
+                                        <Eye size={16} />
+                                    )}
                                 </button>
                             </div>
+
                             {errors.password && (
-                                <p className="mt-1 text-xs font-medium text-red-500">{errors.password}</p>
+                                <p className="mt-1 text-xs font-medium text-red-500">
+                                    {errors.password}
+                                </p>
                             )}
                         </div>
 
@@ -164,7 +208,9 @@ export default function Login() {
                             type="submit"
                             disabled={processing}
                             className={`mt-2 w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-sm transition-all active:scale-[0.99] disabled:opacity-50 ${
-                                isFilled ? 'bg-[#15803d] hover:bg-[#166534]' : 'bg-[#15803d]/60 hover:bg-[#15803d]'
+                                isFilled
+                                    ? 'bg-[#15803d] hover:bg-[#166534]'
+                                    : 'bg-[#15803d]/60 hover:bg-[#15803d]'
                             }`}
                         >
                             {processing ? 'Memproses...' : 'Masuk'}
@@ -175,14 +221,11 @@ export default function Login() {
                     <div className="mt-8 space-y-2 text-center text-xs font-medium text-gray-400">
                         <p>
                             Belum punya akun?{' '}
-                            <Link href="/register" className="font-bold text-[#15803d] hover:underline">
+                            <Link
+                                href="/register"
+                                className="font-bold text-[#15803d] hover:underline"
+                            >
                                 Daftar disini
-                            </Link>
-                        </p>
-                        <p>
-                            Punya lahan untuk disewakan?{' '}
-                            <Link href="/mitra/daftar" className="font-bold text-[#15803d] hover:underline">
-                                Daftar Jadi Mitra
                             </Link>
                         </p>
                     </div>
