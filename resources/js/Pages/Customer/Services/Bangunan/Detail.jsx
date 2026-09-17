@@ -40,6 +40,17 @@ export default function Detail({ mitra }) {
                     </div>
 
                     <ReviewList averageRating={mitra.averageRating} reviewCount={mitra.reviewCount} reviews={mitra.reviews} />
+
+                    {mitra.fotoKendaraan && (
+                        <div className="mt-4">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Foto Kendaraan</p>
+                            <img
+                                src={mitra.fotoKendaraan}
+                                alt="Foto Kendaraan"
+                                className="mt-2 h-40 w-full max-w-xs rounded-lg border border-gray-200 object-cover dark:border-gray-700"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {mitra.isOrderable && mitra.sedangTutupHariIni ? (

@@ -45,6 +45,17 @@ export default function DetailMitra({ service }) {
                         </div>
                     </div>
                     <ReviewList averageRating={service.averageRating} reviewCount={service.reviewCount} reviews={service.reviews} />
+
+                    {service.fotoKendaraan && (
+                        <div className="mt-4">
+                            <p className="text-xs font-semibold text-gray-700 dark:text-gray-200">Foto Kendaraan</p>
+                            <img
+                                src={service.fotoKendaraan}
+                                alt="Foto Kendaraan"
+                                className="mt-2 h-40 w-full max-w-xs rounded-lg border border-gray-200 object-cover dark:border-gray-700"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {service.isOrderable && service.sedangTutupHariIni ? (

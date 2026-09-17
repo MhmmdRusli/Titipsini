@@ -604,7 +604,7 @@ export default function Show({ partner }) {
                             // Normalkan foto lahan (bisa string, array, atau object relasi)
                             // sebelum dipakai sebagai href, supaya tidak crash saat
                             // bentuk datanya bukan string murni.
-                            const fotoHref = resolveFotoUrl(svc.foto_lahan) ?? resolveFotoUrl(svc.foto);
+                            const fotoHref = resolveFotoUrl(svc.foto_lahan) ?? resolveFotoUrl(svc.foto_kendaraan) ?? resolveFotoUrl(svc.foto);
 
                             return (
                                 <SectionCard

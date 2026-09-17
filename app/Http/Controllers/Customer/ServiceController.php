@@ -248,6 +248,7 @@ class ServiceController extends Controller
             ->withQueryString()
             ->through(function ($service) {
                 $service->foto = $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null;
+                $service->fotoKendaraan = $service->foto_kendaraan ? \Illuminate\Support\Facades\Storage::url($service->foto_kendaraan) : null;
                 $service->is_orderable = $service->isOrderable();
                 $service->sedang_tutup_hari_ini = $this->sedangTutupHariIni($service);
                 return $service;
@@ -328,6 +329,7 @@ class ServiceController extends Controller
                 'jamBuka' => $service->jam_buka ? Carbon::parse($service->jam_buka)->format('H.i') : '08.00',
                 'jamTutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
                 'isBuka' => (bool) $service->is_active,
+                'fotoKendaraan' => $service->foto_kendaraan ? \Illuminate\Support\Facades\Storage::url($service->foto_kendaraan) : null,
                 ...$this->reviewSummary($service),
                 'jadwalOperasional' => $this->jadwalUntukCustomer($service),
                 'isOrderable' => $service->isOrderable(),
@@ -1052,6 +1054,8 @@ class ServiceController extends Controller
             'jam_buka' => $service->jam_buka ? Carbon::parse($service->jam_buka)->format('H.i') : '08.00',
             'jam_tutup' => $service->jam_tutup ? Carbon::parse($service->jam_tutup)->format('H.i') : '21.00',
             'isBuka' => (bool) $service->is_active,
+            'fotoKendaraan' => $service->foto_kendaraan ? \Illuminate\Support\Facades\Storage::url($service->foto_kendaraan) : null,
+            'fotoUrl' => $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null,
             'is_orderable' => $service->isOrderable(),
             'sedang_tutup_hari_ini' => $this->sedangTutupHariIni($service),
         ];

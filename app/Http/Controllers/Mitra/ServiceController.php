@@ -20,13 +20,14 @@ class ServiceController extends Controller
             $layanan = Service::query()
                 ->where('user_id', $request->user()->id)
                 ->orderBy('created_at', 'desc')
-                ->get()
-                ->map(function ($item) {
-                    $item->foto_url = $item->foto ? Storage::url($item->foto) : null;
-                    return $item;
-                });
+            ->get()
+            ->map(function ($item) {
+                $item->foto_url = $item->foto ? Storage::url($item->foto) : null;
+                $item->foto_kendaraan_url = $item->foto_kendaraan ? Storage::url($item->foto_kendaraan) : null;
+                return $item;
+            });
 
-            return Inertia::render('Mitra/Layanan/Index', [
+        return Inertia::render('Mitra/Layanan/Index', [
                 'layanan' => $layanan,
                 'daftarKota' => \App\Models\Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
             ]);
@@ -181,6 +182,10 @@ class ServiceController extends Controller
                 $validated['foto'] = $request->file('foto')->store('services', 'public');
             }
 
+            if ($request->hasFile('foto_kendaraan')) {
+                $validated['foto_kendaraan'] = $request->file('foto_kendaraan')->store('foto-kendaraan', 'public');
+            }
+
             // Set verification_status untuk semua kategori yang pakai form kustom
             if ($validated['kategori'] === 'barang' || $validated['kategori'] === 'bangunan' || $validated['kategori'] === 'pindahan') {
                 $validated['verification_status'] = 'pending';
@@ -241,6 +246,13 @@ class ServiceController extends Controller
                 Storage::delete($layanan->foto);
             }
             $validated['foto'] = $request->file('foto')->store('services', 'public');
+        }
+
+        if ($request->hasFile('foto_kendaraan')) {
+            if ($layanan->foto_kendaraan) {
+                Storage::delete($layanan->foto_kendaraan);
+            }
+            $validated['foto_kendaraan'] = $request->file('foto_kendaraan')->store('foto-kendaraan', 'public');
         }
 
         $layanan->update($validated);
@@ -349,6 +361,7 @@ class ServiceController extends Controller
                 'nomor_kir' => ['required', 'string', 'max:20'],
                 'merek_kendaraan' => ['required', 'in:Mitsubishi,Toyota,Suzuki,Daihatsu,Isuzu,Hino,Honda'],
                 'jenis_pickup' => ['required', 'in:Pick Up Terbuka,Pick Up Box,Engkel Box,Double Cabin,Colt Diesel'],
+                'foto_kendaraan' => ['nullable', 'image', 'max:5120'],
                 'upload_berkas' => ['required', 'string', 'max:500'],
                 'kota' => ['nullable', 'string', 'max:100'],
                 'kecamatan' => ['nullable', 'string', 'max:100'],

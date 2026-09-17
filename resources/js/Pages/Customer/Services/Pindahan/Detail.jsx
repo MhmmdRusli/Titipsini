@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { MapPin, Star } from 'lucide-react';
+import { MapPin, Star, Truck } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 import JadwalOperasional from '@/Components/JadwalOperasional';
 
@@ -27,13 +27,23 @@ export default function Detail({ mitra }) {
                         </span>
                     </div>
 
+                    {mitra.fotoKendaraan && (
+                        <div className="mt-4">
+                            <img
+                                src={mitra.fotoKendaraan}
+                                alt="Foto Kendaraan"
+                                className="w-full max-h-64 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
+                            />
+                        </div>
+                    )}
+
                     <div className="mt-4 space-y-3">
                         <JadwalOperasional jadwal={mitra.jadwalOperasional} />
 
                         <div className="flex items-start gap-3 text-sm">
                             <MapPin size={16} className="mt-0.5 shrink-0 text-gray-400" />
                             <div>
-                                <p className="text-xs text-gray-400 dark:text-gray-500">Alamat Lengkap</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">alamat Lengkap</p>
                                 <p className="text-gray-800 dark:text-gray-200">{mitra.alamat}, {mitra.kecamatan}, {mitra.kota}</p>
                             </div>
                         </div>

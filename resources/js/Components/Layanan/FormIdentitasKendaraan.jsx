@@ -1,6 +1,6 @@
-    import { useState } from 'react';
+    import { useState, useRef } from 'react';
     import { useForm, router, Head } from '@inertiajs/react';
-    import { ChevronLeft, ChevronDown } from 'lucide-react';
+    import { ChevronLeft, ChevronDown, Upload, X } from 'lucide-react';
 
     const inputClass = (hasError) =>
         `mt-1 w-full rounded-lg border-none bg-gray-100 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 disabled:opacity-50 ${
@@ -26,29 +26,48 @@
     ];
 
     export default function FormIdentitasKendaraan({ kategori, editingItem, onBatal, onSukses }) {
-        const { data, setData, post, processing, errors } = useForm({
+        const { data, setData, post, put, processing, errors, transform } = useForm({
             kategori,
             nama_usaha: editingItem?.nama_usaha ?? '',
             nomor_polisi: editingItem?.nomor_polisi ?? '',
             nomor_kir: editingItem?.nomor_kir ?? '',
             merek_kendaraan: editingItem?.merek_kendaraan ?? '',
             jenis_pickup: editingItem?.jenis_pickup ?? '',
+            foto_kendaraan: null,
             upload_berkas: editingItem?.upload_berkas ?? '',
         });
+
+        const [fotoKendaraanPreview, setFotoKendaraanPreview] = useState(editingItem?.foto_kendaraan_url ?? null);
 
         const submit = (e) => {
             e.preventDefault();
 
             if (editingItem) {
                 router.post(`/mitra/layanan/${editingItem.id}`, { ...data, _method: 'put' }, {
+                    forceFormData: true,
                     onSuccess: onSukses,
                 });
             } else {
                 post('/mitra/layanan', {
+                    forceFormData: true,
                     onSuccess: onSukses,
                 });
             }
         };
+
+        const fotoKendaraanInputRef = useRef(null);
+
+        function handleFotoKendaraanChange(e) {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setData('foto_kendaraan', file);
+            setFotoKendaraanPreview(URL.createObjectURL(file));
+        }
+
+        function hapusFotoKendaraan() {
+            setData('foto_kendaraan', null);
+            setFotoKendaraanPreview(null);
+        }
 
         return (
             <div className="flex min-h-dvh flex-col bg-white">
@@ -137,6 +156,40 @@
                             <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         </div>
                         {errors.jenis_pickup && <p className="mt-1 text-xs text-red-600">{errors.jenis_pickup}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Foto Kendaraan</label>
+                        <p className="text-xs text-gray-400">Upload foto kendaraan yang akan ditampilkan ke customer</p>
+                        {fotoKendaraanPreview && (
+                            <div className="mt-2 relative inline-block">
+                                <img src={fotoKendaraanPreview} alt="Foto Kendaraan" className="h-28 w-28 rounded-lg border border-gray-200 object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={hapusFotoKendaraan}
+                                    className="absolute -top-1.5 -right-1.5 rounded-full bg-red-500 text-white p-1"
+                                >
+                                    <X size={10} />
+                                </button>
+                            </div>
+                        )}
+                        <div className="mt-2">
+                            <button
+                                type="button"
+                                onClick={() => fotoKendaraanInputRef.current?.click()}
+                                className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 transition hover:border-green-500 hover:text-green-600"
+                            >
+                                <Upload size={20} />
+                                <span className="text-[10px]">Tambah</span>
+                            </button>
+                            <input
+                                ref={fotoKendaraanInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFotoKendaraanChange}
+                                className="hidden"
+                            />
+                        </div>
                     </div>
 
                     <div>

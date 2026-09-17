@@ -17,6 +17,7 @@ class Service extends Model
         'jenis_bangunan',
         'nama',
         'foto',
+        'foto_kendaraan',
         'kota',
         'kecamatan',
         'harga',
@@ -54,6 +55,7 @@ class Service extends Model
             'lebar' => 'integer',
             'jumlah_tampung' => 'integer',
             'foto_lahan' => 'array',
+            'foto_kendaraan' => 'string',
             'deleted_at' => 'datetime',
         ];
     }
