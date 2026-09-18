@@ -1,6 +1,8 @@
 import { Head, useForm, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import axios from 'axios';
 import MitraLayout from '@/Layouts/MitraLayout';
-import { ChevronLeft, Pencil } from 'lucide-react';
+import { ChevronLeft, Pencil, MapPin } from 'lucide-react';
 
 export default function Alamat({ alamat, kotaOptions = [] }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -11,6 +13,63 @@ export default function Alamat({ alamat, kotaOptions = [] }) {
         wilayah: alamat.wilayah ?? '',
         postal_code: alamat.postal_code ?? '',
     });
+
+    const [locating, setLocating] = useState(false);
+    const [locationError, setLocationError] = useState('');
+    const [kotaList, setKotaList] = useState(kotaOptions ?? []);
+
+    async function useCurrentLocation() {
+        setLocationError('');
+        if (!navigator.geolocation) {
+            setLocationError('Geolokasi tidak didukung perangkat ini.');
+            return;
+        }
+        setLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                try {
+                    const { latitude, longitude } = pos.coords;
+                    const { data } = await axios.get('https://nominatim.openstreetmap.org/reverse', {
+                        params: {
+                            lat: latitude,
+                            lon: longitude,
+                            format: 'jsonv2',
+                            addressdetails: 1,
+                            'accept-language': 'id',
+                        },
+                    });
+
+                    const a = data?.address ?? {};
+                    const display = data?.display_name ?? '';
+                    const detectedCity = a.city || a.town || a.county || '';
+                    const detectedWilayah = a.village || a.suburb || a.neighbourhood || a.locality || a.road || '';
+                    const detectedKecamatan = a.city_district || a.county || '';
+
+                    if (display) setData('address', display);
+                    // DEBUG (sementara): lihat field apa saja yang dikembalikan Nominatim untuk lokasi Anda
+                    console.log('[Alamat] Nominatim address keys:', a);
+                    if (a.state) setData('provinsi', a.state);
+                    if (detectedKecamatan) setData('kecamatan', detectedKecamatan);
+                    if (detectedWilayah) setData('wilayah', detectedWilayah);
+                    if (a.postcode) setData('postal_code', a.postcode);
+                    if (detectedCity) {
+                        if (!kotaList.includes(detectedCity)) {
+                            setKotaList((prev) => [...prev, detectedCity]);
+                        }
+                        setData('city', detectedCity);
+                    }
+                } catch {
+                    setLocationError('Gagal menentukan lokasi. Silakan isi alamat manual.');
+                } finally {
+                    setLocating(false);
+                }
+            },
+            () => {
+                setLocationError('Akses lokasi ditolak. Silakan isi alamat manual.');
+                setLocating(false);
+            }
+        );
+    }
 
     const submit = (e) => {
         e.preventDefault();
@@ -40,7 +99,7 @@ export default function Alamat({ alamat, kotaOptions = [] }) {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Kota</label>
+                    <label className="block text-sm font-medium text-gray-700">Kota/Kecamatan</label>
                     <select
                         value={data.city}
                         onChange={(e) => setData('city', e.target.value)}
@@ -49,7 +108,7 @@ export default function Alamat({ alamat, kotaOptions = [] }) {
                         }`}
                     >
                         <option value="">Pilih kota</option>
-                        {kotaOptions.map((nama) => (
+                        {kotaList.map((nama) => (
                             <option key={nama} value={nama}>
                                 {nama}
                             </option>
@@ -67,6 +126,19 @@ export default function Alamat({ alamat, kotaOptions = [] }) {
                     onChange={(v) => setData('postal_code', v)}
                     error={errors.postal_code}
                 />
+
+                <div className="pt-2">
+                    <button
+                        type="button"
+                        onClick={useCurrentLocation}
+                        disabled={locating}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                    >
+                        <MapPin size={14} />
+                        {locating ? 'Mendeteksi...' : 'Gunakan Lokasi Saat Ini'}
+                    </button>
+                    {locationError && <p className="mt-1 text-xs text-red-600">{locationError}</p>}
+                </div>
 
                 <button
                     type="submit"

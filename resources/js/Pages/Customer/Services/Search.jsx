@@ -69,7 +69,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
 
     function handleSearchSubmit(e) {
         e.preventDefault();
-        if (!kota) {
+        if (!kota && !search.trim()) {
             setSheet(detectedKota ? 'confirm' : 'picker');
             return;
         }
