@@ -109,16 +109,26 @@ class PengembalianDanaController extends Controller
     {
         abort_unless($report->category === 'kerugian', 404,
             'Action ini hanya untuk laporan Kerugian / Refund.');
-        abort_if($report->status !== 'siap_refund', 400, 'Laporan ini belum disetujui admin atau sudah diproses.');
-        abort_if($report->admin_approval !== 'approved', 403,
-            'Laporan belum diverifikasi admin. Finance tidak dapat memproses refund sampai admin approve.');
+
+        if ($report->status !== 'siap_refund') {
+            return back()->with('error', 'Laporan ini belum disetujui admin atau sudah diproses.');
+        }
+
+        if ($report->admin_approval !== 'approved') {
+            return back()->with('error', 'Laporan belum diverifikasi admin. Finance tidak dapat memproses refund sampai admin approve.');
+        }
 
         $order = $report->order;
         abort_unless($order, 404);
-        abort_if($order->sudahDirefund(), 400, 'Order ini sudah pernah di-refund sebelumnya.');
+
+        if ($order->sudahDirefund()) {
+            return back()->with('error', 'Order ini sudah pernah di-refund sebelumnya.');
+        }
 
         $total = (float) $order->total_price;
-        abort_if($total <= 0, 422, 'Order ini tidak memiliki total pembayaran.');
+        if ($total <= 0) {
+            return back()->with('error', 'Order ini tidak memiliki total pembayaran.');
+        }
 
         $percentage = 60;
         $amount = round($total * $percentage / 100, 2);
@@ -194,9 +204,14 @@ class PengembalianDanaController extends Controller
     {
         abort_unless($report->category === 'kerugian', 404,
             'Action ini hanya untuk laporan Kerugian / Refund.');
-        abort_if($report->status !== 'siap_refund', 400, 'Laporan ini belum disetujui admin atau sudah diproses.');
-        abort_if($report->admin_approval !== 'approved', 403,
-            'Laporan belum diverifikasi admin. Finance tidak dapat menolak laporan yang belum di-approve admin.');
+
+        if ($report->status !== 'siap_refund') {
+            return back()->with('error', 'Laporan ini belum disetujui admin atau sudah diproses.');
+        }
+
+        if ($report->admin_approval !== 'approved') {
+            return back()->with('error', 'Laporan belum diverifikasi admin. Finance tidak dapat menolak laporan yang belum di-approve admin.');
+        }
 
         $validated = $request->validate([
             'admin_note' => ['required', 'string', 'max:500'],

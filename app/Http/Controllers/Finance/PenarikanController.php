@@ -8,6 +8,7 @@ use App\Models\SaldoMutasi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -60,7 +61,9 @@ class PenarikanController extends Controller
             $saldoTersediaUntukPenarikanIni = $user->saldoMitra();
 
             if ($saldoTersediaUntukPenarikanIni < $jumlahPenarikan) {
-                abort(422, "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")");
+                throw ValidationException::withMessages([
+                    'approve' => "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")",
+                ]);
             }
 
             SaldoMutasi::create([

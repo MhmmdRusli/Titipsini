@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Search, Wallet, CheckCircle2, Clock3, Download, FileText, ExternalLink, ShieldCheck, X, Ban, Filter, Clock, XCircle } from 'lucide-react';
 
@@ -220,6 +220,7 @@ export default function PengembalianDanaView({
     titlePage = 'Pengembalian Dana',
     description = 'Tinjau laporan kerugian barang dari customer dan proses refund dengan nominal atau persentase.',
 }) {
+    const { flash } = usePage().props;
     const [search, setSearch] = useState(filters?.search ?? '');
     const [status, setStatus] = useState(filters?.status ?? 'semua');
     const [modal, setModal] = useState(null); // { mode: 'approve'|'reject', refund }
@@ -247,6 +248,9 @@ export default function PengembalianDanaView({
                 onSuccess: () => {
                     setModal(null);
                     router.reload({ only: ['refunds', 'summary'] });
+                },
+                onError: () => {
+                    setModal(null);
                 },
             }
         );
@@ -308,6 +312,24 @@ export default function PengembalianDanaView({
     return (
         <>
             <Head title={titlePage} />
+
+            {flash?.success && (
+                <div className="mb-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+                        <CheckCircle2 size={18} />
+                    </div>
+                    <div className="text-xs font-semibold">{flash.success}</div>
+                </div>
+            )}
+
+            {flash?.error && (
+                <div className="mb-4 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-900 shadow-sm dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-600 text-white">
+                        <XCircle size={18} />
+                    </div>
+                    <div className="text-xs font-semibold">{flash.error}</div>
+                </div>
+            )}
 
             {modal && (
                 modal.mode === 'approve' ? (

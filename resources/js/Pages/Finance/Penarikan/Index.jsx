@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Wallet,
@@ -13,6 +13,7 @@ import {
     Sparkles,
     MapPin,
     Calendar,
+    AlertCircle,
 } from 'lucide-react';
 import FinanceLayout from '@/Layouts/FinanceLayout';
 
@@ -50,6 +51,13 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
     const [rejectTarget, setRejectTarget] = useState(null);
     const [catatan, setCatatan] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [approveError, setApproveError] = useState(null);
+
+    useEffect(() => {
+        if (!approveError) return;
+        const t = setTimeout(() => setApproveError(null), 4000);
+        return () => clearTimeout(t);
+    }, [approveError]);
 
     const changeTab = (status) => {
         router.get('/finance/penarikan', { status }, { preserveState: true, preserveScroll: true, replace: true });
@@ -64,6 +72,14 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
             {
                 preserveScroll: true,
                 onSuccess: () => setApproveTarget(null),
+                onError: (errors) => {
+                    const msg =
+                        errors?.approve?.[0] ??
+                        errors?.message ??
+                        'Gagal menyetujui penarikan.';
+                    setApproveError(msg);
+                    setApproveTarget(null);
+                },
                 onFinish: () => setIsSubmitting(false),
             }
         );
@@ -133,6 +149,14 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                         <CheckCircle2 size={18} />
                     </div>
                     <div className="text-xs font-semibold">{flash.success}</div>
+                </div>
+            )}
+
+            {/* Notification: error ketika penyetujuan gagal (mis. saldo tidak cukup karena refund) */}
+            {approveError && (
+                <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-900 shadow-sm dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                    <AlertTriangle size={18} className="shrink-0 text-red-600 dark:text-red-400" />
+                    <div className="text-xs font-semibold">{approveError}</div>
                 </div>
             )}
 

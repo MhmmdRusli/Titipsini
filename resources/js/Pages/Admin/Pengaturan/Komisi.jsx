@@ -17,7 +17,7 @@ export default function Komisi({ commission_rate }) {
 
     function submit(e) {
         e.preventDefault();
-        put('/admin/pengaturan/komisi', {
+        put('/super-admin/pengaturan/komisi', {
             preserveScroll: true,
             onSuccess: () => {
                 setSuccessMessage('Pengaturan komisi platform berhasil disimpan!');
