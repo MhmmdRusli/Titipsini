@@ -21,9 +21,9 @@ function formatTanggal(value) {
 }
 
 const STATUS_BADGE = {
-    menunggu_verifikasi: { label: 'Menunggu Verifikasi', color: 'bg-amber-50 text-amber-600' },
-    berhasil: { label: 'Berhasil', color: 'bg-green-50 text-green-700' },
-    ditolak: { label: 'Ditolak', color: 'bg-red-50 text-red-600' },
+    menunggu_verifikasi: { label: 'Menunggu Verifikasi', color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300' },
+    berhasil: { label: 'Berhasil', color: 'bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300' },
+    ditolak: { label: 'Ditolak', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300' },
 };
 
 export default function Show({ topup }) {
@@ -68,89 +68,91 @@ export default function Show({ topup }) {
         );
     }
 
+    const cardCls = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800/90';
+
     return (
         <FinanceLayout>
             <Head title={`Verifikasi Top Up - ${topup.kode_transaksi}`} />
 
             <div className="mx-auto max-w-2xl p-6">
-                <Link href="/finance/topup" className="mb-4 flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition">
+                <Link href="/finance/topup" className="mb-4 flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition dark:text-slate-400 dark:hover:text-slate-200">
                     <ArrowLeft size={16} />
                     Kembali ke Daftar Top Up
                 </Link>
 
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-lg font-semibold text-slate-900">{topup.kode_transaksi}</p>
-                        <p className="text-xs text-slate-400">Diklaim dibayar: {formatTanggal(topup.paid_at)}</p>
+                        <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">{topup.kode_transaksi}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">Diklaim dibayar: {formatTanggal(topup.paid_at)}</p>
                     </div>
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.color}`}>
                         {badge.label}
                     </span>
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <p className="mb-3 text-sm font-semibold text-slate-900">Info Pelanggan</p>
-                    <div className="flex items-start gap-2 text-sm text-slate-600">
-                        <User size={16} className="mt-0.5 shrink-0 text-slate-400" />
+                <div className={cardCls}>
+                    <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Info Pelanggan</p>
+                    <div className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+                        <User size={16} className="mt-0.5 shrink-0 text-slate-400 dark:text-slate-500" />
                         <div>
-                            <p className="font-medium text-slate-900">{topup.user?.name}</p>
-                            <p className="text-xs text-slate-500">{topup.user?.email}</p>
-                            <p className="text-xs text-slate-500">{topup.user?.phone}</p>
+                            <p className="font-medium text-slate-900 dark:text-slate-100">{topup.user?.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{topup.user?.email}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{topup.user?.phone}</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <p className="mb-3 text-sm font-semibold text-slate-900">Info Pembayaran</p>
-                    <div className="flex items-start gap-2 text-sm text-slate-600">
-                        <Building2 size={16} className="mt-0.5 shrink-0 text-slate-400" />
+                <div className={cardCls}>
+                    <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Info Pembayaran</p>
+                    <div className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+                        <Building2 size={16} className="mt-0.5 shrink-0 text-slate-400 dark:text-slate-500" />
                         <div>
-                            <p className="font-medium text-slate-900">
+                            <p className="font-medium text-slate-900 dark:text-slate-100">
                                 {topup.metode_pembayaran === 'transfer_bank' ? 'Transfer Bank' : 'E-Wallet'} - {topup.channel}
                             </p>
                             {topup.va_number && (
-                                <p className="text-xs text-slate-500">No. VA: {topup.va_number}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">No. VA: {topup.va_number}</p>
                             )}
                         </div>
                     </div>
 
-                    <div className="mt-3 space-y-1.5 border-t border-slate-200 pt-3 text-sm">
-                        <div className="flex justify-between text-slate-500">
+                    <div className="mt-3 space-y-1.5 border-t border-slate-200 pt-3 text-sm dark:border-gray-700">
+                        <div className="flex justify-between text-slate-500 dark:text-slate-400">
                             <span>Subtotal Top Up</span>
-                            <span className="text-slate-800">{formatRupiah(topup.nominal)}</span>
+                            <span className="text-slate-800 dark:text-slate-200">{formatRupiah(topup.nominal)}</span>
                         </div>
-                        <div className="flex justify-between text-slate-500">
+                        <div className="flex justify-between text-slate-500 dark:text-slate-400">
                             <span>Biaya Admin</span>
-                            <span className="text-slate-800">{formatRupiah(topup.biaya_admin)}</span>
+                            <span className="text-slate-800 dark:text-slate-200">{formatRupiah(topup.biaya_admin)}</span>
                         </div>
-                        <div className="flex justify-between border-t border-slate-200 pt-1.5 font-semibold text-slate-900">
+                        <div className="flex justify-between border-t border-slate-200 pt-1.5 font-semibold text-slate-900 dark:border-gray-700 dark:text-slate-100">
                             <span>Total Bayar</span>
                             <span>{formatRupiah(topup.total)}</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <p className="mb-3 text-sm font-semibold text-slate-900">Bukti Pembayaran</p>
+                <div className={cardCls}>
+                    <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Bukti Pembayaran</p>
                     {topup.bukti_transfer ? (
                         <a href={topup.bukti_transfer} target="_blank" rel="noopener noreferrer">
                             <img
                                 src={topup.bukti_transfer}
                                 alt="Bukti transfer"
-                                className="w-full rounded-lg border border-slate-200 object-cover"
+                                className="w-full rounded-lg border border-slate-200 object-cover dark:border-gray-600"
                             />
                         </a>
                     ) : (
-                        <p className="text-sm text-slate-400">Belum ada bukti yang diunggah.</p>
+                        <p className="text-sm text-slate-400 dark:text-slate-500">Belum ada bukti yang diunggah.</p>
                     )}
                 </div>
 
                 {topup.catatan_admin && (
-                    <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-4">
-                        <p className="text-sm font-semibold text-red-700">Catatan Penolakan</p>
-                        <p className="mt-1 text-sm text-red-600">{topup.catatan_admin}</p>
+                    <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/30">
+                        <p className="text-sm font-semibold text-red-700 dark:text-red-300">Catatan Penolakan</p>
+                        <p className="mt-1 text-sm text-red-600 dark:text-red-300">{topup.catatan_admin}</p>
                         {topup.verifier && (
-                            <p className="mt-2 text-xs text-red-400">
+                            <p className="mt-2 text-xs text-red-400 dark:text-red-400/60">
                                 Diproses oleh {topup.verifier.name} • {formatTanggal(topup.verified_at)}
                             </p>
                         )}
@@ -158,7 +160,7 @@ export default function Show({ topup }) {
                 )}
 
                 {topup.status === 'berhasil' && topup.verifier && (
-                    <p className="mt-3 text-center text-xs text-slate-400">
+                    <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
                         Diverifikasi oleh {topup.verifier.name} • {formatTanggal(topup.verified_at)}
                     </p>
                 )}
@@ -169,7 +171,7 @@ export default function Show({ topup }) {
                             type="button"
                             onClick={() => setRejectOpen(true)}
                             disabled={processing}
-                            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-red-200 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-red-200 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/40 disabled:opacity-50"
                         >
                             <XCircle size={16} />
                             Tolak
@@ -189,19 +191,19 @@ export default function Show({ topup }) {
 
             {approveOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-slate-100">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-slate-100 dark:bg-gray-800 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-600">
+                            <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300">
                                 <CheckCircle2 size={22} />
                             </div>
                             <div>
-                                <h3 className="text-base font-bold text-slate-900">Setujui Top Up</h3>
-                                <p className="text-xs text-slate-500">{topup.kode_transaksi}</p>
+                                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Setujui Top Up</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{topup.kode_transaksi}</p>
                             </div>
                         </div>
 
-                        <p className="mt-3 text-sm text-slate-600">
-                            Setujui top up sebesar <strong className="text-emerald-600">{formatRupiah(topup.nominal)}</strong> untuk <strong className="text-slate-900">{topup.user?.name}</strong>? Saldo pelanggan akan langsung ditambahkan.
+                        <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+                            Setujui top up sebesar <strong className="text-emerald-600 dark:text-emerald-400">{formatRupiah(topup.nominal)}</strong> untuk <strong className="text-slate-900 dark:text-slate-100">{topup.user?.name}</strong>? Saldo pelanggan akan langsung ditambahkan.
                         </p>
 
                         <div className="mt-5 flex justify-end gap-2">
@@ -209,7 +211,7 @@ export default function Show({ topup }) {
                                 type="button"
                                 disabled={processing}
                                 onClick={() => setApproveOpen(false)}
-                                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-300 dark:hover:bg-gray-600 transition"
                             >
                                 Batal
                             </button>
@@ -228,15 +230,15 @@ export default function Show({ topup }) {
 
             {rejectOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-slate-100">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-slate-100 dark:bg-gray-800 dark:border-gray-700">
                         <div className="mb-3 flex items-center justify-between">
-                            <h2 className="text-base font-bold text-slate-900">Tolak Top Up</h2>
-                            <button onClick={() => setRejectOpen(false)} className="text-slate-400 hover:text-slate-600">
+                            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Tolak Top Up</h2>
+                            <button onClick={() => setRejectOpen(false)} className="text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200">
                                 <X size={18} />
                             </button>
                         </div>
 
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Alasan Penolakan</label>
+                        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Alasan Penolakan</label>
                         <textarea
                             rows={3}
                             value={alasan}
@@ -245,7 +247,7 @@ export default function Show({ topup }) {
                                 setErrorAlasan('');
                             }}
                             placeholder="Contoh: Bukti transfer tidak sesuai nominal."
-                            className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-1 ${
+                            className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-1 dark:bg-gray-700 dark:border-gray-600 dark:text-slate-200 ${
                                 errorAlasan
                                     ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
                                     : 'border-slate-200 focus:border-emerald-600 focus:ring-emerald-600'
