@@ -1122,7 +1122,7 @@ class ServiceController extends Controller
             'detectedKota' => 'Yogyakarta',
             'openCityPicker' => $request->boolean('pilih_kota'),
             'filters' => $request->only(['kota', 'search']),
-            'mitras' => $request->filled('kota') ? $services : null,
+            'mitras' => ($request->filled('kota') || $request->filled('search')) ? $services : null,
         ]);
     }
 

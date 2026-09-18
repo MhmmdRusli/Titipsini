@@ -19,6 +19,8 @@ function formatRupiah(value) {
     }).format(value ?? 0);
 }
 
+const cardCls = 'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800';
+
 export default function Index({ topups }) {
     return (
         <FinanceLayout>
@@ -61,11 +63,11 @@ export default function Index({ topups }) {
             </div>
 
             {/* Main Table Card */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className={cardCls}>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                         <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:border-gray-700 dark:bg-gray-800 dark:text-slate-400">
                                 <th className="px-6 py-4">Kode Transaksi</th>
                                 <th className="px-6 py-4">Pelanggan</th>
                                 <th className="px-6 py-4">Nominal</th>
@@ -74,16 +76,16 @@ export default function Index({ topups }) {
                                 <th className="px-6 py-4 text-right">Tindakan</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200">
+                        <tbody className="divide-y divide-slate-200 dark:divide-gray-700/60">
                             {topups.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-20 text-center text-slate-500">
+                                    <td colSpan={6} className="px-6 py-20 text-center text-slate-500 dark:text-slate-400">
                                         <div className="mx-auto flex max-w-sm flex-col items-center justify-center">
-                                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 border border-slate-200">
+                                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 border border-slate-200 dark:bg-gray-700 dark:text-slate-500 dark:border-gray-600">
                                                 <Clock size={32} />
                                             </div>
-                                            <h3 className="mt-4 text-base font-bold text-slate-800">Tidak Ada Transaksi</h3>
-                                            <p className="mt-1 text-xs text-slate-400">
+                                            <h3 className="mt-4 text-base font-bold text-slate-800 dark:text-slate-200">Tidak Ada Transaksi</h3>
+                                            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
                                                 Belum ada transaksi top-up yang menunggu verifikasi saat ini.
                                             </p>
                                         </div>
@@ -91,28 +93,28 @@ export default function Index({ topups }) {
                                 </tr>
                             ) : (
                                 topups.data.map((t) => (
-                                    <tr key={t.id} className="group transition-colors hover:bg-slate-50/80">
-                                        <td className="px-6 py-4 font-mono text-xs font-semibold text-slate-600">
+                                    <tr key={t.id} className="group transition-colors hover:bg-slate-50/80 dark:hover:bg-gray-700/40">
+                                        <td className="px-6 py-4 font-mono text-xs font-semibold text-slate-600 dark:text-slate-400">
                                             {t.kode_transaksi}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                                            <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors dark:text-slate-200">
                                                 {t.user?.name ?? '-'}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="font-extrabold text-slate-900 text-base">
+                                            <div className="font-extrabold text-slate-900 text-base dark:text-slate-200">
                                                 {formatRupiah(t.nominal)}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700">
+                                            <div className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-300">
                                                 {t.metode_pembayaran === 'transfer_bank' ? 'Transfer Bank' : 'E-Wallet'} - {t.channel}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-xs text-slate-500">
+                                        <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
                                             <div className="flex items-center gap-1.5 font-medium">
-                                                <Clock size={14} className="text-slate-400" />
+                                                <Clock size={14} className="text-slate-400 dark:text-slate-500" />
                                                 {t.paid_at ? new Date(t.paid_at).toLocaleString('id-ID') : '-'}
                                             </div>
                                         </td>
@@ -135,11 +137,11 @@ export default function Index({ topups }) {
 
             {/* Pagination Container */}
             {topups.links?.length > 3 && (
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 border border-slate-200 shadow-sm">
-                    <p className="text-xs font-medium text-slate-500">
-                        Menampilkan <span className="font-bold text-slate-800">{topups.from ?? 0}</span> -{' '}
-                        <span className="font-bold text-slate-800">{topups.to ?? 0}</span> dari Total{' '}
-                        <span className="font-bold text-slate-800">{topups.total ?? 0}</span> Data
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 border border-slate-200 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        Menampilkan <span className="font-bold text-slate-800 dark:text-slate-200">{topups.from ?? 0}</span> -{' '}
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{topups.to ?? 0}</span> dari Total{' '}
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{topups.total ?? 0}</span> Data
                     </p>
                     <div className="flex flex-wrap gap-1">
                         {topups.links.map((link, i) => (
@@ -152,8 +154,8 @@ export default function Index({ topups }) {
                                     link.active
                                         ? 'bg-[#087847] text-white border-emerald-600 shadow-sm'
                                         : link.url
-                                        ? 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
-                                        : 'cursor-not-allowed text-slate-300 border-slate-100 bg-slate-50/50'
+                                        ? 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:bg-gray-700 dark:text-slate-300 dark:border-gray-600 dark:hover:bg-gray-600'
+                                        : 'cursor-not-allowed text-slate-300 border-slate-100 bg-slate-50/50 dark:text-slate-600 dark:border-gray-600 dark:bg-gray-700'
                                 }`}
                             />
                         ))}
