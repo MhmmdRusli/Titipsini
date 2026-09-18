@@ -3,98 +3,102 @@
 namespace App\Http\Controllers\Mitra;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kota;
 use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ServiceController extends Controller
 {
     /**
-         * GET /mitra/layanan
-         */
-        public function index(Request $request): Response
-        {
-            $layanan = Service::query()
-                ->where('user_id', $request->user()->id)
-                ->orderBy('created_at', 'desc')
+     * GET /mitra/layanan
+     */
+    public function index(Request $request): Response
+    {
+        $layanan = Service::query()
+            ->where('user_id', $request->user()->id)
+            ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($item) {
                 $item->foto_url = $item->foto ? Storage::url($item->foto) : null;
                 $item->foto_kendaraan_url = $item->foto_kendaraan ? Storage::url($item->foto_kendaraan) : null;
+
                 return $item;
             });
 
         return Inertia::render('Mitra/Layanan/Index', [
-                'layanan' => $layanan,
-                'daftarKota' => \App\Models\Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
-            ]);
+            'layanan' => $layanan,
+            'daftarKota' => Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
+        ]);
+    }
+
+    /**
+     * GET /mitra/layanan/{layanan}
+     */
+    public function show(Request $request, Service $layanan): Response
+    {
+        $this->authorizeOwnership($request, $layanan);
+
+        $layanan->foto_url = $layanan->foto ? Storage::url($layanan->foto) : null;
+        $layanan->foto_kendaraan_url = $layanan->foto_kendaraan ? Storage::url($layanan->foto_kendaraan) : null;
+
+        // Handle foto_lahan array untuk kategori barang
+        if ($layanan->kategori === 'barang' && is_array($layanan->foto_lahan)) {
+            $layanan->foto_lahan = array_map(function ($path) {
+                return Storage::url($path);
+            }, $layanan->foto_lahan);
         }
 
-        /**
-         * GET /mitra/layanan/{layanan}
-         */
-        public function show(Request $request, Service $layanan): Response
-        {
-            $this->authorizeOwnership($request, $layanan);
+        return Inertia::render('Mitra/Layanan/Detail', [
+            'layanan' => $layanan,
+            'fiturPenuhAktif' => (bool) (($request->user()->fitur_penuh_kategori ?? [])[$layanan->kategori] ?? false),
+        ]);
+    }
 
-            $layanan->foto_url = $layanan->foto ? Storage::url($layanan->foto) : null;
-            $layanan->foto_kendaraan_url = $layanan->foto_kendaraan ? Storage::url($layanan->foto_kendaraan) : null;
-            
-            // Handle foto_lahan array untuk kategori barang
-            if ($layanan->kategori === 'barang' && is_array($layanan->foto_lahan)) {
-                $layanan->foto_lahan = array_map(function ($path) {
-                    return Storage::url($path);
-                }, $layanan->foto_lahan);
-            }
+    /**
+     * GET /mitra/layanan/{kategori}
+     * Menampilkan halaman kelola khusus 1 kategori (barang/kendaraan/bangunan/pindahan)
+     */
+    public function kategori(Request $request, string $kategori): Response
+    {
+        $halamanPerKategori = [
+            'barang' => 'Mitra/Layanan/KelolaBarang',
+            'kendaraan' => 'Mitra/Layanan/KelolaKendaraan',
+            'bangunan' => 'Mitra/Layanan/KelolaBangunan',
+            'pindahan' => 'Mitra/Layanan/KelolaPickUp',
+        ];
 
-            return Inertia::render('Mitra/Layanan/Detail', [
-                'layanan' => $layanan,
-                'fiturPenuhAktif' => (bool) (($request->user()->fitur_penuh_kategori ?? [])[$layanan->kategori] ?? false),
-            ]);
-        }
+        abort_unless(array_key_exists($kategori, $halamanPerKategori), 404);
 
-        /**
-         * GET /mitra/layanan/{kategori}
-         * Menampilkan halaman kelola khusus 1 kategori (barang/kendaraan/bangunan/pindahan)
-         */
-        public function kategori(Request $request, string $kategori): Response
-        {
-            $halamanPerKategori = [
-                'barang' => 'Mitra/Layanan/KelolaBarang',
-                'kendaraan' => 'Mitra/Layanan/KelolaKendaraan',
-                'bangunan' => 'Mitra/Layanan/KelolaBangunan',
-                'pindahan' => 'Mitra/Layanan/KelolaPickUp',
-            ];
+        $layanan = Service::query()
+            ->where('user_id', $request->user()->id)
+            ->where('kategori', $kategori)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $item->foto_url = $item->foto ? Storage::url($item->foto) : null;
+                $item->foto_kendaraan_url = $item->foto_kendaraan ? Storage::url($item->foto_kendaraan) : null;
 
-            abort_unless(array_key_exists($kategori, $halamanPerKategori), 404);
+                return $item;
+            });
 
-            $layanan = Service::query()
-                ->where('user_id', $request->user()->id)
-                ->where('kategori', $kategori)
-                ->orderBy('created_at', 'desc')
-                ->get()
-                ->map(function ($item) {
-                    $item->foto_url = $item->foto ? Storage::url($item->foto) : null;
-                    $item->foto_kendaraan_url = $item->foto_kendaraan ? Storage::url($item->foto_kendaraan) : null;
-                    return $item;
-                });
+        return Inertia::render($halamanPerKategori[$kategori], [
+            'layanan' => $layanan,
+            'daftarKota' => Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
+            'menungguVerifikasi' => false,
+            'fiturPenuhAktif' => (bool) (($request->user()->fitur_penuh_kategori ?? [])[$kategori] ?? false),
+            'edit' => $request->query('edit'),
+        ]);
+    }
 
-            return Inertia::render($halamanPerKategori[$kategori], [
-                'layanan' => $layanan,
-                'daftarKota' => \App\Models\Kota::where('is_active', true)->orderBy('nama')->pluck('nama'),
-                'menungguVerifikasi' => false,
-                'fiturPenuhAktif' => (bool) (($request->user()->fitur_penuh_kategori ?? [])[$kategori] ?? false),
-                'edit' => $request->query('edit'),
-            ]);
-        }
-
-        /**
-         * PATCH /mitra/layanan/{kategori}/fitur-penuh
-         */
-            public function toggleFiturPenuh(Request $request, string $kategori): RedirectResponse
+    /**
+     * PATCH /mitra/layanan/{kategori}/fitur-penuh
+     */
+    public function toggleFiturPenuh(Request $request, string $kategori): RedirectResponse
     {
         abort_unless(in_array($kategori, ['barang', 'kendaraan', 'bangunan', 'pindahan']), 404);
 
@@ -124,10 +128,10 @@ class ServiceController extends Controller
         );
     }
 
-        /**
-         * PATCH /mitra/layanan/{layanan}/toggle-aktif
-         */
-            public function toggleAktif(Request $request, Service $layanan): RedirectResponse
+    /**
+     * PATCH /mitra/layanan/{layanan}/toggle-aktif
+     */
+    public function toggleAktif(Request $request, Service $layanan): RedirectResponse
     {
         $this->authorizeOwnership($request, $layanan);
 
@@ -153,58 +157,55 @@ class ServiceController extends Controller
         );
     }
 
-        /**
-         * POST /mitra/layanan
-         */
-        public function store(Request $request): RedirectResponse
-        {
-            $validated = $this->validated($request);
+    /**
+     * POST /mitra/layanan
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $this->validated($request);
 
-            // Form alamat lahan (dipakai barang & kendaraan, kemungkinan juga
-            // bangunan/pindahan) — deteksi lewat keberadaan 'nama_usaha'.
-            if (isset($validated['nama_usaha'])) {
-                $validated['nama'] = $validated['nama_usaha'];
-                
-                // Untuk barang, set kota dari kabupaten_kota
-                if ($validated['kategori'] === 'barang') {
-                    $validated['kota'] = $validated['kabupaten_kota'];
-                }
-                // Untuk pindahan, jika kota/kecamatan tidak ada di form, set default
-                if ($validated['kategori'] === 'pindahan') {
-                    $validated['kota'] = $validated['kota'] ?? 'Tidak Ditentukan';
-                    $validated['kecamatan'] = $validated['kecamatan'] ?? 'Tidak Ditentukan';
-                }
+        // Form alamat lahan (dipakai barang & kendaraan, kemungkinan juga
+        // bangunan/pindahan) — deteksi lewat keberadaan 'nama_usaha'.
+        if (isset($validated['nama_usaha'])) {
+            $validated['nama'] = $validated['nama_usaha'];
 
-                $validated['foto_lahan'] = $request->hasFile('foto_lahan')
-                    ? $this->simpanFotoLahan($request)
-                    : [];
+            // Untuk barang, set kota dari kabupaten_kota
+            if ($validated['kategori'] === 'barang') {
+                $validated['kota'] = $validated['kabupaten_kota'];
             }
+            // Untuk pindahan, kota sudah disediakan dari form (required)
+            // tidak perlu fallback ke "Tidak Ditentukan"
 
-            if ($request->hasFile('foto')) {
-                $validated['foto'] = $request->file('foto')->store('services', 'public');
-            }
-
-            if ($request->hasFile('foto_kendaraan')) {
-                $validated['foto_kendaraan'] = $request->file('foto_kendaraan')->store('foto-kendaraan', 'public');
-            }
-
-            // Set verification_status untuk semua kategori yang pakai form kustom
-            if ($validated['kategori'] === 'barang' || $validated['kategori'] === 'bangunan' || $validated['kategori'] === 'pindahan') {
-                $validated['verification_status'] = 'pending';
-            }
-
-            $fiturPenuhAktif = (bool) (($request->user()->fitur_penuh_kategori ?? [])[$validated['kategori']] ?? false);
-            $validated['is_active'] = $fiturPenuhAktif;
-
-            $request->user()->services()->create($validated);
-
-            return redirect()->back()->with('success', 'Layanan berhasil ditambahkan.');
+            $validated['foto_lahan'] = $request->hasFile('foto_lahan')
+                ? $this->simpanFotoLahan($request)
+                : [];
         }
 
-        /**
-         * PUT /mitra/layanan/{service}
-         */
-        public function update(Request $request, Service $layanan): RedirectResponse
+        if ($request->hasFile('foto')) {
+            $validated['foto'] = $request->file('foto')->store('services', 'public');
+        }
+
+        if ($request->hasFile('foto_kendaraan')) {
+            $validated['foto_kendaraan'] = $request->file('foto_kendaraan')->store('foto-kendaraan', 'public');
+        }
+
+        // Set verification_status untuk semua kategori yang pakai form kustom
+        if ($validated['kategori'] === 'barang' || $validated['kategori'] === 'bangunan' || $validated['kategori'] === 'pindahan') {
+            $validated['verification_status'] = 'pending';
+        }
+
+        $fiturPenuhAktif = (bool) (($request->user()->fitur_penuh_kategori ?? [])[$validated['kategori']] ?? false);
+        $validated['is_active'] = $fiturPenuhAktif;
+
+        $request->user()->services()->create($validated);
+
+        return redirect()->back()->with('success', 'Layanan berhasil ditambahkan.');
+    }
+
+    /**
+     * PUT /mitra/layanan/{service}
+     */
+    public function update(Request $request, Service $layanan): RedirectResponse
     {
         $this->authorizeOwnership($request, $layanan);
 
@@ -212,6 +213,10 @@ class ServiceController extends Controller
 
         if ($validated['kategori'] === 'barang') {
             $validated['nama'] = $validated['nama_usaha'];
+            // Sync kota dari kabupaten_kota (frontend kirim, tapi pastikan)
+            if (isset($validated['kabupaten_kota'])) {
+                $validated['kota'] = $validated['kabupaten_kota'];
+            }
 
             if ($request->hasFile('foto_lahan')) {
                 $this->hapusFotoLahan($layanan);
@@ -231,13 +236,6 @@ class ServiceController extends Controller
         // 👇 DITAMBAHKAN: handle kategori Pindahan
         if ($validated['kategori'] === 'pindahan') {
             $validated['nama'] = $validated['nama_usaha'];
-            // Pertahankan kota dan kecamatan yang sudah ada jika tidak dikirim
-            if (!isset($validated['kota'])) {
-                $validated['kota'] = $layanan->kota ?? 'Tidak Ditentukan';
-            }
-            if (!isset($validated['kecamatan'])) {
-                $validated['kecamatan'] = $layanan->kecamatan ?? 'Tidak Ditentukan';
-            }
         }
 
         $validated['verification_status'] = 'pending';
@@ -262,55 +260,55 @@ class ServiceController extends Controller
         return redirect()->back()->with('success', 'Layanan berhasil diperbarui.');
     }
 
-        /**
-         * DELETE /mitra/layanan/{service}
-         */
-        public function destroy(Request $request, Service $layanan): RedirectResponse
-        {
-            $this->authorizeOwnership($request, $layanan);
+    /**
+     * DELETE /mitra/layanan/{service}
+     */
+    public function destroy(Request $request, Service $layanan): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $layanan);
 
-            if ($layanan->foto) {
-                Storage::delete($layanan->foto);
-            }
-
-            $this->hapusFotoLahan($layanan);
-
-            $layanan->delete();
-
-            return redirect()->back()->with('success', 'Layanan berhasil dihapus.');
+        if ($layanan->foto) {
+            Storage::delete($layanan->foto);
         }
 
-        protected function simpanFotoLahan(Request $request): array
-        {
-            $paths = [];
+        $this->hapusFotoLahan($layanan);
 
-            foreach ($request->file('foto_lahan') as $foto) {
-                $paths[] = $foto->store('foto-lahan', 'public');
-            }
+        $layanan->delete();
 
-            return $paths;
+        return redirect()->back()->with('success', 'Layanan berhasil dihapus.');
+    }
+
+    protected function simpanFotoLahan(Request $request): array
+    {
+        $paths = [];
+
+        foreach ($request->file('foto_lahan') as $foto) {
+            $paths[] = $foto->store('foto-lahan', 'public');
         }
 
-        protected function hapusFotoLahan(Service $layanan): void
-        {
-            if (! is_array($layanan->foto_lahan)) {
-                return;
-            }
+        return $paths;
+    }
 
-            foreach ($layanan->foto_lahan as $path) {
-                Storage::disk('public')->delete($path);
-            }
+    protected function hapusFotoLahan(Service $layanan): void
+    {
+        if (! is_array($layanan->foto_lahan)) {
+            return;
         }
 
-        /**
-         * Dua bentuk validasi tergantung form yang dipakai:
-         * - Form alamat lahan (barang, kendaraan, dan kategori lain yang sudah
-         *   pakai FormAlamatLahanParkir/sejenisnya) — dideteksi dari field
-         *   'nama_usaha' yang cuma ada di form ini.
-         * - Form generik lama (modal bawaan KategoriLayananView) — masih
-         *   dipakai kategori yang belum punya FormKustom.
-         */
-        protected function validated(Request $request, bool $isUpdate = false): array
+        foreach ($layanan->foto_lahan as $path) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    /**
+     * Dua bentuk validasi tergantung form yang dipakai:
+     * - Form alamat lahan (barang, kendaraan, dan kategori lain yang sudah
+     *   pakai FormAlamatLahanParkir/sejenisnya) — dideteksi dari field
+     *   'nama_usaha' yang cuma ada di form ini.
+     * - Form generik lama (modal bawaan KategoriLayananView) — masih
+     *   dipakai kategori yang belum punya FormKustom.
+     */
+    protected function validated(Request $request, bool $isUpdate = false): array
     {
         $kategori = $request->input('kategori');
 
@@ -366,8 +364,10 @@ class ServiceController extends Controller
                 'harga' => ['required', 'numeric', 'min:0'],
                 'foto_kendaraan' => ['nullable', 'image', 'max:5120'],
                 'upload_berkas' => ['required', 'string', 'max:500'],
-                'kota' => ['nullable', 'string', 'max:100'],
-                'kecamatan' => ['nullable', 'string', 'max:100'],
+                'kota' => ['required', 'string', 'max:100', Rule::exists('kota', 'nama')->where('is_active', true)],
+                'kecamatan' => ['required', 'string', 'max:100'],
+            ], [
+                'kota.exists' => 'Kota belum terdaftar atau tidak aktif. Hubungi Admin untuk menambahkan kota ini.',
             ]);
         }
 
@@ -380,7 +380,7 @@ class ServiceController extends Controller
                 'in:motor,mobil,truk,becak,sepeda,bus,mobil_pick_up',
             ],
             'nama' => ['required', 'string', 'max:150'],
-            'kota' => ['required', 'string', 'max:100', \Illuminate\Validation\Rule::exists('kota', 'nama')->where('is_active', true)],
+            'kota' => ['required', 'string', 'max:100', Rule::exists('kota', 'nama')->where('is_active', true)],
             'kecamatan' => ['required', 'string', 'max:100'],
             'harga' => ['nullable', 'numeric', 'min:0'],
             'is_active' => ['boolean'],
@@ -390,8 +390,8 @@ class ServiceController extends Controller
         ]);
     }
 
-        protected function authorizeOwnership(Request $request, Service $service): void
-        {
-            abort_unless($service->user_id === $request->user()->id, 403);
-        }
+    protected function authorizeOwnership(Request $request, Service $service): void
+    {
+        abort_unless($service->user_id === $request->user()->id, 403);
     }
+}

@@ -318,6 +318,12 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
     const submit = (e) => {
         e.preventDefault();
 
+        // Pastikan kota terisi dari kabupaten_kota untuk kategori barang
+        // (backend store() juga copy tapi ini lebih aman)
+        if (kategori === 'barang') {
+            setData('kota', data.kabupaten_kota);
+        }
+
         if (editingItem) {
             router.post(`/mitra/layanan/${editingItem.id}`, { ...data, _method: 'put' }, {
                 forceFormData: true,

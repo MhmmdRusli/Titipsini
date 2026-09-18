@@ -25,18 +25,20 @@
         'Colt Diesel',
     ];
 
-    export default function FormIdentitasKendaraan({ kategori, editingItem, onBatal, onSukses }) {
-        const { data, setData, post, put, processing, errors, transform } = useForm({
-            kategori,
-            nama_usaha: editingItem?.nama_usaha ?? '',
-            nomor_polisi: editingItem?.nomor_polisi ?? '',
-            nomor_kir: editingItem?.nomor_kir ?? '',
-            merek_kendaraan: editingItem?.merek_kendaraan ?? '',
-            jenis_pickup: editingItem?.jenis_pickup ?? '',
-            harga: editingItem?.harga ?? '',
-            foto_kendaraan: null,
-            upload_berkas: editingItem?.upload_berkas ?? '',
-        });
+    export default function FormIdentitasKendaraan({ kategori, editingItem, daftarKota = [], onBatal, onSukses }) {
+const { data, setData, post, put, processing, errors, transform } = useForm({
+        kategori,
+        nama_usaha: editingItem?.nama_usaha ?? '',
+        nomor_polisi: editingItem?.nomor_polisi ?? '',
+        nomor_kir: editingItem?.nomor_kir ?? '',
+        merek_kendaraan: editingItem?.merek_kendaraan ?? '',
+        jenis_pickup: editingItem?.jenis_pickup ?? '',
+        harga: editingItem?.harga ?? '',
+        kota: editingItem?.kota ?? '',
+        kecamatan: editingItem?.kecamatan ?? '',
+        foto_kendaraan: null,
+        upload_berkas: editingItem?.upload_berkas ?? '',
+    });
 
         const [fotoKendaraanPreview, setFotoKendaraanPreview] = useState(editingItem?.foto_kendaraan_url ?? null);
 
@@ -169,6 +171,37 @@
                             className={inputClass(errors.harga)}
                         />
                         {errors.harga && <p className="mt-1 text-xs text-red-600">{errors.harga}</p>}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Kota</label>
+                            <div className="relative">
+                                <select
+                                    value={data.kota}
+                                    onChange={(e) => setData('kota', e.target.value)}
+                                    className={`${inputClass(errors.kota)} appearance-none pr-8`}
+                                >
+                                    <option value="">Pilih kota</option>
+                                    {daftarKota.map((kota) => (
+                                        <option key={kota} value={kota}>{kota}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            </div>
+                            {errors.kota && <p className="mt-1 text-xs text-red-600">{errors.kota}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Kecamatan</label>
+                            <input
+                                type="text"
+                                placeholder="Contoh: Gondokusuman"
+                                value={data.kecamatan}
+                                onChange={(e) => setData('kecamatan', e.target.value)}
+                                className={inputClass(errors.kecamatan)}
+                            />
+                            {errors.kecamatan && <p className="mt-1 text-xs text-red-600">{errors.kecamatan}</p>}
+                        </div>
                     </div>
 
                     <div>
