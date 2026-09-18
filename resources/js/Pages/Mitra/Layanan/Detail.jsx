@@ -195,6 +195,7 @@ export default function Detail({ layanan }) {
                             <Baris label="Nomor Kir Kendaraan" value={layanan.nomor_kir} />
                             <Baris label="Merk Kendaraan" value={layanan.merek_kendaraan} />
                             <Baris label="Jenis Kendaraan" value={layanan.jenis_pickup} />
+                            <Baris label="Harga/Hari" value={layanan.harga ? `Rp ${parseInt(layanan.harga).toLocaleString('id-ID')}` : null} />
 
                             <div className="mt-3 border-t border-gray-200 pt-3">
                                 <p className="mb-2 text-sm font-semibold text-gray-800">Dokumen Kendaraan</p>

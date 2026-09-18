@@ -33,6 +33,7 @@
             nomor_kir: editingItem?.nomor_kir ?? '',
             merek_kendaraan: editingItem?.merek_kendaraan ?? '',
             jenis_pickup: editingItem?.jenis_pickup ?? '',
+            harga: editingItem?.harga ?? '',
             foto_kendaraan: null,
             upload_berkas: editingItem?.upload_berkas ?? '',
         });
@@ -156,6 +157,18 @@
                             <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         </div>
                         {errors.jenis_pickup && <p className="mt-1 text-xs text-red-600">{errors.jenis_pickup}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Harga (per hari)</label>
+                        <input
+                            type="number"
+                            placeholder="Contoh: 15000"
+                            value={data.harga}
+                            onChange={(e) => setData('harga', e.target.value)}
+                            className={inputClass(errors.harga)}
+                        />
+                        {errors.harga && <p className="mt-1 text-xs text-red-600">{errors.harga}</p>}
                     </div>
 
                     <div>

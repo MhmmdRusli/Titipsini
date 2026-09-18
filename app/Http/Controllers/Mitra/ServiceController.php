@@ -41,6 +41,7 @@ class ServiceController extends Controller
             $this->authorizeOwnership($request, $layanan);
 
             $layanan->foto_url = $layanan->foto ? Storage::url($layanan->foto) : null;
+            $layanan->foto_kendaraan_url = $layanan->foto_kendaraan ? Storage::url($layanan->foto_kendaraan) : null;
             
             // Handle foto_lahan array untuk kategori barang
             if ($layanan->kategori === 'barang' && is_array($layanan->foto_lahan)) {
@@ -77,6 +78,7 @@ class ServiceController extends Controller
                 ->get()
                 ->map(function ($item) {
                     $item->foto_url = $item->foto ? Storage::url($item->foto) : null;
+                    $item->foto_kendaraan_url = $item->foto_kendaraan ? Storage::url($item->foto_kendaraan) : null;
                     return $item;
                 });
 
@@ -361,6 +363,7 @@ class ServiceController extends Controller
                 'nomor_kir' => ['required', 'string', 'max:20'],
                 'merek_kendaraan' => ['required', 'in:Mitsubishi,Toyota,Suzuki,Daihatsu,Isuzu,Hino,Honda'],
                 'jenis_pickup' => ['required', 'in:Pick Up Terbuka,Pick Up Box,Engkel Box,Double Cabin,Colt Diesel'],
+                'harga' => ['required', 'numeric', 'min:0'],
                 'foto_kendaraan' => ['nullable', 'image', 'max:5120'],
                 'upload_berkas' => ['required', 'string', 'max:500'],
                 'kota' => ['nullable', 'string', 'max:100'],
