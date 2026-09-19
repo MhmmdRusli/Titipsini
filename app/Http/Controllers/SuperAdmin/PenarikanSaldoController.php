@@ -46,6 +46,8 @@ class PenarikanSaldoController extends Controller
                 'created_at' => $item->created_at?->format('d M Y H:i'),
                 'processed_at' => $item->processed_at?->format('d M Y H:i'),
                 'utang_refund' => $user ? $user->utangRefund() : 0,
+                'utang_refund_dipotong' => (int) ($item->utang_refund_dipotong ?? 0),
+                'jumlah_dikirim' => (int) ($item->jumlah_dikirim ?? 0),
             ];
         })->withQueryString();
 

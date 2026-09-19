@@ -327,9 +327,22 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                                 </button>
                                             </div>
                                         ) : (
-                                            <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
-                                                Selesai {formatDate(item.processed_at)}
-                                            </span>
+                                            <div className="flex flex-col items-end gap-1">
+                                                <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
+                                                    Selesai {formatDate(item.processed_at)}
+                                                </span>
+                                                {(item.utang_refund_dipotong ?? 0) > 0 && (
+                                                    <div className="flex items-center gap-1 text-[10px] text-red-600 dark:text-red-400">
+                                                        <MinusCircle size={10} />
+                                                        <span className="font-medium">Dipotong utang: Rp {formatRupiah(item.utang_refund_dipotong)}</span>
+                                                    </div>
+                                                )}
+                                                {(item.jumlah_dikirim ?? 0) > 0 && (
+                                                    <div className="flex items-center gap-1 text-[10px] text-green-600 dark:text-green-400">
+                                                        <span className="font-medium">Dikirim: Rp {formatRupiah(item.jumlah_dikirim)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         )}
                                     </td>
                                 </tr>
@@ -413,6 +426,9 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                 <p className="mt-0.5">
                                     Utang refund sebesar <span className="font-semibold">{formatRupiah(approveTarget.utang_refund)}</span> akan dipotong dari saldo mitra.
                                     Pastikan saldo mitra cukup setelah potongan utang.
+                                </p>
+                                <p className="mt-2 font-bold text-green-700 dark:text-green-400">
+                                    Dana yang akan dikirim ke rekening: <span className="text-green-600">{formatRupiah(approveTarget.jumlah - approveTarget.utang_refund)}</span>
                                 </p>
                             </div>
                         )}

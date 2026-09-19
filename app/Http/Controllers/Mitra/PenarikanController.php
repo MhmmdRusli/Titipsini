@@ -134,17 +134,11 @@ class PenarikanController extends Controller
     /**
      * Submit Form Penarikan
      */
-        public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $user = Auth::user();
         $saldoTersedia = $user->saldoMitra();
         $utang = $user->utangRefund();
-
-        if ($utang > 0) {
-            return back()->withErrors([
-                'jumlah' => 'Kamu punya utang refund sebesar Rp'.number_format($utang, 0, ',', '.').' yang harus lunas dulu sebelum bisa menarik saldo.',
-            ]);
-        }
 
         if ($saldoTersedia < 100000) {
             return back()->withErrors([

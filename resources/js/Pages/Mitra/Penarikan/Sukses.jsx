@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Clock3, ArrowLeft } from 'lucide-react';
+import { Clock3, ArrowLeft, AlertCircle, MinusCircle } from 'lucide-react';
 
 function formatRupiah(value) {
     return new Intl.NumberFormat('id-ID').format(value ?? 0);
@@ -23,8 +23,13 @@ export default function PenarikanSukses({ penarikan }) {
         nama_bank: '-',
         nomor_rekening: '-',
         nama_pemilik: '-',
-        status: 'pending'
+        status: 'pending',
+        utang_refund_dipotong: 0,
+        jumlah_dikirim: 0,
     };
+
+    const utangDipotong = Number(data.utang_refund_dipotong || 0);
+    const jumlahDikirim = Number(data.jumlah_dikirim || 0);
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-200 dark:bg-gray-800 p-4">
@@ -74,6 +79,24 @@ export default function PenarikanSukses({ penarikan }) {
                         <Clock3 size={36} className="text-amber-500" />
                     </div>
 
+                    {utangDipotong > 0 ? (
+                        <div className="mb-4 w-full rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-900/40 dark:bg-red-950/30">
+                            <div className="flex items-start gap-2">
+                                <AlertCircle size={18} className="text-red-600 shrink-0 mt-0.5" />
+                                <div className="text-left text-[11px] text-red-700 dark:text-red-400">
+                                    <p className="font-bold">Potongan Utang Refund</p>
+                                    <p className="mt-0.5">
+                                        Dari total penarikan <span className="font-semibold">Rp{formatRupiah(data.jumlah)}</span>,
+                                        dipotong utang refund <span className="font-semibold">Rp{formatRupiah(utangDipotong)}</span>.
+                                    </p>
+                                    <p className="mt-1 font-bold text-green-700 dark:text-green-400">
+                                        Dana yang dikirim ke rekening: <span className="text-green-600">Rp{formatRupiah(jumlahDikirim)}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : null}
+
                     <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
                         Penarikan Diajukan & Sedang Diproses
                     </h2>
@@ -106,11 +129,25 @@ export default function PenarikanSukses({ penarikan }) {
                             value={data.nama_pemilik} 
                         />
                         <Row 
-                            label="Total Dana" 
+                            label="Total Dana Diajukan" 
                             value={`Rp ${formatRupiah(data.jumlah)}`} 
                             bold 
                         />
                         
+                        {utangDipotong > 0 && (
+                            <>
+                                <Row 
+                                    label="Potongan Utang Refund" 
+                                    value={`- Rp ${formatRupiah(utangDipotong)}`} 
+                                />
+                                <Row 
+                                    label="Dana yang Dikirim" 
+                                    value={`Rp ${formatRupiah(jumlahDikirim)}`} 
+                                    bold 
+                                />
+                            </>
+                        )}
+
                         <div className="flex items-center justify-between py-1.5 border-t border-green-100 dark:border-gray-700 mt-1">
                             <span className="text-gray-400 dark:text-gray-500 text-[11px]">Status</span>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 capitalize">

@@ -11,7 +11,7 @@ class Penarikan extends Model
 
     protected $fillable = [
         'user_id', 'jumlah', 'nama_bank', 'nomor_rekening', 'nama_pemilik',
-        'status', 'catatan', 'processed_at',
+        'status', 'catatan', 'processed_at', 'utang_refund_dipotong', 'jumlah_dikirim',
     ];
 
     protected function casts(): array
