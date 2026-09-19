@@ -16,6 +16,7 @@ const CATEGORY_ICON = {
 export default function Search({ kategori = 'barang', detectedKota = null, openCityPicker = false, filters = {}, mitras = null }) {
     const [search, setSearch] = useState(filters?.search ?? '');
     const [kota, setKota] = useState(filters?.kota ?? null);
+    const [geoLoading, setGeoLoading] = useState(false);
 
     // 'confirm'  -> "Pilih kota: X" bottom sheet
     // 'picker'   -> full "kota lain" search screen
@@ -65,6 +66,58 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
         setSheet(null);
         if (!silent) setCityQuery('');
         fetchMitras(nextKota, search);
+    }
+
+    async function handleCurrentLocation() {
+        if (!navigator.geolocation) {
+            alert('Browser tidak mendukung geolokasi.');
+            return;
+        }
+        setGeoLoading(true);
+        try {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0,
+                });
+            });
+            const { latitude, longitude } = position.coords;
+            
+            // Reverse geocode using Nominatim (OpenStreetMap)
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=id`
+            );
+            const result = await response.json();
+            const address = result.address || {};
+            
+            // Try to find city from address
+            const city = address.city || address.town || address.municipality || address.county || address.regency || '';
+            
+            if (city) {
+                // Try to match with our city list
+                const { data } = await axios.get('/api/cities', { params: { search: city } });
+                if (data && data.length > 0) {
+                    applyKota(data[0].nama);
+                } else {
+                    applyKota(city);
+                }
+            } else {
+                alert('Tidak dapat mendeteksi kota dari lokasi Anda.');
+            }
+        } catch (error) {
+            if (error.code === 1) {
+                alert('Izin akses lokasi ditolak. Silakan aktifkan di pengaturan browser.');
+            } else if (error.code === 2) {
+                alert('Informasi lokasi tidak tersedia.');
+            } else if (error.code === 3) {
+                alert('Permintaan lokasi timeout. Coba lagi.');
+            } else {
+                alert('Gagal mengambil lokasi: ' + error.message);
+            }
+        } finally {
+            setGeoLoading(false);
+        }
     }
 
     function handleSearchSubmit(e) {
@@ -134,6 +187,19 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                         className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
                     />
                 </form>
+
+                {/* Quick "Lokasi Saat Ini" button - always visible when no kota selected */}
+                {!kota && (
+                    <button
+                        type="button"
+                        onClick={handleCurrentLocation}
+                        disabled={geoLoading}
+                        className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#15803d] bg-white px-4 py-2.5 text-sm font-medium text-[#15803d] shadow-sm hover:bg-[#e8f5ee] dark:border-[#22c55e] dark:bg-gray-800 dark:text-[#4ade80] dark:hover:bg-green-950/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <MapPin size={16} />
+                        {geoLoading ? 'Mendeteksi lokasi...' : 'Gunakan Lokasi Saat Ini'}
+                    </button>
+                )}
 
                 {kota && (
                     <button
@@ -264,6 +330,18 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                 OKE
                             </button>
                         </div>
+
+                        <div className="mt-4">
+                            <button
+                                type="button"
+                                onClick={handleCurrentLocation}
+                                disabled={geoLoading}
+                                className="flex w-full items-center justify-center gap-2 rounded-full border border-[#15803d] bg-white px-4 py-2.5 text-sm font-medium text-[#15803d] shadow-sm hover:bg-[#e8f5ee] dark:border-[#22c55e] dark:bg-gray-800 dark:text-[#4ade80] dark:hover:bg-green-950/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <MapPin size={16} />
+                                {geoLoading ? 'Mendeteksi lokasi...' : 'Gunakan Lokasi Saat Ini'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -325,6 +403,20 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                             <span className="ml-2 text-xs font-medium text-[#15803d] dark:text-[#4ade80]">
                                                 Anda di sini
                                             </span>
+                                        </span>
+                                    </button>
+                                )}
+
+                                {!cityQuery && (
+                                    <button
+                                        type="button"
+                                        onClick={handleCurrentLocation}
+                                        disabled={geoLoading}
+                                        className="flex w-full items-center gap-2 border-b border-gray-100 py-3 text-left dark:border-gray-800"
+                                    >
+                                        <MapPin size={16} className="text-[#15803d] dark:text-[#4ade80]" />
+                                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            {geoLoading ? 'Mendeteksi lokasi...' : 'Gunakan Lokasi Saya'}
                                         </span>
                                     </button>
                                 )}

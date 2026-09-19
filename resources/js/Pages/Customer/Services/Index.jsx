@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Search, MapPin, Clock, X, Package, Car, Building2, Truck, Star } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
+import axios from 'axios';
 
 const VEHICLE_TYPES = [
     { value: 'motor', label: 'Motor' },
@@ -77,6 +78,56 @@ export default function ServicesIndex({ services, filters }) {
     const [modalOpen, setModalOpen] = useState(needsTypeSelection && !filters?.jenis);
     const [selectedType, setSelectedType] = useState(filters?.jenis ?? '');
     const [search, setSearch] = useState(filters?.search ?? '');
+    const [geoLoading, setGeoLoading] = useState(false);
+
+    async function handleCurrentLocation() {
+        if (!navigator.geolocation) {
+            alert('Browser tidak mendukung geolokasi.');
+            return;
+        }
+        setGeoLoading(true);
+        try {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0,
+                });
+            });
+            const { latitude, longitude } = position.coords;
+            
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=id`
+            );
+            const result = await response.json();
+            const address = result.address || {};
+            
+            const city = address.city || address.town || address.municipality || address.county || address.regency || '';
+            
+            if (city) {
+                const { data } = await axios.get('/api/cities', { params: { search: city, kategori } });
+                if (data && data.length > 0) {
+                    router.get('/app/services', { kategori, search: data[0].nama, browse: true }, { replace: true });
+                } else {
+                    router.get('/app/services', { kategori, search: city, browse: true }, { replace: true });
+                }
+            } else {
+                alert('Tidak dapat mendeteksi kota dari lokasi Anda.');
+            }
+        } catch (error) {
+            if (error.code === 1) {
+                alert('Izin akses lokasi ditolak. Silakan aktifkan di pengaturan browser.');
+            } else if (error.code === 2) {
+                alert('Informasi lokasi tidak tersedia.');
+            } else if (error.code === 3) {
+                alert('Permintaan lokasi timeout. Coba lagi.');
+            } else {
+                alert('Gagal mengambil lokasi: ' + error.message);
+            }
+        } finally {
+            setGeoLoading(false);
+        }
+    }
 
     function confirmType() {
         if (!selectedType) return;
@@ -116,6 +167,18 @@ export default function ServicesIndex({ services, filters }) {
                         className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
                     />
                 </form>
+
+                {!search && !filters?.search && (
+                    <button
+                        type="button"
+                        onClick={handleCurrentLocation}
+                        disabled={geoLoading}
+                        className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#15803d] bg-white px-4 py-2.5 text-sm font-medium text-[#15803d] shadow-sm hover:bg-[#e8f5ee] dark:border-[#22c55e] dark:bg-gray-800 dark:text-[#4ade80] dark:hover:bg-green-950/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <MapPin size={16} />
+                        {geoLoading ? 'Mendeteksi lokasi...' : 'Gunakan Lokasi Saat Ini'}
+                    </button>
+                )}
 
                 {needsTypeSelection && selectedType && (
                     <button

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\InternalAuthController;
 use App\Http\Controllers\Customer\CityController;
+use App\Http\Controllers\Customer\ServiceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,3 +30,4 @@ Route::prefix('internal')->group(function () {
 });
 
 Route::get('/cities', [CityController::class, 'search']);
+Route::get('/services/nearby', [ServiceController::class, 'nearby']);

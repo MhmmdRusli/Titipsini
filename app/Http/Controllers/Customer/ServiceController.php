@@ -1394,4 +1394,57 @@ class ServiceController extends Controller
             ];
         })->all();
     }
+
+    /**
+     * GET /api/services/nearby
+     * Cari layanan terdekat berdasarkan koordinat (radius search)
+     */
+    public function nearby(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'radius' => 'nullable|integer|min:1|max:100', // km
+            'kategori' => 'nullable|in:barang,bangunan,kendaraan,pindahan',
+        ]);
+
+        $latitude = $request->float('latitude');
+        $longitude = $request->float('longitude');
+        $radius = $request->integer('radius', 10); // default 10km
+        $kategori = $request->string('kategori')->toString();
+
+        // Haversine formula for distance calculation
+        $haversine = "(6371 * acos(cos(radians({$latitude})) * cos(radians(latitude)) * cos(radians(longitude) - radians({$longitude})) + sin(radians({$latitude})) * sin(radians(latitude))))";
+
+        $services = Service::query()
+            ->where('is_active', true)
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->when($kategori, fn ($q) => $q->where('kategori', $kategori))
+            ->select('services.*')
+            ->selectRaw("{$haversine} as distance_km")
+            ->having('distance_km', '<=', $radius)
+            ->with('vendor:id,name,verification_status,jadwal_operasional')
+            ->orderBy('distance_km')
+            ->orderByRaw("
+                CASE 
+                    WHEN services.verification_status = 'terverifikasi' 
+                         AND EXISTS (
+                             SELECT 1 FROM users 
+                             WHERE users.id = services.user_id 
+                             AND users.verification_status = 'terverifikasi'
+                             AND users.jadwal_operasional IS NOT NULL
+                             AND users.jadwal_operasional <> '[]'
+                         ) THEN 1
+                    ELSE 2
+                END
+            ")
+            ->paginate(20)
+            ->through(fn ($service) => array_merge(
+                $this->formatMitraKendaraan($service),
+                ['distance_km' => round($service->distance_km, 1)]
+            ));
+
+        return response()->json($services);
+    }
 }

@@ -25,8 +25,8 @@
         'Colt Diesel',
     ];
 
-    export default function FormIdentitasKendaraan({ kategori, editingItem, daftarKota = [], onBatal, onSukses }) {
-const { data, setData, post, put, processing, errors, transform } = useForm({
+export default function FormIdentitasKendaraan({ kategori, editingItem, daftarKota = [], onBatal, onSukses }) {
+    const { data, setData, post, put, processing, errors, transform } = useForm({
         kategori,
         nama_usaha: editingItem?.nama_usaha ?? '',
         nomor_polisi: editingItem?.nomor_polisi ?? '',
@@ -36,6 +36,8 @@ const { data, setData, post, put, processing, errors, transform } = useForm({
         harga: editingItem?.harga ?? '',
         kota: editingItem?.kota ?? '',
         kecamatan: editingItem?.kecamatan ?? '',
+        latitude: editingItem?.latitude ?? '',
+        longitude: editingItem?.longitude ?? '',
         foto_kendaraan: null,
         upload_berkas: editingItem?.upload_berkas ?? '',
     });
