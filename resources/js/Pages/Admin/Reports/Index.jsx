@@ -71,11 +71,11 @@ export default function Index({ reports = [], filters = {} }) {
                     ))}
                 </div>
                 <a
-                    href={route('admin.reports.export')}
+                    href={route('admin.reports.export', { format: 'xls' })}
                     className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-all select-none w-fit"
                 >
                     <FileDown size={14} className="text-gray-500 dark:text-gray-400" />
-                    Unduh Dokumen
+                    Ekspor ke Excel (.xls)
                 </a>
             </div>
 

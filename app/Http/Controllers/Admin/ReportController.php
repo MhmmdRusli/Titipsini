@@ -35,11 +35,15 @@ class ReportController extends Controller
     /**
      * Unduh daftar laporan sebagai file CSV (bisa dibuka di Excel/Sheets).
      */
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request)
     {
         $reports = Report::with(['order.customer', 'order.partner'])
             ->latest()
             ->get();
+
+        if ($request->query('format') === 'xls') {
+            return $this->exportExcel($reports);
+        }
 
         $filename = 'laporan-'.now()->format('Y-m-d_His').'.csv';
 
@@ -72,6 +76,51 @@ class ReportController extends Controller
 
         return response()->streamDownload($callback, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
+    /**
+     * Unduh laporan sebagai file .xls (HTML table) yang terbuka
+     * langsung berupa tabel rapih di Microsoft Excel / LibreOffice.
+     */
+    protected function exportExcel($reports)
+    {
+        $filename = 'laporan-'.now()->format('Y-m-d_His').'.xls';
+
+        $html = '<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+table{border-collapse:collapse;font-family:"Plus Jakarta Sans",ui-sans-serif,sans-serif;font-size:11pt;width:100%}
+th,td{border:1px solid #666;padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#0f766e;color:#fff;font-weight:700;text-transform:uppercase;font-size:10pt}
+.title{font-size:15pt;font-weight:700;margin:16px 0}
+</style></head><body>
+<div class="title">Laporan Komplain / Reklamasi</div>
+<table><thead><tr>
+<th style="width:3%">#</th>
+<th style="width:17%">Nama Pelapor</th>
+<th style="width:17%">Nama Vendor</th>
+<th style="width:13%">Jenis Layanan</th>
+<th style="width:12%">Tanggal Laporan</th>
+<th style="width:38%">Ulasan</th>
+</tr></thead><tbody>';
+
+        foreach ($reports as $i => $r) {
+            $html .= '<tr>
+                <td>'.($i + 1).'</td>
+                <td>'.e($r->order->customer->name ?? '-').'</td>
+                <td>'.e($r->order->partner->name ?? '-').'</td>
+                <td>'.e($r->order->service_type ?? '-').'</td>
+                <td>'.e($r->created_at->format('d M Y')).'</td>
+                <td>'.e($r->description).'</td>
+            </tr>';
+        }
+
+        $html .= '</tbody></table></body></html>';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=utf-8',
+             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 
