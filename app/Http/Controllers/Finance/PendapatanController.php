@@ -13,12 +13,15 @@ class PendapatanController extends Controller
     public function index(Request $request): Response
     {
         $bulan = $request->string('bulan')->toString();
+        $tahun = $request->string('tahun')->toString();
 
         $query = PendapatanPlatform::with(['order:id,order_code', 'partner:id,name']);
 
-        if ($bulan) {
-            [$tahun, $bulanAngka] = explode('-', $bulan);
-            $query->whereYear('created_at', $tahun)->whereMonth('created_at', $bulanAngka);
+        if ($bulan && $tahun) {
+            $query->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan);
+        } elseif ($bulan) {
+            [$t, $b] = explode('-', $bulan);
+            $query->whereYear('created_at', $t)->whereMonth('created_at', $b);
         }
 
         $totalKomisi = (clone $query)->sum('jumlah_komisi');
@@ -47,6 +50,7 @@ class PendapatanController extends Controller
             ],
             'filters' => [
                 'bulan' => $bulan,
+                'tahun' => $tahun,
             ],
         ]);
     }

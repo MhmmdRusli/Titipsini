@@ -20,21 +20,55 @@ function formatDate(dateString) {
 // Card style diperbarui agar konsisten di dark mode
 const cardCls = 'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/60';
 
+const MONTHS = [
+    { value: '01', label: 'Januari' },
+    { value: '02', label: 'Februari' },
+    { value: '03', label: 'Maret' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'Mei' },
+    { value: '06', label: 'Juni' },
+    { value: '07', label: 'Juli' },
+    { value: '08', label: 'Agustus' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'Oktober' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'Desember' },
+];
+
+const YEARS = [
+    { value: '2026', label: '2026' },
+    { value: '2025', label: '2025' },
+    { value: '2024', label: '2024' },
+    { value: '2023', label: '2023' },
+];
+
 export default function Index({ items, summary, filters }) {
     const [bulan, setBulan] = useState(filters.bulan || '');
+    const [tahun, setTahun] = useState(filters.tahun || new Date().getFullYear().toString());
 
     const handleMonthChange = (e) => {
         const value = e.target.value;
         setBulan(value);
         router.get(
             '/finance/pendapatan',
-            value ? { bulan: value } : {},
+            value ? { bulan: value, tahun: tahun } : { tahun: tahun },
+            { preserveState: true, preserveScroll: true, replace: true }
+        );
+    };
+
+    const handleYearChange = (e) => {
+        const value = e.target.value;
+        setTahun(value);
+        router.get(
+            '/finance/pendapatan',
+            bulan ? { bulan: bulan, tahun: value } : { tahun: value },
             { preserveState: true, preserveScroll: true, replace: true }
         );
     };
 
     const handleReset = () => {
         setBulan('');
+        setTahun(new Date().getFullYear().toString());
         router.get('/finance/pendapatan', {}, { preserveState: true, preserveScroll: true, replace: true });
     };
 
@@ -65,12 +99,26 @@ export default function Index({ items, summary, filters }) {
                         </div>
 
                         <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-md">
-                            <input
-                                type="month"
+                            <select
                                 value={bulan}
                                 onChange={handleMonthChange}
-                                className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-1.5 text-sm font-medium text-white placeholder-green-200 focus:outline-none focus:ring-1 focus:ring-white/30 [color-scheme:dark]"
-                            />
+                                className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-1.5 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+                            >
+                                <option value="" className="text-gray-900">Semua Bulan</option>
+                                {MONTHS.map((m) => (
+                                    <option key={m.value} value={m.value} className="text-gray-900">{m.label}</option>
+                                ))}
+                            </select>
+                            <span className="text-white/40">|</span>
+                            <select
+                                value={tahun}
+                                onChange={handleYearChange}
+                                className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-1.5 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+                            >
+                                {YEARS.map((y) => (
+                                    <option key={y.value} value={y.value} className="text-gray-900">{y.label}</option>
+                                ))}
+                            </select>
                             {bulan && (
                                 <button
                                     type="button"
