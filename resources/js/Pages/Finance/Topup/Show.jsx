@@ -68,22 +68,22 @@ export default function Show({ topup }) {
         );
     }
 
-    const cardCls = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800/90';
+    const cardCls = 'rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800';
 
     return (
         <FinanceLayout>
             <Head title={`Verifikasi Top Up - ${topup.kode_transaksi}`} />
 
             <div className="mx-auto max-w-2xl p-6">
-                <Link href="/finance/topup" className="mb-4 flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition dark:text-slate-400 dark:hover:text-slate-200">
+                <Link href="/finance/topup" className="mb-4 flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition dark:text-gray-400 dark:hover:text-gray-200">
                     <ArrowLeft size={16} />
                     Kembali ke Daftar Top Up
                 </Link>
 
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">{topup.kode_transaksi}</p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">Diklaim dibayar: {formatTanggal(topup.paid_at)}</p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{topup.kode_transaksi}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">Diklaim dibayar: {formatTanggal(topup.paid_at)}</p>
                     </div>
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.color}`}>
                         {badge.label}
@@ -91,41 +91,41 @@ export default function Show({ topup }) {
                 </div>
 
                 <div className={cardCls}>
-                    <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Info Pelanggan</p>
-                    <div className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        <User size={16} className="mt-0.5 shrink-0 text-slate-400 dark:text-slate-500" />
+                    <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Info Pelanggan</p>
+                    <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <User size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
                         <div>
-                            <p className="font-medium text-slate-900 dark:text-slate-100">{topup.user?.name}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{topup.user?.email}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{topup.user?.phone}</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{topup.user?.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{topup.user?.email}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{topup.user?.phone}</p>
                         </div>
                     </div>
                 </div>
 
                 <div className={cardCls}>
-                    <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Info Pembayaran</p>
-                    <div className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        <Building2 size={16} className="mt-0.5 shrink-0 text-slate-400 dark:text-slate-500" />
+                    <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Info Pembayaran</p>
+                    <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <Building2 size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
                         <div>
-                            <p className="font-medium text-slate-900 dark:text-slate-100">
+                            <p className="font-medium text-gray-900 dark:text-gray-100">
                                 {topup.metode_pembayaran === 'transfer_bank' ? 'Transfer Bank' : 'E-Wallet'} - {topup.channel}
                             </p>
                             {topup.va_number && (
-                                <p className="text-xs text-slate-500 dark:text-slate-400">No. VA: {topup.va_number}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">No. VA: {topup.va_number}</p>
                             )}
                         </div>
                     </div>
 
-                    <div className="mt-3 space-y-1.5 border-t border-slate-200 pt-3 text-sm dark:border-gray-700">
-                        <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                    <div className="mt-3 space-y-1.5 border-t border-gray-200 pt-3 text-sm dark:border-gray-700">
+                        <div className="flex justify-between text-gray-500 dark:text-gray-400">
                             <span>Subtotal Top Up</span>
-                            <span className="text-slate-800 dark:text-slate-200">{formatRupiah(topup.nominal)}</span>
+                            <span className="text-gray-800 dark:text-gray-200">{formatRupiah(topup.nominal)}</span>
                         </div>
-                        <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                        <div className="flex justify-between text-gray-500 dark:text-gray-400">
                             <span>Biaya Admin</span>
-                            <span className="text-slate-800 dark:text-slate-200">{formatRupiah(topup.biaya_admin)}</span>
+                            <span className="text-gray-800 dark:text-gray-200">{formatRupiah(topup.biaya_admin)}</span>
                         </div>
-                        <div className="flex justify-between border-t border-slate-200 pt-1.5 font-semibold text-slate-900 dark:border-gray-700 dark:text-slate-100">
+                        <div className="flex justify-between border-t border-gray-200 pt-1.5 font-semibold text-gray-900 dark:border-gray-700 dark:text-gray-100">
                             <span>Total Bayar</span>
                             <span>{formatRupiah(topup.total)}</span>
                         </div>
@@ -133,17 +133,17 @@ export default function Show({ topup }) {
                 </div>
 
                 <div className={cardCls}>
-                    <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Bukti Pembayaran</p>
+                    <p className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Bukti Pembayaran</p>
                     {topup.bukti_transfer ? (
                         <a href={topup.bukti_transfer} target="_blank" rel="noopener noreferrer">
                             <img
                                 src={topup.bukti_transfer}
                                 alt="Bukti transfer"
-                                className="w-full rounded-lg border border-slate-200 object-cover dark:border-gray-600"
+                                className="w-full rounded-lg border border-gray-200 object-cover dark:border-gray-600"
                             />
                         </a>
                     ) : (
-                        <p className="text-sm text-slate-400 dark:text-slate-500">Belum ada bukti yang diunggah.</p>
+                        <p className="text-sm text-gray-400 dark:text-gray-500">Belum ada bukti yang diunggah.</p>
                     )}
                 </div>
 
@@ -160,7 +160,7 @@ export default function Show({ topup }) {
                 )}
 
                 {topup.status === 'berhasil' && topup.verifier && (
-                    <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
+                    <p className="mt-3 text-center text-xs text-gray-400 dark:text-gray-500">
                         Diverifikasi oleh {topup.verifier.name} • {formatTanggal(topup.verified_at)}
                     </p>
                 )}
@@ -191,19 +191,19 @@ export default function Show({ topup }) {
 
             {approveOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-slate-100 dark:bg-gray-800 dark:border-gray-700">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 rounded-xl bg-green-100 text-green-600 dark:bg-green-950/60 dark:text-green-300">
+                            <div className="p-2.5 rounded-xl bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-300">
                                 <CheckCircle2 size={22} />
                             </div>
                             <div>
-                                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Setujui Top Up</h3>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">{topup.kode_transaksi}</p>
+                                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Setujui Top Up</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{topup.kode_transaksi}</p>
                             </div>
                         </div>
 
-                        <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-                            Setujui top up sebesar <strong className="text-green-600 dark:text-green-400">{formatRupiah(topup.nominal)}</strong> untuk <strong className="text-slate-900 dark:text-slate-100">{topup.user?.name}</strong>? Saldo pelanggan akan langsung ditambahkan.
+                        <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                            Setujui top up sebesar <strong className="text-green-700 dark:text-green-400">{formatRupiah(topup.nominal)}</strong> untuk <strong className="text-gray-900 dark:text-gray-100">{topup.user?.name}</strong>? Saldo pelanggan akan langsung ditambahkan.
                         </p>
 
                         <div className="mt-5 flex justify-end gap-2">
@@ -211,7 +211,7 @@ export default function Show({ topup }) {
                                 type="button"
                                 disabled={processing}
                                 onClick={() => setApproveOpen(false)}
-                                className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-300 dark:hover:bg-gray-600 transition"
+                                className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition"
                             >
                                 Batal
                             </button>
@@ -230,15 +230,15 @@ export default function Show({ topup }) {
 
             {rejectOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-slate-100 dark:bg-gray-800 dark:border-gray-700">
+                    <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
                         <div className="mb-3 flex items-center justify-between">
-                            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Tolak Top Up</h2>
-                            <button onClick={() => setRejectOpen(false)} className="text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200">
+                            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Tolak Top Up</h2>
+                            <button onClick={() => setRejectOpen(false)} className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200">
                                 <X size={18} />
                             </button>
                         </div>
 
-                        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Alasan Penolakan</label>
+                        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Alasan Penolakan</label>
                         <textarea
                             rows={3}
                             value={alasan}
@@ -247,10 +247,10 @@ export default function Show({ topup }) {
                                 setErrorAlasan('');
                             }}
                             placeholder="Contoh: Bukti transfer tidak sesuai nominal."
-                            className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-1 dark:bg-gray-700 dark:border-gray-600 dark:text-slate-200 ${
+                            className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ${
                                 errorAlasan
                                     ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                                    : 'border-slate-200 focus:border-green-600 focus:ring-green-600'
+                                    : 'border-gray-200 focus:border-green-500 focus:ring-green-500'
                             }`}
                         />
                         {errorAlasan && <p className="mt-1 text-xs text-red-500">{errorAlasan}</p>}

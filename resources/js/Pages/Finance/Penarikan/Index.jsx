@@ -43,7 +43,7 @@ function formatDate(value) {
     });
 }
 
-const cardCls = 'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800';
+const cardCls = 'overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800';
 
 export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = false }) {
     const { flash } = usePage().props;
@@ -110,7 +110,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
             <Head title="Penarikan Saldo" />
 
             {/* Header Hero Banner (Sesuai Gambar) */}
-            <div className="relative mb-8 overflow-hidden rounded-2xl bg-[#087847] p-8 text-white shadow-md">
+            <div className="relative mb-8 overflow-hidden rounded-2xl bg-green-700 p-8 text-white shadow-md">
                 <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
                     <div>
                         {/* Badge Pill Khusus di Kiri Atas */}
@@ -164,7 +164,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
             )}
 
             {/* Navigation Tabs */}
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-100 p-1.5 border border-slate-200 dark:bg-gray-800 dark:border-gray-700">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gray-100 p-1.5 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                 <div className="flex flex-wrap gap-1">
                     {TABS.map((tab) => {
                         const isActive = activeStatus === tab.key;
@@ -174,8 +174,8 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                 onClick={() => changeTab(tab.key)}
                                 className={`relative rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 ${
                                     isActive
-                                        ? 'bg-white text-green-800 border border-slate-200 shadow-sm dark:bg-gray-800 dark:text-green-300 dark:border-green-900/40'
-                                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/5'
+                                        ? 'bg-white text-green-800 border border-gray-200 shadow-sm dark:bg-gray-800 dark:text-green-300 dark:border-green-900/40'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5'
                                 }`}
                             >
                                 {tab.label}
@@ -203,7 +203,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                         <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:border-gray-700 dark:bg-gray-800 dark:text-slate-400">
+                            <tr className="border-b border-gray-200 bg-gray-50 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
                                 <th className="px-6 py-4">Informasi Mitra</th>
                                 <th className="px-6 py-4">Nominal</th>
                                 <th className="px-6 py-4">Rekening Tujuan</th>
@@ -213,16 +213,16 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                 <th className="px-6 py-4 text-right">Tindakan</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200 dark:divide-gray-700/60">
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700/60">
                             {penarikan.data.length === 0 && (
                                 <tr>
                                     <td colSpan={7} className="px-6 py-20 text-center">
                                         <div className="mx-auto flex max-w-sm flex-col items-center justify-center">
-                                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 border border-slate-200 dark:bg-gray-700 dark:text-slate-500 dark:border-gray-600">
+                                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 border border-gray-200 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700">
                                                 <Wallet size={32} />
                                             </div>
-                                            <h3 className="mt-4 text-base font-bold text-slate-800 dark:text-slate-200">Tidak ada pengajuan</h3>
-                                            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                                            <h3 className="mt-4 text-base font-bold text-gray-800 dark:text-gray-200">Tidak ada pengajuan</h3>
+                                            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                                                 Belum ada data penarikan saldo yang sesuai dengan filter ini.
                                             </p>
                                         </div>
@@ -230,42 +230,42 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                 </tr>
                             )}
                             {penarikan.data.map((item) => (
-                                <tr key={item.id} className="group transition-colors hover:bg-slate-50/80 dark:hover:bg-gray-700/40">
+                                <tr key={item.id} className="group transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/40">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-700 font-bold text-sm border border-green-200/50 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800">
                                                 {item.user?.name?.charAt(0) ?? 'M'}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-slate-900 group-hover:text-green-700 transition-colors dark:text-slate-200 dark:group-hover:text-green-400">
+                                                <p className="font-bold text-gray-900 group-hover:text-green-700 transition-colors dark:text-gray-200 dark:group-hover:text-green-400">
                                                     {item.user?.name ?? '-'}
                                                 </p>
-                                                <p className="text-[11px] text-slate-400 dark:text-slate-500">{item.user?.email ?? '-'}</p>
+                                                <p className="text-[11px] text-gray-400 dark:text-gray-500">{item.user?.email ?? '-'}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="font-extrabold text-slate-900 text-base dark:text-slate-200">
+                                        <div className="font-extrabold text-gray-900 text-base dark:text-gray-200">
                                             {formatRupiah(item.jumlah)}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-gray-600 dark:bg-gray-700">
-                                            <div className="flex items-center gap-2 font-semibold text-xs text-slate-800 dark:text-slate-200">
+                                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-2.5 dark:border-gray-700 dark:bg-gray-800">
+                                            <div className="flex items-center gap-2 font-semibold text-xs text-gray-800 dark:text-gray-200">
                                                 <Building2 size={14} className="text-green-600 dark:text-green-400" />
                                                 <span>{item.nama_bank}</span>
-                                                <span className="text-slate-300 dark:text-slate-600">•</span>
-                                                <span className="font-mono text-slate-600 dark:text-slate-400">{item.nomor_rekening}</span>
+                                                <span className="text-gray-300 dark:text-gray-600">•</span>
+                                                <span className="font-mono text-gray-600 dark:text-gray-400">{item.nomor_rekening}</span>
                                             </div>
-                                            <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500">
+                                            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
                                                 <User size={12} />
                                                 <span>a.n. {item.nama_pemilik}</span>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium dark:text-slate-400">
-                                            <Clock size={14} className="text-slate-400 dark:text-slate-500" />
+                                        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium dark:text-gray-400">
+                                            <Clock size={14} className="text-gray-400 dark:text-gray-500" />
                                             {formatDate(item.created_at)}
                                         </div>
                                     </td>
@@ -303,7 +303,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                                 Rp {formatRupiah(item.utang_refund)}
                                             </span>
                                         ) : (
-                                            <span className="text-[11px] text-slate-400 dark:text-slate-500">-</span>
+                                            <span className="text-[11px] text-gray-400 dark:text-gray-500">-</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -312,7 +312,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                                 <button
                                                     type="button"
                                                     onClick={() => setApproveTarget(item)}
-                                                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#087847] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-800 active:scale-95 border border-green-600"
+                                                    className="inline-flex items-center gap-1.5 rounded-xl bg-green-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-800 active:scale-95 border border-green-600"
                                                 >
                                                     <Check size={14} />
                                                     Setujui
@@ -320,14 +320,14 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                                 <button
                                                     type="button"
                                                     onClick={() => setRejectTarget(item)}
-                                                    className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 dark:border-gray-600 dark:bg-gray-800 dark:text-slate-300"
+                                                    className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
                                                     title="Tolak Penarikan"
                                                 >
                                                     <Ban size={15} />
                                                 </button>
                                             </div>
                                         ) : (
-                                            <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                                            <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
                                                 Selesai {formatDate(item.processed_at)}
                                             </span>
                                         )}
@@ -341,11 +341,11 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
 
             {/* Pagination Container */}
             {penarikan.data.length > 0 && (
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 border border-slate-200 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                        Menampilkan <span className="font-bold text-slate-800 dark:text-slate-200">{penarikan.from}</span> -{' '}
-                        <span className="font-bold text-slate-800 dark:text-slate-200">{penarikan.to}</span> dari Total{' '}
-                        <span className="font-bold text-slate-800 dark:text-slate-200">{penarikan.total}</span> Data
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 border border-gray-200 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        Menampilkan <span className="font-bold text-gray-800 dark:text-gray-200">{penarikan.from}</span> -{' '}
+                        <span className="font-bold text-gray-800 dark:text-gray-200">{penarikan.to}</span> dari Total{' '}
+                        <span className="font-bold text-gray-800 dark:text-gray-200">{penarikan.total}</span> Data
                     </p>
                     <div className="flex flex-wrap gap-1">
                         {penarikan.links.map((link, i) => (
@@ -357,10 +357,10 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all border ${
                                     link.active
-                                        ? 'bg-[#087847] text-white border-green-600 shadow-sm'
+                                        ? 'bg-green-700 text-white border-green-600 shadow-sm'
                                         : link.url
-                                        ? 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:bg-gray-700 dark:text-slate-300 dark:border-gray-600 dark:hover:bg-gray-600'
-                                        : 'cursor-not-allowed text-slate-300 border-slate-100 bg-slate-50/50 dark:text-slate-600 dark:border-gray-600 dark:bg-gray-700'
+                                        ? 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-600'
+                                        : 'cursor-not-allowed text-gray-300 border-gray-100 bg-gray-50/50 dark:text-gray-600 dark:border-gray-700 dark:bg-gray-800'
                                 }`}
                             />
                         ))}
@@ -370,8 +370,8 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
 
             {/* Modal Approve */}
             {approveTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-md">
-                    <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 dark:bg-gray-800 dark:border-gray-700">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4 backdrop-blur-md">
+                    <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                         <div className="flex items-center justify-between">
                             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800">
                                 <CheckCircle2 size={24} />
@@ -379,30 +379,30 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                             <button
                                 type="button"
                                 onClick={() => setApproveTarget(null)}
-                                className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition dark:text-slate-500 dark:hover:bg-gray-700 dark:hover:text-slate-300"
+                                className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
                         <div className="mt-4">
-                            <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">Konfirmasi Persetujuan</h3>
-                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            <h3 className="text-lg font-extrabold text-gray-900 dark:text-gray-100">Konfirmasi Persetujuan</h3>
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                 Dana akan dikonfirmasi telah ditransfer ke rekening penerima berikut.
                             </p>
                         </div>
 
-                        <div className="mt-5 space-y-3 rounded-2xl bg-slate-50 p-4 border border-slate-200 text-xs dark:bg-gray-700 dark:border-gray-600">
+                        <div className="mt-5 space-y-3 rounded-2xl bg-gray-50 p-4 border border-gray-200 text-xs dark:bg-gray-800 dark:border-gray-700">
                             <div className="flex justify-between">
-                                <span className="text-slate-400 dark:text-slate-500">Mitra:</span>
-                                <span className="font-bold text-slate-800 dark:text-slate-200">{approveTarget.user?.name}</span>
+                                <span className="text-gray-400 dark:text-gray-500">Mitra:</span>
+                                <span className="font-bold text-gray-800 dark:text-gray-200">{approveTarget.user?.name}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-400 dark:text-slate-500">Bank & Rekening:</span>
-                                <span className="font-bold text-slate-800 dark:text-slate-200">{approveTarget.nama_bank} - {approveTarget.nomor_rekening}</span>
+                                <span className="text-gray-400 dark:text-gray-500">Bank & Rekening:</span>
+                                <span className="font-bold text-gray-800 dark:text-gray-200">{approveTarget.nama_bank} - {approveTarget.nomor_rekening}</span>
                             </div>
-                            <div className="flex justify-between border-t border-slate-200 pt-3 dark:border-gray-600">
-                                <span className="text-slate-400 dark:text-slate-500">Total Pencairan:</span>
+                            <div className="flex justify-between border-t border-gray-200 pt-3 dark:border-gray-700">
+                                <span className="text-gray-400 dark:text-gray-500">Total Pencairan:</span>
                                 <span className="text-base font-black text-green-700 dark:text-green-400">{formatRupiah(approveTarget.jumlah)}</span>
                             </div>
                         </div>
@@ -421,7 +421,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                             <button
                                 type="button"
                                 onClick={() => setApproveTarget(null)}
-                                className="rounded-xl px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition border border-slate-200 dark:text-slate-400 dark:hover:bg-gray-700"
+                                className="rounded-xl px-5 py-2.5 text-xs font-bold text-gray-600 hover:bg-gray-100 transition border border-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
                             >
                                 Batal
                             </button>
@@ -429,7 +429,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                 type="button"
                                 disabled={isSubmitting}
                                 onClick={handleApprove}
-                                className="rounded-xl bg-[#087847] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-green-800 transition disabled:opacity-50 border border-green-600"
+                                className="rounded-xl bg-green-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-green-800 transition disabled:opacity-50 border border-green-600"
                             >
                                 {isSubmitting ? 'Memproses...' : 'Ya, Setujui Sekarang'}
                             </button>
@@ -440,8 +440,8 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
 
             {/* Modal Reject */}
             {rejectTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-md">
-                    <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 dark:bg-gray-800 dark:border-gray-700">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/60 p-4 backdrop-blur-md">
+                    <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 shadow-2xl border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                         <div className="flex items-center justify-between">
                             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800">
                                 <AlertTriangle size={24} />
@@ -452,32 +452,32 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                     setRejectTarget(null);
                                     setCatatan('');
                                 }}
-                                className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition dark:text-slate-500 dark:hover:bg-gray-700 dark:hover:text-slate-300"
+                                className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
                         <div className="mt-4">
-                            <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">Tolak Permintaan</h3>
-                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            <h3 className="text-lg font-extrabold text-gray-900 dark:text-gray-100">Tolak Permintaan</h3>
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                 Berikan alasan penolakan agar mitra dapat memperbaiki pengajuannya.
                             </p>
                         </div>
 
                         <div className="mt-4 space-y-2 rounded-2xl bg-red-50/50 p-3.5 border border-red-200 text-xs dark:bg-red-950/30 dark:border-red-800">
                             <div className="flex justify-between">
-                                <span className="text-slate-500 dark:text-slate-400">Mitra:</span>
-                                <span className="font-bold text-slate-800 dark:text-slate-200">{rejectTarget.user?.name}</span>
+                                <span className="text-gray-500 dark:text-gray-400">Mitra:</span>
+                                <span className="font-bold text-gray-800 dark:text-gray-200">{rejectTarget.user?.name}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-500 dark:text-slate-400">Nominal:</span>
+                                <span className="text-gray-500 dark:text-gray-400">Nominal:</span>
                                 <span className="font-bold text-red-700 dark:text-red-300">{formatRupiah(rejectTarget.jumlah)}</span>
                             </div>
                         </div>
 
                         <div className="mt-4">
-                            <label className="mb-2 block text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <label className="mb-2 block text-xs font-bold text-gray-700 dark:text-gray-300">
                                 Catatan Penolakan
                             </label>
                             <textarea
@@ -485,7 +485,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                 onChange={(e) => setCatatan(e.target.value)}
                                 rows={3}
                                 placeholder="Tuliskan alasan penolakan di sini..."
-                                className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-3.5 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition dark:bg-gray-700 dark:border-gray-600 dark:text-slate-200 dark:placeholder-slate-500"
+                                className="w-full rounded-2xl border border-gray-200 bg-gray-50 p-3.5 text-xs font-medium text-gray-800 placeholder-gray-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:placeholder-gray-500"
                             />
                         </div>
 
@@ -496,7 +496,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                     setRejectTarget(null);
                                     setCatatan('');
                                 }}
-                                className="rounded-xl px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition border border-slate-200 dark:text-slate-400 dark:hover:bg-gray-700"
+                                className="rounded-xl px-5 py-2.5 text-xs font-bold text-gray-600 hover:bg-gray-100 transition border border-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
                             >
                                 Batal
                             </button>

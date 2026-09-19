@@ -320,7 +320,7 @@ export default function Dashboard({ stats = {}, transactions, filters = {}, citi
             {/* Modal Detail */}
             {selected && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-                    <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-100 dark:border-gray-800">
+                    <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl border border-gray-100 dark:border-gray-700">
                         <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-5 py-4">
                             <div>
                                 <span className="text-xs font-semibold uppercase tracking-wider text-green-600 dark:text-green-400">Detail Transaksi</span>

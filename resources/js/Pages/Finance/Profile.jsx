@@ -286,8 +286,8 @@ export default function Profile({ finance }) {
 
         /* Support Dark Mode pada style kustom */
         .dark .field-input {
-          border-color: #1f293d;
-          background: #1f293d;
+          border-color: #1f2937;
+          background: #1f2937;
           color: #f3f4f6;
         }
         .dark .field-input:hover {

@@ -75,24 +75,24 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <span className="text-xs font-semibold uppercase tracking-wider text-green-600">Verifikasi Transaksi</span>
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
+                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
                         Verifikasi Pembayaran QRIS
                     </h1>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         Daftar pesanan yang menunggu verifikasi bukti transfer QRIS dari customer.
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2">
                     <div className="relative w-full sm:w-64">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && applyFilters({ search: e.target.value })}
                             placeholder="Cari kode pesanan..."
-                            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-4 text-xs font-medium text-slate-800 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-200"
+                            className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-4 text-xs font-medium text-gray-800 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200"
                         />
                     </div>
                     <button
@@ -131,10 +131,10 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
             )}
 
             {/* Main Table Card */}
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-gray-800 dark:bg-slate-900">
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                        <thead className="border-b border-slate-100 bg-slate-50/60 uppercase tracking-wider text-slate-500 dark:border-gray-800 dark:bg-slate-800/40 dark:text-gray-400">
+                        <thead className="border-b border-gray-100 bg-gray-50/60 uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-400">
                             <tr>
                                 <th className="px-5 py-3.5 font-semibold">Kode</th>
                                 <th className="px-5 py-3.5 font-semibold">Customer</th>
@@ -145,32 +145,32 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
                                 <th className="px-5 py-3.5 text-right font-semibold">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-gray-800">
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {orders.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="px-5 py-12 text-center text-sm text-slate-400 dark:text-gray-500">
+                                    <td colSpan={7} className="px-5 py-12 text-center text-sm text-gray-400 dark:text-gray-500">
                                         Belum ada pesanan yang menunggu verifikasi pembayaran.
                                     </td>
                                 </tr>
                             ) : (
                                 orders.data.map((order) => (
-                                    <tr key={order.id} className="transition hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                                        <td className="px-5 py-4 font-semibold text-slate-900 dark:text-gray-100">{order.order_code}</td>
-                                        <td className="px-5 py-4 font-medium text-slate-700 dark:text-gray-300">{order.customer?.name ?? '-'}</td>
-                                        <td className="px-5 py-4 text-slate-600 dark:text-gray-400">{order.partner?.name ?? '-'}</td>
+                                    <tr key={order.id} className="transition hover:bg-gray-50/60 dark:hover:bg-gray-800/40">
+                                        <td className="px-5 py-4 font-semibold text-gray-900 dark:text-gray-100">{order.order_code}</td>
+                                        <td className="px-5 py-4 font-medium text-gray-700 dark:text-gray-300">{order.customer?.name ?? '-'}</td>
+                                        <td className="px-5 py-4 text-gray-600 dark:text-gray-400">{order.partner?.name ?? '-'}</td>
                                         <td className="px-5 py-4 font-bold text-green-600 dark:text-green-400">{formatRupiah(order.total_price)}</td>
-                                        <td className="px-5 py-4 text-slate-600 dark:text-gray-400">
-                                            <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium capitalize text-slate-700 dark:bg-slate-800 dark:text-gray-300">
+                                        <td className="px-5 py-4 text-gray-600 dark:text-gray-400">
+                                            <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium capitalize text-gray-700 dark:bg-gray-800 dark:text-gray-300">
                                                 {order.payment_method ?? '-'}
                                             </span>
                                         </td>
-                                        <td className="px-5 py-4 text-slate-500 dark:text-gray-400">{order.created_at}</td>
+                                        <td className="px-5 py-4 text-gray-500 dark:text-gray-400">{order.created_at}</td>
                                         <td className="px-5 py-4 text-right">
                                             <div className="flex items-center justify-end gap-1.5">
                                                 <button
                                                     type="button"
                                                     onClick={() => { setVerifyTarget(order); setPreviewImage(true); }}
-                                                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
+                                                    className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                                                 >
                                                     <ImageIcon size={13} /> Bukti
                                                 </button>
@@ -198,9 +198,9 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
                 </div>
 
                 {orders.links && orders.links.length > 3 && (
-                    <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800">
-                        <p className="text-xs text-slate-500 dark:text-gray-400">
-                            Menampilkan <span className="font-semibold text-slate-700 dark:text-gray-200">{orders.data.length}</span> dari <span className="font-semibold text-slate-700 dark:text-gray-200">{orders.total}</span> pesanan
+                    <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Menampilkan <span className="font-semibold text-gray-700 dark:text-gray-200">{orders.data.length}</span> dari <span className="font-semibold text-gray-700 dark:text-gray-200">{orders.total}</span> pesanan
                         </p>
                         <div className="flex flex-wrap items-center gap-1">
                             {orders.links.map((link, idx) => (
@@ -212,7 +212,7 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
                                     className={`rounded-md px-3 py-1 text-xs font-medium transition ${
                                         link.active
                                             ? 'bg-green-600 text-white'
-                                            : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700'
+                                            : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                                     } ${!link.url ? 'cursor-not-allowed opacity-40' : ''}`}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />
@@ -224,19 +224,19 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
 
             {/* Modal preview bukti transfer */}
             {previewImage && verifyTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" onClick={() => setPreviewImage(false)}>
-                    <div className="w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-xl dark:bg-slate-900" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-gray-800">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm" onClick={() => setPreviewImage(false)}>
+                    <div className="w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
                             <div>
                                 <span className="text-xs font-semibold uppercase tracking-wider text-green-600">Bukti Transfer</span>
-                                <h3 className="text-base font-bold text-slate-900 dark:text-gray-100">{verifyTarget.order_code}</h3>
+                                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{verifyTarget.order_code}</h3>
                             </div>
-                            <button type="button" onClick={() => setPreviewImage(false)} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                            <button type="button" onClick={() => setPreviewImage(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
                                 <X size={18} />
                             </button>
                         </div>
                         <div className="p-5">
-                            <div className="flex items-center justify-center rounded-lg bg-slate-50 p-2 border border-slate-100 dark:bg-slate-800/50 dark:border-gray-800">
+                            <div className="flex items-center justify-center rounded-lg bg-gray-50 p-2 border border-gray-100 dark:bg-gray-800/50 dark:border-gray-800">
                                 <img
                                     src={verifyTarget.payment_receipt}
                                     alt="Bukti Transfer"
@@ -247,7 +247,7 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
                                 <button
                                     type="button"
                                     onClick={() => setPreviewImage(false)}
-                                    className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
+                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                                 >
                                     Tutup
                                 </button>
@@ -271,23 +271,23 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
 
             {/* Modal konfirmasi verifikasi pembayaran */}
             {verifyTarget && !previewImage && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-gray-900">
                         <div className="p-6">
                             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/50 dark:text-green-400">
                                 <ShieldCheck size={22} />
                             </div>
-                            <h3 className="text-base font-bold text-slate-900 dark:text-gray-100">Verifikasi Pembayaran?</h3>
-                            <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-gray-400">
-                                Pastikan bukti transfer untuk pesanan <span className="font-semibold text-slate-800 dark:text-gray-200">{verifyTarget.order_code}</span> sebesar{' '}
-                                <span className="font-bold text-green-600 dark:text-green-400">{formatRupiah(verifyTarget.total_price)}</span> sudah benar. Status pesanan akan diubah menjadi <span className="font-semibold text-slate-700 dark:text-gray-200">Pembayaran Diterima</span>.
+                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Verifikasi Pembayaran?</h3>
+                            <p className="mt-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                Pastikan bukti transfer untuk pesanan <span className="font-semibold text-gray-800 dark:text-gray-200">{verifyTarget.order_code}</span> sebesar{' '}
+                                <span className="font-bold text-green-600 dark:text-green-400">{formatRupiah(verifyTarget.total_price)}</span> sudah benar. Status pesanan akan diubah menjadi <span className="font-semibold text-gray-700 dark:text-gray-200">Pembayaran Diterima</span>.
                             </p>
                             <div className="mt-6 flex items-center justify-end gap-2">
                                 <button
                                     type="button"
                                     onClick={() => setVerifyTarget(null)}
                                     disabled={isVerifying}
-                                    className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
+                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                                 >
                                     Batal
                                 </button>
@@ -307,23 +307,23 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
 
             {/* Modal konfirmasi penolakan pembayaran */}
             {rejectTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl dark:border dark:border-gray-800 dark:bg-gray-900">
                         <div className="p-6">
                             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
                                 <XCircle size={22} />
                             </div>
-                            <h3 className="text-base font-bold text-slate-900 dark:text-gray-100">Tolak Pembayaran?</h3>
-                            <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-gray-400">
-                                Anda akan menolak pembayaran untuk pesanan <span className="font-semibold text-slate-800 dark:text-gray-200">{rejectTarget.order_code}</span>.
+                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Tolak Pembayaran?</h3>
+                            <p className="mt-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                Anda akan menolak pembayaran untuk pesanan <span className="font-semibold text-gray-800 dark:text-gray-200">{rejectTarget.order_code}</span>.
                             </p>
                             <div className="mt-4">
-                                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-gray-300">Alasan Penolakan</label>
+                                <label className="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">Alasan Penolakan</label>
                                 <textarea
                                     value={rejectReason}
                                     onChange={(e) => setRejectReason(e.target.value)}
                                     rows={3}
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-xs font-medium text-slate-800 focus:border-rose-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-100 dark:focus:bg-slate-800"
+                                    className="w-full rounded-xl border border-gray-200 bg-gray-50/50 p-3 text-xs font-medium text-gray-800 focus:border-rose-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:bg-gray-800"
                                     placeholder="Contoh: Bukti transfer tidak jelas / nominal tidak sesuai"
                                 />
                             </div>
@@ -332,7 +332,7 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
                                     type="button"
                                     onClick={() => { setRejectTarget(null); setRejectReason(''); }}
                                     disabled={isRejecting}
-                                    className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700"
+                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                                 >
                                     Batal
                                 </button>
