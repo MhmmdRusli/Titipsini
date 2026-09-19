@@ -144,7 +144,7 @@ class ServiceController extends Controller
     /**
      * Blokir pemesanan kalau layanan/mitra belum siap: layanan belum
      * divalidasi, KTP mitra belum terverifikasi, atau jam operasional mitra
-     * belum dipasang.
+     * belum dipasang, atau kapasitas penuh.
      */
     protected function ensureOrderable(Service $service): void
     {
@@ -159,6 +159,11 @@ class ServiceController extends Controller
             403,
             'Mitra sedang tutup saat ini. Silakan coba lagi di jam operasional.'
         );
+
+        // Cek kapasitas (hanya untuk kategori yang punya jumlah_tampung)
+        if ($service->jumlah_tampung && $service->isFull()) {
+            abort(403, 'Kapasitas penuh. Silakan pilih layanan lain atau coba tanggal lain.');
+        }
     }
 
     /**
@@ -355,6 +360,7 @@ class ServiceController extends Controller
             };
             $service->foto = $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null;
             $service->fotoKendaraan = $service->foto_kendaraan ? \Illuminate\Support\Facades\Storage::url($service->foto_kendaraan) : null;
+            $service->capacity = $service->getCapacityData();
             return $service;
         })->sortBy('sort_priority')->values();
 
@@ -1295,6 +1301,7 @@ class ServiceController extends Controller
             'fotoUrl' => $service->foto ? \Illuminate\Support\Facades\Storage::url($service->foto) : null,
             'is_orderable' => $service->isOrderable(),
             'sedang_tutup_hari_ini' => $this->sedangTutupHariIni($service),
+            'capacity' => $service->getCapacityData(),
         ];
     }
 

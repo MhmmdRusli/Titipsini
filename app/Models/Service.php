@@ -101,7 +101,70 @@ class Service extends Model
             && $this->vendor->jadwalOperasionalValid();
     }
     public function user()
-{
-    return $this->belongsTo(\App\Models\User::class);
-}
+    {
+        return $this->belongsTo(\App\Models\User::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(\App\Models\Order::class, 'service_id');
+    }
+
+    /**
+     * Hitung order aktif yang memakai slot kapasitas.
+     * Order aktif = status baru sampai diterima_mitra, dan end_date >= today.
+     */
+    public function getActiveOrdersCount(): int
+    {
+        return $this->orders()
+            ->whereIn('status', ['baru', 'diproses', 'diterima', 'dijemput', 'diterima_mitra'])
+            ->where('end_date', '>=', now()->toDateString())
+            ->count();
+    }
+
+    /**
+     * Kapasitas tersisa (bisa negatif jika overbooking manual).
+     */
+    public function getRemainingCapacity(): int
+    {
+        if (! $this->jumlah_tampung) {
+            return 999; // unlimited jika tidak set
+        }
+        return max(0, $this->jumlah_tampung - $this->getActiveOrdersCount());
+    }
+
+    /**
+     * Apakah kapasitas penuh?
+     */
+    public function isFull(): bool
+    {
+        if (! $this->jumlah_tampung) {
+            return false;
+        }
+        return $this->getActiveOrdersCount() >= $this->jumlah_tampung;
+    }
+
+    /**
+     * Data kapasitas untuk frontend.
+     */
+    public function getCapacityData(): array
+    {
+        if (! $this->jumlah_tampung) {
+            return [
+                'total' => null,
+                'used' => $this->getActiveOrdersCount(),
+                'remaining' => null,
+                'is_full' => false,
+                'is_unlimited' => true,
+            ];
+        }
+        $used = $this->getActiveOrdersCount();
+        return [
+            'total' => $this->jumlah_tampung,
+            'used' => $used,
+            'remaining' => max(0, $this->jumlah_tampung - $used),
+            'is_full' => $used >= $this->jumlah_tampung,
+            'is_unlimited' => false,
+        ];
+    }
 }

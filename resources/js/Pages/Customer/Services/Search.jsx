@@ -218,6 +218,16 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                         {mitras.data.map((m) => {
                             const sedangTutup = m.is_orderable !== false && m.sedang_tutup_hari_ini === true;
                             const dimmed = m.is_orderable === false || sedangTutup;
+                            const cap = m.capacity;
+                            const isFull = cap && cap.is_full;
+                            const capText = cap && !cap.is_unlimited 
+                                ? `Tersisa ${cap.remaining}/${cap.total} slot`
+                                : cap && cap.is_unlimited
+                                ? 'Tidak terbatas'
+                                : null;
+                            const capColor = isFull ? 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400'
+                                : cap && cap.remaining <= 2 ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400'
+                                : 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400';
                             return (
                             <div
                                 key={m.id}
@@ -233,15 +243,22 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                         </span>
                                         <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{m.nama}</p>
                                     </div>
-                                    {m.is_orderable === false ? (
-                                        <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
-                                            Segera Tersedia
-                                        </span>
-                                    ) : sedangTutup ? (
-                                        <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-500 dark:bg-red-950/40 dark:text-red-400">
-                                            Layanan Sedang Tutup
-                                        </span>
-                                    ) : null}
+                                    <div className="flex flex-col items-end gap-1">
+                                        {m.is_orderable === false ? (
+                                            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                                Segera Tersedia
+                                            </span>
+                                        ) : sedangTutup ? (
+                                            <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-500 dark:bg-red-950/40 dark:text-red-400">
+                                                Layanan Sedang Tutup
+                                            </span>
+                                        ) : null}
+                                        {capText && (
+                                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${capColor}`}>
+                                                {capText}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <p className="mt-1.5 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                                     <MapPin size={12} /> {m.alamat}, {m.kecamatan}
@@ -253,11 +270,11 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                 <div className="mt-3 flex gap-2">
                                     <button
                                         type="button"
-                                        disabled={!m.isBuka || m.is_orderable === false || sedangTutup}
-                                        onClick={() => { if (m.is_orderable !== false && ! sedangTutup) router.visit(`/app/services/${kategori}/${m.id}/titip`); }}
+                                        disabled={!m.isBuka || m.is_orderable === false || sedangTutup || isFull}
+                                        onClick={() => { if (m.is_orderable !== false && ! sedangTutup && !isFull) router.visit(`/app/services/${kategori}/${m.id}/titip`); }}
                                         className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-[#22c55e] dark:disabled:bg-gray-700"
                                     >
-                                        {sedangTutup ? 'Layanan Sedang Tutup' : 'Titip Disini'}
+                                        {isFull ? 'Penuh' : sedangTutup ? 'Layanan Sedang Tutup' : 'Titip Disini'}
                                     </button>
                                     <Link
                                         href={`/app/services/${kategori}/${m.id}/detail`}

@@ -24,12 +24,18 @@ export default function DetailMitra({ service }) {
                         </div>
                         <span
                             className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                service.isBuka
+                                service.sedangTutupHariIni
+                                    ? 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'
+                                    : service.isOrderable
                                     ? 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]'
-                                    : 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'
+                                    : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400'
                             }`}
                         >
-                            {service.isBuka ? 'Buka' : 'Tutup'}
+                            {service.sedangTutupHariIni
+                                ? 'Layanan Sedang Tutup'
+                                : service.isOrderable
+                                ? 'Buka'
+                                : 'Segera Tersedia'}
                         </span>
                     </div>
 
