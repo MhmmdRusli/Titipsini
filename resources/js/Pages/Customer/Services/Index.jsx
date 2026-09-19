@@ -83,7 +83,7 @@ export default function ServicesIndex({ services, filters }) {
         setModalOpen(false);
         router.get(
             '/app/services',
-            { kategori, jenis: selectedType, search },
+            { kategori, jenis: selectedType, search, browse: true },
             { preserveState: true, replace: true }
         );
     }
@@ -92,7 +92,7 @@ export default function ServicesIndex({ services, filters }) {
         e.preventDefault();
         router.get(
             '/app/services',
-            { kategori, jenis: filters?.jenis ?? '', search },
+            { kategori, jenis: filters?.jenis ?? '', search, browse: true },
             { preserveState: true, replace: true }
         );
     }

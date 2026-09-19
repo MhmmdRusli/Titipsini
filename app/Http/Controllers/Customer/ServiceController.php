@@ -216,6 +216,26 @@ class ServiceController extends Controller
             return redirect()->route('customer.services.barang.landing');
         }
 
+        $searchQuery = $request->string('search')->toString();
+
+        // Determine which cities to include in search (nearby = same province)
+        $targetKotas = [];
+        if ($searchQuery) {
+            $matchedKotas = \App\Models\Kota::where('is_active', true)
+                ->where(function ($q) use ($searchQuery) {
+                    $q->where('nama', 'like', "%{$searchQuery}%");
+                })
+                ->pluck('provinsi')
+                ->unique();
+            
+            if ($matchedKotas->isNotEmpty()) {
+                $targetKotas = \App\Models\Kota::where('is_active', true)
+                    ->whereIn('provinsi', $matchedKotas)
+                    ->pluck('nama')
+                    ->toArray();
+            }
+        }
+
         $services = Service::query()
             ->where('is_active', true)
             ->select('services.*')
@@ -236,10 +256,11 @@ class ServiceController extends Controller
             ->when($kategori, fn ($query) => $query->where('kategori', $kategori))
             ->when($jenis && $kategori === 'kendaraan', fn ($query) => $query->where('jenis_kendaraan', $jenis))
             ->when($jenis && $kategori === 'bangunan', fn ($query) => $query->where('jenis_bangunan', $jenis))
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('kota', 'like', "%{$search}%")
-                        ->orWhere('kecamatan', 'like', "%{$search}%");
+            ->when($targetKotas, fn ($query) => $query->whereIn('kota', $targetKotas))
+            ->when($searchQuery && empty($targetKotas), function ($query) use ($searchQuery) {
+                $query->where(function ($q) use ($searchQuery) {
+                    $q->where('kota', 'like', "%{$searchQuery}%")
+                        ->orWhere('kecamatan', 'like', "%{$searchQuery}%");
                 });
             })
             ->with('vendor:id,name,verification_status,jadwal_operasional')
@@ -1062,17 +1083,96 @@ class ServiceController extends Controller
     }
     public function search(Request $request, string $kategori = 'kendaraan')
     {
+        $kotaFilter = $request->string('kota')->toString();
+        $searchQuery = $request->string('search')->toString();
+
+        // Determine which cities to include in search (nearby = same province)
+        $targetKotas = [];
+        $targetProvinsi = [];
+        
+        if ($kotaFilter) {
+            // Exact kota filter + nearby (same province from kota table)
+            $provinsi = \App\Models\Kota::where('nama', $kotaFilter)
+                ->where('is_active', true)
+                ->value('provinsi');
+            
+            if ($provinsi) {
+                $targetKotas = \App\Models\Kota::where('provinsi', $provinsi)
+                    ->where('is_active', true)
+                    ->pluck('nama')
+                    ->toArray();
+                $targetProvinsi = [$provinsi];
+            }
+        } elseif ($searchQuery) {
+            // Search query: match kota/kecamatan/nama in services, then expand to same province
+            // 1. Get provinces from matching services
+            $provinsiFromServices = \App\Models\Service::where('kategori', $kategori)
+                ->where('is_active', true)
+                ->where(function ($q) use ($searchQuery) {
+                    $q->where('kota', 'like', "%{$searchQuery}%")
+                        ->orWhere('kecamatan', 'like', "%{$searchQuery}%")
+                        ->orWhere('provinsi', 'like', "%{$searchQuery}%");
+                })
+                ->whereNotNull('provinsi')
+                ->where('provinsi', '!=', '')
+                ->distinct('provinsi')
+                ->pluck('provinsi');
+            
+            // 2. Also check kota table for matching city names
+            $provinsiFromKotaTable = \App\Models\Kota::where('is_active', true)
+                ->where('nama', 'like', "%{$searchQuery}%")
+                ->pluck('provinsi');
+            
+            $allProvinsi = $provinsiFromServices->merge($provinsiFromKotaTable)->unique()->values();
+            
+            if ($allProvinsi->isNotEmpty()) {
+                $targetProvinsi = $allProvinsi->toArray();
+                $targetKotas = \App\Models\Kota::where('is_active', true)
+                    ->whereIn('provinsi', $targetProvinsi)
+                    ->pluck('nama')
+                    ->toArray();
+                
+                // Also include cities from services that match the province
+                $serviceKotas = \App\Models\Service::where('kategori', $kategori)
+                    ->where('is_active', true)
+                    ->whereIn('provinsi', $targetProvinsi)
+                    ->distinct('kota')
+                    ->pluck('kota')
+                    ->filter()
+                    ->toArray();
+                
+                $targetKotas = array_unique(array_merge($targetKotas, $serviceKotas));
+            }
+        }
+
         $services = Service::query()
             ->where('kategori', $kategori)
             ->where('is_active', true)
             ->with('vendor:id,name,verification_status,jadwal_operasional')
-            ->when($request->filled('kota'), fn ($query) => $query->where('kota', $request->string('kota')))
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $search = $request->string('search');
-                $query->where(function ($q) use ($search) {
-                    $q->where('nama', 'like', "%{$search}%")
-                        ->orWhere('kota', 'like', "%{$search}%")
-                        ->orWhere('kecamatan', 'like', "%{$search}%");
+            ->when($targetKotas || $targetProvinsi, function ($query) use ($targetKotas, $targetProvinsi, $searchQuery) {
+                // Main filter: nearby cities (same province)
+                if ($targetKotas) {
+                    $query->whereIn('kota', $targetKotas);
+                }
+                if ($targetProvinsi && empty($targetKotas)) {
+                    $query->whereIn('provinsi', $targetProvinsi);
+                }
+                
+                // Also include direct matches for search term (for old data without provinsi)
+                if ($searchQuery) {
+                    $query->orWhere(function ($q) use ($searchQuery) {
+                        $q->where('kota', 'like', "%{$searchQuery}%")
+                            ->orWhere('kecamatan', 'like', "%{$searchQuery}%")
+                            ->orWhere('provinsi', 'like', "%{$searchQuery}%");
+                    });
+                }
+            })
+            ->when(empty($targetKotas) && empty($targetProvinsi) && $searchQuery, function ($query) use ($searchQuery) {
+                // Fallback: direct text search
+                $query->where(function ($q) use ($searchQuery) {
+                    $q->where('nama', 'like', "%{$searchQuery}%")
+                        ->orWhere('kota', 'like', "%{$searchQuery}%")
+                        ->orWhere('kecamatan', 'like', "%{$searchQuery}%");
                 });
             })
             ->orderByRaw("
