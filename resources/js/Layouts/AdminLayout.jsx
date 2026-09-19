@@ -153,32 +153,32 @@ export default function AdminLayout({ children, title }) {
         <div className="flex h-screen bg-[#f8fafc] dark:bg-[#0b0f19] text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-300">
             <style>{`
                 .dark main .bg-white {
-                    background-color: #166534 !important;
-                    color: #f3f4f6 !important;
-                    border-color: #0a422a !important;
+                    background-color: #1e293b !important;
+                    color: #f1f5f9 !important;
+                    border-color: #334155 !important;
                 }
                 .dark main .text-gray-900,
                 .dark main .text-gray-800,
                 .dark main .text-gray-700 {
-                    color: #f3f4f6 !important;
+                    color: #f1f5f9 !important;
                 }
                 .dark main .text-[#111827] {
-                    color: #f3f4f6 !important;
+                    color: #f1f5f9 !important;
                 }
                 .dark main .text-gray-500,
                 .dark main .text-gray-600 {
-                    color: #9ca3af !important;
+                    color: #94a3b8 !important;
                 }
                 .dark main .border-gray-100,
                 .dark main .border-gray-200 {
-                    border-color: #0a422a !important;
+                    border-color: #334155 !important;
                 }
-                .dark main input, 
-                .dark main select, 
+                .dark main input,
+                .dark main select,
                 .dark main textarea {
-                    background-color: #14532d !important;
-                    color: #ffffff !important;
-                    border-color: #0a422a !important;
+                    background-color: #0f172a !important;
+                    color: #f1f5f9 !important;
+                    border-color: #334155 !important;
                 }
             `}</style>
 

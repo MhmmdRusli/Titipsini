@@ -83,7 +83,7 @@ export default function Riwayat({ riwayat, totalPendapatan = 0 }) {
                                         ? 'bg-green-700 text-white'
                                         : link.url
                                         ? 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                        :\ 'text-gray-300 dark:text-gray-500'
+                                        :'text-gray-300 dark:text-gray-500'
                                 }`}
                             />
                         ))}
