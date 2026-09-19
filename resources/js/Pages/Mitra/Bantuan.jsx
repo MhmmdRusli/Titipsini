@@ -78,10 +78,10 @@ export default function Bantuan({ faqs = [] }) {
                             ))}
                         </div>
 
-                        <div className="mt-6 rounded-xl bg-emerald-50 p-4">
+                        <div className="mt-6 rounded-xl bg-green-50 p-4">
                             <p className="mb-3 text-sm font-semibold text-gray-900">Apakah ini membantu?</p>
                             {feedback ? (
-                                <p className="rounded-lg bg-white px-4 py-2.5 text-center text-sm font-medium text-emerald-700">
+                                <p className="rounded-lg bg-white px-4 py-2.5 text-center text-sm font-medium text-green-700">
                                     Terima kasih atas tanggapanmu!
                                 </p>
                             ) : (

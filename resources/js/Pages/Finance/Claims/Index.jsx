@@ -11,9 +11,9 @@ const STATUS_CONFIG = {
     klaim_diajukan: { label: 'Klaim Diajukan', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400', icon: Clock },
     menunggu_pemeriksaan_admin: { label: 'Menunggu Pemeriksaan Admin', color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400', icon: Clock },
     menunggu_klarifikasi_mitra: { label: 'Menunggu Klarifikasi Mitra', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400', icon: Clock },
-    disetujui: { label: 'Disetujui (Siap Proses)', color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400', icon: CheckCircle2 },
+    disetujui: { label: 'Disetujui (Siap Proses)', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400', icon: CheckCircle2 },
     diproses_finance: { label: 'Diproses Finance', color: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400', icon: Clock },
-    refund_berhasil: { label: 'Refund Berhasil', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-[#4ade80]', icon: CheckCircle2 },
+    refund_berhasil: { label: 'Refund Berhasil', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400', icon: CheckCircle2 },
     ditolak: { label: 'Ditolak', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
     sengketa: { label: 'Sengketa', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: AlertTriangle },
 };
@@ -63,9 +63,9 @@ export default function Index({ claims, filters, summary }) {
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-                        <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Siap Diproses</p>
-                        <p className="mt-1 text-2xl font-bold text-emerald-800 dark:text-emerald-200">{summary.siap_diproses}</p>
+                    <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-950/30">
+                        <p className="text-xs font-medium text-green-700 dark:text-green-300">Siap Diproses</p>
+                        <p className="mt-1 text-2xl font-bold text-green-800 dark:text-green-200">{summary.siap_diproses}</p>
                     </div>
                     <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-900/50 dark:bg-indigo-950/30">
                         <p className="text-xs font-medium text-indigo-700 dark:text-indigo-300">Sedang Diproses</p>
@@ -91,7 +91,7 @@ export default function Index({ claims, filters, summary }) {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Cari nomor order, nama customer..."
-                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
+                                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
                             />
                             {search && (
                                 <button
@@ -106,7 +106,7 @@ export default function Index({ claims, filters, summary }) {
                         <select
                             value={status}
                             onChange={(e) => handleStatusChange(e.target.value)}
-                            className="w-full sm:w-48 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                            className="w-full sm:w-48 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                         >
                             {STATUS_OPTIONS.map((opt) => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -137,7 +137,7 @@ export default function Index({ claims, filters, summary }) {
                                     const isReady = claim.status === 'disetujui';
                                     const isProcessing = claim.status === 'diproses_finance';
                                     return (
-                                        <tr key={claim.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isReady ? 'bg-emerald-50/50 dark:bg-emerald-950/20' : ''} ${isProcessing ? 'bg-indigo-50/50 dark:bg-indigo-950/20' : ''}`}>
+                                        <tr key={claim.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isReady ? 'bg-green-50/50 dark:bg-green-950/20' : ''} ${isProcessing ? 'bg-indigo-50/50 dark:bg-indigo-950/20' : ''}`}>
                                             <td className="px-4 py-3">
                                                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{claim.order_code}</p>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{claim.service_type}</p>
@@ -150,7 +150,7 @@ export default function Index({ claims, filters, summary }) {
                                                 <p className="text-sm text-gray-800 dark:text-gray-200">{claim.mitra_name ?? '-'}</p>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <p className="text-sm font-bold text-[#15803d] dark:text-[#4ade80]">{formatRupiah(claim.jumlah_refund)}</p>
+                                                <p className="text-sm font-bold text-green-700 dark:text-green-400">{formatRupiah(claim.jumlah_refund)}</p>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">{claim.persentase_refund}% dari {formatRupiah(claim.total_price)}</p>
                                             </td>
                                             <td className="px-4 py-3">
@@ -166,7 +166,7 @@ export default function Index({ claims, filters, summary }) {
                                                 {isReady && (
                                                     <button
                                                         onClick={() => router.post(`/finance/klaim/${claim.id}/proses`)}
-                                                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 transition"
+                                                        className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 transition"
                                                     >
                                                         <Send size={14} />
                                                         Mulai Proses
@@ -184,7 +184,7 @@ export default function Index({ claims, filters, summary }) {
                                                 {claim.status === 'refund_berhasil' && (
                                                     <button
                                                         onClick={() => router.visit(`/finance/klaim/${claim.id}`)}
-                                                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#15803d] px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 dark:bg-green-700 transition"
+                                                        className="inline-flex items-center gap-1.5 rounded-lg bg-green-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 dark:bg-green-700 transition"
                                                     >
                                                         <Eye size={14} />
                                                         Detail
@@ -213,7 +213,7 @@ export default function Index({ claims, filters, summary }) {
                                             disabled={!link.url || link.active}
                                             className={`px-3 py-1.5 text-sm rounded-lg transition ${
                                                 link.active
-                                                    ? 'bg-[#15803d] text-white'
+                                                    ? 'bg-green-700 text-white'
                                                     : link.url
                                                     ? 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
                                                     : 'text-gray-300 cursor-not-allowed'

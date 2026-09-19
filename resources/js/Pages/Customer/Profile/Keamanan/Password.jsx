@@ -4,8 +4,8 @@ import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
 // --- Konstanta Global untuk Warna ---
-const BRAND_GREEN_BG = 'bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600';
-const BRAND_GREEN_BG_MUTED = 'bg-[#86efac] dark:bg-emerald-900/60';
+const BRAND_GREEN_BG = 'bg-green-700 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600';
+const BRAND_GREEN_BG_MUTED = 'bg-[#86efac] dark:bg-green-900/60';
 
 export default function Password() {
     const [success, setSuccess] = useState(false);
@@ -103,7 +103,7 @@ function PasswordField({ label, placeholder, value, onChange, error, show, onTog
                     className={`w-full rounded-xl border px-4 py-3.5 pr-11 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 transition ${
                         error
                             ? 'border-red-400 bg-white dark:bg-gray-900 focus:border-red-500 focus:ring-red-200'
-                            : 'border-transparent bg-gray-100 dark:bg-gray-800 focus:border-[#15803d] focus:ring-[#15803d]/20 dark:focus:border-[#22c55e]'
+                            : 'border-transparent bg-gray-100 dark:bg-gray-800 focus:border-green-700 focus:ring-green-700/20 dark:focus:border-green-500'
                     }`}
                 />
                 <button
@@ -128,9 +128,9 @@ function SuccessScreen() {
 
             <div className="flex flex-col items-center justify-center min-h-[calc(100vh-6rem)] px-8 py-10 text-center bg-white dark:bg-gray-950">
                 <div className="flex items-center gap-2 mb-10">
-                    <ShieldCheck size={24} className="text-[#15803d] dark:text-[#4ade80]" />
+                    <ShieldCheck size={24} className="text-green-700 dark:text-green-400" />
                     <span className="text-lg font-extrabold text-gray-900 dark:text-gray-50">
-                        Titipsini<span className="text-[#15803d] dark:text-[#4ade80]">.Com</span>
+                        Titipsini<span className="text-green-700 dark:text-green-400">.Com</span>
                     </span>
                 </div>
 
@@ -163,7 +163,7 @@ function SuccessIllustration() {
                     cx={d.x}
                     cy={d.y}
                     r={d.r}
-                    className={i % 3 === 0 ? 'fill-[#15803d]' : 'fill-emerald-200 dark:fill-emerald-900'}
+                    className={i % 3 === 0 ? 'fill-green-700' : 'fill-green-200 dark:fill-green-900'}
                     opacity={i % 2 === 0 ? 0.8 : 0.5}
                 />
             ))}

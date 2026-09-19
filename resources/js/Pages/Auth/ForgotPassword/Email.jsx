@@ -38,7 +38,7 @@ export default function Email() {
                                 alt="Logo Icon"
                                 className="h-8 w-auto object-contain"
                             />
-                            <div className="text-xl font-bold tracking-tight text-[#15803d]">
+                            <div className="text-xl font-bold tracking-tight text-green-700">
                                 Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                             </div>
                         </div>
@@ -70,7 +70,7 @@ export default function Email() {
                                     name="f_em_reset"
                                     value={data.email}
                                     onChange={(e) => setData('email', e.target.value)}
-                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] pl-11 pr-4 py-3.5 text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#15803d]/30 transition-all ${
+                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] pl-11 pr-4 py-3.5 text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-700/30 transition-all ${
                                         errors.email ? 'ring-2 ring-red-500' : ''
                                     }`}
                                 />
@@ -81,7 +81,7 @@ export default function Email() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white transition-all hover:bg-[#166534] active:scale-[0.99] disabled:opacity-50 mt-2 shadow-sm"
+                            className="w-full rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white transition-all hover:bg-green-800 active:scale-[0.99] disabled:opacity-50 mt-2 shadow-sm"
                         >
                             {processing ? 'Mengirim...' : 'Kirim'}
                         </button>
@@ -89,11 +89,11 @@ export default function Email() {
 
                     <div className="mt-8 text-center text-xs text-gray-400 font-medium">
                         Kembali ke halaman{' '}
-                        <Link href="/login" className="font-bold text-[#15803d] hover:underline">
+                        <Link href="/login" className="font-bold text-green-700 hover:underline">
                             Masuk
                         </Link>{' '}
                         atau{' '}
-                        <Link href="/register" className="font-bold text-[#15803d] hover:underline">
+                        <Link href="/register" className="font-bold text-green-700 hover:underline">
                             Daftar
                         </Link>
                     </div>

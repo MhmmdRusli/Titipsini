@@ -10,14 +10,14 @@ export default function LengkapiDataIntro() {
                 
                 {/* 1. Header: Logo Titipsini */}
                 <div className="flex flex-col items-center pt-2">
-                    <div className="flex items-center gap-1.5 text-2xl font-bold text-[#3B8F55]">
+                    <div className="flex items-center gap-1.5 text-2xl font-bold text-green-700">
                         <img 
                             src="/images/logo-titipsini.png" 
                             alt="Logo Titipsini" 
                             className="h-8 w-auto object-contain" 
                             onError={(e) => { e.target.style.display = 'none'; }}
                         />
-                        <span className="tracking-tight font-extrabold text-[#3B8F55]">
+                        <span className="tracking-tight font-extrabold text-green-700">
                             Titipsini<span className="text-yellow-400 mx-0.5">●</span>Com
                         </span>
                     </div>
@@ -54,7 +54,7 @@ export default function LengkapiDataIntro() {
                 <div className="w-full pt-4 pb-2">
                     <Link
                         href={route('customer.lengkapi-data.form')}
-                        className="flex w-full items-center justify-center rounded-2xl bg-[#3B8F55] py-4 text-center text-sm font-bold text-white shadow-lg shadow-[#3B8F55]/20 hover:bg-[#317646] active:scale-[0.98] transition-all"
+                        className="flex w-full items-center justify-center rounded-2xl bg-green-700 py-4 text-center text-sm font-bold text-white shadow-lg shadow-green-700/20 hover:bg-[#317646] active:scale-[0.98] transition-all"
                     >
                         Lengkapi Data Diri Sekarang
                     </Link>

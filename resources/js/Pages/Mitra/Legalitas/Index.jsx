@@ -520,7 +520,7 @@ function SuksesStep() {
         <div className="flex h-full flex-col items-center px-6 py-8 text-center">
             <div className="flex items-center gap-1.5 self-center">
                 <img src="/images/logo-titipsini.png" alt="Titipsini.com" className="h-6 w-auto object-contain" />
-                <span className="text-base font-bold tracking-tight text-[#15803d]">
+                <span className="text-base font-bold tracking-tight text-green-700">
                     Titipsini<span className="mx-0.5 text-[#fbbf24]">•</span>Com
                 </span>
             </div>

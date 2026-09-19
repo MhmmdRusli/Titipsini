@@ -100,7 +100,7 @@ export default function ClaimCreate({ order, kondisiAwal }) {
                             <p className="text-xs text-gray-500 dark:text-gray-400">Order: {order.order_code}</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-sm font-bold text-[#15803d] dark:text-[#4ade80]">{formatRupiah(order.total_price)}</p>
+                            <p className="text-sm font-bold text-green-700 dark:text-green-400">{formatRupiah(order.total_price)}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Total Pesanan</p>
                         </div>
                     </div>
@@ -164,7 +164,7 @@ export default function ClaimCreate({ order, kondisiAwal }) {
                             rows={4}
                             required
                             placeholder="Jelaskan alasan klaim Anda dengan detail (contoh: barang rusak saat diterima, barang tidak sesuai deskripsi, barang hilang, dll.)"
-                            className="mt-1.5 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
+                            className="mt-1.5 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
                         />
                         {errors.alasan && (
                             <p className="mt-1 text-xs text-red-500">{errors.alasan}</p>
@@ -189,7 +189,7 @@ export default function ClaimCreate({ order, kondisiAwal }) {
                                 </div>
                             ))}
                             {files.length < 5 && (
-                                <label className="flex h-24 w-24 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#15803d] hover:bg-green-50 dark:border-gray-700 dark:hover:border-green-600 dark:hover:bg-green-950/30 transition">
+                                <label className="flex h-24 w-24 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:border-green-700 hover:bg-green-50 dark:border-gray-700 dark:hover:border-green-600 dark:hover:bg-green-950/30 transition">
                                     <input
                                         type="file"
                                         accept="image/*"
@@ -224,7 +224,7 @@ export default function ClaimCreate({ order, kondisiAwal }) {
                             max={order.total_price}
                             step="1000"
                             placeholder="Contoh: 50000"
-                            className="mt-1.5 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
+                            className="mt-1.5 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
                         />
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                             Kosongkan jika tidak yakin nominalnya. Admin akan menentukan berdasarkan bukti.
@@ -242,7 +242,7 @@ export default function ClaimCreate({ order, kondisiAwal }) {
                         <button
                             type="submit"
                             disabled={isSubmitting || files.length === 0 || !alasan.trim()}
-                            className="flex-1 rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700 transition"
+                            className="flex-1 rounded-xl bg-green-700 py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700 transition"
                         >
                             {isSubmitting ? 'Mengajukan...' : 'Ajukan Klaim'}
                         </button>
@@ -254,7 +254,7 @@ export default function ClaimCreate({ order, kondisiAwal }) {
                     <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Alur Proses Klaim</p>
                     <div className="mt-3 space-y-2 text-xs">
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                            <ShieldCheck size={14} className="text-[#15803d]" />
+                            <ShieldCheck size={14} className="text-green-700" />
                             <span>1. Klaim Diajukan (Anda di sini)</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 ml-6">

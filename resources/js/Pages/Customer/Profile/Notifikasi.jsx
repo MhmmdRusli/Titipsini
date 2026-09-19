@@ -55,8 +55,8 @@ export default function NotifikasiSettings({ preferences }) {
                                 type="button"
                                 onClick={() => toggle(item.key)}
                                 // Warna aktif menggunakan kelas warna Emerald
-                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950 ${
-                                    values[item.key] ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
+                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950 ${
+                                    values[item.key] ? 'bg-green-600 dark:bg-green-500' : 'bg-gray-300 dark:bg-gray-700'
                                 }`}
                             >
                                 <span

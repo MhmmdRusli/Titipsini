@@ -22,9 +22,9 @@ const STATUS_CONFIG = {
     klaim_diajukan: { label: 'Klaim Diajukan', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400', icon: Clock },
     menunggu_pemeriksaan_admin: { label: 'Menunggu Pemeriksaan Admin', color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400', icon: Clock },
     menunggu_klarifikasi_mitra: { label: 'Menunggu Klarifikasi Mitra', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400', icon: Clock },
-    disetujui: { label: 'Disetujui', color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400', icon: CheckCircle2 },
+    disetujui: { label: 'Disetujui', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400', icon: CheckCircle2 },
     diproses_finance: { label: 'Diproses Finance', color: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400', icon: Clock },
-    refund_berhasil: { label: 'Refund Berhasil', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-[#4ade80]', icon: CheckCircle2 },
+    refund_berhasil: { label: 'Refund Berhasil', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400', icon: CheckCircle2 },
     ditolak: { label: 'Ditolak', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
     sengketa: { label: 'Sengketa', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: AlertTriangle },
 };
@@ -94,7 +94,7 @@ export default function ClaimShow({ claim }) {
                     {claim.jumlah_klaim && (
                         <div className="rounded-xl border border-gray-100 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
                             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Jumlah Klaim Diajukan</p>
-                            <p className="mt-1 text-lg font-bold text-[#15803d] dark:text-[#4ade80]">{formatRupiah(claim.jumlah_klaim)}</p>
+                            <p className="mt-1 text-lg font-bold text-green-700 dark:text-green-400">{formatRupiah(claim.jumlah_klaim)}</p>
                         </div>
                     )}
 
@@ -138,9 +138,9 @@ export default function ClaimShow({ claim }) {
 
                     {/* Refund Details */}
                     {['disetujui', 'diproses_finance', 'refund_berhasil'].includes(claim.status) && (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-                            <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">Detail Refund</p>
-                            <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-emerald-700/90 dark:text-emerald-300/80">
+                        <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-950/30">
+                            <p className="text-xs font-semibold text-green-800 dark:text-green-300 uppercase tracking-wide">Detail Refund</p>
+                            <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-green-700/90 dark:text-green-300/80">
                                 <div><strong>Persentase:</strong> {claim.persentase_refund ?? '-'}%</div>
                                 <div><strong>Jumlah Refund:</strong> {claim.jumlah_refund ? formatRupiah(claim.jumlah_refund) : '-'}</div>
                             </div>
@@ -230,7 +230,7 @@ export default function ClaimShow({ claim }) {
                             )}
                             {claim.status === 'disetujui' && (
                                 <div className="relative">
-                                    <div className="absolute left-[-6px] top-0.5 h-2 w-2 rounded-full bg-emerald-500" />
+                                    <div className="absolute left-[-6px] top-0.5 h-2 w-2 rounded-full bg-green-500" />
                                     <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Disetujui</p>
                                     <p className="text-[10px] text-gray-500 dark:text-gray-400">Persentase: {claim.persentase_refund}% | Jumlah: {claim.jumlah_refund ? formatRupiah(claim.jumlah_refund) : '-'}</p>
                                 </div>

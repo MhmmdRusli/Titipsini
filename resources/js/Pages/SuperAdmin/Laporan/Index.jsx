@@ -10,9 +10,9 @@ import {
 const STATUS_STYLE = {
     menunggu: 'bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800/50',
     diproses: 'bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-800/50',
-    disetujui: 'bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/50',
+    disetujui: 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-950/60 dark:text-green-400 dark:border-green-800/50',
     ditolak: 'bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:border-rose-800/50',
-    selesai: 'bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700/50',
+    selesai: 'bg-green-50 text-green-800 border border-green-300 dark:bg-green-900/40 dark:text-green-300 dark:border-green-700/50',
 };
 
 const STATUS_LABEL = {
@@ -63,14 +63,14 @@ export default function Index({ reports, filters = {}, summary = {} }) {
             <Head title="Laporan Pelayanan" />
 
             {/* Hero banner - Diubah ke Emerald Green Gradient */}
-            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-700 p-6 text-white shadow-lg">
+            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-green-600 to-green-700 p-6 text-white shadow-lg">
                 <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
                         <MessageSquareWarning size={22} />
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold">Laporan Pelayanan</h1>
-                        <p className="mt-1 text-sm text-emerald-50/90">
+                        <p className="mt-1 text-sm text-green-50/90">
                             Kelola keluhan customer terkait layanan vendor (komplain pelayanan).
                             Untuk kerugian barang & refund, buka menu <strong>Pengembalian Dana</strong>.
                         </p>
@@ -94,7 +94,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari kode order / nama customer / barang..."
-                        className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-800 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+                        className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-800 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
                     />
                 </form>
 
@@ -108,7 +108,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                                 onClick={() => applyFilters({ status: f.key })}
                                 className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
                                     status === f.key
-                                        ? 'bg-emerald-600 text-white shadow-sm'
+                                        ? 'bg-green-600 text-white shadow-sm'
                                         : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:bg-slate-800'
                                 }`}
                             >
@@ -137,7 +137,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                             <tr>
                                 <td colSpan={5} className="px-4 py-14 text-center text-gray-400 dark:text-slate-500">
                                     <div className="flex flex-col items-center justify-center">
-                                        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400">
                                             <FileText size={24} />
                                         </div>
                                         <p className="text-sm font-medium text-gray-500 dark:text-slate-400">
@@ -148,7 +148,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                             </tr>
                         ) : (
                             rows.map((r) => (
-                                <tr key={r.id} className="hover:bg-emerald-50/30 dark:hover:bg-slate-800/50">
+                                <tr key={r.id} className="hover:bg-green-50/30 dark:hover:bg-slate-800/50">
                                     <td className="px-4 py-3.5">
                                         <div className="font-semibold text-gray-900 dark:text-slate-100">
                                             #{r.order_code ?? '-'}
@@ -185,7 +185,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                                     <td className="px-4 py-3.5 text-right">
                                         <Link
                                             href={route('super-admin.laporan-layanan.show', r.id)}
-                                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-800/60 dark:bg-emerald-950/60 dark:text-emerald-400 dark:hover:bg-emerald-900/60"
+                                            className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-2.5 py-1.5 text-[11px] font-bold text-green-700 transition hover:bg-green-100 dark:border-green-800/60 dark:bg-green-950/60 dark:text-green-400 dark:hover:bg-green-900/60"
                                         >
                                             Detail
                                             <ChevronRight size={14} />
@@ -208,7 +208,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                             preserveScroll
                             className={`rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold transition dark:border-slate-800 ${
                                 link.active
-                                    ? 'bg-emerald-600 text-white'
+                                    ? 'bg-green-600 text-white'
                                     : link.url
                                         ? 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
                                         : 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-slate-800 dark:text-slate-600'
@@ -225,7 +225,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
 function SummaryInline({ label, value }) {
     return (
         <div className="rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-sm">
-            <p className="text-[11px] text-emerald-100">{label}</p>
+            <p className="text-[11px] text-green-100">{label}</p>
             <p className="mt-1 text-2xl font-bold">{value}</p>
         </div>
     );

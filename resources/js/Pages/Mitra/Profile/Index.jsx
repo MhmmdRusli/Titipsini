@@ -79,11 +79,11 @@ export default function ProfileIndex({ partner }) {
                                     className="h-12 w-12 rounded-xl object-cover"
                                 />
                             ) : (
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/60 font-bold text-emerald-700 dark:text-emerald-300">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 dark:bg-green-950/60 font-bold text-green-700 dark:text-green-300">
                                     {partner.name?.charAt(0).toUpperCase() ?? 'M'}
                                 </div>
                             )}
-                            <div className="absolute -bottom-1 -right-1 rounded-full bg-emerald-600 p-0.5 text-white">
+                            <div className="absolute -bottom-1 -right-1 rounded-full bg-green-600 p-0.5 text-white">
                                 <Store size={10} />
                             </div>
                         </div>
@@ -94,7 +94,7 @@ export default function ProfileIndex({ partner }) {
                                     {partner.name}
                                 </h2>
                                 {partner.is_verified && (
-                                    <CheckCircle2 size={14} className="shrink-0 text-emerald-500" />
+                                    <CheckCircle2 size={14} className="shrink-0 text-green-500" />
                                 )}
                             </div>
                             <p className="truncate text-xs text-gray-500 dark:text-gray-400">
@@ -102,7 +102,7 @@ export default function ProfileIndex({ partner }) {
                             </p>
                             <div className="mt-1">
                                 {partner.is_verified ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-green-600 dark:text-green-400">
                                         • Terverifikasi
                                     </span>
                                 ) : (

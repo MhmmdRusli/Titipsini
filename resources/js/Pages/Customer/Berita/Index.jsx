@@ -29,11 +29,11 @@ export default function BeritaIndex({ berita }) {
                             href={`/app/berita/${b.id}`}
                             className="flex gap-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 shadow-sm transition hover:border-green-300 dark:hover:border-green-700"
                         >
-                            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/40 dark:to-emerald-900/30">
+                            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/40 dark:to-green-900/30">
                                 {b.foto ? (
                                     <img src={b.foto} alt={b.judul} className="h-full w-full object-cover" />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-[#15803d] dark:text-[#4ade80]">
+                                    <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-green-700 dark:text-green-400">
                                         Titipsini
                                     </div>
                                 )}
@@ -57,7 +57,7 @@ export default function BeritaIndex({ berita }) {
                                 preserveScroll
                                 className={`rounded-md px-3 py-1.5 text-xs ${
                                     link.active
-                                        ? 'bg-[#15803d] text-white dark:bg-[#22c55e]'
+                                        ? 'bg-green-700 text-white dark:bg-green-500'
                                         : link.url
                                         ? 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
                                         : 'text-gray-300 dark:text-gray-700'

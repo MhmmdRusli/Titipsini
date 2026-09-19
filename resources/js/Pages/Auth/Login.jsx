@@ -64,7 +64,7 @@ export default function Login() {
                                 className="h-10 w-auto object-contain"
                             />
 
-                            <div className="text-2xl font-bold tracking-tight text-[#15803d]">
+                            <div className="text-2xl font-bold tracking-tight text-green-700">
                                 Titipsini
                                 <span className="mx-0.5 text-[#fbbf24]">•</span>
                                 Com
@@ -124,7 +124,7 @@ export default function Login() {
                                     onChange={(e) =>
                                         setData('identifier', e.target.value)
                                     }
-                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] py-3.5 pr-4 pl-11 text-sm text-gray-800 placeholder-gray-400 transition-all focus:ring-2 focus:ring-[#15803d]/30 focus:outline-none ${
+                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] py-3.5 pr-4 pl-11 text-sm text-gray-800 placeholder-gray-400 transition-all focus:ring-2 focus:ring-green-700/30 focus:outline-none ${
                                         errors.identifier
                                             ? 'ring-2 ring-red-500'
                                             : ''
@@ -159,7 +159,7 @@ export default function Login() {
                                     onChange={(e) =>
                                         setData('password', e.target.value)
                                     }
-                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 pr-11 text-sm text-gray-800 placeholder-gray-400 transition-all focus:ring-2 focus:ring-[#15803d]/30 focus:outline-none ${
+                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 pr-11 text-sm text-gray-800 placeholder-gray-400 transition-all focus:ring-2 focus:ring-green-700/30 focus:outline-none ${
                                         errors.password
                                             ? 'ring-2 ring-red-500'
                                             : ''
@@ -197,7 +197,7 @@ export default function Login() {
                         <div className="text-right">
                             <Link
                                 href="/forgot-password"
-                                className="text-xs font-semibold text-[#16a34a] hover:underline"
+                                className="text-xs font-semibold text-green-500 hover:underline"
                             >
                                 Lupa Kata Sandi?
                             </Link>
@@ -209,8 +209,8 @@ export default function Login() {
                             disabled={processing}
                             className={`mt-2 w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-sm transition-all active:scale-[0.99] disabled:opacity-50 ${
                                 isFilled
-                                    ? 'bg-[#15803d] hover:bg-[#166534]'
-                                    : 'bg-[#15803d]/60 hover:bg-[#15803d]'
+                                    ? 'bg-green-700 hover:bg-green-800'
+                                    : 'bg-green-700/60 hover:bg-green-700'
                             }`}
                         >
                             {processing ? 'Memproses...' : 'Masuk'}
@@ -223,7 +223,7 @@ export default function Login() {
                             Belum punya akun?{' '}
                             <Link
                                 href="/register"
-                                className="font-bold text-[#15803d] hover:underline"
+                                className="font-bold text-green-700 hover:underline"
                             >
                                 Daftar disini
                             </Link>

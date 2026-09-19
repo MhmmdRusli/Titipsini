@@ -63,7 +63,7 @@ export default function InvoiceBangunan({ order }) {
                     {/* Status */}
                     <div className="mt-4">
                         {order.sudahDibayar ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-[#15803d] dark:bg-green-950/40 dark:text-green-400">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-950/40 dark:text-green-400">
                                 <CheckCircle2 size={13} />
                                 Sudah Dibayar
                             </span>
@@ -120,7 +120,7 @@ export default function InvoiceBangunan({ order }) {
 
                         <div className="mt-2 flex items-center justify-between border-t border-dashed border-gray-200 pt-3 dark:border-gray-700">
                             <span className="text-sm font-bold text-gray-900 dark:text-gray-100">Total Pembayaran</span>
-                            <span className="text-lg font-extrabold text-[#15803d] dark:text-green-400">
+                            <span className="text-lg font-extrabold text-green-700 dark:text-green-400">
                                 {formatRupiah(order.totalPembayaran)}
                             </span>
                         </div>
@@ -131,14 +131,14 @@ export default function InvoiceBangunan({ order }) {
                         {!order.sudahDibayar && (
                             <Link
                                 href={`/app/orders/${order.id}/pembayaran`}
-                                className="flex w-full items-center justify-center rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-green-700 active:scale-[0.98] dark:bg-[#22c55e] dark:hover:bg-green-600"
+                                className="flex w-full items-center justify-center rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-green-700 active:scale-[0.98] dark:bg-green-500 dark:hover:bg-green-600"
                             >
                                 Bayar Langsung
                             </Link>
                         )}
                         <Link
                             href="/app/dashboard"
-                            className="flex w-full items-center justify-center rounded-xl border border-[#15803d] py-3.5 text-sm font-bold text-[#15803d] transition hover:bg-green-50 active:scale-[0.98] dark:border-green-500 dark:text-green-400 dark:hover:bg-green-950/30"
+                            className="flex w-full items-center justify-center rounded-xl border border-green-700 py-3.5 text-sm font-bold text-green-700 transition hover:bg-green-50 active:scale-[0.98] dark:border-green-500 dark:text-green-400 dark:hover:bg-green-950/30"
                         >
                             Kembali Ke Beranda
                         </Link>

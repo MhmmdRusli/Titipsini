@@ -4,7 +4,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 
 // --- Konstanta Global untuk Warna ---
 // Menggunakan warna hijau khas Titipsini.com untuk konsistensi tema
-const BRAND_GREEN_TEXT = 'text-[#15803d] dark:text-[#4ade80]';
+const BRAND_GREEN_TEXT = 'text-green-700 dark:text-green-400';
 
 // --- Komponen Utama ---
 export default function Keamanan() {
@@ -23,8 +23,8 @@ export default function Keamanan() {
 // --- Komponen Header Halaman ---
 function HeaderTitle() {
     return (
-        <div className="flex items-center gap-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 p-5 border border-emerald-100 dark:border-emerald-900/50">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/80 text-emerald-600 dark:text-lime-400">
+        <div className="flex items-center gap-4 rounded-2xl bg-green-50/50 dark:bg-green-950/20 p-5 border border-green-100 dark:border-green-900/50">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/80 text-green-600 dark:text-lime-400">
                 <ShieldCheck size={24} />
             </div>
             <div>
@@ -68,7 +68,7 @@ function MenuItem({ href, icon: Icon, label }) {
     return (
         <Link
             href={href}
-            className="flex items-center gap-4 rounded-2xl bg-slate-50 dark:bg-gray-900/60 border border-slate-100 dark:border-gray-800 px-5 py-4 transition hover:bg-emerald-50/60 dark:hover:bg-emerald-950/20 active:scale-[0.98]"
+            className="flex items-center gap-4 rounded-2xl bg-slate-50 dark:bg-gray-900/60 border border-slate-100 dark:border-gray-800 px-5 py-4 transition hover:bg-green-50/60 dark:hover:bg-green-950/20 active:scale-[0.98]"
         >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-gray-800 shadow-sm">
                 <Icon size={20} className={BRAND_GREEN_TEXT} />

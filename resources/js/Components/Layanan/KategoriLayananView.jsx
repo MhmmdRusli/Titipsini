@@ -520,7 +520,7 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
                             const getBackgroundColor = () => {
                                 switch(kategori) {
                                     case 'pindahan':
-                                        return 'bg-emerald-50 text-emerald-500';
+                                        return 'bg-green-50 text-green-500';
                                     case 'bangunan':
                                         return 'bg-green-50 text-green-500';
                                     case 'kendaraan':
@@ -608,7 +608,7 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
             {/* Modal Perhatian */}
             {showPerhatian && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
-                    <div className="w-full max-w-sm rounded-2xl bg-emerald-50 p-5 shadow-xl">
+                    <div className="w-full max-w-sm rounded-2xl bg-green-50 p-5 shadow-xl">
                         <div className="flex items-start justify-between gap-3">
                             <div className="flex items-start gap-2.5">
                                 <AlertCircle size={20} className="mt-0.5 shrink-0 text-green-700" />

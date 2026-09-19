@@ -11,11 +11,11 @@ const BRAND = '#008736';
 function EmptyState() {
     return (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-            <div className="relative mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30">
+            <div className="relative mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-green-50 dark:bg-green-950/30">
                 <MapPin
                     size={56}
                     strokeWidth={1.25}
-                    className="text-[#008736] dark:text-emerald-400"
+                    className="text-[#008736] dark:text-green-400"
                 />
             </div>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -24,7 +24,7 @@ function EmptyState() {
 
             <Link
                 href="/app/profile/alamat/tambah"
-                className="mt-6 flex items-center justify-center gap-2 rounded-2xl bg-[#008736] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-700/25 transition hover:bg-emerald-800 active:scale-[0.99]"
+                className="mt-6 flex items-center justify-center gap-2 rounded-2xl bg-[#008736] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-green-700/25 transition hover:bg-green-800 active:scale-[0.99]"
             >
                 Tambah Alamat Baru
                 <Plus size={16} />
@@ -69,7 +69,7 @@ function AddressCard({ address }) {
                         {address.name}
                     </p>
                     {address.is_primary && (
-                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#008736] dark:bg-emerald-950/40 dark:text-emerald-400">
+                        <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#008736] dark:bg-green-950/40 dark:text-green-400">
                             Utama
                         </span>
                     )}
@@ -78,7 +78,7 @@ function AddressCard({ address }) {
                 <div className="flex items-center gap-1">
                     <Link
                         href={`/app/profile/alamat/${address.id}/edit`}
-                        className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-[#008736] transition hover:scale-105 dark:bg-emerald-950/50 dark:text-emerald-400"
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-[#008736] transition hover:scale-105 dark:bg-green-950/50 dark:text-green-400"
                         title="Edit Alamat"
                     >
                         <Pencil size={14} />
@@ -163,7 +163,7 @@ export default function AddressIndex({ addresses = [] }) {
 
                         <Link
                             href="/app/profile/alamat/tambah"
-                            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#008736] py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-700/25 transition hover:bg-emerald-800 active:scale-[0.99]"
+                            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#008736] py-3.5 text-sm font-bold text-white shadow-lg shadow-green-700/25 transition hover:bg-green-800 active:scale-[0.99]"
                         >
                             Tambah Alamat Baru
                             <Plus size={16} />

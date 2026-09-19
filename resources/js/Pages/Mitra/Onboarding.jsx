@@ -41,7 +41,7 @@ function Wordmark({ light = false }) {
                 />
                 <span
                     className={`text-sm font-bold tracking-tight ${
-                        light ? 'text-white' : 'text-[#15803d]'
+                        light ? 'text-white' : 'text-green-700'
                     }`}
                 >
                     Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com

@@ -50,7 +50,7 @@ export default function Instruksi({ topup }) {
                 {topup.metode_pembayaran === 'transfer_bank' ? (
                     <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                            <Building2 size={16} className="text-[#15803d] dark:text-[#4ade80]" />
+                            <Building2 size={16} className="text-green-700 dark:text-green-400" />
                             Bank {topup.channel}
                         </div>
                         <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">No. Rekening Virtual Account</p>
@@ -59,7 +59,7 @@ export default function Instruksi({ topup }) {
                             <button
                                 type="button"
                                 onClick={copyVa}
-                                className="flex items-center gap-1 rounded-lg bg-green-50 dark:bg-green-950/40 px-2.5 py-1.5 text-xs font-medium text-[#15803d] dark:text-[#4ade80] hover:bg-green-100 dark:hover:bg-green-900/60 transition"
+                                className="flex items-center gap-1 rounded-lg bg-green-50 dark:bg-green-950/40 px-2.5 py-1.5 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/60 transition"
                             >
                                 {copied ? <Check size={13} /> : <Copy size={13} />}
                                 {copied ? 'Tersalin' : 'Salin'}
@@ -72,7 +72,7 @@ export default function Instruksi({ topup }) {
                 ) : (
                     <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
                         <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                            <Building2 size={16} className="text-[#15803d] dark:text-[#4ade80]" />
+                            <Building2 size={16} className="text-green-700 dark:text-green-400" />
                             {topup.channel}
                         </div>
                         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -168,7 +168,7 @@ export default function Instruksi({ topup }) {
                 {/* Bagian QRIS Pembayaran */}
                 <div className="mt-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm text-center">
                     <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                        <QrCode size={18} className="text-[#15803d] dark:text-[#4ade80]" />
+                        <QrCode size={18} className="text-green-700 dark:text-green-400" />
                         <span>Scan QRIS untuk Membayar</span>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
@@ -207,7 +207,7 @@ export default function Instruksi({ topup }) {
                             </button>
                         </div>
                     ) : (
-                        <label className="mt-3 flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 py-6 text-gray-400 dark:text-gray-500 hover:border-[#15803d] dark:hover:border-[#22c55e] transition">
+                        <label className="mt-3 flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 py-6 text-gray-400 dark:text-gray-500 hover:border-green-700 dark:hover:border-green-500 transition">
                             <Upload size={20} />
                             <span className="text-xs">Tap untuk unggah gambar</span>
                             <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
@@ -224,7 +224,7 @@ export default function Instruksi({ topup }) {
                     type="button"
                     disabled={processing || !data.bukti_transfer}
                     onClick={handleSelesai}
-                    className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-lg transition disabled:opacity-40"
+                    className="w-full rounded-xl bg-green-700 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-lg transition disabled:opacity-40"
                 >
                     {processing ? 'Mengirim...' : 'Saya Sudah Bayar'}
                 </button>

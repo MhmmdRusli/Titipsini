@@ -57,7 +57,7 @@ export default function Onboarding() {
         return (
             <div
                 onClick={() => setShowSplash(false)}
-                className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-between bg-[#15803d] px-8 py-16 text-white"
+                className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-between bg-green-700 px-8 py-16 text-white"
             >
                 <Head title="Titipsini.Com" />
                 <div />
@@ -94,7 +94,7 @@ export default function Onboarding() {
                     alt="Logo Icon" 
                     className="h-12 w-auto object-contain" 
                 />
-                <span className="text-xl font-black tracking-tight text-[#15803d]">
+                <span className="text-xl font-black tracking-tight text-green-700">
                     Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                 </span>
             </div>
@@ -120,7 +120,7 @@ export default function Onboarding() {
                         <span
                             key={i}
                             className={`h-1.5 rounded-full transition-all duration-300 ${
-                                i === slide ? 'bg-[#15803d] w-6' : 'bg-gray-200 w-2'
+                                i === slide ? 'bg-green-700 w-6' : 'bg-gray-200 w-2'
                             }`}
                         />
                     ))}
@@ -139,13 +139,13 @@ export default function Onboarding() {
             <div className="px-6 pb-10 space-y-3">
                 <Link
                     href="/register"
-                    className="block w-full rounded-xl bg-[#15803d] py-3.5 text-center text-sm font-bold text-white shadow-sm hover:bg-[#166534] transition-colors"
+                    className="block w-full rounded-xl bg-green-700 py-3.5 text-center text-sm font-bold text-white shadow-sm hover:bg-green-800 transition-colors"
                 >
                     Daftar
                 </Link>
                 <Link
                     href="/login"
-                    className="block w-full rounded-xl border border-gray-300 py-3.5 text-center text-sm font-bold text-[#15803d] hover:bg-gray-50 transition-colors"
+                    className="block w-full rounded-xl border border-gray-300 py-3.5 text-center text-sm font-bold text-green-700 hover:bg-gray-50 transition-colors"
                 >
                     Masuk
                 </Link>

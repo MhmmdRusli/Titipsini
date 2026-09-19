@@ -75,7 +75,7 @@ export default function Profile({ admin }) {
                 />
                 <label
                   htmlFor="foto"
-                  className="absolute -bottom-2 -right-2 bg-green-700 dark:bg-emerald-600 text-white rounded-xl p-1.5 shadow-md cursor-pointer hover:bg-green-800 dark:hover:bg-emerald-500 transition border-2 border-white dark:border-gray-900"
+                  className="absolute -bottom-2 -right-2 bg-green-700 dark:bg-green-600 text-white rounded-xl p-1.5 shadow-md cursor-pointer hover:bg-green-800 dark:hover:bg-green-500 transition border-2 border-white dark:border-gray-900"
                   title="Ganti foto"
                 >
                   <Pencil size={13} />
@@ -96,7 +96,7 @@ export default function Profile({ admin }) {
                 {data.email || "email@domain.com"}
               </p>
 
-              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-950/60 border border-green-200 dark:border-green-800/50 px-3 py-1 text-[10px] font-semibold text-green-700 dark:text-green-400">
                 <ShieldCheck size={12} />
                 {admin?.peran ?? "Admin"}
               </span>
@@ -252,7 +252,7 @@ export default function Profile({ admin }) {
           <button
             type="submit"
             disabled={processing}
-            className="rounded-xl bg-green-700 dark:bg-emerald-600 px-5 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-emerald-500 disabled:opacity-60 shadow-sm transition select-none"
+            className="rounded-xl bg-green-700 dark:bg-green-600 px-5 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-green-500 disabled:opacity-60 shadow-sm transition select-none"
           >
             Simpan Perubahan
           </button>
@@ -277,8 +277,8 @@ export default function Profile({ admin }) {
           border-color: #d1d5db;
         }
         .field-input:focus {
-          border-color: #15803d;
-          box-shadow: 0 0 0 1px #15803d;
+          border-color: green-700;
+          box-shadow: 0 0 0 1px green-700;
         }
         .field-input:disabled {
           background: #f9fafb;

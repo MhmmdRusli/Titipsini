@@ -22,7 +22,7 @@ function formatTanggal(value) {
 const STATUS_CONFIG = {
     pending: { label: 'Belum Dibayar', color: 'text-gray-500 bg-gray-50 dark:bg-gray-800 dark:text-gray-400', icon: Clock },
     menunggu_verifikasi: { label: 'Menunggu Verifikasi', color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400', icon: Loader2 },
-    berhasil: { label: 'Berhasil', color: 'text-[#15803d] bg-green-50 dark:bg-green-950/40 dark:text-[#4ade80]', icon: CheckCircle2 },
+    berhasil: { label: 'Berhasil', color: 'text-green-700 bg-green-50 dark:bg-green-950/40 dark:text-green-400', icon: CheckCircle2 },
     ditolak: { label: 'Ditolak', color: 'text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
     gagal: { label: 'Gagal', color: 'text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
 };
@@ -49,7 +49,7 @@ export default function Riwayat({ topups, saldo }) {
                 {/* Saldo saat ini */}
                 <div className="flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-3.5 shadow-sm">
                     <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <Wallet size={15} className="text-[#15803d] dark:text-[#4ade80]" />
+                        <Wallet size={15} className="text-green-700 dark:text-green-400" />
                         Saldo Titip Saat Ini
                     </div>
                     <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{formatRupiah(saldo)}</span>
@@ -110,7 +110,7 @@ export default function Riwayat({ topups, saldo }) {
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 className={`rounded-lg px-3 py-1.5 text-xs transition ${
                                     link.active 
-                                        ? 'bg-[#15803d] dark:bg-[#22c55e] text-white' 
+                                        ? 'bg-green-700 dark:bg-green-600 text-white' 
                                         : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                 } ${!link.url ? 'opacity-40 cursor-not-allowed' : ''}`}
                             />

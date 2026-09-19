@@ -8,7 +8,7 @@ export default function Success({ orderId, sudahLunas = false, paymentMethod }) 
             <Head title="Pesanan Berhasil" />
 
             <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#15803d] dark:bg-[#4ade80] text-white shadow-md">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-700 dark:bg-green-400 text-white shadow-md">
                     <CheckCircle2 size={40} />
                 </div>
 
@@ -25,7 +25,7 @@ export default function Success({ orderId, sudahLunas = false, paymentMethod }) 
                     {!sudahLunas && (
                         <Link
                             href={`/app/orders/${orderId}/pembayaran`}
-                            className="block w-full rounded-xl bg-[#15803d] hover:bg-[#166534] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] py-3 text-sm font-bold text-white shadow-sm transition"
+                            className="block w-full rounded-xl bg-green-700 hover:bg-green-800 dark:bg-green-500 dark:hover:bg-green-500 py-3 text-sm font-bold text-white shadow-sm transition"
                         >
                             Lakukan Pembayaran
                         </Link>
@@ -35,8 +35,8 @@ export default function Success({ orderId, sudahLunas = false, paymentMethod }) 
                         href="/app/orders"
                         className={`block w-full rounded-xl py-3 text-sm font-bold transition ${
                             sudahLunas
-                                ? 'bg-[#15803d] hover:bg-[#166534] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] text-white shadow-sm'
-                                : 'border border-green-200 bg-green-50 text-[#15803d] hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/40 dark:text-[#4ade80] dark:hover:bg-green-900/50'
+                                ? 'bg-green-700 hover:bg-green-800 dark:bg-green-500 dark:hover:bg-green-500 text-white shadow-sm'
+                                : 'border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-900/50'
                         }`}
                     >
                         Lihat Pesanan Saya

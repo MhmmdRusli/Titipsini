@@ -80,7 +80,7 @@ export default function Extend({ order, hargaPerHari }) {
 
                 {/* Progress bar sederhana - 1 langkah saja untuk perpanjangan */}
                 <div className="mb-6 h-1 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                    <div className="h-full w-full rounded-full bg-[#15803d] dark:bg-[#22c55e]" />
+                    <div className="h-full w-full rounded-full bg-green-700 dark:bg-green-500" />
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -111,7 +111,7 @@ export default function Extend({ order, hargaPerHari }) {
                         <label htmlFor="extend_end_date" className="mb-1.5 block text-sm font-semibold text-gray-800 dark:text-gray-100">
                             Tanggal Keluar Baru
                         </label>
-                        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-3 focus-within:border-[#15803d] focus-within:ring-1 focus-within:ring-[#15803d] dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-3 focus-within:border-green-700 focus-within:ring-1 focus-within:ring-green-700 dark:border-gray-700 dark:bg-gray-800">
                             <CalendarDays size={16} className="shrink-0 text-gray-400" />
                             <input
                                 id="extend_end_date"
@@ -137,7 +137,7 @@ export default function Extend({ order, hargaPerHari }) {
                                 <span className="text-xs text-gray-400">{jumlahHariTambahan} hari tambahan</span>
                             )}
                         </div>
-                        <p className="mt-1 text-xl font-extrabold text-[#15803d] dark:text-[#4ade80]">
+                        <p className="mt-1 text-xl font-extrabold text-green-700 dark:text-green-400">
                             {formatRupiah(totalPembayaran)}
                         </p>
                         {jumlahHariTambahan === 0 && (
@@ -151,7 +151,7 @@ export default function Extend({ order, hargaPerHari }) {
                             type="checkbox"
                             checked={agree}
                             onChange={(e) => setAgree(e.target.checked)}
-                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-[#15803d] focus:ring-[#15803d]"
+                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-green-700 focus:ring-green-700"
                         />
                         <span>
                             Saya menyetujui{' '}
@@ -165,7 +165,7 @@ export default function Extend({ order, hargaPerHari }) {
                     <button
                         type="submit"
                         disabled={!canSubmit}
-                        className="flex w-full items-center justify-center rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 transition duration-200 hover:bg-green-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none dark:bg-[#22c55e] dark:hover:bg-green-600 dark:disabled:bg-gray-700 dark:disabled:text-gray-500"
+                        className="flex w-full items-center justify-center rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 transition duration-200 hover:bg-green-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none dark:bg-green-500 dark:hover:bg-green-600 dark:disabled:bg-gray-700 dark:disabled:text-gray-500"
                     >
                         {processing ? 'Memproses...' : 'Perpanjang Sekarang'}
                     </button>

@@ -70,10 +70,10 @@ export default function Index({ withdrawals, filters, summary = {} }) {
                     <title>Daftar Penarikan Saldo</title>
                     <style>
                         body { font-family: Arial, sans-serif; padding: 24px; color: #111827; }
-                        h1 { font-size: 24px; margin-bottom: 16px; color: #15803d; }
+                        h1 { font-size: 24px; margin-bottom: 16px; color: green-700; }
                         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
                         th, td { border: 1px solid #d1d5db; padding: 8px 10px; font-size: 12px; text-align: left; }
-                        th { background: #f0fdf4; color: #166534; }
+                        th { background: #f0fdf4; color: green-800; }
                     </style>
                 </head>
                 <body>
@@ -118,20 +118,20 @@ export default function Index({ withdrawals, filters, summary = {} }) {
             <Head title="Penarikan Saldo" />
 
             {/* Header Banner - Menggunakan Gradasi Emerald & Dark Mode Support */}
-            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#15803d] to-emerald-700 p-6 text-white shadow-lg">
+            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-green-700 to-green-700 p-6 text-white shadow-lg">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-100">
+                        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-green-100">
                             <TrendingUp size={12} />
                             Withdrawal Monitor
                         </div>
                         <h1 className="text-2xl font-bold">Penarikan Saldo</h1>
-                        <p className="mt-1 text-sm text-emerald-50/90">Pantau semua pengajuan penarikan saldo dari mitra dan pengguna lainnya.</p>
+                        <p className="mt-1 text-sm text-green-50/90">Pantau semua pengajuan penarikan saldo dari mitra dan pengguna lainnya.</p>
                     </div>
 
                     <button
                         onClick={exportPdf}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[#15803d] shadow-sm transition hover:bg-emerald-50"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-green-700 shadow-sm transition hover:bg-green-50"
                     >
                         <Download size={16} />
                         Download PDF
@@ -141,25 +141,25 @@ export default function Index({ withdrawals, filters, summary = {} }) {
                 {/* Summary Cards */}
                 <div className="grid gap-3 md:grid-cols-4">
                     <div className="rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 text-xs text-emerald-100">
+                        <div className="flex items-center gap-2 text-xs text-green-100">
                             <Clock3 size={14} /> Menunggu Verifikasi
                         </div>
                         <div className="mt-2 text-2xl font-bold">{summary?.pending ?? 0}</div>
                     </div>
                     <div className="rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 text-xs text-emerald-100">
+                        <div className="flex items-center gap-2 text-xs text-green-100">
                             <CheckCircle2 size={14} /> Selesai
                         </div>
                         <div className="mt-2 text-2xl font-bold">{summary?.selesai ?? 0}</div>
                     </div>
                     <div className="rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 text-xs text-emerald-100">
+                        <div className="flex items-center gap-2 text-xs text-green-100">
                             <XCircle size={14} /> Ditolak
                         </div>
                         <div className="mt-2 text-2xl font-bold">{summary?.ditolak ?? 0}</div>
                     </div>
                     <div className="rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 text-xs text-emerald-100">
+                        <div className="flex items-center gap-2 text-xs text-green-100">
                             <Wallet size={14} /> Total Menunggu
                         </div>
                         <div className="mt-2 text-lg font-bold">{formatRupiah(summary?.total_pending_amount)}</div>
@@ -175,7 +175,7 @@ export default function Index({ withdrawals, filters, summary = {} }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari nama user / bank / rekening"
-                        className="w-full rounded-xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 py-2.5 pl-10 pr-3 text-sm text-slate-800 dark:text-gray-100 shadow-sm focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
+                        className="w-full rounded-xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 py-2.5 pl-10 pr-3 text-sm text-slate-800 dark:text-gray-100 shadow-sm focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:focus:border-green-500 dark:focus:ring-green-500"
                     />
                 </form>
 
@@ -190,7 +190,7 @@ export default function Index({ withdrawals, filters, summary = {} }) {
                             }}
                             className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
                                 status === tab.value
-                                    ? 'bg-[#15803d] text-white shadow-sm dark:bg-emerald-600'
+                                    ? 'bg-green-700 text-white shadow-sm dark:bg-green-600'
                                     : 'bg-white dark:bg-gray-900 text-slate-600 dark:text-gray-300 ring-1 ring-slate-200 dark:ring-gray-800 hover:bg-slate-50 dark:hover:bg-gray-800'
                             }`}
                         >
@@ -218,7 +218,7 @@ export default function Index({ withdrawals, filters, summary = {} }) {
                                 <tr>
                                     <td colSpan={5} className="px-5 py-16 text-center">
                                         <div className="mx-auto max-w-md">
-                                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-[#15803d] dark:text-emerald-400">
+                                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400">
                                                 <Wallet size={28} />
                                             </div>
                                             <h3 className="text-base font-bold text-slate-800 dark:text-gray-200">Belum ada pengajuan penarikan</h3>
@@ -228,10 +228,10 @@ export default function Index({ withdrawals, filters, summary = {} }) {
                                 </tr>
                             ) : (
                                 (withdrawals?.data ?? []).map((item) => (
-                                    <tr key={item.id} className="hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 transition-colors">
+                                    <tr key={item.id} className="hover:bg-green-50/40 dark:hover:bg-green-950/20 transition-colors">
                                         <td className="px-5 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-[#15803d] dark:text-emerald-400 font-bold text-xs">
+                                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-400 font-bold text-xs">
                                                     {item.user?.name?.charAt(0) ?? 'U'}
                                                 </div>
                                                 <div>
@@ -241,12 +241,12 @@ export default function Index({ withdrawals, filters, summary = {} }) {
                                             </div>
                                         </td>
                                         <td className="px-5 py-4">
-                                            <div className="font-bold text-[#15803d] dark:text-emerald-400 text-base">{formatRupiah(item.jumlah)}</div>
+                                            <div className="font-bold text-green-700 dark:text-green-400 text-base">{formatRupiah(item.jumlah)}</div>
                                         </td>
                                         <td className="px-5 py-4">
                                             <div className="rounded-lg border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-900/60 p-2.5">
                                                 <div className="flex items-center gap-2 font-semibold text-xs text-slate-800 dark:text-gray-200">
-                                                    <Building2 size={14} className="text-[#15803d] dark:text-emerald-400" />
+                                                    <Building2 size={14} className="text-green-700 dark:text-green-400" />
                                                     <span>{item.nama_bank}</span>
                                                     <span className="text-slate-300 dark:text-gray-700">•</span>
                                                     <span className="font-mono text-slate-600 dark:text-gray-400">{item.nomor_rekening}</span>
@@ -266,7 +266,7 @@ export default function Index({ withdrawals, filters, summary = {} }) {
                                                     </span>
                                                 )}
                                                 {item.status === 'selesai' && (
-                                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 px-3 py-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+                                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 dark:bg-green-950/50 px-3 py-1 text-[10px] font-bold text-green-700 dark:text-green-400">
                                                         <CheckCircle2 size={12} />
                                                         Selesai
                                                     </span>

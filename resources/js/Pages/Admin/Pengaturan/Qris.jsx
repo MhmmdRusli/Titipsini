@@ -140,12 +140,12 @@ export default function Qris() {
                             <button
                                 type="submit"
                                 disabled={processing || !data.qris_image}
-                                className="rounded-xl bg-green-700 dark:bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 dark:hover:bg-emerald-500 disabled:opacity-50"
+                                className="rounded-xl bg-green-700 dark:bg-green-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 dark:hover:bg-green-500 disabled:opacity-50"
                             >
                                 Simpan QRIS
                             </button>
                             {recentlySuccessful && (
-                                <span className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-emerald-400">
+                                <span className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
                                     <CheckCircle2 size={14} />
                                     QRIS berhasil disimpan
                                 </span>

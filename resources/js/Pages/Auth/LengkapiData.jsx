@@ -76,7 +76,7 @@ export default function LengkapiData() {
     }
 
     function inputClass(hasError) {
-        return `w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#15803d]/30 transition-all ${
+        return `w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-700/30 transition-all ${
             hasError ? 'ring-2 ring-red-500' : ''
         }`;
     }
@@ -103,7 +103,7 @@ export default function LengkapiData() {
                     
                     {/* Progress Bar Indikator Hijau */}
                     <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
-                        <div className="h-full w-1/2 rounded-full bg-[#15803d]" />
+                        <div className="h-full w-1/2 rounded-full bg-green-700" />
                     </div>
                 </div>
 
@@ -118,7 +118,7 @@ export default function LengkapiData() {
                                 alt="Logo Icon"
                                 className="h-10 w-auto object-contain"
                             />
-                            <div className="text-2xl font-bold tracking-tight text-[#15803d]">
+                            <div className="text-2xl font-bold tracking-tight text-green-700">
                                 Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                             </div>
                         </div>
@@ -202,7 +202,7 @@ export default function LengkapiData() {
                                             name="gender"
                                             checked={data.gender === option.value}
                                             onChange={() => setData('gender', option.value)}
-                                            className="h-4 w-4 accent-[#15803d]"
+                                            className="h-4 w-4 accent-green-700"
                                         />
                                         {option.label}
                                     </label>
@@ -287,7 +287,7 @@ export default function LengkapiData() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white transition-all hover:bg-[#166534] active:scale-[0.99] disabled:opacity-50 mt-4 shadow-sm"
+                            className="w-full rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white transition-all hover:bg-green-800 active:scale-[0.99] disabled:opacity-50 mt-4 shadow-sm"
                         >
                             Lanjutkan
                         </button>

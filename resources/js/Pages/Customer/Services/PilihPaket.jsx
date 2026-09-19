@@ -15,7 +15,7 @@ export default function PilihPaket({ serviceId }) {
                         alt="Titipsini"
                         className="h-8 w-8 rounded-full object-cover"
                     />
-                    <p className="text-lg font-extrabold text-[#15803d] dark:text-[#4ade80]">
+                    <p className="text-lg font-extrabold text-green-700 dark:text-green-400">
                         Titipsini<span className="text-yellow-400">•</span>Com
                     </p>
                 </div>
@@ -25,7 +25,7 @@ export default function PilihPaket({ serviceId }) {
 
                 {/* Ilustrasi sederhana */}
                 <div className="relative mt-8 flex h-40 w-40 items-center justify-center rounded-full bg-green-50 dark:bg-green-950/30">
-                    <Boxes size={72} strokeWidth={1.3} className="text-[#15803d] dark:text-[#4ade80]" />
+                    <Boxes size={72} strokeWidth={1.3} className="text-green-700 dark:text-green-400" />
                 </div>
 
                 <h1 className="mt-6 text-lg font-bold text-gray-900 dark:text-gray-100">Pilih Paket</h1>
@@ -36,7 +36,7 @@ export default function PilihPaket({ serviceId }) {
                 {/* CTA utama ala tombol "Fitur Pencarian" di landing */}
                 <Link
                     href={`/app/services/barang?service_id=${serviceId ?? ''}`}
-                    className="mt-8 flex w-full items-center gap-3 rounded-2xl bg-[#15803d] p-4 text-left text-white shadow-md transition hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600"
+                    className="mt-8 flex w-full items-center gap-3 rounded-2xl bg-green-700 p-4 text-left text-white shadow-md transition hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
                 >
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15">
                         <PackagePlus size={20} />

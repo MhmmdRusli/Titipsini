@@ -42,6 +42,7 @@ use App\Http\Controllers\Mitra\Auth\EmailVerificationNotificationController as M
 use App\Http\Controllers\Mitra\Auth\EmailVerificationPromptController as MitraEmailVerificationPromptController;
 use App\Http\Controllers\Mitra\Auth\NewPasswordController as MitraNewPasswordController;
 use App\Http\Controllers\Mitra\Auth\PasswordResetLinkController as MitraPasswordResetLinkController;
+use App\Http\Controllers\Mitra\Auth\RegisteredUserController as MitraRegisteredUserController;
 use App\Http\Controllers\Mitra\Auth\VerifyEmailController as MitraVerifyEmailController;
 use App\Http\Controllers\Mitra\BantuanController as MitraBantuanController;
 use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
@@ -146,7 +147,9 @@ Route::middleware('guest')->prefix('mitra')->name('mitra.')->group(function () {
     Route::post('/masuk', fn () => redirect('/login'))->name('login.store');
     Route::get('/login', fn () => redirect('/login'))->name('login.alias');
 
-    Route::get('/daftar', fn () => redirect('/register'))->name('register');
+    // Register Mitra
+    Route::get('/daftar', [MitraRegisteredUserController::class, 'create'])->name('register');
+    Route::post('/daftar', [MitraRegisteredUserController::class, 'store'])->name('register.store');
 
     Route::get('/lupa-password', [MitraPasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('/lupa-password', [MitraPasswordResetLinkController::class, 'store'])->name('password.email');

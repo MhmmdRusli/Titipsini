@@ -34,7 +34,7 @@ function InfoRow({ label, value }) {
 const STATUS_LABEL = {
     menunggu_pembayaran: { label: 'Belum Dibayar', color: 'text-blue-600 dark:text-blue-400' },
     menunggu_verifikasi: { label: 'Menunggu Verifikasi', color: 'text-amber-600 dark:text-amber-400' },
-    terverifikasi: { label: 'Berhasil', color: 'text-[#15803d] dark:text-[#4ade80]' },
+    terverifikasi: { label: 'Berhasil', color: 'text-green-700 dark:text-green-400' },
 };
 
 export default function ExtendInvoice({ order, qris_url, saldo }) {
@@ -97,7 +97,7 @@ export default function ExtendInvoice({ order, qris_url, saldo }) {
 
                 {/* ================= KARTU INVOICE ================= */}
                 <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-800/90">
-                    <div className="flex items-center justify-between gap-3 bg-[#15803d] px-5 py-4 dark:bg-[#0f5c2c]">
+                    <div className="flex items-center justify-between gap-3 bg-green-700 px-5 py-4 dark:bg-green-800">
                         <div className="flex items-center gap-2">
                             <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white/15">
                                 <img src="/images/admin-titipsini.png" alt="Titipsini" className="h-full w-full object-contain" />
@@ -138,7 +138,7 @@ export default function ExtendInvoice({ order, qris_url, saldo }) {
                         {/* Total */}
                         <div className="flex items-center justify-between border-t border-gray-100 pt-3 dark:border-gray-700/60">
                             <span className="text-sm font-bold text-gray-800 dark:text-gray-100">Total Pembayaran</span>
-                            <span className="text-lg font-extrabold text-[#15803d] dark:text-[#4ade80]">
+                            <span className="text-lg font-extrabold text-green-700 dark:text-green-400">
                                 {formatRupiah(order.extend_price)}
                             </span>
                         </div>
@@ -168,7 +168,7 @@ export default function ExtendInvoice({ order, qris_url, saldo }) {
                                     type="button"
                                     onClick={bayarSaldo}
                                     disabled={payingSaldo}
-                                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 disabled:opacity-60 dark:bg-[#22c55e] dark:hover:bg-green-600 transition active:scale-[0.98]"
+                                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 disabled:opacity-60 dark:bg-green-500 dark:hover:bg-green-600 transition active:scale-[0.98]"
                                 >
                                     <WalletMinimal size={16} />
                                     {payingSaldo ? 'Memproses...' : `Bayar Sekarang (Saldo ${formatRupiah(saldo)})`}
@@ -176,7 +176,7 @@ export default function ExtendInvoice({ order, qris_url, saldo }) {
                                 <button
                                     type="button"
                                     onClick={() => setShowQris(true)}
-                                    className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#15803d] bg-white py-3 text-sm font-bold text-[#15803d] hover:bg-green-50 dark:border-green-700 dark:bg-transparent dark:text-[#4ade80] dark:hover:bg-green-950/30 transition"
+                                    className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-green-700 bg-white py-3 text-sm font-bold text-green-700 hover:bg-green-50 dark:border-green-700 dark:bg-transparent dark:text-green-400 dark:hover:bg-green-950/30 transition"
                                 >
                                     <QrCode size={16} />
                                     Bayar via QRIS
@@ -224,7 +224,7 @@ export default function ExtendInvoice({ order, qris_url, saldo }) {
                                         <button
                                             type="submit"
                                             disabled={!file || uploading}
-                                            className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white disabled:opacity-50 dark:bg-[#22c55e]"
+                                            className="flex-1 rounded-lg bg-green-700 py-2 text-xs font-bold text-white disabled:opacity-50 dark:bg-green-500"
                                         >
                                             {uploading ? 'Mengunggah...' : 'Kirim Bukti'}
                                         </button>

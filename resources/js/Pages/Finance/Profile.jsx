@@ -65,7 +65,7 @@ export default function Profile({ finance }) {
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 items-start">
 
           {/* ================= Kartu Kiri: Foto & Ringkasan ================= */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-800 p-6 transition-colors lg:sticky lg:top-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-800 p-6 transition-colors lg:sticky lg:top-6">
             <div className="flex flex-col items-center text-center">
               <div className="relative">
                 <img
@@ -75,7 +75,7 @@ export default function Profile({ finance }) {
                 />
                 <label
                   htmlFor="foto"
-                  className="absolute -bottom-2 -right-2 bg-green-700 dark:bg-emerald-600 text-white rounded-xl p-1.5 shadow-md cursor-pointer hover:bg-green-800 dark:hover:bg-emerald-500 transition border-2 border-white dark:border-gray-900"
+                  className="absolute -bottom-2 -right-2 bg-green-700 dark:bg-green-600 text-white rounded-xl p-1.5 shadow-md cursor-pointer hover:bg-green-800 dark:hover:bg-green-500 transition border-2 border-white dark:border-gray-900"
                   title="Ganti foto"
                 >
                   <Pencil size={13} />
@@ -96,7 +96,7 @@ export default function Profile({ finance }) {
                 {data.email || "email@domain.com"}
               </p>
 
-              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-950/60 border border-green-200 dark:border-green-800/50 px-3 py-1 text-[10px] font-semibold text-green-700 dark:text-green-400">
                 <ShieldCheck size={12} />
                 {finance?.peran ?? "Finance"}
               </span>
@@ -112,7 +112,7 @@ export default function Profile({ finance }) {
           <div className="space-y-6">
 
             {/* --- Section: Informasi Pribadi --- */}
-            <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-800 p-6 lg:p-8 transition-colors">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-800 p-6 lg:p-8 transition-colors">
               <SectionHeading
                 title="Informasi Pribadi"
                 subtitle="Data diri utama yang tampil pada akun kamu."
@@ -179,7 +179,7 @@ export default function Profile({ finance }) {
             </div>
 
             {/* --- Section: Alamat --- */}
-            <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-800 p-6 lg:p-8 transition-colors">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-800 p-6 lg:p-8 transition-colors">
               <SectionHeading
                 title="Alamat"
                 subtitle="Lokasi domisili untuk keperluan administrasi."
@@ -239,7 +239,7 @@ export default function Profile({ finance }) {
         </div>
 
         {/* ================= Action Buttons ================= */}
-        <div className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-[#111827]/95 backdrop-blur px-4 py-3 lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:dark:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
+        <div className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-gray-800/95 backdrop-blur px-4 py-3 lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:dark:bg-transparent lg:px-0 lg:py-0 lg:backdrop-blur-none">
           <button
             type="button"
             onClick={handleCancel}
@@ -250,7 +250,7 @@ export default function Profile({ finance }) {
           <button
             type="submit"
             disabled={processing}
-            className="rounded-xl bg-green-700 dark:bg-emerald-600 px-5 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-emerald-500 disabled:opacity-60 shadow-sm transition select-none"
+            className="rounded-xl bg-green-700 dark:bg-green-600 px-5 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-green-500 disabled:opacity-60 shadow-sm transition select-none"
           >
             Simpan Perubahan
           </button>
@@ -275,8 +275,8 @@ export default function Profile({ finance }) {
           border-color: #d1d5db;
         }
         .field-input:focus {
-          border-color: #15803d;
-          box-shadow: 0 0 0 1px #15803d;
+          border-color: green-700;
+          box-shadow: 0 0 0 1px green-700;
         }
         .field-input:disabled {
           background: #f9fafb;

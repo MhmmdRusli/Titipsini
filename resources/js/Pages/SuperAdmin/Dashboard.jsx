@@ -169,7 +169,7 @@ export default function Dashboard({
               <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-white md:text-3xl">
                 Halo, Selamat Datang di Dashboard Admin
               </h1>
-              <p className="mt-1 text-xs text-emerald-100 md:text-sm">
+              <p className="mt-1 text-xs text-green-100 md:text-sm">
                 Pantau seluruh aktivitas transaksi, pelanggan, dan vendor Titipsini secara terpusat.
               </p>
             </div>

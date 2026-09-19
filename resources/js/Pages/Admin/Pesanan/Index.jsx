@@ -27,11 +27,11 @@ const STATUSES = [
 const STATUS_STYLE = {
     baru: 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800/50',
     menunggu_verifikasi_finance: 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/50',
-    pembayaran_diterima: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/50',
+    pembayaran_diterima: 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-400 dark:border-green-800/50',
     diproses: 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/50',
     diproses_mitra: 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-800/50',
     dikirim: 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-800/50',
-    selesai: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/50',
+    selesai: 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-400 dark:border-green-800/50',
     dibatalkan: 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/50',
 };
 
@@ -347,7 +347,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari kode pesanan / customer..."
-                        className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-3 text-xs text-gray-800 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
+                        className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-3 text-xs text-gray-800 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-green-500 dark:focus:ring-green-500"
                     />
                 </form>
 
@@ -394,7 +394,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                     onClick={toggleSelectMode}
                     className={`ml-auto rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all ${
                         selectMode
-                            ? 'border-green-600 bg-green-50 text-green-700 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                            ? 'border-green-600 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-950/40 dark:text-green-400'
                             : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800'
                     }`}
                 >
@@ -403,8 +403,8 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
             </div>
 
             {selectMode && selectedIds.length > 0 && isSuperAdmin && (
-                <div className="mb-4 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm dark:border-emerald-900/50 dark:bg-emerald-950/30">
-                    <span className="text-xs font-semibold text-green-800 dark:text-emerald-300">
+                <div className="mb-4 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3 shadow-sm dark:border-green-900/50 dark:bg-green-950/30">
+                    <span className="text-xs font-semibold text-green-800 dark:text-green-300">
                         {selectedIds.length} pesanan dipilih
                     </span>
                     <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                             type="checkbox"
                                             checked={allOnPageSelected}
                                             onChange={toggleSelectAllOnPage}
-                                            className="rounded text-green-600 focus:ring-green-600 dark:border-gray-700 dark:bg-slate-800 dark:checked:bg-emerald-600"
+                                            className="rounded text-green-600 focus:ring-green-600 dark:border-gray-700 dark:bg-slate-800 dark:checked:bg-green-600"
                                         />
                                     </th>
                                 )}
@@ -474,7 +474,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                     <tr
                                         key={order.id}
                                         className={`transition-colors hover:bg-gray-50/60 dark:hover:bg-slate-800/50 ${
-                                            selectedIds.includes(order.id) ? 'bg-green-50/50 dark:bg-emerald-950/20' : ''
+                                            selectedIds.includes(order.id) ? 'bg-green-50/50 dark:bg-green-950/20' : ''
                                         }`}
                                     >
                                         {selectMode && (
@@ -483,7 +483,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                     type="checkbox"
                                                     checked={selectedIds.includes(order.id)}
                                                     onChange={() => toggleSelectOne(order.id)}
-                                                    className="rounded text-green-600 focus:ring-green-600 dark:border-gray-700 dark:bg-slate-800 dark:checked:bg-emerald-600"
+                                                    className="rounded text-green-600 focus:ring-green-600 dark:border-gray-700 dark:bg-slate-800 dark:checked:bg-green-600"
                                                 />
                                             </td>
                                         )}
@@ -491,12 +491,12 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                             <div>{order.order_code}</div>
                                             <div className="mt-1 flex flex-wrap gap-1">
                                                 {order.payment_receipt && (
-                                                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-600 dark:bg-green-950/40 dark:text-green-400">
                                                         <FileText size={11} /> Bukti Diunggah
                                                     </span>
                                                 )}
                                                 {readyToComplete && (
-                                                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-600 dark:bg-green-950/40 dark:text-green-400">
                                                         <CheckCircle2 size={11} /> Menunggu Customer
                                                     </span>
                                                 )}
@@ -506,14 +506,14 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                             <HandCoins size={11} /> Cash - Belum Diterima
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                        <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-600 dark:bg-green-950/40 dark:text-green-400">
                                                             <CheckCircle2 size={11} /> Cash Diterima
                                                         </span>
                                                     )
                                                 )}
                                                 {order.denda > 0 && (
                                                     order.denda_paid_at ? (
-                                                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                        <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-600 dark:bg-green-950/40 dark:text-green-400">
                                                             <CheckCircle2 size={11} /> Denda Lunas
                                                         </span>
                                                     ) : order.denda_payment_receipt ? (
@@ -533,7 +533,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                         <td className="px-4 py-3.5">
                                             <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-300">
                                                 {SERVICE_LABEL[order.service_type] ?? order.service_type}
-                                                {order.is_pickup && <Truck size={13} className="text-green-700 dark:text-emerald-400" />}
+                                                {order.is_pickup && <Truck size={13} className="text-green-700 dark:text-green-400" />}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">
@@ -597,7 +597,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedOrder(order)}
-                                                    className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 transition hover:bg-green-600 hover:text-white dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
+                                                    className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 transition hover:bg-green-600 hover:text-white dark:border-green-800/60 dark:bg-green-950/50 dark:text-green-400 dark:hover:bg-green-600 dark:hover:text-white"
                                                 >
                                                     Detail
                                                     <ChevronRight size={14} />
@@ -649,7 +649,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 preserveScroll
                                 className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
                                     link.active
-                                        ? 'bg-green-700 text-white shadow-sm dark:bg-emerald-600'
+                                        ? 'bg-green-700 text-white shadow-sm dark:bg-green-600'
                                         : link.url
                                         ? 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800'
                                         : 'cursor-not-allowed border border-gray-100 bg-gray-50/50 text-gray-300 dark:border-gray-800/50 dark:bg-slate-900/50 dark:text-gray-600'
@@ -815,7 +815,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
                     <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
                         <div className="flex items-center gap-2">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400">
                                 <CheckCircle2 size={18} />
                             </span>
                             <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Verifikasi Pembayaran?</h2>
@@ -838,7 +838,7 @@ export default function PesananIndex({ orders, filters, cities = [] }) {
                                 type="button"
                                 onClick={handleVerifyPayment}
                                 disabled={isVerifying}
-                                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60"
+                                className="rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-60"
                             >
                                 {isVerifying ? 'Memproses...' : 'Ya, Verifikasi Pembayaran'}
                             </button>
@@ -908,7 +908,7 @@ function CustomSelect({ value, options, onChange }) {
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="inline-flex min-w-[140px] items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 shadow-sm transition hover:bg-gray-50 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-800 dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
+                className="inline-flex min-w-[140px] items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 shadow-sm transition hover:bg-gray-50 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-800 dark:focus:border-green-500 dark:focus:ring-green-500"
             >
                 <span>{selectedLabel}</span>
                 <ChevronDown size={14} className={`text-gray-400 transition-transform dark:text-gray-500 ${isOpen ? 'rotate-180' : ''}`} />
@@ -928,8 +928,8 @@ function CustomSelect({ value, options, onChange }) {
                                 }}
                                 className={`w-full px-3 py-2 text-left text-xs transition ${
                                     isSelected
-                                        ? 'bg-green-700 font-medium text-white dark:bg-emerald-600'
-                                        : 'text-gray-700 hover:bg-green-50 hover:text-green-800 dark:text-gray-300 dark:hover:bg-slate-800 dark:hover:text-emerald-400'
+                                        ? 'bg-green-700 font-medium text-white dark:bg-green-600'
+                                        : 'text-gray-700 hover:bg-green-50 hover:text-green-800 dark:text-gray-300 dark:hover:bg-slate-800 dark:hover:text-green-400'
                                 }`}
                             >
                                 {opt.label}
@@ -1015,7 +1015,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
                                 {displayStatusLabel(order)}
                             </span>
                             {readyToComplete && (
-                                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-600 dark:bg-green-950/40 dark:text-green-400">
                                     <CheckCircle2 size={11} /> Menunggu Customer
                                 </span>
                             )}
@@ -1063,7 +1063,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
                     )}
 
                     <dt className="text-gray-500 dark:text-gray-400">Total Harga</dt>
-                    <dd className="font-bold text-green-700 dark:text-emerald-400">{formatRupiah(order.total_price)}</dd>
+                    <dd className="font-bold text-green-700 dark:text-green-400">{formatRupiah(order.total_price)}</dd>
 
                     {order.denda > 0 && (
                         <>
@@ -1091,7 +1091,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
                                 <HandCoins size={14} /> Pembayaran Tunai
                             </span>
                             {!cashPending && (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600 dark:text-green-400">
                                     <CheckCircle2 size={12} /> Diterima {order.payment_verified_at}
                                 </span>
                             )}
@@ -1112,7 +1112,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
                                 </button>
                             </>
                         ) : (
-                            <p className="mt-2 text-xs text-emerald-700/80 dark:text-emerald-300/80">
+                            <p className="mt-2 text-xs text-green-700/80 dark:text-green-300/80">
                                 Uang tunai untuk pesanan ini sudah dikonfirmasi diterima oleh admin.
                             </p>
                         )}
@@ -1121,18 +1121,18 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
 
                 {/* Blok verifikasi pembayaran transfer - tampil kalau ada bukti transfer tapi belum diverifikasi */}
                 {!order.payment_verified_at && order.payment_receipt && ['transfer', 'qris', 'pending'].includes(order.payment_method) && (
-                    <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
+                    <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-950/30">
                         <div className="flex items-center justify-between">
-                            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">
+                            <span className="flex items-center gap-1.5 text-xs font-semibold uppercase text-green-700 dark:text-green-400">
                                 <CheckCircle2 size={14} /> Verifikasi Pembayaran Transfer
                             </span>
                         </div>
 
-                        <p className="mt-2 text-xs text-emerald-700/80 dark:text-emerald-300/80">
+                        <p className="mt-2 text-xs text-green-700/80 dark:text-green-300/80">
                             Customer telah mengunggah bukti transfer. Periksa bukti pembayaran di bawah ini, lalu klik verifikasi jika sesuai.
                         </p>
 
-                        <div className="mt-3 overflow-hidden rounded-xl border border-emerald-200 bg-white dark:border-emerald-800 dark:bg-slate-900">
+                        <div className="mt-3 overflow-hidden rounded-xl border border-green-200 bg-white dark:border-green-800 dark:bg-slate-900">
                             <img
                                 src={order.payment_receipt}
                                 alt="Bukti Transfer"
@@ -1144,7 +1144,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
                         <button
                             type="button"
                             onClick={() => onVerifyPayment(order)}
-                            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700"
                         >
                             <CheckCircle2 size={15} />
                             Verifikasi / Setujui Pembayaran
@@ -1160,7 +1160,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
                                 <AlertTriangle size={14} /> Denda Keterlambatan
                             </span>
                             {order.denda_paid_at && (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600 dark:text-green-400">
                                     <CheckCircle2 size={12} /> Terverifikasi {order.denda_paid_at}
                                 </span>
                             )}
@@ -1171,7 +1171,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
                         </p>
 
                         {order.denda_paid_at ? (
-                            <p className="mt-2 text-xs text-emerald-700/80 dark:text-emerald-300/80">
+                            <p className="mt-2 text-xs text-green-700/80 dark:text-green-300/80">
                                 Denda sudah diverifikasi, saldo mitra otomatis bertambah.
                             </p>
                         ) : order.denda_payment_receipt ? (
@@ -1260,7 +1260,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
                                     type="text"
                                     value={data.cancel_reason}
                                     onChange={(e) => setData('cancel_reason', e.target.value)}
-                                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-emerald-500 dark:focus:ring-emerald-500"
+                                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-gray-800 dark:bg-slate-800 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-green-500 dark:focus:ring-green-500"
                                     placeholder="Contoh: Bukti pembayaran tidak valid"
                                 />
                                 {errors.cancel_reason && (
@@ -1278,7 +1278,7 @@ function OrderDetailModal({ order, onClose, onConfirmCash, onVerifyPayment, onAp
                                     className={`rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition disabled:opacity-60 ${
                                         next === 'dibatalkan'
                                             ? 'bg-red-600 hover:bg-red-700'
-                                            : 'bg-green-700 hover:bg-green-800 dark:bg-emerald-600 dark:hover:bg-emerald-700'
+                                            : 'bg-green-700 hover:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700'
                                     }`}
                                 >
                                     {isSubmitting ? 'Memproses...' : actionLabel[next]}

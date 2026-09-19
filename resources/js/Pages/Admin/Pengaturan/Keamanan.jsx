@@ -47,7 +47,7 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                 {/* ============ FORM GANTI KATA SANDI ============ */}
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-[#111827] lg:col-span-2 transition-colors">
                     <div className="mb-6 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-200 text-green-700 dark:bg-emerald-950/60 dark:border-emerald-800/50 dark:text-emerald-400">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 border border-green-200 text-green-700 dark:bg-green-950/60 dark:border-green-800/50 dark:text-green-400">
                             <ShieldCheck size={20} />
                         </div>
                         <div>
@@ -109,12 +109,12 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                             <button
                                 type="submit"
                                 disabled={processing || limitReached}
-                                className="rounded-xl bg-emerald-600 dark:bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 dark:hover:bg-emerald-500 disabled:opacity-50 shadow-sm transition-all select-none"
+                                className="rounded-xl bg-green-600 dark:bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-700 dark:hover:bg-green-500 disabled:opacity-50 shadow-sm transition-all select-none"
                             >
                                 Simpan kata sandi
                             </button>
                             {recentlySuccessful && (
-                                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Kata sandi berhasil diperbarui</span>
+                                <span className="text-xs font-semibold text-green-600 dark:text-green-400">Kata sandi berhasil diperbarui</span>
                             )}
                         </div>
                     </form>
@@ -124,7 +124,7 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                 <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-[#111827] transition-colors">
                     <div className="mb-5 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-200 text-green-700 dark:bg-emerald-950/60 dark:border-emerald-800/50 dark:text-emerald-400">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 border border-green-200 text-green-700 dark:bg-green-950/60 dark:border-green-800/50 dark:text-green-400">
                                 <Clock size={20} />
                             </div>
                             <div>
@@ -162,7 +162,7 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                                     key={session.id ?? idx}
                                     className={`rounded-xl border p-3.5 transition-colors ${
                                         session.current
-                                            ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-800/40 dark:bg-emerald-950/20'
+                                            ? 'border-green-200 bg-green-50/50 dark:border-green-800/40 dark:bg-green-950/20'
                                             : 'border-gray-200 bg-gray-50/50 dark:border-gray-800/80 dark:bg-[#1e293b]/50'
                                     }`}
                                 >
@@ -175,7 +175,7 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
                                                 <p className="text-xs font-semibold text-gray-800 dark:text-gray-100">
                                                     {session.device ?? 'Perangkat tidak dikenal'}
                                                     {session.current && (
-                                                        <span className="ml-2 rounded-full bg-emerald-100 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-400">
+                                                        <span className="ml-2 rounded-full bg-green-100 border border-green-200 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-950 dark:border-green-800 dark:text-green-400">
                                                             Sesi ini
                                                         </span>
                                                     )}

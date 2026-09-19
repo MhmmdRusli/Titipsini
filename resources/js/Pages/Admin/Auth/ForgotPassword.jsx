@@ -22,9 +22,9 @@ export default function ForgotPassword({ status }) {
 
             <div className="w-full max-w-md rounded-2xl bg-white p-10 shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-gray-100 z-10">
                 <div className="mb-6 text-center">
-                    <div className="flex items-center justify-center gap-2 text-xl font-bold text-[#3B8F55]">
+                    <div className="flex items-center justify-center gap-2 text-xl font-bold text-green-700">
                         <img src="/images/logo-titipsini.png" alt="Logo" className="h-7 w-7 object-contain" />
-                        <span className="tracking-tight font-extrabold text-[#3B8F55]">
+                        <span className="tracking-tight font-extrabold text-green-700">
                             Titipsini
                             <span className="text-yellow-400 mx-0.5">●</span>
                             Com
@@ -68,7 +68,7 @@ export default function ForgotPassword({ status }) {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="w-full rounded-xl bg-[#3B8F55] py-3 text-sm font-semibold text-white hover:bg-[#317646] active:bg-[#275e38] transition-colors shadow-md shadow-green-900/10 disabled:opacity-50"
+                        className="w-full rounded-xl bg-green-700 py-3 text-sm font-semibold text-white hover:bg-[#317646] active:bg-[#275e38] transition-colors shadow-md shadow-green-900/10 disabled:opacity-50"
                     >
                         {processing ? 'Mengirim...' : 'Kirim Link Reset'}
                     </button>
@@ -76,7 +76,7 @@ export default function ForgotPassword({ status }) {
 
                 <Link
                     href="/admin/login"
-                    className="mt-6 flex items-center justify-center gap-1.5 text-xs font-medium text-gray-500 hover:text-[#3B8F55] transition-colors"
+                    className="mt-6 flex items-center justify-center gap-1.5 text-xs font-medium text-gray-500 hover:text-green-700 transition-colors"
                 >
                     <ArrowLeft size={14} />
                     Kembali ke halaman login

@@ -27,13 +27,13 @@ export default function Login() {
                 {/* SISI KIRI: Brand Logo & Ilustrasi */}
                 <div className="hidden flex-1 flex-col items-center justify-center lg:flex select-none">
                     <div className="mb-6 text-center">
-                        <div className="flex items-center justify-center gap-2 text-2xl font-bold text-[#3B8F55]">
+                        <div className="flex items-center justify-center gap-2 text-2xl font-bold text-green-700">
                             <img
                                 src="/images/logo-titipsini.png"
                                 alt="Logo"
                                 className="h-8 w-8 object-contain"
                             />
-                            <span className="tracking-tight font-extrabold text-[#3B8F55]">
+                            <span className="tracking-tight font-extrabold text-green-700">
                                 Titipsini
                                 <span className="text-yellow-400 mx-0.5">●</span>
                                 Com
@@ -93,11 +93,11 @@ export default function Login() {
                             {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
                         </div>
 
-                        {/* Mengubah text-gray-400 menjadi text-[#3B8F55] dan hover:text-[#317646] */}
+                        {/* Mengubah text-gray-400 menjadi text-green-700 dan hover:text-[#317646] */}
                         <div className="text-right">
                             <Link 
                                 href="/admin/forgot-password" 
-                                className="text-xs font-medium text-[#3B8F55] hover:text-[#317646] hover:underline transition-colors"
+                                className="text-xs font-medium text-green-700 hover:text-[#317646] hover:underline transition-colors"
                             >
                                 Lupa kata sandi?
                             </Link>
@@ -106,7 +106,7 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full rounded-xl bg-[#3B8F55] py-3 text-sm font-semibold text-white hover:bg-[#317646] active:bg-[#275e38] transition-colors shadow-md shadow-green-900/10 disabled:opacity-50"
+                            className="w-full rounded-xl bg-green-700 py-3 text-sm font-semibold text-white hover:bg-[#317646] active:bg-[#275e38] transition-colors shadow-md shadow-green-900/10 disabled:opacity-50"
                         >
                             Masuk
                         </button>

@@ -27,7 +27,7 @@ export default function Riwayat({ riwayat, totalPendapatan = 0 }) {
 
             <div className="px-4 py-4">
                 {/* Ringkasan total */}
-                <div className="rounded-2xl bg-green-600 p-4 text-white shadow-sm">
+                <div className="rounded-2xl bg-green-700 p-4 text-white dark:bg-green-800 shadow-sm">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-white/80">
                         <Wallet size={13} />
                         Total Pendapatan Selesai
@@ -38,7 +38,7 @@ export default function Riwayat({ riwayat, totalPendapatan = 0 }) {
                 {/* List riwayat */}
                 <div className="mt-4 space-y-2.5">
                     {riwayat.data.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400">
+                        <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-700 p-6 text-center text-sm text-gray-400 dark:text-gray-500">
                             Belum ada pendapatan tercatat.
                         </div>
                     ) : (
@@ -47,9 +47,9 @@ export default function Riwayat({ riwayat, totalPendapatan = 0 }) {
                             return (
                                 <div
                                     key={item.id}
-                                    className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3.5 shadow-sm"
+                                    className="flex items-center gap-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-3.5 shadow-sm"
                                 >
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400">
                                         <Icon size={18} />
                                     </div>
                                     <div className="min-w-0 flex-1">
@@ -60,7 +60,7 @@ export default function Riwayat({ riwayat, totalPendapatan = 0 }) {
                                             {item.order_code} &middot; {item.tanggal}
                                         </p>
                                     </div>
-                                    <span className="shrink-0 text-sm font-bold text-green-700">
+                                    <span className="shrink-0 text-sm font-bold text-green-700 dark:text-green-400">
                                         +{formatRupiah(item.total_price)}
                                     </span>
                                 </div>
@@ -80,10 +80,10 @@ export default function Riwayat({ riwayat, totalPendapatan = 0 }) {
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 className={`rounded-md px-3 py-1.5 text-xs ${
                                     link.active
-                                        ? 'bg-green-600 text-white'
+                                        ? 'bg-green-700 text-white'
                                         : link.url
-                                        ? 'text-gray-500 hover:bg-gray-100'
-                                        : 'text-gray-300'
+                                        ? 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                        :\ 'text-gray-300 dark:text-gray-500'
                                 }`}
                             />
                         ))}

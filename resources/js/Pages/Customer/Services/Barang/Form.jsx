@@ -170,9 +170,9 @@ function DateRangeField({ tanggalMasuk, tanggalKeluar, onChange, error }) {
                                             disabled
                                                 ? 'cursor-not-allowed text-gray-300 dark:text-gray-600'
                                                 : isStart || isEnd
-                                                    ? 'bg-[#15803d] font-bold text-white dark:bg-[#22c55e]'
+                                                    ? 'bg-green-700 font-bold text-white dark:bg-green-500'
                                                     : inRange
-                                                        ? 'bg-green-100 text-[#15803d] dark:bg-green-950/50 dark:text-green-400'
+                                                        ? 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400'
                                                         : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
                                         }`}
                                     >
@@ -195,7 +195,7 @@ function UkuranBarangInfoModal({ options, onClose }) {
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-4 sm:items-center">
             <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-gray-800">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-[#15803d] dark:text-green-400">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                         <Info size={18} />
                         <p className="text-sm font-bold">Information</p>
                     </div>
@@ -373,7 +373,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                             type="button"
                             onClick={() => update('pickup', !form.pickup)}
                             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
-                                form.pickup ? 'bg-[#15803d] dark:bg-[#22c55e]' : 'bg-gray-200 dark:bg-gray-700'
+                                form.pickup ? 'bg-green-700 dark:bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
                             }`}
                         >
                             <span
@@ -405,7 +405,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                                 {belumPunyaAlamat ? (
                                     <Link
                                         href="/app/profile/alamat/tambah"
-                                        className="mt-2 flex items-center gap-3 rounded-xl border border-dashed border-green-300 bg-green-50 px-4 py-3.5 text-sm font-semibold text-[#15803d] transition hover:bg-green-100 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400"
+                                        className="mt-2 flex items-center gap-3 rounded-xl border border-dashed border-green-300 bg-green-50 px-4 py-3.5 text-sm font-semibold text-green-700 transition hover:bg-green-100 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400"
                                     >
                                         <Plus size={16} className="shrink-0" />
                                         Tambah alamat penjemputan
@@ -421,14 +421,14 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                                                     onClick={() => update('address_id', address.id)}
                                                     className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
                                                         selected
-                                                            ? 'border-[#15803d] bg-green-50 ring-2 ring-[#15803d]/20 dark:border-green-500 dark:bg-green-950/30'
+                                                            ? 'border-green-700 bg-green-50 ring-2 ring-green-700/20 dark:border-green-500 dark:bg-green-950/30'
                                                             : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
                                                     }`}
                                                 >
                                                     <MapPin
                                                         size={16}
                                                         className={`mt-0.5 shrink-0 ${
-                                                            selected ? 'text-[#15803d] dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
+                                                            selected ? 'text-green-700 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
                                                         }`}
                                                     />
                                                     <span className="flex-1">
@@ -453,7 +453,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
 
                                         <Link
                                             href="/app/profile/alamat/tambah"
-                                            className="flex items-center gap-2 px-1 py-1 text-xs font-semibold text-[#15803d] dark:text-green-400"
+                                            className="flex items-center gap-2 px-1 py-1 text-xs font-semibold text-green-700 dark:text-green-400"
                                         >
                                             <Plus size={13} />
                                             Tambah alamat lain
@@ -471,7 +471,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                             <button
                                 type="button"
                                 onClick={() => setInfoOpen(true)}
-                                className="text-gray-400 hover:text-[#15803d] dark:hover:text-green-400"
+                                className="text-gray-400 hover:text-green-700 dark:hover:text-green-400"
                             >
                                 <Info size={14} />
                             </button>
@@ -530,7 +530,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                                 type="file"
                                 accept="image/jpeg,image/png,image/webp"
                                 onChange={(e) => update('fotoBarang', e.target.files?.[0] ?? null)}
-                                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-green-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#15803d] focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:file:bg-green-950/40 dark:file:text-green-400"
+                                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-green-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:file:bg-green-950/40 dark:file:text-green-400"
                             />
                         </div>
                         {form.fotoBarang && (
@@ -555,15 +555,15 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                             type="checkbox"
                             checked={form.setuju}
                             onChange={(e) => update('setuju', e.target.checked)}
-                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-[#15803d] focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700"
+                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-green-700 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700"
                         />
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                             Saya menyetujui{' '}
-                            <Link href="/app/profile/tentang/syarat-ketentuan" className="font-semibold text-[#15803d] dark:text-green-400">
+                            <Link href="/app/profile/tentang/syarat-ketentuan" className="font-semibold text-green-700 dark:text-green-400">
                                 Syarat
                             </Link>{' '}
                             dan{' '}
-                            <Link href="/app/profile/tentang/kebijakan-privasi" className="font-semibold text-[#15803d] dark:text-green-400">
+                            <Link href="/app/profile/tentang/kebijakan-privasi" className="font-semibold text-green-700 dark:text-green-400">
                                 Ketentuan
                             </Link>{' '}
                             yang berlaku di Titipsini.com.
@@ -573,7 +573,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                     <button
                         type="submit"
                         disabled={!bisaSubmit}
-                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="w-full rounded-xl bg-green-700 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         {submitting ? 'Memproses...' : 'Titip Sekarang'}
                     </button>

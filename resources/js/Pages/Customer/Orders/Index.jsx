@@ -39,10 +39,10 @@ function getStatusLabel(order) {
 }
 
 const STATUS_COLOR = {
-    baru: 'text-red-500',
-    diproses: 'text-cyan-500',
-    selesai: 'text-emerald-700 dark:text-emerald-400',
-    dibatalkan: 'text-gray-500',
+    baru: 'text-amber-700 dark:text-amber-400',
+    diproses: 'text-blue-700 dark:text-blue-400',
+    selesai: 'text-green-700 dark:text-green-400',
+    dibatalkan: 'text-red-700 dark:text-red-400',
 };
 
 function formatRupiah(value) {
@@ -144,13 +144,13 @@ export default function OrdersIndex({ orders, filters }) {
                                     onClick={() => changeTab(tab.value)}
                                     className={`relative shrink-0 px-3.5 py-3 text-sm font-medium transition-colors ${
                                         isActive
-                                            ? 'font-semibold text-emerald-600 dark:text-emerald-400'
+                                            ? 'font-semibold text-green-600 dark:text-green-400'
                                             : 'text-gray-500 hover:text-gray-800 dark:text-gray-400'
                                     }`}
                                 >
                                     {tab.label}
                                     {isActive && (
-                                        <span className="absolute bottom-0 left-0 h-0.5 w-full bg-emerald-500" />
+                                        <span className="absolute bottom-0 left-0 h-0.5 w-full bg-green-500" />
                                     )}
                                 </button>
                             );
@@ -179,10 +179,10 @@ export default function OrdersIndex({ orders, filters }) {
                             const canRequestPickup = isDititip && hasPickup && !isPickupRequested;
 
                             return (
-                                <div
-                                    key={order.id}
-                                    className="rounded-xl border border-emerald-300/70 bg-emerald-50/40 p-4 dark:border-emerald-800/60 dark:bg-emerald-950/20"
-                                >
+                    <div
+                        key={order.id}
+                        className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                    >
                                     {/* Header Kartu: Nama Vendor & Status */}
                                     <div className="flex items-start justify-between">
                                         <div>
@@ -199,7 +199,7 @@ export default function OrdersIndex({ orders, filters }) {
                                                         <button
                                                             type="button"
                                                             onClick={() => toggleAddress(order.id)}
-                                                            className="ml-1 text-emerald-600 dark:text-emerald-400 hover:underline"
+                                                            className="ml-1 text-green-600 dark:text-green-400 hover:underline"
                                                         >
                                                             {expandedAddresses[order.id] ? 'sembunyikan' : 'selengkapnya'}
                                                         </button>
@@ -214,9 +214,9 @@ export default function OrdersIndex({ orders, filters }) {
 
                                     {/* Badge Layanan */}
                                     <div className="mt-2.5">
-                                        <span className="inline-block rounded-md border border-emerald-300/80 bg-emerald-100/60 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-                                            {SERVICE_LABEL[order.service_type] ?? 'Penitipan Barang'}
-                                        </span>
+                                            <span className="inline-block rounded-md border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300">
+                                                {SERVICE_LABEL[order.service_type] ?? 'Penitipan Barang'}
+                                            </span>
                                     </div>
 
                                     {/* Rincian Durasi & Total */}
@@ -242,7 +242,7 @@ export default function OrdersIndex({ orders, filters }) {
                                         <div className="mt-3.5">
                                             <p className="text-xs font-semibold text-gray-900 dark:text-gray-200">Ulasan</p>
                                             {reviewOrderId === order.id ? (
-                                                <div className="mt-1.5 rounded-lg bg-emerald-100/30 p-3 dark:bg-emerald-950/40">
+                                                <div className="mt-1.5 rounded-lg bg-gray-50 dark:bg-gray-900/50">
                                                     <div className="flex gap-1">
                                                         {[1, 2, 3, 4, 5].map((star) => (
                                                             <button key={star} type="button" onClick={() => setReviewRating(star)} aria-label={`${star} bintang`}>
@@ -255,16 +255,16 @@ export default function OrdersIndex({ orders, filters }) {
                                                         onChange={(e) => setReviewText(e.target.value)}
                                                         placeholder="Tulis ulasan kamu..."
                                                         rows={3}
-                                                        className="mt-2 w-full rounded-lg border border-gray-200 bg-white p-2.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                                                        className="mt-2 w-full rounded-lg border border-gray-200 bg-white p-2.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
                                                     />
-                                                    <button type="button" disabled={!reviewRating || !reviewText.trim() || reviewing} onClick={() => submitReview(order.id)} className="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white disabled:opacity-50">
+                                    <button type="button" disabled={!reviewRating || !reviewText.trim() || reviewing} onClick={() => submitReview(order.id)} className="mt-2 w-full rounded-lg bg-green-700 py-2 text-xs font-bold text-white disabled:opacity-50 dark:bg-green-600 dark:hover:bg-green-700">
                                                         {reviewing ? 'Mengirim...' : 'Kirim Ulasan'}
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <button type="button" onClick={() => setReviewOrderId(order.id)} className="mt-1.5 w-full rounded-lg border border-emerald-300 p-2.5 text-left text-xs text-emerald-700 dark:border-emerald-800 dark:text-emerald-300">
-                                                    Beri ulasan dan rating
-                                                </button>
+                                                    <button type="button" onClick={() => setReviewOrderId(order.id)} className="mt-1.5 w-full rounded-lg border border-gray-200 p-2.5 text-left text-xs text-gray-700 dark:border-gray-700 dark:text-gray-300">
+                                                        Beri ulasan dan rating
+                                                    </button>
                                             )}
                                         </div>
                                     )}
@@ -274,7 +274,7 @@ export default function OrdersIndex({ orders, filters }) {
                                             <div className="flex items-center gap-1">
                                                 {[1, 2, 3, 4, 5].map((star) => <Star key={star} size={14} className={star <= order.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'} />)}
                                             </div>
-                                            <div className="mt-1.5 rounded-lg bg-emerald-100/30 p-2.5 text-xs text-gray-600 dark:bg-emerald-950/40 dark:text-gray-300">{order.review}</div>
+                                            <div className="mt-1.5 rounded-lg bg-gray-50 p-2.5 text-xs text-gray-600 dark:bg-gray-900/50 dark:text-gray-300">{order.review}</div>
                                         </div>
                                     )}
 
@@ -283,16 +283,15 @@ export default function OrdersIndex({ orders, filters }) {
                                         {/* Tab Menunggu Mitra menitip */}
                                         {['pembayaran_diterima', 'diproses_mitra'].includes(order.status) && (
                                             <div className="flex flex-col gap-2">
-                                                <button
-                                                    type="button"
-                                                    disabled
-                                                    className="flex-1 rounded-lg border border-gray-300 bg-white py-2 text-center text-xs font-medium text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700"
-                                                >
-                                                    Pesanan sedang diproses mitra
-                                                </button>
+                                                        <Link
+                                                            href={`/app/orders/${order.id}`}
+                                                            className="flex-1 rounded-lg border border-gray-300 bg-white py-2 text-center text-xs font-medium text-gray-600 transition active:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700"
+                                                        >
+                                                            Detail Pesanan
+                                                        </Link>
                                                 <Link
                                                     href={`/app/orders/${order.id}`}
-                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                    className="flex-1 rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-medium text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
                                                 >
                                                     Detail Pesanan
                                                 </Link>
@@ -310,13 +309,13 @@ export default function OrdersIndex({ orders, filters }) {
                                                         type="button"
                                                         onClick={() => setPickupConfirmOrder(order)}
                                                         disabled={isProcessing}
-                                                        className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                        className="flex-1 rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-medium text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
                                                     >
                                                         {isProcessing ? 'Memproses...' : 'Ajukan Pengambilan'}
                                                     </button>
                                                     <Link
                                                         href={`/app/orders/${order.id}`}
-                                                        className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                        className="flex-1 rounded-lg border border-gray-300 bg-white py-2 text-center text-xs font-medium text-gray-600 transition active:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700"
                                                     >
                                                         Detail Pesanan
                                                     </Link>
@@ -332,7 +331,7 @@ export default function OrdersIndex({ orders, filters }) {
                                                     <button
                                                         type="button"
                                                         onClick={() => router.get(`/app/orders/${order.id}/extend`)}
-                                                        className="w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                        className="w-full rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-medium text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
                                                     >
                                                         Perpanjang Waktu Jasa
                                                     </button>
@@ -354,7 +353,7 @@ export default function OrdersIndex({ orders, filters }) {
                                                 </button>
                                                 <Link
                                                     href={`/app/orders/${order.id}`}
-                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                    className="flex-1 rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-medium text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
                                                 >
                                                     Detail Pesanan
                                                 </Link>
@@ -366,7 +365,7 @@ export default function OrdersIndex({ orders, filters }) {
                                             <div className="flex gap-2">
                                                 <Link
                                                     href={`/app/orders/${order.id}`}
-                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                    className="flex-1 rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-medium text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
                                                 >
                                                     Detail Pesanan
                                                 </Link>
@@ -385,13 +384,13 @@ export default function OrdersIndex({ orders, filters }) {
                                             <div className="flex gap-2">
                                                 <Link
                                                     href={`/app/orders/${order.id}`}
-                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-semibold text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                    className="flex-1 rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-semibold text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
                                                 >
                                                     Bayar Sekarang
                                                 </Link>
                                                 <Link
                                                     href={`/app/orders/${order.id}`}
-                                                    className="flex-1 rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                    className="flex-1 rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-medium text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
                                                 >
                                                     Detail Pesanan
                                                 </Link>
@@ -403,7 +402,7 @@ export default function OrdersIndex({ orders, filters }) {
                                             && !['pembayaran_diterima', 'diproses_mitra'].includes(order.status) && (
                                             <Link
                                                 href={`/app/orders/${order.id}`}
-                                                className="block w-full rounded-lg border border-emerald-600 bg-white py-2 text-center text-xs font-medium text-emerald-600 transition active:bg-emerald-50 dark:bg-gray-800 dark:text-emerald-400"
+                                                className="block w-full rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-medium text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
                                             >
                                                 Detail Pesanan
                                             </Link>
@@ -450,7 +449,7 @@ export default function OrdersIndex({ orders, filters }) {
                                 type="button"
                                 onClick={() => requestPickup(pickupConfirmOrder)}
                                 disabled={processingOrderId === pickupConfirmOrder.id}
-                                className="flex-1 rounded-xl bg-[#15803d] py-2.5 text-xs font-bold text-white transition hover:bg-green-700 disabled:opacity-60"
+                                className="flex-1 rounded-xl bg-green-700 py-2.5 text-xs font-bold text-white transition hover:bg-green-700 disabled:opacity-60"
                             >
                                 {processingOrderId === pickupConfirmOrder.id ? 'Mengirim...' : 'Ya, Ajukan'}
                             </button>
@@ -478,7 +477,7 @@ export default function OrdersIndex({ orders, filters }) {
                     <div
                         role="status"
                         className={`pointer-events-auto flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium shadow-lg ${
-                            toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-emerald-700 text-white'
+                            toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-green-700 text-white'
                         }`}
                     >
                         {toast.type === 'error' ? <XCircle size={18} /> : <CheckCircle2 size={18} />}

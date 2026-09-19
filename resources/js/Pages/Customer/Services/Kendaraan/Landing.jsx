@@ -40,7 +40,7 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
             <Head title="Titip Kendaraan" />
             <div className="px-4 py-6">
                 <div className="overflow-hidden rounded-3xl bg-[#e8f5ee] p-6 dark:bg-green-950/30">
-                    <div className="flex min-h-44 items-center justify-center rounded-2xl bg-gradient-to-br from-[#15803d] to-[#4ade80] text-white">
+                    <div className="flex min-h-44 items-center justify-center rounded-2xl bg-gradient-to-br from-green-700 to-green-400 text-white">
                         <Car size={96} strokeWidth={1.2} />
                     </div>
                     <h1 className="mt-6 text-2xl font-extrabold text-gray-900 dark:text-gray-100">Titip Kendaraan</h1>
@@ -50,7 +50,7 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
                     <button
                         type="button"
                         onClick={() => setOpen(true)}
-                        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white shadow-sm hover:bg-green-700 dark:bg-[#22c55e]"
+                        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-green-700 dark:bg-green-500"
                     >
                         <Search size={17} /> Fitur Pencarian
                     </button>
@@ -76,7 +76,7 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
                                 value={cityQuery}
                                 onChange={(e) => setCityQuery(e.target.value)}
                                 placeholder={selectedCity}
-                                className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#15803d] focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-green-700 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                             />
                         </label>
                         {(cityLoading || cityResults.length > 0) && (
@@ -95,10 +95,10 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
                             </div>
                         )}
                         <div className="mt-7 grid grid-cols-2 gap-2">
-                            <Link href="/app/services/kendaraan/search" className="rounded-xl border border-[#15803d] py-3 text-center text-xs font-bold text-[#15803d] dark:border-green-400 dark:text-green-400">
+                            <Link href="/app/services/kendaraan/search" className="rounded-xl border border-green-700 py-3 text-center text-xs font-bold text-green-700 dark:border-green-400 dark:text-green-400">
                                 KOTA LAIN
                             </Link>
-                            <Link href={`/app/services/kendaraan/search?kota=${encodeURIComponent(selectedCity)}`} className="rounded-xl bg-[#15803d] py-3 text-center text-xs font-bold text-white dark:bg-[#22c55e]">
+                            <Link href={`/app/services/kendaraan/search?kota=${encodeURIComponent(selectedCity)}`} className="rounded-xl bg-green-700 py-3 text-center text-xs font-bold text-white dark:bg-green-500">
                                 OKE
                             </Link>
                         </div>

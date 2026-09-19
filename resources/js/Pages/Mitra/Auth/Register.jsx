@@ -89,7 +89,7 @@ export default function Register() {
                             alt="Logo"
                             className="h-9 w-auto object-contain"
                         />
-                        <span className="text-2xl font-extrabold tracking-tight text-[#15803d]">
+                        <span className="text-2xl font-extrabold tracking-tight text-green-700">
                             Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                         </span>
                     </div>

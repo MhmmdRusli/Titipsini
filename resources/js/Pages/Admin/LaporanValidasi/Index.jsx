@@ -15,7 +15,7 @@ const STATUS_FILTERS = [
 
 const APPROVAL_STYLE = {
     pending: 'bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800/50',
-    approved: 'bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/50',
+    approved: 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-950/60 dark:text-green-400 dark:border-green-800/50',
     rejected: 'bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:border-rose-800/50',
 };
 
@@ -43,9 +43,9 @@ function formatRupiah(value) {
 function SummaryCard({ icon: Icon, color, label, value, sub }) {
     const COLOR = {
         amber: 'from-amber-500 to-orange-500',
-        emerald: 'from-emerald-500 to-teal-600',
+        emerald: 'from-green-500 to-teal-600',
         red: 'from-rose-500 to-red-600',
-        blue: 'from-emerald-600 to-green-700',
+        blue: 'from-green-600 to-green-700',
     };
     return (
         <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -85,14 +85,14 @@ export default function Index({ reports, filters = {}, summary = {} }) {
             <Head title="Validasi Laporan Kerugian" />
 
             {/* Hero banner */}
-            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-700 p-6 text-white shadow-lg">
+            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-green-600 to-green-700 p-6 text-white shadow-lg">
                 <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
                         <ShieldCheck size={22} />
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold">Validasi Laporan Kerugian</h1>
-                        <p className="mt-1 text-sm text-emerald-50/90">
+                        <p className="mt-1 text-sm text-green-50/90">
                             Verifikasi data dan foto bukti dari laporan kerugian customer.
                             Setelah Anda setujui, laporan diteruskan ke <strong>Finance</strong> untuk proses refund nominal/persen.
                             Jika ditolak, laporan tidak dapat diproses refund.
@@ -120,7 +120,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari kode order / nama customer / barang..."
-                        className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-xs text-gray-800 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:placeholder-slate-500"
+                        className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-xs text-gray-800 shadow-sm focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:placeholder-slate-500"
                     />
                 </form>
 
@@ -134,7 +134,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                                 onClick={() => applyFilters({ status: f.key })}
                                 className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
                                     status === f.key
-                                        ? 'bg-emerald-600 text-white shadow-sm'
+                                        ? 'bg-green-600 text-white shadow-sm'
                                         : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:bg-slate-800'
                                 }`}
                             >
@@ -164,7 +164,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                             <tr>
                                 <td colSpan={6} className="px-4 py-14 text-center text-gray-400 dark:text-slate-500">
                                     <div className="flex flex-col items-center justify-center">
-                                        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400">
                                             <FileText size={24} />
                                         </div>
                                         <p className="text-sm font-medium text-gray-500 dark:text-slate-400">
@@ -175,7 +175,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                             </tr>
                         ) : (
                             rows.map((r) => (
-                                <tr key={r.id} className="hover:bg-emerald-50/30 dark:hover:bg-slate-800/50">
+                                <tr key={r.id} className="hover:bg-green-50/30 dark:hover:bg-slate-800/50">
                                     <td className="px-4 py-3.5">
                                         <div className="font-semibold text-gray-900 dark:text-slate-100">
                                             #{r.order_code ?? '-'}
@@ -217,7 +217,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                                     <td className="px-4 py-3.5 text-right">
                                         <Link
                                             href={route('admin.laporan-validasi.show', r.id)}
-                                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-800/60 dark:bg-emerald-950/60 dark:text-emerald-400 dark:hover:bg-emerald-900/60"
+                                            className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-2.5 py-1.5 text-[11px] font-bold text-green-700 transition hover:bg-green-100 dark:border-green-800/60 dark:bg-green-950/60 dark:text-green-400 dark:hover:bg-green-900/60"
                                         >
                                             Detail
                                             <ChevronRight size={14} />
@@ -240,7 +240,7 @@ export default function Index({ reports, filters = {}, summary = {} }) {
                             preserveScroll
                             className={`rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold transition dark:border-slate-800 ${
                                 link.active
-                                    ? 'bg-emerald-600 text-white'
+                                    ? 'bg-green-600 text-white'
                                     : link.url
                                         ? 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
                                         : 'cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-slate-800 dark:text-slate-600'

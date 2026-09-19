@@ -26,13 +26,13 @@ export default function Show({ berita, lainnya = [] }) {
                         style={{ aspectRatio: '16/9' }}
                     />
                 ) : (
-                    <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/40 dark:to-emerald-900/30">
-                        <Newspaper size={32} className="text-[#15803d] dark:text-[#4ade80]" />
+                    <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/40 dark:to-green-900/30">
+                        <Newspaper size={32} className="text-green-700 dark:text-green-400" />
                     </div>
                 )}
 
                 <div className="mt-3 flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-                    <span className="rounded bg-[#15803d] dark:bg-[#22c55e] px-1.5 py-0.5 font-medium text-white">Titipsini</span>
+                    <span className="rounded bg-green-700 dark:bg-green-500 px-1.5 py-0.5 font-medium text-white">Titipsini</span>
                     <span>{formatTanggal(berita.published_at)}</span>
                 </div>
 
@@ -53,12 +53,12 @@ export default function Show({ berita, lainnya = [] }) {
                                     href={`/app/berita/${b.id}`}
                                     className="flex gap-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-sm transition hover:border-green-300 dark:hover:border-green-700"
                                 >
-                                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/40 dark:to-emerald-900/30">
+                                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/40 dark:to-green-900/30">
                                         {b.foto ? (
                                             <img src={b.foto} alt={b.judul} className="h-full w-full object-cover" />
                                         ) : (
                                             <div className="flex h-full w-full items-center justify-center">
-                                                <Newspaper size={18} className="text-[#15803d] dark:text-[#4ade80]" />
+                                                <Newspaper size={18} className="text-green-700 dark:text-green-400" />
                                             </div>
                                         )}
                                     </div>

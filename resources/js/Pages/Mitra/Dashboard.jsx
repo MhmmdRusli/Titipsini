@@ -115,7 +115,7 @@ export default function Dashboard({ partner = {}, saldo = 0, toko = {}, layanan 
                                     {toko?.nama ?? 'Titipsini Partner Outlet'}
                                 </p>
                                 {isVerified && (
-                                    <BadgeCheck size={15} className="shrink-0 text-green-600 dark:text-[#4ade80]" />
+                                    <BadgeCheck size={15} className="shrink-0 text-green-600 dark:text-green-400" />
                                 )}
                             </div>
                             <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
@@ -251,7 +251,7 @@ export default function Dashboard({ partner = {}, saldo = 0, toko = {}, layanan 
                                     {aktif && (
                                         <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-green-500" />
                                     )}
-                                    <Icon size={22} className="text-green-600 dark:text-[#4ade80]" strokeWidth={1.75} />
+                                    <Icon size={22} className="text-green-600 dark:text-green-400" strokeWidth={1.75} />
                                 </Link>
                             );
                         })}

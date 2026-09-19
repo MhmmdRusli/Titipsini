@@ -50,7 +50,7 @@ export default function Reset() {
                                 alt="Logo Icon"
                                 className="h-10 w-auto object-contain"
                             />
-                            <div className="text-2xl font-bold tracking-tight text-[#15803d]">
+                            <div className="text-2xl font-bold tracking-tight text-green-700">
                                 Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                             </div>
                         </div>
@@ -72,7 +72,7 @@ export default function Reset() {
                                     name="f_pw_new"
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
-                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#15803d]/30 transition-all ${
+                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-700/30 transition-all ${
                                         errors.password ? 'ring-2 ring-red-500' : ''
                                     }`}
                                 />
@@ -92,7 +92,7 @@ export default function Reset() {
                                         <li
                                             key={rule.label}
                                             className={`text-xs flex items-center gap-1.5 ${
-                                                passed ? 'text-[#15803d]' : 'text-gray-400'
+                                                passed ? 'text-green-700' : 'text-gray-400'
                                             }`}
                                         >
                                             <span>{passed ? '✓' : '•'}</span>
@@ -117,7 +117,7 @@ export default function Reset() {
                                     name="f_pw_confirm"
                                     value={data.password_confirmation}
                                     onChange={(e) => setData('password_confirmation', e.target.value)}
-                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#15803d]/30 transition-all ${
+                                    className={`w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-700/30 transition-all ${
                                         errors.password_confirmation ? 'ring-2 ring-red-500' : ''
                                     }`}
                                 />
@@ -137,7 +137,7 @@ export default function Reset() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white transition-all hover:bg-[#166534] active:scale-[0.99] disabled:opacity-50 mt-2 shadow-sm"
+                            className="w-full rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white transition-all hover:bg-green-800 active:scale-[0.99] disabled:opacity-50 mt-2 shadow-sm"
                         >
                             {processing ? 'Menyimpan...' : 'Simpan Kata Sandi'}
                         </button>

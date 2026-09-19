@@ -14,14 +14,14 @@ export default function Penangguhan({ vendor, report_id }) {
             <div className="mb-4 flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 select-none">
                 <Link 
                     href={route('admin.reports.index')} 
-                    className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                    className="hover:text-green-600 dark:hover:text-green-400 transition-colors"
                 >
                     Laporan
                 </Link>
                 <ChevronRight size={14} className="text-gray-400 dark:text-gray-600" />
                 <Link 
                     href={route('admin.reports.show', report_id)} 
-                    className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                    className="hover:text-green-600 dark:hover:text-green-400 transition-colors"
                 >
                     Detail Laporan
                 </Link>

@@ -38,7 +38,7 @@ export default function Index({ topups }) {
                         <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
                             Verifikasi Top Up
                         </h1>
-                        <p className="mt-1.5 max-w-xl text-xs text-emerald-100/90 leading-relaxed">
+                        <p className="mt-1.5 max-w-xl text-xs text-green-100/90 leading-relaxed">
                             Kelola dan verifikasi pengajuan top-up saldo dari pelanggan secara aman dan terstruktur.
                         </p>
                     </div>
@@ -98,7 +98,7 @@ export default function Index({ topups }) {
                                             {t.kode_transaksi}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors dark:text-slate-200">
+                                            <div className="font-bold text-slate-900 group-hover:text-green-700 transition-colors dark:text-slate-200">
                                                 {t.user?.name ?? '-'}
                                             </div>
                                         </td>
@@ -121,7 +121,7 @@ export default function Index({ topups }) {
                                         <td className="px-6 py-4 text-right">
                                             <Link
                                                 href={`/finance/topup/${t.id}`}
-                                                className="inline-flex items-center gap-1.5 rounded-xl bg-[#087847] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-emerald-800 active:scale-95 border border-emerald-600"
+                                                className="inline-flex items-center gap-1.5 rounded-xl bg-[#087847] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-800 active:scale-95 border border-green-600"
                                             >
                                                 <span>Periksa</span>
                                                 <ArrowUpRight size={14} />
@@ -152,7 +152,7 @@ export default function Index({ topups }) {
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all border ${
                                     link.active
-                                        ? 'bg-[#087847] text-white border-emerald-600 shadow-sm'
+                                        ? 'bg-[#087847] text-white border-green-600 shadow-sm'
                                         : link.url
                                         ? 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:bg-gray-700 dark:text-slate-300 dark:border-gray-600 dark:hover:bg-gray-600'
                                         : 'cursor-not-allowed text-slate-300 border-slate-100 bg-slate-50/50 dark:text-slate-600 dark:border-gray-600 dark:bg-gray-700'

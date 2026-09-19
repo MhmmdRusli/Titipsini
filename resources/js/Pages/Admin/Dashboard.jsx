@@ -8,7 +8,7 @@ import {
 import { Package, Users, Handshake, Activity, Box, Car, Building2, Bike, MapPin, Calendar, Sparkles, ChevronDown, Wallet } from 'lucide-react';
 
 // Palette warna disesuaikan dengan ciri khas hijau & kuning Titipsini.com
-const PIE_COLORS = ['#15803d', '#fbbf24', '#0d9488', '#16a34a'];
+const PIE_COLORS = ['green-700', '#fbbf24', '#0d9488', 'green-500'];
 
 const PERIOD_OPTIONS = [
     { value: 'all', label: 'Semua Waktu' },
@@ -63,7 +63,7 @@ export default function Dashboard({
         { key: 'barang', label: 'Penitipan Barang', icon: Box, color: 'text-green-600 bg-green-50 dark:bg-green-950/60 dark:text-green-400' },
         { key: 'kendaraan', label: 'Penitipan Kendaraan', icon: Car, color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/60 dark:text-amber-400' },
         { key: 'bangunan', label: 'Penitipan Bangunan', icon: Building2, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/60 dark:text-teal-400' },
-        { key: 'pickup', label: 'Layanan Antar-Jemput', icon: Bike, color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-400' },
+        { key: 'pickup', label: 'Layanan Antar-Jemput', icon: Bike, color: 'text-green-600 bg-green-50 dark:bg-green-950/60 dark:text-green-400' },
     ];
 
     // Format nilai Rupiah untuk Komisi
@@ -78,7 +78,7 @@ export default function Dashboard({
             <Head title="Dashboard Admin" />
 
             {/* Banner Selamat Datang */}
-            <div className="relative mb-6 rounded-2xl bg-gradient-to-r from-green-700 via-emerald-700 to-green-800 p-6 text-white shadow-md select-none">
+            <div className="relative mb-6 rounded-2xl bg-gradient-to-r from-green-700 via-green-700 to-green-800 p-6 text-white shadow-md select-none">
                 <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
                     <div className="absolute -right-10 -top-16 h-56 w-56 rounded-full bg-amber-400/10" />
                     <div className="absolute -bottom-20 right-24 h-40 w-40 rounded-full bg-white/5" />
@@ -131,8 +131,8 @@ export default function Dashboard({
                     label={`Komisi Platform (${summary?.persenKomisi ?? 10}%)`}
                     value={formattedKomisi}
                     icon={Wallet}
-                    accent="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400"
-                    borderAccent="border-l-2 border-l-emerald-600"
+                    accent="bg-green-100 text-green-700 dark:bg-green-950/80 dark:text-green-400"
+                    borderAccent="border-l-2 border-l-green-600"
                 />
 
                 <StatCard
@@ -183,8 +183,8 @@ export default function Dashboard({
                             <LineChart data={monthlyTrend}>
                                 <defs>
                                     <linearGradient id="lineFade" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#15803d" stopOpacity={0.15} />
-                                        <stop offset="100%" stopColor="#15803d" stopOpacity={0} />
+                                        <stop offset="0%" stopColor="green-700" stopOpacity={0.15} />
+                                        <stop offset="100%" stopColor="green-700" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
@@ -199,7 +199,7 @@ export default function Dashboard({
                                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.3)'
                                     }}
                                 />
-                                <Line type="monotone" dataKey="total" stroke="#16a34a" strokeWidth={3} dot={{ r: 4, fill: '#16a34a', strokeWidth: 2, stroke: '#ffffff' }} activeDot={{ r: 6 }} name="Pesanan" />
+                                <Line type="monotone" dataKey="total" stroke="green-500" strokeWidth={3} dot={{ r: 4, fill: 'green-500', strokeWidth: 2, stroke: '#ffffff' }} activeDot={{ r: 6 }} name="Pesanan" />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>

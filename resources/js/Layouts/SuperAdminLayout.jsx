@@ -172,9 +172,9 @@ export default function SuperAdminLayout({ children, title }) {
         <div className="flex h-screen bg-[#f8fafc] dark:bg-[#0b0f19] text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-300">
             <style>{`
                 .dark main .bg-white {
-                    background-color: #111827 !important;
+                    background-color: #166534 !important;
                     color: #f3f4f6 !important;
-                    border-color: #1f2937 !important;
+                    border-color: #0a422a !important;
                 }
                 .dark main .text-gray-900,
                 .dark main .text-gray-800,
@@ -190,19 +190,19 @@ export default function SuperAdminLayout({ children, title }) {
                 }
                 .dark main .border-gray-100,
                 .dark main .border-gray-200 {
-                    border-color: #1f2937 !important;
+                    border-color: #0a422a !important;
                 }
                 .dark main input, 
                 .dark main select, 
                 .dark main textarea {
-                    background-color: #1f2937 !important;
+                    background-color: #14532d !important;
                     color: #ffffff !important;
-                    border-color: #374151 !important;
+                    border-color: #0a422a !important;
                 }
             `}</style>
 
             {/* Sidebar */}
-            <aside className="w-64 shrink-0 bg-[#0d5235] dark:bg-[#093221] text-gray-100 flex flex-col border-r border-[#0a422a] dark:border-gray-800 shadow-md h-full transition-colors">
+            <aside className="w-64 shrink-0 bg-green-800 dark:bg-green-900 text-gray-100 flex flex-col border-r border-green-700 dark:border-gray-800 shadow-md h-full transition-colors">
                 <div className="px-5 py-6 border-b border-white/10 flex flex-col items-center text-center shrink-0">
                     <img
                         src="/images/admin-titipsini.png"
@@ -212,7 +212,7 @@ export default function SuperAdminLayout({ children, title }) {
                     <span className="text-base font-bold tracking-tight text-white">
                         Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] text-emerald-200/80 font-medium mt-0.5">
+                    <span className="inline-flex items-center gap-1 text-[11px] text-green-200/80 font-medium mt-0.5">
                         <ShieldCheck size={12} />
                         Super Admin Portal
                     </span>
@@ -231,11 +231,11 @@ export default function SuperAdminLayout({ children, title }) {
                                     href={href}
                                     className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all ${
                                         active
-                                            ? 'bg-[#15803d] text-white shadow-sm font-semibold'
-                                            : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
+                                            ? 'bg-green-700 text-white shadow-sm font-semibold'
+                                            : 'text-green-100/80 hover:bg-white/10 hover:text-white'
                                     }`}
                                 >
-                                    <Icon size={16} className={active ? 'text-[#fbbf24]' : 'text-emerald-200/70'} />
+                                    <Icon size={16} className={active ? 'text-[#fbbf24]' : 'text-green-200/70'} />
                                     {label}
                                 </Link>
                             );
@@ -248,15 +248,15 @@ export default function SuperAdminLayout({ children, title }) {
                                     onClick={() => setOpenMenu(isOpen ? null : label)}
                                     className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all ${
                                         active && !isOpen
-                                            ? 'bg-[#15803d] text-white shadow-sm font-semibold'
-                                            : 'text-emerald-100/80 hover:bg-white/10 hover:text-white'
+                                            ? 'bg-green-700 text-white shadow-sm font-semibold'
+                                            : 'text-green-100/80 hover:bg-white/10 hover:text-white'
                                     }`}
                                 >
-                                    <Icon size={16} className={active && !isOpen ? 'text-[#fbbf24]' : 'text-emerald-200/70'} />
+                                    <Icon size={16} className={active && !isOpen ? 'text-[#fbbf24]' : 'text-green-200/70'} />
                                     <span className="flex-1 text-left">{label}</span>
                                     <ChevronDown
                                         size={14}
-                                        className={`transition-transform text-emerald-200/70 ${isOpen ? 'rotate-180 text-white' : ''}`}
+                                        className={`transition-transform text-green-200/70 ${isOpen ? 'rotate-180 text-white' : ''}`}
                                     />
                                 </button>
 
@@ -273,7 +273,7 @@ export default function SuperAdminLayout({ children, title }) {
                                                     <Link
                                                         key={sub.href}
                                                         href={sub.href}
-                                                        className="mt-2 flex items-center gap-2 rounded-lg bg-emerald-500/15 px-3 py-2 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/25 hover:text-white"
+                                                        className="mt-2 flex items-center gap-2 rounded-lg bg-green-500/15 px-3 py-2 text-xs font-semibold text-green-200 transition-colors hover:bg-green-500/25 hover:text-white"
                                                     >
                                                         <Plus size={14} />
                                                         {sub.label}
@@ -288,10 +288,10 @@ export default function SuperAdminLayout({ children, title }) {
                                                     className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors ${
                                                         subActive
                                                             ? 'font-bold text-[#fbbf24] bg-white/10'
-                                                            : 'text-emerald-100/70 hover:text-white hover:bg-white/5'
+                                                            : 'text-green-100/70 hover:text-white hover:bg-white/5'
                                                     }`}
                                                 >
-                                                    <span className="text-emerald-200/50">—</span>
+                                                    <span className="text-green-200/50">—</span>
                                                     {sub.label}
                                                 </Link>
                                             );
@@ -322,11 +322,11 @@ export default function SuperAdminLayout({ children, title }) {
                         <h1 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-white">{title}</h1>
                         <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                             <span className="flex items-center gap-1.5">
-                                <Calendar size={13} className="text-emerald-600 dark:text-emerald-400" />
+                                <Calendar size={13} className="text-green-600 dark:text-green-400" />
                                 {tanggal}
                             </span>
                             <span className="flex items-center gap-1.5 tabular-nums">
-                                <Clock size={13} className="text-emerald-600 dark:text-emerald-400" />
+                                <Clock size={13} className="text-green-600 dark:text-green-400" />
                                 {jam}
                             </span>
                             {cuaca && (
@@ -370,7 +370,7 @@ export default function SuperAdminLayout({ children, title }) {
                                     className="h-9 w-9 rounded-xl object-cover ring-1 ring-gray-200 dark:ring-gray-700"
                                 />
                             ) : (
-                                <div className="h-9 w-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-xs font-bold border border-emerald-300/40 dark:border-emerald-800">
+                                <div className="h-9 w-9 rounded-xl bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-300 flex items-center justify-center text-xs font-bold border border-green-300/40 dark:border-green-800">
                                     {(user?.name ?? 'S').charAt(0).toUpperCase()}
                                 </div>
                             )}

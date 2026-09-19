@@ -105,7 +105,7 @@ export default function MitraLayout({ children, title, hideBack = false, onBack 
                                         alt="Logo"
                                         className="h-6 w-auto object-contain"
                                     />
-                                    <span className="text-base font-bold tracking-tight text-[#15803d]">
+                                    <span className="text-base font-bold tracking-tight text-green-700">
                                         Titipsini<span className="mx-0.5 text-[#fbbf24]">•</span>Com
                                     </span>
                                 </>

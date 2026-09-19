@@ -200,7 +200,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
         return (
             <MitraLayout title="Verifikasi PIN">
                 <Head title="Verifikasi PIN" />
-                <div className="flex min-h-full flex-col justify-between bg-white px-5 py-4">
+                <div className="flex min-h-full flex-col justify-between bg-white dark:bg-gray-800 px-5 py-4">
                     
                     {/* Header */}
                     <div>
@@ -243,7 +243,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                             type="button"
                             disabled={data.pin.length < PIN_LENGTH || processing || isSubmittingPin}
                             onClick={() => submitForm(data.pin)}
-                            className="mb-8 w-full rounded-lg bg-[#2D7A44] py-3 text-xs font-semibold text-white transition active:bg-green-800 disabled:opacity-40 cursor-pointer"
+                            className="mb-8 w-full rounded-lg bg-green-700 py-3 text-xs font-semibold text-white transition active:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700 disabled:opacity-40 cursor-pointer"
                         >
                             {isSubmittingPin ? 'Memverifikasi...' : 'Verifikasi'}
                         </button>
@@ -290,17 +290,17 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
     return (
         <MitraLayout title="Penarikan">
             <Head title="Penarikan" />
-            <div className="relative flex min-h-full flex-col justify-between bg-white px-5 py-4">
+            <div className="relative flex min-h-full flex-col justify-between bg-white dark:bg-gray-800 px-5 py-4">
                 
                 <div className="overflow-y-auto pr-1">
                     {/* Card Saldo Aktif */}
-                    <div className="mt-4 rounded-xl border border-gray-100 bg-white p-3 shadow-xs">
+                    <div className="mt-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-xs">
                         <p className="text-[10px] text-gray-400">Total Saldo Aktif <span className="text-[8px]">▼</span></p>
                         <p className="mt-0.5 text-base font-extrabold text-gray-900">Rp{formatRupiah(saldoNum)}</p>
                     </div>
 
                     {utangRefund > 0 ? (
-                        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] text-red-700">
+                        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30 p-3 text-[11px] text-red-700">
                             <p className="font-bold">Ada utang refund</p>
                             <p className="mt-0.5">
                                 Kamu memiliki utang refund sebesar <span className="font-semibold">Rp{formatRupiah(utangRefund)}</span>.
@@ -308,7 +308,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                             </p>
                         </div>
                     ) : adaRefund ? (
-                        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-700">
+                        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30 p-3 text-[11px] text-amber-700">
                             <p className="font-bold">Refund telah dipotong dari saldo</p>
                             <p className="mt-0.5">
                                 Ada refund yang telah disetujui dan dipotong dari penghasilan kamu.
@@ -327,8 +327,8 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                 onClick={() => setData('jumlah', String(value))}
                                 className={`rounded-lg border py-2 text-[11px] font-semibold transition cursor-pointer ${
                                     jumlahNumber === value
-                                        ? 'border-[#2D7A44] bg-[#2D7A44] text-white'
-                                        : 'border-gray-200 bg-white text-gray-700'
+                                        ? 'border-green-700 bg-green-700 text-white'
+                                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                                 }`}
                             >
                                 Rp {formatRupiah(value)}
@@ -368,8 +368,8 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                     onClick={() => setSelectedRekeningId(item.id)}
                                     className={`cursor-pointer rounded-xl border p-3 shadow-xs transition-all ${
                                         isSelected
-                                            ? 'border-[#2D7A44] bg-emerald-50/20 ring-1 ring-[#2D7A44]'
-                                            : 'border-gray-100 bg-white hover:border-gray-200'
+                                            ? 'border-green-700 bg-green-50/20 ring-1 ring-green-700'
+                                            : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-200'
                                     }`}
                                 >
                                     <div className="flex items-center justify-between">
@@ -379,7 +379,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                                 name="rekening_pilihan"
                                                 checked={isSelected}
                                                 onChange={() => setSelectedRekeningId(item.id)}
-                                                className="h-3.5 w-3.5 text-[#2D7A44] focus:ring-[#2D7A44]"
+                                                className="h-3.5 w-3.5 text-green-700 focus:ring-green-700"
                                             />
                                             <div>
                                                 <p className="text-[11px] font-bold text-gray-800">{item.nama_bank}</p>
@@ -393,7 +393,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                         <button
                                             type="button"
                                             onClick={(e) => handleOpenEditModal(item, e)}
-                                            className="text-gray-400 hover:text-[#2D7A44] p-1 cursor-pointer"
+                                            className="text-gray-400 hover:text-green-700 p-1 cursor-pointer"
                                         >
                                             <Pencil size={13} />
                                         </button>
@@ -404,10 +404,10 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
 
                         {/* PANEL DETAIL REKENING TERPILIH */}
                         {selectedRekening && (
-                            <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/40 p-3.5">
-                                <div className="flex items-center gap-1.5 border-b border-emerald-100 pb-2 mb-2">
-                                    <CheckCircle2 size={13} className="text-[#2D7A44]" />
-                                    <p className="text-[10px] font-bold text-[#2D7A44] uppercase tracking-wider">
+                            <div className="mt-3 rounded-xl border border-green-200 bg-green-50/40 p-3.5">
+                                <div className="flex items-center gap-1.5 border-b border-green-100 pb-2 mb-2">
+                                    <CheckCircle2 size={13} className="text-green-700" />
+                                    <p className="text-[10px] font-bold text-green-700 uppercase tracking-wider">
                                         Detail Rekening Terpilih
                                     </p>
                                 </div>
@@ -432,7 +432,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                         <button
                             type="button"
                             onClick={handleOpenTambahModal}
-                            className="flex items-center gap-1 text-[11px] font-bold text-[#2D7A44] mt-2 hover:opacity-80 transition cursor-pointer"
+                            className="flex items-center gap-1 text-[11px] font-bold text-green-700 mt-2 hover:opacity-80 transition cursor-pointer"
                         >
                             <Plus size={14} />
                             Tambah Rekening
@@ -445,7 +445,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                     type="button"
                     disabled={!isValidJumlah}
                     onClick={() => { clearErrors(); setStep('pin'); }}
-                    className="mt-4 mb-2 w-full rounded-lg bg-[#2D7A44] py-3 text-xs font-semibold text-white transition active:bg-green-800 disabled:opacity-40 cursor-pointer"
+                    className="mt-4 mb-2 w-full rounded-lg bg-green-700 py-3 text-xs font-semibold text-white transition active:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700 disabled:opacity-40 cursor-pointer"
                 >
                     Tarik
                 </button>
@@ -476,7 +476,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                         placeholder="Contoh: PT. BCA (Bank Central Asia)"
                                         value={namaBank}
                                         onChange={(e) => setNamaBank(e.target.value)}
-                                        className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-gray-800 focus:border-[#2D7A44] focus:outline-none focus:ring-1 focus:ring-[#2D7A44]"
+                                        className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-gray-800 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700"
                                     />
                                 </div>
                                 <div>
@@ -488,7 +488,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                         placeholder="Contoh: 7310900342"
                                         value={noRekening}
                                         onChange={(e) => setNoRekening(e.target.value.replace(/\D/g, ''))}
-                                        className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-gray-800 focus:border-[#2D7A44] focus:outline-none focus:ring-1 focus:ring-[#2D7A44]"
+                                        className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-gray-800 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700"
                                     />
                                 </div>
                                 <div>
@@ -499,7 +499,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                         placeholder="Contoh: Angelina Hana"
                                         value={namaPemilik}
                                         onChange={(e) => setNamaPemilik(e.target.value)}
-                                        className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-gray-800 focus:border-[#2D7A44] focus:outline-none focus:ring-1 focus:ring-[#2D7A44]"
+                                        className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-gray-800 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700"
                                     />
                                 </div>
 
@@ -515,7 +515,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                     <button
                                         type="submit"
                                         disabled={isSavingRekening}
-                                        className="flex-1 rounded-lg bg-[#2D7A44] py-2 text-[11px] font-semibold text-white hover:bg-green-800 cursor-pointer disabled:opacity-50"
+                                        className="flex-1 rounded-lg bg-green-700 py-2 text-[11px] font-semibold text-white hover:bg-green-800 cursor-pointer disabled:opacity-50"
                                     >
                                         {isSavingRekening ? 'Menyimpan...' : 'Simpan'}
                                     </button>

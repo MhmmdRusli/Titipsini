@@ -4,7 +4,7 @@ import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
 import { Trash2, RotateCcw, X, AlertTriangle, Inbox, Clock } from 'lucide-react';
 
 const SISA_STYLE = {
-    aman: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/50',
+    aman: 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-400 dark:border-green-800/50',
     segera: 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/50',
     kritis: 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/50',
 };
@@ -67,7 +67,7 @@ export default function Index({ items = [], types = [], filters = null }) {
                     onClick={() => applyType('')}
                     className={`rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all ${
                         activeType === ''
-                            ? 'border-green-700 bg-green-700 text-white dark:border-emerald-600 dark:bg-emerald-600'
+                            ? 'border-green-700 bg-green-700 text-white dark:border-green-600 dark:bg-green-600'
                             : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800'
                     }`}
                 >
@@ -80,7 +80,7 @@ export default function Index({ items = [], types = [], filters = null }) {
                         onClick={() => applyType(t.key)}
                         className={`rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition-all ${
                             activeType === t.key
-                                ? 'border-green-700 bg-green-700 text-white dark:border-emerald-600 dark:bg-emerald-600'
+                                ? 'border-green-700 bg-green-700 text-white dark:border-green-600 dark:bg-green-600'
                                 : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800'
                         }`}
                     >
@@ -149,7 +149,7 @@ export default function Index({ items = [], types = [], filters = null }) {
                                             <button
                                                 type="button"
                                                 onClick={() => setRestoreTarget(item)}
-                                                className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 transition hover:bg-green-600 hover:text-white dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
+                                                className="inline-flex items-center gap-1 rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 transition hover:bg-green-600 hover:text-white dark:border-green-800/60 dark:bg-green-950/50 dark:text-green-400 dark:hover:bg-green-600 dark:hover:text-white"
                                             >
                                                 <RotateCcw size={13} />
                                                 Pulihkan
@@ -177,7 +177,7 @@ export default function Index({ items = [], types = [], filters = null }) {
                     <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-gray-800 dark:bg-slate-900">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400">
                                     <RotateCcw size={18} />
                                 </span>
                                 <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Pulihkan Data?</h2>
@@ -206,7 +206,7 @@ export default function Index({ items = [], types = [], filters = null }) {
                                 type="button"
                                 onClick={handleRestore}
                                 disabled={isProcessing}
-                                className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                                className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:opacity-60 dark:bg-green-600 dark:hover:bg-green-700"
                             >
                                 {isProcessing ? 'Memproses...' : 'Ya, Pulihkan'}
                             </button>

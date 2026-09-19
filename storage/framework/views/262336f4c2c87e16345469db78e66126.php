@@ -23,4 +23,4 @@
 </body>
 
 </html>
-<?php /**PATH C:\Users\Siti Mintarsih\Documents\GitHub\Titipsini\resources\views/app.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\laragon\www\titipsini-web\resources\views/app.blade.php ENDPATH**/ ?>

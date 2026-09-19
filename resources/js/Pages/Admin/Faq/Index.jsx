@@ -67,7 +67,7 @@ export default function FaqIndex({ faq }) {
                 </p>
                 <button
                     onClick={openCreateModal}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shrink-0"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 transition-all focus:outline-none focus:ring-2 focus:ring-green-500/20 shrink-0"
                 >
                     <Plus size={16} />
                     Tambah FAQ
@@ -91,7 +91,7 @@ export default function FaqIndex({ faq }) {
                             <GripVertical size={16} className="mt-1 shrink-0 text-gray-300 dark:text-gray-600 cursor-grab active:cursor-grabbing" />
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
-                                    <HelpCircle size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                    <HelpCircle size={16} className="shrink-0 text-green-600 dark:text-green-400" />
                                     <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{item.pertanyaan}</p>
                                     {!item.is_active && (
                                         <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">
@@ -104,7 +104,7 @@ export default function FaqIndex({ faq }) {
                             <div className="flex shrink-0 items-center gap-1">
                                 <button
                                     onClick={() => openEditModal(item)}
-                                    className="rounded-lg p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                                    className="rounded-lg p-2 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-green-600 dark:hover:text-green-400 transition-colors"
                                 >
                                     <Pencil size={15} />
                                 </button>
@@ -143,7 +143,7 @@ export default function FaqIndex({ faq }) {
                                     type="text"
                                     value={data.pertanyaan}
                                     onChange={(e) => setData('pertanyaan', e.target.value)}
-                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3.5 py-2 text-xs text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors"
+                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3.5 py-2 text-xs text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
                                     placeholder="Contoh: Bagaimana cara membatalkan pesanan?"
                                 />
                                 {errors.pertanyaan && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.pertanyaan}</p>}
@@ -155,7 +155,7 @@ export default function FaqIndex({ faq }) {
                                     rows={4}
                                     value={data.jawaban}
                                     onChange={(e) => setData('jawaban', e.target.value)}
-                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3.5 py-2 text-xs text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors"
+                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3.5 py-2 text-xs text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
                                     placeholder="Tulis jawabannya di sini..."
                                 />
                                 {errors.jawaban && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.jawaban}</p>}
@@ -167,7 +167,7 @@ export default function FaqIndex({ faq }) {
                                     type="number"
                                     value={data.urutan}
                                     onChange={(e) => setData('urutan', e.target.value)}
-                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3.5 py-2 text-xs text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors"
+                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3.5 py-2 text-xs text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
                                     placeholder="0"
                                 />
                                 <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">Angka lebih kecil tampil lebih dulu. Kosongkan untuk otomatis di urutan terakhir.</p>
@@ -180,7 +180,7 @@ export default function FaqIndex({ faq }) {
                                     type="button"
                                     onClick={() => setData('is_active', !data.is_active)}
                                     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                        data.is_active ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-700'
+                                        data.is_active ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'
                                     }`}
                                 >
                                     <span
@@ -202,7 +202,7 @@ export default function FaqIndex({ faq }) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors shadow-sm"
+                                    className="rounded-xl bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-60 transition-colors shadow-sm"
                                 >
                                     {editingFaq ? 'Simpan Perubahan' : 'Tambah FAQ'}
                                 </button>

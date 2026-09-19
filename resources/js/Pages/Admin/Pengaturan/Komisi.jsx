@@ -82,7 +82,7 @@ export default function Komisi({ commission_rate }) {
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="rounded-xl bg-green-700 px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-green-800 transition-colors disabled:opacity-60 flex items-center gap-2 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                                        className="rounded-xl bg-green-700 px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-green-800 transition-colors disabled:opacity-60 flex items-center gap-2 dark:bg-green-600 dark:hover:bg-green-500"
                                     >
                                         {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
                                     </button>
@@ -132,7 +132,7 @@ export default function Komisi({ commission_rate }) {
                                     </div>
                                     <div className="flex justify-between text-xs pt-2 border-t border-gray-200 dark:border-gray-700/60">
                                         <span className="text-gray-700 dark:text-gray-300 font-medium">Diterima Mitra:</span>
-                                        <span className="font-bold text-green-700 dark:text-emerald-400">Rp {pendapatanMitra.toLocaleString('id-ID')}</span>
+                                        <span className="font-bold text-green-700 dark:text-green-400">Rp {pendapatanMitra.toLocaleString('id-ID')}</span>
                                     </div>
                                 </div>
                             </div>

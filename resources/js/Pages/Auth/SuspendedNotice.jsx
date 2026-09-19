@@ -27,7 +27,7 @@ export default function SuspendedNotice({ reason, alreadyRequested }) {
                                     className="h-6 w-auto object-contain"
                                     onError={(e) => { e.target.style.display = 'none'; }}
                                 />
-                                <span className="text-base font-bold tracking-tight text-[#15803d] dark:text-[#4ade80]">
+                                <span className="text-base font-bold tracking-tight text-green-700 dark:text-green-400">
                                     Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                                 </span>
                             </div>
@@ -59,8 +59,8 @@ export default function SuspendedNotice({ reason, alreadyRequested }) {
                         </div>
 
                         {recentlySuccessful && (
-                            <div className="mt-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-3 text-xs text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center gap-2 font-medium">
-                                <svg className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                            <div className="mt-4 rounded-xl bg-green-50 dark:bg-green-950/40 p-3 text-xs text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800 flex items-center justify-center gap-2 font-medium">
+                                <svg className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <span>Permintaan pemulihan berhasil dikirim! Silakan tunggu konfirmasi admin.</span>
@@ -78,7 +78,7 @@ export default function SuspendedNotice({ reason, alreadyRequested }) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-3 text-xs font-semibold text-white shadow-sm active:scale-[0.98] transition disabled:opacity-50"
+                                    className="w-full rounded-xl bg-green-600 hover:bg-green-700 px-4 py-3 text-xs font-semibold text-white shadow-sm active:scale-[0.98] transition disabled:opacity-50"
                                 >
                                     {processing ? 'Mengirim...' : 'Ajukan Pemulihan Akun'}
                                 </button>

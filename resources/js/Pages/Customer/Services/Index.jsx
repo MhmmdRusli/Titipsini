@@ -164,7 +164,7 @@ export default function ServicesIndex({ services, filters }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari kota atau kecamatan..."
-                        className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
+                        className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
                     />
                 </form>
 
@@ -173,7 +173,7 @@ export default function ServicesIndex({ services, filters }) {
                         type="button"
                         onClick={handleCurrentLocation}
                         disabled={geoLoading}
-                        className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#15803d] bg-white px-4 py-2.5 text-sm font-medium text-[#15803d] shadow-sm hover:bg-[#e8f5ee] dark:border-[#22c55e] dark:bg-gray-800 dark:text-[#4ade80] dark:hover:bg-green-950/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-green-700 bg-white px-4 py-2.5 text-sm font-medium text-green-700 shadow-sm hover:bg-[#e8f5ee] dark:border-green-500 dark:bg-gray-800 dark:text-green-400 dark:hover:bg-green-950/30 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <MapPin size={16} />
                         {geoLoading ? 'Mendeteksi lokasi...' : 'Gunakan Lokasi Saat Ini'}
@@ -184,7 +184,7 @@ export default function ServicesIndex({ services, filters }) {
                     <button
                         type="button"
                         onClick={() => setModalOpen(true)}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#15803d] px-3 py-1.5 text-xs font-semibold text-white dark:bg-[#22c55e]"
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-700 px-3 py-1.5 text-xs font-semibold text-white dark:bg-green-500"
                     >
                         <ModalIcon size={13} />
                         {typeOptions.find((t) => t.value === selectedType)?.label}
@@ -219,7 +219,7 @@ export default function ServicesIndex({ services, filters }) {
                             >
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-900/30 dark:text-[#4ade80]">
+                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                                             <ServiceIcon size={16} />
                                         </div>
                                         <div>
@@ -234,7 +234,7 @@ export default function ServicesIndex({ services, filters }) {
                                                 className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
                                                     sedangTutup
                                                         ? 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'
-                                                        : 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]'
+                                                        : 'bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400'
                                                 }`}
                                             >
                                                 {sedangTutup ? 'Layanan Sedang Tutup' : 'Buka'}
@@ -275,7 +275,7 @@ export default function ServicesIndex({ services, filters }) {
                                         {orderable && ! sedangTutup && !isFull ? (
                                             <Link
                                                 href={hrefForService(service)}
-                                                className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#15803d] px-3.5 py-2 text-xs font-bold text-white dark:bg-[#22c55e]"
+                                                className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-green-700 px-3.5 py-2 text-xs font-bold text-white dark:bg-green-500"
                                             >
                                                 Titip Disini
                                             </Link>
@@ -290,7 +290,7 @@ export default function ServicesIndex({ services, filters }) {
                                         )}
                                         <Link
                                             href={detailHrefForService(service)}
-                                            className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-[#15803d] px-3.5 py-2 text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
+                                            className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-green-700 px-3.5 py-2 text-xs font-bold text-green-700 dark:border-green-500 dark:text-green-400"
                                         >
                                             Detail Mitra
                                         </Link>
@@ -324,7 +324,7 @@ export default function ServicesIndex({ services, filters }) {
                                     onClick={() => setSelectedType(type.value)}
                                     className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
                                         selectedType === type.value
-                                            ? 'border-[#15803d] bg-[#15803d] text-white dark:border-[#22c55e] dark:bg-[#22c55e]'
+                                            ? 'border-green-700 bg-green-700 text-white dark:border-green-500 dark:bg-green-500'
                                             : 'border-gray-200 text-gray-600 hover:border-green-300 dark:border-gray-600 dark:text-gray-300 dark:hover:border-green-600'
                                     }`}
                                 >
@@ -337,7 +337,7 @@ export default function ServicesIndex({ services, filters }) {
                             type="button"
                             disabled={!selectedType}
                             onClick={confirmType}
-                            className="mt-6 w-full rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white transition hover:bg-green-700 disabled:opacity-40 dark:bg-[#22c55e] dark:hover:bg-green-600"
+                            className="mt-6 w-full rounded-xl bg-green-700 py-3 text-sm font-bold text-white transition hover:bg-green-700 disabled:opacity-40 dark:bg-green-500 dark:hover:bg-green-600"
                         >
                             OK
                         </button>

@@ -4,7 +4,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 const STATUS_STYLE = {
     pendaftar: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
     verifikasi_akun: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 dark:border dark:border-amber-800/50',
-    terverifikasi: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border dark:border-emerald-800/50',
+    terverifikasi: 'bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-400 dark:border dark:border-green-800/50',
     ditolak: 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400 dark:border dark:border-red-800/50',
 };
 
@@ -18,7 +18,7 @@ const STATUS_LABEL = {
 const ORDER_STATUS_STYLE = {
     baru: 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 dark:border dark:border-blue-800/50',
     diproses: 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 dark:border dark:border-amber-800/50',
-    selesai: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border dark:border-emerald-800/50',
+    selesai: 'bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-400 dark:border dark:border-green-800/50',
     dibatalkan: 'bg-red-50 text-red-600 dark:bg-red-950/60 dark:text-red-400 dark:border dark:border-red-800/50',
 };
 
@@ -46,7 +46,7 @@ export default function Show({ user }) {
 
             <Link
                 href={route('admin.pengguna.index')}
-                className="mb-4 inline-flex items-center text-sm font-medium text-green-700 dark:text-emerald-400 hover:text-green-800 dark:hover:text-emerald-300 transition-colors"
+                className="mb-4 inline-flex items-center text-sm font-medium text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors"
             >
                 ← Kembali ke daftar pengguna
             </Link>
@@ -55,7 +55,7 @@ export default function Show({ user }) {
                 {/* Profile card */}
                 <div className="rounded-xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-[#111827] p-6 lg:col-span-1 shadow-sm transition-colors">
                     <div className="flex flex-col items-center text-center">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50 dark:bg-emerald-950/50 text-2xl font-semibold text-green-700 dark:text-emerald-400 border border-green-100 dark:border-emerald-800/40 overflow-hidden">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50 dark:bg-green-950/50 text-2xl font-semibold text-green-700 dark:text-green-400 border border-green-100 dark:border-green-800/40 overflow-hidden">
                             {user.foto ? (
                                 <img src={user.foto} alt={user.name} className="h-20 w-20 rounded-full object-cover" />
                             ) : (

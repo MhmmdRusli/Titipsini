@@ -31,7 +31,7 @@ export default function Denda({ settings }) {
     return (
         <AdminLayout title="Denda Keterlambatan">
             {flash?.success && (
-                <div className="mb-5 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-400">
+                <div className="mb-5 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-400">
                     {flash.success}
                 </div>
             )}
@@ -119,7 +119,7 @@ export default function Denda({ settings }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="mt-5 rounded-xl bg-green-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+                            className="mt-5 rounded-xl bg-green-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 disabled:opacity-60 dark:bg-green-600 dark:hover:bg-green-700"
                         >
                             {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </button>

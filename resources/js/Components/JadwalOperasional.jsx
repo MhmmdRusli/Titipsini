@@ -41,7 +41,7 @@ export default function JadwalOperasional({ jadwal = [] }) {
                                 <span>
                                     {h.hari}
                                     {isToday && (
-                                        <span className="ml-1.5 rounded bg-[#15803d]/10 px-1 py-0.5 text-[9px] font-medium text-[#15803d] dark:bg-[#22c55e]/20 dark:text-[#4ade80]">
+                                        <span className="ml-1.5 rounded bg-green-700/10 px-1 py-0.5 text-[9px] font-medium text-green-700 dark:bg-green-500/20 dark:text-green-400">
                                             Hari ini
                                         </span>
                                     )}

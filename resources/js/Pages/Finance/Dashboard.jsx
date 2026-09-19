@@ -32,7 +32,7 @@ const PERIOD_OPTIONS = [
 const statusStyles = {
     baru: 'bg-blue-50 text-blue-700 ring-blue-600/20',
     diproses: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-    selesai: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+    selesai: 'bg-green-50 text-green-700 ring-green-600/20',
     dibatalkan: 'bg-rose-50 text-rose-700 ring-rose-600/20',
 };
 
@@ -43,7 +43,7 @@ const currency = (value) => new Intl.NumberFormat('id-ID', {
 // StatCard persis seperti kode contoh (Watermark ikon besar + Border Accent Kiri)
 function StatCard({ label, value, detail, icon: Icon, accent, borderAccent }) {
     return (
-        <div className={`group relative overflow-hidden rounded-2xl border bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 p-5 shadow-sm transition-all duration-300 hover:shadow-md ${borderAccent}`}>
+        <div className={`group relative overflow-hidden rounded-2xl border bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-800 p-5 shadow-sm transition-all duration-300 hover:shadow-md ${borderAccent}`}>
             {/* Watermark ikon transparan */}
             <Icon
                 size={88}
@@ -146,7 +146,7 @@ export default function Dashboard({ stats = {}, transactions, filters = {}, citi
             <Head title="Dashboard Finance" />
 
             {/* Banner Selamat Datang - Menggunakan Gradien & Visual Persis dari Kode Contoh */}
-            <div className="relative mb-6 rounded-2xl bg-gradient-to-r from-green-700 via-emerald-700 to-green-800 p-6 text-white shadow-md select-none">
+            <div className="relative mb-6 rounded-2xl bg-gradient-to-r from-green-700 via-green-700 to-green-800 p-6 text-white shadow-md select-none">
                 <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
                     <div className="absolute -right-10 -top-16 h-56 w-56 rounded-full bg-amber-400/10" />
                     <div className="absolute -bottom-20 right-24 h-40 w-40 rounded-full bg-white/5" />
@@ -200,8 +200,8 @@ export default function Dashboard({ stats = {}, transactions, filters = {}, citi
                     value={currency(stats.totalIncome)} 
                     detail="Dari transaksi selesai" 
                     icon={CircleDollarSign} 
-                    accent="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400"
-                    borderAccent="border-l-2 border-l-emerald-600"
+                    accent="bg-green-100 text-green-700 dark:bg-green-950/80 dark:text-green-400"
+                    borderAccent="border-l-2 border-l-green-600"
                 />
                 <StatCard 
                     label="Pendapatan Hari Ini" 
@@ -222,7 +222,7 @@ export default function Dashboard({ stats = {}, transactions, filters = {}, citi
             </div>
 
             {/* Tabel Transaksi Keuangan */}
-            <section className="mt-6 overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition-colors">
+            <section className="mt-6 overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm transition-colors">
                 <div className="flex flex-col gap-4 border-b border-gray-100 dark:border-gray-800 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 className="text-sm font-bold text-gray-800 dark:text-gray-100">Transaksi Keuangan</h2>

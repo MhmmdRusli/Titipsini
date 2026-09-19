@@ -418,7 +418,7 @@ export default function AddressForm({ address = null }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#008736] hover:bg-emerald-800 active:scale-[0.99] py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-700/25 transition-all disabled:opacity-60"
+                            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#008736] hover:bg-green-800 active:scale-[0.99] py-3.5 text-sm font-bold text-white shadow-lg shadow-green-700/25 transition-all disabled:opacity-60"
                         >
                             {processing ? (
                                 <>
@@ -437,7 +437,7 @@ export default function AddressForm({ address = null }) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
                     <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
                         <div className="flex items-start gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-[#008736] dark:bg-emerald-950/50 dark:text-emerald-400">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-[#008736] dark:bg-green-950/50 dark:text-green-400">
                                 <Pencil size={18} />
                             </div>
                             <div>
@@ -463,7 +463,7 @@ export default function AddressForm({ address = null }) {
                                 type="button"
                                 onClick={updateAddress}
                                 disabled={processing}
-                                className="flex-1 rounded-xl bg-[#008736] py-2.5 text-xs font-bold text-white transition hover:bg-emerald-800 disabled:opacity-60"
+                                className="flex-1 rounded-xl bg-[#008736] py-2.5 text-xs font-bold text-white transition hover:bg-green-800 disabled:opacity-60"
                             >
                                 {processing ? 'Menyimpan...' : 'Ya, Simpan'}
                             </button>

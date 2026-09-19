@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { Delete, ShieldCheck } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
 
-const BRAND_GREEN = 'text-[#15803d] dark:text-[#4ade80]';
+const BRAND_GREEN = 'text-green-700 dark:text-green-400';
 
 // Konfigurasi tiap langkah wizard: field, judul, dan subjudul.
 const STEPS = {
@@ -200,7 +200,7 @@ export default function Pin() {
                                                 ? 'border-red-400 bg-red-400'
                                                 : 'border-red-300 bg-transparent'
                                             : filled
-                                            ? 'border-[#15803d] bg-[#15803d] dark:border-[#22c55e] dark:bg-[#22c55e]'
+                                            ? 'border-green-700 bg-green-700 dark:border-green-500 dark:bg-green-500'
                                             : 'border-gray-300 dark:border-gray-700 bg-transparent'
                                     }`}
                                 />
@@ -309,7 +309,7 @@ function SuccessIllustration() {
                     cx={d.x}
                     cy={d.y}
                     r={d.r}
-                    className={i % 3 === 0 ? 'fill-[#15803d]' : 'fill-emerald-200 dark:fill-emerald-900'}
+                    className={i % 3 === 0 ? 'fill-green-700' : 'fill-green-200 dark:fill-green-900'}
                     opacity={i % 2 === 0 ? 0.8 : 0.5}
                 />
             ))}

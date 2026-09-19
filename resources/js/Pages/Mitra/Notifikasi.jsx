@@ -85,13 +85,13 @@ export default function Notifikasi({ notifikasi = [] }) {
                                         
                                          <a   href={'/mitra/pesanan/' + n.order_id}
                                             onClick={function () { if (!n.is_read) markAsRead(n.id); }}
-                                            className="text-xs font-bold text-green-600 hover:underline dark:text-[#4ade80]"
+                                            className="text-xs font-bold text-green-600 hover:underline dark:text-green-400"
                                         >
                                             Detail&nbsp;&nbsp;Pesanan
                                         </a>
                                     ) : (
                                         !n.is_read ? (
-                                            <button onClick={function () { markAsRead(n.id); }} className="text-xs font-bold text-green-600 hover:underline dark:text-[#4ade80]">
+                                            <button onClick={function () { markAsRead(n.id); }} className="text-xs font-bold text-green-600 hover:underline dark:text-green-400">
                                                 Tandai dibaca
                                             </button>
                                         ) : null

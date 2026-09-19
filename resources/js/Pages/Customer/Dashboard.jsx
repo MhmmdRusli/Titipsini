@@ -193,7 +193,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                                         className="h-11 w-11 rounded-full border border-gray-200 object-cover transition hover:border-green-400 dark:border-gray-700 dark:hover:border-green-500"
                                     />
                                 ) : (
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-green-200 bg-green-50 text-sm font-semibold text-[#15803d] transition hover:border-green-400 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300 dark:hover:border-green-500">
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-green-200 bg-green-50 text-sm font-semibold text-green-700 transition hover:border-green-400 dark:border-green-800 dark:bg-green-900/40 dark:text-green-300 dark:hover:border-green-500">
                                         {firstName.charAt(0).toUpperCase()}
                                     </div>
                                 )}
@@ -368,7 +368,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                                 href={`/app/berita/${b.id}`}
                                 className="flex w-[62%] shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-800"
                             >
-                                <div className="relative h-24 w-full overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950 dark:to-emerald-950">
+                                <div className="relative h-24 w-full overflow-hidden bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-950">
                                     {b.foto && (
                                         <img
                                             src={b.foto}
@@ -410,7 +410,7 @@ export default function Dashboard({ user, saldo = 10000, vendors = [], berita = 
                     <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-800">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400">
                                     <MapPin size={22} />
                                 </div>
                                 <div>

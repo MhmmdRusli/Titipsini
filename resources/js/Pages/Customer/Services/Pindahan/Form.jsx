@@ -101,7 +101,7 @@ export default function Form({
 
             <div className="px-4 py-6">
                 {/* Banner Header */}
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#15803d] to-emerald-600 p-5 text-white shadow-md dark:from-green-700 dark:to-green-900">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-700 to-green-600 p-5 text-white shadow-md dark:from-green-700 dark:to-green-900">
                     <div className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/15">
                         <ServiceIcon size={22} />
                     </div>
@@ -126,7 +126,7 @@ export default function Form({
                     <div>
                         <label className="text-sm font-bold text-gray-900 dark:text-gray-100">Jenis {serviceLabel}</label>
                         <div className="relative mt-2">
-                            <div className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-[#15803d] shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-green-400">
+                            <div className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-green-700 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-green-400">
                                 {service?.nama || service?.jenisLabel || serviceLabel}
                             </div>
                             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 dark:text-gray-500">
@@ -171,9 +171,9 @@ export default function Form({
                             </span>
                         </div>
                         {selectedAddress && (
-                            <div className="mt-2 rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 dark:border-emerald-900/60 dark:bg-emerald-950/30">
+                            <div className="mt-2 rounded-xl border border-green-100 bg-green-50/70 p-3 dark:border-green-900/60 dark:bg-green-950/30">
                                 <div className="flex items-start gap-2">
-                                    <MapPin size={17} className="mt-0.5 shrink-0 text-[#15803d] dark:text-emerald-400" />
+                                    <MapPin size={17} className="mt-0.5 shrink-0 text-green-700 dark:text-green-400" />
                                     <div className="min-w-0 flex-1">
                                         <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                                             {selectedAddress.name || 'Alamat pilihan'}
@@ -187,7 +187,7 @@ export default function Form({
                                             href={googleMapsUrl(selectedAddress)}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#15803d] hover:underline dark:text-emerald-400"
+                                            className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-green-700 hover:underline dark:text-green-400"
                                         >
                                             Tentukan / lihat di Google Maps
                                             <ExternalLink size={13} />
@@ -197,7 +197,7 @@ export default function Form({
                             </div>
                         )}
                         {!addresses.length && (
-                            <Link href="/app/profile/alamat/tambah" className="mt-2 inline-flex text-xs font-bold text-[#15803d] hover:underline dark:text-emerald-400">
+                            <Link href="/app/profile/alamat/tambah" className="mt-2 inline-flex text-xs font-bold text-green-700 hover:underline dark:text-green-400">
                                 Tambah alamat terlebih dahulu
                             </Link>
                         )}
@@ -225,15 +225,15 @@ export default function Form({
                             type="checkbox"
                             checked={form.setuju}
                             onChange={(e) => update('setuju', e.target.checked)}
-                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-[#15803d] focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700"
+                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-green-700 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700"
                         />
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                             Saya menyetujui{' '}
-                            <Link href="/app/profile/tentang/syarat-ketentuan" className="font-semibold text-[#15803d] dark:text-green-400">
+                            <Link href="/app/profile/tentang/syarat-ketentuan" className="font-semibold text-green-700 dark:text-green-400">
                                 Syarat
                             </Link>{' '}
                             dan{' '}
-                            <Link href="/app/profile/tentang/kebijakan-privasi" className="font-semibold text-[#15803d] dark:text-green-400">
+                            <Link href="/app/profile/tentang/kebijakan-privasi" className="font-semibold text-green-700 dark:text-green-400">
                                 Ketentuan
                             </Link>{' '}
                             yang berlaku di Titipsini.com.
@@ -244,7 +244,7 @@ export default function Form({
                     <button
                         type="submit"
                         disabled={!bisaSubmit}
-                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="w-full rounded-xl bg-green-700 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         {submitting ? 'Memproses...' : 'Lanjutkan Pembayaran'}
                     </button>

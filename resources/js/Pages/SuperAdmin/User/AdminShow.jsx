@@ -36,7 +36,7 @@ export default function AdminShow({ user }) {
 
             <Link
                 href={BASE_PATH}
-                className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-[#15803d] dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors"
+                className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors"
             >
                 <ArrowLeft size={16} />
                 Kembali ke daftar admin
@@ -45,7 +45,7 @@ export default function AdminShow({ user }) {
             <div className="max-w-lg">
                 <div className="rounded-xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-[#111827] p-6 shadow-sm transition-colors">
                     <div className="flex flex-col items-center text-center">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50 dark:bg-emerald-950/50 text-2xl font-semibold text-[#15803d] dark:text-emerald-400 border border-green-100 dark:border-emerald-800/40 overflow-hidden">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50 dark:bg-green-950/50 text-2xl font-semibold text-green-700 dark:text-green-400 border border-green-100 dark:border-green-800/40 overflow-hidden">
                             {user.foto ? (
                                 <img src={user.foto} alt={user.name} className="h-20 w-20 rounded-full object-cover" />
                             ) : (
@@ -59,7 +59,7 @@ export default function AdminShow({ user }) {
                         <span
                             className={`mt-2 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
                                 user.is_active
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/50'
+                                    ? 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/60 dark:text-green-400 dark:border-green-800/50'
                                     : 'bg-gray-100 text-gray-500 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'
                             }`}
                         >
@@ -88,7 +88,7 @@ export default function AdminShow({ user }) {
                         className={`mt-6 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm transition-colors ${
                             user.is_active
                                 ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800/50 dark:hover:bg-red-950/60'
-                                : 'bg-[#15803d] text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500'
+                                : 'bg-green-700 text-white hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500'
                         }`}
                     >
                         <Power size={15} />
@@ -106,7 +106,7 @@ export default function AdminShow({ user }) {
                                 <div className={`p-2.5 rounded-xl ${
                                     user.is_active
                                         ? 'bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400'
-                                        : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                                        : 'bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-400'
                                 }`}>
                                     <AlertCircle size={22} />
                                 </div>
@@ -143,7 +143,7 @@ export default function AdminShow({ user }) {
                                 disabled={processing}
                                 onClick={handleToggleActive}
                                 className={`rounded-xl px-4 py-2 text-xs font-bold text-white shadow-sm transition disabled:opacity-60 ${
-                                    user.is_active ? 'bg-red-600 hover:bg-red-700' : 'bg-[#15803d] hover:bg-emerald-700'
+                                    user.is_active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-700 hover:bg-green-700'
                                 }`}
                             >
                                 {processing ? 'Memproses...' : 'Ya, Lanjutkan'}

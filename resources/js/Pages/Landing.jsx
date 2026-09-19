@@ -43,8 +43,8 @@ export default function Landing() {
     const navLinkClass = (id) =>
         `text-lg font-semibold transition-colors duration-200 ${
             activeSection === id
-                ? 'text-emerald-600 font-bold border-b-2 border-emerald-600 pb-1'
-                : 'text-gray-700 hover:text-emerald-600'
+                ? 'text-green-600 font-bold border-b-2 border-green-600 pb-1'
+                : 'text-gray-700 hover:text-green-600'
         }`;
 
     return (
@@ -57,7 +57,7 @@ export default function Landing() {
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3">
                         <img src="/images/logo-titipsini.png" alt="Titipsini" className="h-10 md:h-12 w-auto object-contain" />
-                        <span className="text-2xl font-black tracking-tight text-emerald-600 md:text-3xl">
+                        <span className="text-2xl font-black tracking-tight text-green-600 md:text-3xl">
                             Titipsini<span className="text-amber-400">•</span>Com
                         </span>
                     </Link>
@@ -82,7 +82,7 @@ export default function Landing() {
                         {/* Profil Icon Desktop */}
                         <Link 
                             href="/mulai" 
-                            className="flex items-center justify-center rounded-full p-2 text-gray-800 transition hover:bg-emerald-50 hover:text-emerald-600"
+                            className="flex items-center justify-center rounded-full p-2 text-gray-800 transition hover:bg-green-50 hover:text-green-600"
                             title="Onboarding / Profil"
                         >
                             <User size={26} />
@@ -117,7 +117,7 @@ export default function Landing() {
                             </a>
                             <Link 
                                 href="/mulai" 
-                                className="flex items-center gap-3 pt-2 text-gray-800 hover:text-emerald-600"
+                                className="flex items-center gap-3 pt-2 text-gray-800 hover:text-green-600"
                                 onClick={() => setMenuOpen(false)}
                             >
                                 <User size={24} />
@@ -135,7 +135,7 @@ export default function Landing() {
                         <h1 className="text-4xl font-black leading-[1.1] text-gray-900 sm:text-6xl xl:text-7xl">
                             Bingung Mau Nitip <br />
                             Barang Dimana? <br />
-                            <span className="text-emerald-600">Titipsini</span> aja!
+                            <span className="text-green-600">Titipsini</span> aja!
                         </h1>
                         <p className="mt-6 text-xl text-gray-600 leading-relaxed sm:text-2xl">
                             Semua bisa dititipkan termasuk barang, rumah atau kendaraan.
@@ -143,7 +143,7 @@ export default function Landing() {
                         <div className="mt-10">
                             <a
                                 href="#download"
-                                className="inline-block rounded-2xl bg-emerald-600 px-10 py-5 text-lg font-bold text-white shadow-xl transition hover:bg-emerald-700 hover:shadow-2xl active:scale-95"
+                                className="inline-block rounded-2xl bg-green-600 px-10 py-5 text-lg font-bold text-white shadow-xl transition hover:bg-green-700 hover:shadow-2xl active:scale-95"
                             >
                                 Download Sekarang
                             </a>
@@ -238,7 +238,7 @@ export default function Landing() {
                     <div className="mt-10">
                         <a
                             href="#download"
-                            className="inline-block rounded-2xl bg-emerald-600 px-10 py-5 text-lg font-bold text-white shadow-lg transition hover:bg-emerald-700"
+                            className="inline-block rounded-2xl bg-green-600 px-10 py-5 text-lg font-bold text-white shadow-lg transition hover:bg-green-700"
                         >
                             Download Sekarang
                         </a>
@@ -247,7 +247,7 @@ export default function Landing() {
             </section>
 
             {/* ============== FOOTER ============== */}
-            <footer className="w-full bg-emerald-600 text-white py-16 px-6 md:px-12 lg:px-16 mt-12">
+            <footer className="w-full bg-green-600 text-white py-16 px-6 md:px-12 lg:px-16 mt-12">
                 <div className="w-full grid grid-cols-1 gap-12 md:grid-cols-4 items-start">
                     <div>
                         <div className="flex items-center gap-3">

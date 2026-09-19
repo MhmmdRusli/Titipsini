@@ -41,7 +41,7 @@ export default function Keamanan({ remainingChanges = 2 }) {
                 {/* ============ FORM GANTI KATA SANDI ============ */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-gray-800 dark:bg-[#111827] lg:col-span-2 transition-colors">
                     <div className="mb-6 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 dark:bg-emerald-950/60 dark:border-emerald-800/50 dark:text-emerald-400">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 border border-green-200 text-green-700 dark:bg-green-950/60 dark:border-green-800/50 dark:text-green-400">
                             <ShieldCheck size={20} />
                         </div>
                         <div>
@@ -55,7 +55,7 @@ export default function Keamanan({ remainingChanges = 2 }) {
                         className={`mb-5 flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-xs font-medium transition-colors ${
                             limitReached
                                 ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400'
-                                : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400'
+                                : 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950/40 dark:text-green-400'
                         }`}
                     >
                         <AlertTriangle size={14} className="shrink-0" />
@@ -65,7 +65,7 @@ export default function Keamanan({ remainingChanges = 2 }) {
                     </div>
 
                     {recentlySuccessful && (
-                        <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-400">
+                        <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-green-200 bg-green-50 px-3 py-2.5 text-xs font-medium text-green-700 dark:border-green-900/50 dark:bg-green-950/40 dark:text-green-400">
                             ✓ Kata sandi berhasil diubah!
                         </div>
                     )}
@@ -84,7 +84,7 @@ export default function Keamanan({ remainingChanges = 2 }) {
                                         value={data[name]}
                                         onChange={(e) => setData(name, e.target.value)}
                                         disabled={limitReached}
-                                        className={`block w-full rounded-xl border px-3 py-2 pr-10 text-xs text-slate-800 bg-white dark:bg-[#1f293d] dark:text-gray-100 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 disabled:bg-slate-50 dark:disabled:bg-gray-800/50 disabled:text-slate-400 shadow-sm transition-colors ${
+                                        className={`block w-full rounded-xl border px-3 py-2 pr-10 text-xs text-slate-800 bg-white dark:bg-[#1f293d] dark:text-gray-100 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 disabled:bg-slate-50 dark:disabled:bg-gray-800/50 disabled:text-slate-400 shadow-sm transition-colors ${
                                             errors[name] 
                                                 ? 'border-red-400 dark:border-red-500' 
                                                 : 'border-slate-200 dark:border-gray-800'
@@ -116,7 +116,7 @@ export default function Keamanan({ remainingChanges = 2 }) {
                             <button
                                 type="submit"
                                 disabled={processing || limitReached}
-                                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 px-4 py-2 text-xs font-semibold text-white shadow-sm transition disabled:cursor-not-allowed"
+                                className="rounded-xl bg-green-600 hover:bg-green-700 disabled:bg-green-400 px-4 py-2 text-xs font-semibold text-white shadow-sm transition disabled:cursor-not-allowed"
                             >
                                 {processing ? 'Memproses...' : 'Simpan'}
                             </button>
@@ -125,12 +125,12 @@ export default function Keamanan({ remainingChanges = 2 }) {
                 </div>
 
                 {/* ============ INFO CARD ============ */}
-                <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/20 p-5">
+                <div className="rounded-2xl border border-green-200 dark:border-green-900/40 bg-green-50 dark:bg-green-950/20 p-5">
                     <div className="flex items-start gap-3">
-                        <ShieldCheck className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" size={20} />
+                        <ShieldCheck className="mt-0.5 shrink-0 text-green-600 dark:text-green-400" size={20} />
                         <div>
-                            <p className="font-semibold text-emerald-900 dark:text-emerald-200">Keamanan Akun</p>
-                            <p className="mt-1 text-xs text-emerald-800 dark:text-emerald-300">
+                            <p className="font-semibold text-green-900 dark:text-green-200">Keamanan Akun</p>
+                            <p className="mt-1 text-xs text-green-800 dark:text-green-300">
                                 Ubah kata sandi secara berkala untuk menjaga keamanan akun Super Admin Anda. Gunakan kombinasi huruf besar, huruf kecil, angka, dan simbol.
                             </p>
                         </div>

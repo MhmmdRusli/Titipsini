@@ -8,7 +8,7 @@ import {
 
 const APPROVAL_STYLE = {
     pending: 'bg-amber-100 text-amber-700 border border-amber-200',
-    approved: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
+    approved: 'bg-green-100 text-green-700 border border-green-200',
     rejected: 'bg-red-100 text-red-700 border border-red-200',
 };
 
@@ -53,7 +53,7 @@ function ApproveModal({ report, onClose }) {
             <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
                 <div className="flex items-start justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-950/60 dark:text-green-400">
                             <ShieldCheck size={18} />
                         </div>
                         <div>
@@ -83,7 +83,7 @@ function ApproveModal({ report, onClose }) {
                         value={data.admin_approval_note}
                         onChange={(e) => setData('admin_approval_note', e.target.value)}
                         placeholder="cth: Bukti foto konsisten dengan kronologi customer. Taksiran wajar."
-                        className="w-full resize-none rounded-xl border border-gray-200 bg-white p-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900"
+                        className="w-full resize-none rounded-xl border border-gray-200 bg-white p-3 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-900"
                     />
                 </div>
 
@@ -99,7 +99,7 @@ function ApproveModal({ report, onClose }) {
                         type="button"
                         onClick={submit}
                         disabled={processing}
-                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-gray-900 dark:text-emerald-400 dark:hover:bg-emerald-950/40 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-green-500 bg-white px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 dark:border-green-900/60 dark:bg-gray-900 dark:text-green-400 dark:hover:bg-green-950/40 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 6 9 17 4 12" />
@@ -205,7 +205,7 @@ export default function Show({ report }) {
 
             <Link
                 href={backUrl}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 hover:text-emerald-700 dark:text-gray-400 dark:hover:text-emerald-400"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 hover:text-green-700 dark:text-gray-400 dark:hover:text-green-400"
             >
                 <ChevronLeft size={14} />
                 Kembali ke daftar Validasi Laporan
@@ -248,11 +248,11 @@ export default function Show({ report }) {
                                 </p>
                             </div>
 
-                            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
-                                <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                            <div className="rounded-xl border border-green-200 bg-green-50 p-3 dark:border-green-900/40 dark:bg-green-950/30">
+                                <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700 dark:text-green-300">
                                     Total Pesanan
                                 </p>
-                                <p className="mt-1 text-base font-bold text-emerald-700 dark:text-emerald-300">
+                                <p className="mt-1 text-base font-bold text-green-700 dark:text-green-300">
                                     {formatRupiah(report.total_price)}
                                 </p>
                             </div>
@@ -288,7 +288,7 @@ export default function Show({ report }) {
 
                                     {/* Foto Mitra (Kondisi Awal) */}
                                     <div>
-                                        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                                        <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400">
                                             Foto Mitra (Kondisi Awal)
                                         </p>
                                         {report.kondisi_awal?.foto_urls?.length ? (
@@ -361,7 +361,7 @@ export default function Show({ report }) {
                             Vendor
                         </p>
                         <div className="mt-2 flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-950/60 dark:text-green-400">
                                 <Store size={16} />
                             </div>
                             <div>
@@ -388,7 +388,7 @@ export default function Show({ report }) {
                                 <button
                                     type="button"
                                     onClick={() => setModal({ kind: 'approve' })}
-                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-gray-900 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
+                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-green-500 bg-white px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 dark:border-green-900/60 dark:bg-gray-900 dark:text-green-400 dark:hover:bg-green-950/40"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="20 6 9 17 4 12" />
@@ -408,11 +408,11 @@ export default function Show({ report }) {
                     )}
 
                     {!isPending && report.admin_approval === 'approved' && (
-                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30">
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                        <div className="rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm dark:border-green-900/40 dark:bg-green-950/30">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700 dark:text-green-300">
                                 Sudah Disetujui
                             </p>
-                            <p className="mt-1 text-xs text-emerald-800 dark:text-emerald-200">
+                            <p className="mt-1 text-xs text-green-800 dark:text-green-200">
                                 Laporan diteruskan ke Finance untuk proses refund.
                                 Status saat ini: <strong>{STATUS_LABEL[report.status]}</strong>.
                             </p>

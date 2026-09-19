@@ -82,7 +82,7 @@ export default function FormKendaraan({ serviceId, jenisKendaraanOptions = [], p
             <Head title="Form Penitipan Kendaraan" />
 
              <div className="px-4 py-6">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#15803d] to-emerald-600 p-5 text-white">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-700 to-green-600 p-5 text-white">
                     <div className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/15">
                         <Car size={22} />
                     </div>
@@ -160,7 +160,7 @@ export default function FormKendaraan({ serviceId, jenisKendaraanOptions = [], p
                             <button
                                 type="button"
                                 onClick={() => update('jumlahKendaraan', Math.max(1, form.jumlahKendaraan - 1))}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#15803d] text-white transition hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-700 text-white transition hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
                             >
                                 <Minus size={16} />
                             </button>
@@ -170,7 +170,7 @@ export default function FormKendaraan({ serviceId, jenisKendaraanOptions = [], p
                             <button
                                 type="button"
                                 onClick={() => update('jumlahKendaraan', form.jumlahKendaraan + 1)}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#15803d] text-white transition hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-700 text-white transition hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
                             >
                                 <Plus size={16} />
                             </button>
@@ -216,15 +216,15 @@ export default function FormKendaraan({ serviceId, jenisKendaraanOptions = [], p
                             type="checkbox"
                             checked={form.setuju}
                             onChange={(e) => update('setuju', e.target.checked)}
-                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-[#15803d] focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700"
+                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-green-700 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700"
                         />
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                             Saya menyetujui{' '}
-                            <Link href="/app/profile/tentang/syarat-ketentuan" className="font-semibold text-[#15803d] dark:text-green-400">
+                            <Link href="/app/profile/tentang/syarat-ketentuan" className="font-semibold text-green-700 dark:text-green-400">
                                 Syarat
                             </Link>{' '}
                             dan{' '}
-                            <Link href="/app/profile/tentang/kebijakan-privasi" className="font-semibold text-[#15803d] dark:text-green-400">
+                            <Link href="/app/profile/tentang/kebijakan-privasi" className="font-semibold text-green-700 dark:text-green-400">
                                 Ketentuan
                             </Link>{' '}
                             yang berlaku di Titipsini.com.
@@ -234,7 +234,7 @@ export default function FormKendaraan({ serviceId, jenisKendaraanOptions = [], p
                     <button
                         type="submit"
                         disabled={!bisaSubmit}
-                        className="w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                        className="w-full rounded-xl bg-green-700 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         {submitting ? 'Memproses...' : 'Titip Sekarang'}
                     </button>

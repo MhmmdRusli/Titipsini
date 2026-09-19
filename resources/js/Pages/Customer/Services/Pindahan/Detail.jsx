@@ -21,7 +21,7 @@ export default function Detail({ mitra }) {
                                 mitra.sedangTutupHariIni
                                     ? 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400'
                                     : mitra.isOrderable
-                                    ? 'bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#4ade80]'
+                                    ? 'bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400'
                                     : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400'
                             }`}
                         >
@@ -76,7 +76,7 @@ export default function Detail({ mitra }) {
                         href={`/app/services/pindahan/${mitra.id}/titip`}
                         className={`mt-6 block w-full rounded-xl py-3 text-center text-sm font-bold text-white ${
                             mitra.isOrderable
-                                ? 'bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600'
+                                ? 'bg-green-700 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600'
                                 : 'pointer-events-none bg-gray-300 dark:bg-gray-700'
                         }`}
                     >

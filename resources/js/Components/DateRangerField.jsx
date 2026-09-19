@@ -144,9 +144,9 @@ export default function DateRangeField({ tanggalMasuk, tanggalKeluar, onChange, 
                                             disabled
                                                 ? 'cursor-not-allowed text-gray-300 dark:text-gray-600'
                                                 : isStart || isEnd
-                                                    ? 'bg-[#15803d] font-bold text-white dark:bg-[#22c55e]'
+                                                    ? 'bg-green-700 font-bold text-white dark:bg-green-500'
                                                     : inRange
-                                                        ? 'bg-green-100 text-[#15803d] dark:bg-green-950/50 dark:text-green-400'
+                                                        ? 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400'
                                                         : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
                                         }`}
                                     >

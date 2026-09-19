@@ -38,7 +38,7 @@ export default function Verify({ email }) {
                                 alt="Logo Icon"
                                 className="h-10 w-auto object-contain"
                             />
-                            <div className="text-2xl font-bold tracking-tight text-[#15803d]">
+                            <div className="text-2xl font-bold tracking-tight text-green-700">
                                 Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                             </div>
                         </div>
@@ -62,7 +62,7 @@ export default function Verify({ email }) {
                                 placeholder="123456"
                                 value={data.otp_code}
                                 onChange={(e) => setData('otp_code', e.target.value.replace(/\D/g, ''))}
-                                className={`w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 text-center text-lg tracking-[0.5em] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#15803d]/30 transition-all ${
+                                className={`w-full rounded-xl border-none bg-[#f4f7fc] px-4 py-3.5 text-center text-lg tracking-[0.5em] text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-700/30 transition-all ${
                                     errors.otp_code ? 'ring-2 ring-red-500' : ''
                                 }`}
                             />
@@ -74,7 +74,7 @@ export default function Verify({ email }) {
                         <button
                             type="submit"
                             disabled={processing || data.otp_code.length !== 6}
-                            className="w-full rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white transition-all hover:bg-[#166534] active:scale-[0.99] disabled:opacity-50 mt-2 shadow-sm"
+                            className="w-full rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white transition-all hover:bg-green-800 active:scale-[0.99] disabled:opacity-50 mt-2 shadow-sm"
                         >
                             {processing ? 'Memproses...' : 'Verifikasi'}
                         </button>

@@ -26,7 +26,7 @@ export default function Sukses({ topup, saldo }) {
 
             <div className="px-4 py-6">
                 <div className="rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 text-center shadow-sm">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50 text-[#15803d] dark:text-[#4ade80]">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400">
                         <CheckCircle2 size={30} />
                     </div>
                     <p className="mt-3 text-lg font-bold text-gray-900 dark:text-gray-100">Sukses</p>
@@ -34,8 +34,8 @@ export default function Sukses({ topup, saldo }) {
                     <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">ID Transaksi {topup.kode_transaksi}</p>
 
                     <div className="mt-3 rounded-xl bg-green-50 dark:bg-green-950/40 px-4 py-3 border border-green-100/60 dark:border-green-900/40">
-                        <p className="text-xs text-[#15803d] dark:text-[#4ade80]">Total Top Up</p>
-                        <p className="text-xl font-bold text-green-800 dark:text-green-300">{formatRupiah(topup.nominal)}</p>
+                        <p className="text-xs text-green-700 dark:text-green-400">Total Top Up</p>
+                        <p className="text-xl font-bold text-green-700 dark:text-green-300">{formatRupiah(topup.nominal)}</p>
                     </div>
 
                     <div className="mt-4 space-y-1.5 text-left text-xs">
@@ -57,7 +57,7 @@ export default function Sukses({ topup, saldo }) {
 
                 <div className="mt-4 flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-3.5 shadow-sm">
                     <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <Wallet size={15} className="text-[#15803d] dark:text-[#4ade80]" />
+                        <Wallet size={15} className="text-green-700 dark:text-green-400" />
                         Saldo Titip Saat Ini
                     </div>
                     <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{formatRupiah(saldo)}</span>
@@ -66,7 +66,7 @@ export default function Sukses({ topup, saldo }) {
                 <div className="mt-5 space-y-2">
                     <Link
                         href="/app/saldo/riwayat"
-                        className="block w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3 text-center text-sm font-bold text-white shadow-sm transition"
+                        className="block w-full rounded-xl bg-green-700 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-600 py-3 text-center text-sm font-bold text-white shadow-sm transition"
                     >
                         Lihat Saldo
                     </Link>

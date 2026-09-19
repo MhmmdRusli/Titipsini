@@ -180,7 +180,7 @@ export default function Show({ topup }) {
                             type="button"
                             onClick={() => setApproveOpen(true)}
                             disabled={processing}
-                            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 py-3 text-sm font-semibold text-white shadow-sm transition disabled:opacity-50"
+                            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-green-600 hover:bg-green-700 py-3 text-sm font-semibold text-white shadow-sm transition disabled:opacity-50"
                         >
                             <CheckCircle2 size={16} />
                             Setujui & Tambah Saldo
@@ -193,7 +193,7 @@ export default function Show({ topup }) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
                     <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl border border-slate-100 dark:bg-gray-800 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300">
+                            <div className="p-2.5 rounded-xl bg-green-100 text-green-600 dark:bg-green-950/60 dark:text-green-300">
                                 <CheckCircle2 size={22} />
                             </div>
                             <div>
@@ -203,7 +203,7 @@ export default function Show({ topup }) {
                         </div>
 
                         <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-                            Setujui top up sebesar <strong className="text-emerald-600 dark:text-emerald-400">{formatRupiah(topup.nominal)}</strong> untuk <strong className="text-slate-900 dark:text-slate-100">{topup.user?.name}</strong>? Saldo pelanggan akan langsung ditambahkan.
+                            Setujui top up sebesar <strong className="text-green-600 dark:text-green-400">{formatRupiah(topup.nominal)}</strong> untuk <strong className="text-slate-900 dark:text-slate-100">{topup.user?.name}</strong>? Saldo pelanggan akan langsung ditambahkan.
                         </p>
 
                         <div className="mt-5 flex justify-end gap-2">
@@ -219,7 +219,7 @@ export default function Show({ topup }) {
                                 type="button"
                                 disabled={processing}
                                 onClick={handleApprove}
-                                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition disabled:opacity-60"
+                                className="rounded-xl bg-green-600 hover:bg-green-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition disabled:opacity-60"
                             >
                                 {processing ? 'Memproses...' : 'Ya, Setujui'}
                             </button>
@@ -250,7 +250,7 @@ export default function Show({ topup }) {
                             className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-1 dark:bg-gray-700 dark:border-gray-600 dark:text-slate-200 ${
                                 errorAlasan
                                     ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
-                                    : 'border-slate-200 focus:border-emerald-600 focus:ring-emerald-600'
+                                    : 'border-slate-200 focus:border-green-600 focus:ring-green-600'
                             }`}
                         />
                         {errorAlasan && <p className="mt-1 text-xs text-red-500">{errorAlasan}</p>}

@@ -50,7 +50,7 @@ export default function Index({ orders, counts, filters }) {
                             onClick={() => goTo(t.key, filters.kategori)}
                             className={`relative flex flex-1 items-center justify-center gap-1.5 py-3 text-sm font-semibold transition ${
                                 active
-                                    ? 'text-[#15803d] dark:text-[#4ade80]'
+                                    ? 'text-green-700 dark:text-green-400'
                                     : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
                             }`}
                         >
@@ -59,7 +59,7 @@ export default function Index({ orders, counts, filters }) {
                                 <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
                             )}
                             {active && (
-                                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#15803d] dark:bg-[#4ade80]" />
+                                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-green-700 dark:bg-green-400" />
                             )}
                         </button>
                     );
@@ -76,8 +76,8 @@ export default function Index({ orders, counts, filters }) {
                             onClick={() => goTo(filters.tab, k.key)}
                             className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition ${
                                 active
-                                    ? 'border-[#15803d] bg-[#15803d] text-white dark:border-green-700 dark:bg-green-700'
-                                    : 'border-gray-300 bg-white text-gray-600 hover:border-[#22c55e] hover:bg-[#22c55e] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-green-600 dark:hover:bg-green-600 dark:hover:text-white'
+                                    ? 'border-green-700 bg-green-700 text-white dark:border-green-700 dark:bg-green-700'
+                                    : 'border-gray-300 bg-white text-gray-600 hover:border-green-500 hover:bg-green-500 hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-green-600 dark:hover:bg-green-600 dark:hover:text-white'
                             }`}
                         >
                             {k.label}
@@ -123,7 +123,7 @@ export default function Index({ orders, counts, filters }) {
 
                                         {/* Alamat */}
                                         <div className="mt-2 flex items-start gap-1.5 text-xs text-gray-700 dark:text-gray-300">
-                                            <MapPin size={14} className="mt-0.5 shrink-0 text-[#15803d] dark:text-[#4ade80]" />
+                                            <MapPin size={14} className="mt-0.5 shrink-0 text-green-700 dark:text-green-400" />
                                             <div className="min-w-0">
                                                 <p className="line-clamp-2 leading-relaxed">{order.address ?? '-'}</p>
                                                 {order.address_notes && (
@@ -134,7 +134,7 @@ export default function Index({ orders, counts, filters }) {
 
                                         {/* Jenis layanan spesifik dan nomor pesanan. */}
                                         <div className="mt-3 flex items-center justify-between gap-3">
-                                            <span className="inline-flex items-center gap-1 rounded-lg border border-green-600 bg-white px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-700 dark:bg-gray-900 dark:text-[#4ade80]">
+                                            <span className="inline-flex items-center gap-1 rounded-lg border border-green-600 bg-white px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-700 dark:bg-gray-900 dark:text-green-400">
                                                 <Icon size={13} /> {order.service_label}
                                             </span>
                                             <span className="shrink-0 rounded-md bg-white px-2.5 py-1 text-xs font-bold text-gray-700 dark:bg-gray-800 dark:text-gray-200">
@@ -189,7 +189,7 @@ export default function Index({ orders, counts, filters }) {
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 className={`rounded-xl px-3 py-1.5 text-xs font-medium transition ${
                                     link.active
-                                        ? 'bg-[#15803d] text-white dark:bg-green-700'
+                                        ? 'bg-green-700 text-white dark:bg-green-700'
                                         : 'border border-gray-200 bg-white text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
                                 } ${!link.url ? 'cursor-not-allowed opacity-40' : 'hover:opacity-80'}`}
                             />

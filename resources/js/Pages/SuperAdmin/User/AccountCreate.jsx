@@ -45,7 +45,7 @@ export default function AccountCreate() {
         ${
             hasError
                 ? 'border-red-400 focus:border-red-500 focus:ring-red-200'
-                : 'border-transparent focus:border-[#15803d] focus:ring-[#15803d]/20 dark:focus:border-emerald-500'
+                : 'border-transparent focus:border-green-700 focus:ring-green-700/20 dark:focus:border-green-500'
         }
     `;
 
@@ -57,7 +57,7 @@ export default function AccountCreate() {
             <div className="mx-auto max-w-3xl">
                 <Link
                     href="/super-admin/user/customer"
-                    className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-[#15803d] dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors"
+                    className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors"
                 >
                     <ArrowLeft size={16} />
                     Kembali
@@ -89,18 +89,18 @@ export default function AccountCreate() {
                                             onClick={() => setData('role', option.value)}
                                             className={`relative flex flex-col items-start gap-1.5 rounded-xl border p-4 text-left transition-all ${
                                                 isSelected
-                                                    ? 'border-[#15803d] bg-emerald-50/60 dark:bg-emerald-950/30 ring-2 ring-[#15803d]/20'
+                                                    ? 'border-green-700 bg-green-50/60 dark:bg-green-950/30 ring-2 ring-green-700/20'
                                                     : 'border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-slate-300 dark:hover:border-gray-600'
                                             }`}
                                         >
                                             <div className="flex w-full items-center justify-between">
                                                 <Icon
                                                     size={20}
-                                                    className={isSelected ? 'text-[#15803d] dark:text-emerald-400' : 'text-slate-400 dark:text-gray-500'}
+                                                    className={isSelected ? 'text-green-700 dark:text-green-400' : 'text-slate-400 dark:text-gray-500'}
                                                 />
-                                                {isSelected && <CheckCircle2 size={18} className="text-[#15803d] dark:text-emerald-400" />}
+                                                {isSelected && <CheckCircle2 size={18} className="text-green-700 dark:text-green-400" />}
                                             </div>
-                                            <span className={`text-sm font-semibold ${isSelected ? 'text-[#15803d] dark:text-emerald-400' : 'text-slate-700 dark:text-gray-200'}`}>
+                                            <span className={`text-sm font-semibold ${isSelected ? 'text-green-700 dark:text-green-400' : 'text-slate-700 dark:text-gray-200'}`}>
                                                 {option.label}
                                             </span>
                                             <span className="text-xs leading-relaxed text-slate-500 dark:text-gray-400">
@@ -219,7 +219,7 @@ export default function AccountCreate() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full sm:w-auto rounded-xl bg-[#15803d] hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 px-8 py-3 text-sm font-bold text-white shadow-sm transition-colors disabled:opacity-60"
+                            className="w-full sm:w-auto rounded-xl bg-green-700 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500 px-8 py-3 text-sm font-bold text-white shadow-sm transition-colors disabled:opacity-60"
                         >
                             {processing ? 'Menyimpan...' : `Buat Akun ${data.role === 'admin' ? 'Admin' : 'Finance'}`}
                         </button>

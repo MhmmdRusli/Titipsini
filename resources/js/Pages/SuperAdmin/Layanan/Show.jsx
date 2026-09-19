@@ -8,7 +8,7 @@ const BASE_PATH = '/super-admin/layanan';
 const STATUS_STYLE = {
     pendaftar: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
     verifikasi_akun: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400',
-    terverifikasi: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400',
+    terverifikasi: 'bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-400',
     ditolak: 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400',
     ditangguhkan: 'bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-400',
 };
@@ -68,7 +68,7 @@ export default function LayananShow({ layanan }) {
 
             <Link
                 href={BASE_PATH}
-                className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-[#15803d] dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors"
+                className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors"
             >
                 <ArrowLeft size={16} />
                 Kembali ke daftar layanan
@@ -121,7 +121,7 @@ export default function LayananShow({ layanan }) {
                             value={
                                 <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                                     layanan.is_active
-                                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
+                                        ? 'bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-400'
                                         : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
                                 }`}>
                                     {layanan.is_active ? 'Aktif — menerima pesanan' : 'Nonaktif'}
@@ -158,7 +158,7 @@ export default function LayananShow({ layanan }) {
                             type="button"
                             disabled={processing || approved}
                             onClick={() => submitStatus('terverifikasi')}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <CheckCircle2 size={14} />
                             {approved ? 'Sudah Disetujui' : 'Setujui Layanan'}
@@ -190,7 +190,7 @@ export default function LayananShow({ layanan }) {
                             className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
                                 layanan.is_active
                                     ? 'border border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                                    : 'bg-[#15803d] text-white hover:bg-emerald-700'
+                                    : 'bg-green-700 text-white hover:bg-green-700'
                             }`}
                         >
                             <Power size={14} />
@@ -202,7 +202,7 @@ export default function LayananShow({ layanan }) {
                 {/* Info Vendor */}
                 <div className="rounded-xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-[#111827] p-6 shadow-sm">
                     <div className="flex items-center gap-2.5 mb-4">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-[#15803d] dark:text-emerald-400">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-400">
                             <UserIcon size={16} />
                         </div>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-gray-100">Pemilik Layanan</h3>
@@ -216,7 +216,7 @@ export default function LayananShow({ layanan }) {
                     {layanan.user?.id && (
                         <Link
                             href={`/super-admin/user/vendor/${layanan.user.id}`}
-                            className="mt-4 flex items-center justify-center gap-1.5 rounded-xl border border-[#15803d] text-[#15803d] dark:border-emerald-500 dark:text-emerald-400 px-4 py-2 text-xs font-bold hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+                            className="mt-4 flex items-center justify-center gap-1.5 rounded-xl border border-green-700 text-green-700 dark:border-green-500 dark:text-green-400 px-4 py-2 text-xs font-bold hover:bg-green-50 dark:hover:bg-green-950/30 transition-colors"
                         >
                             <MapPin size={14} />
                             Lihat Profil Vendor

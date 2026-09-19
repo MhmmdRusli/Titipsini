@@ -22,18 +22,18 @@ function getFileUrl(path) {
 
 const STATUS_CONFIG = {
     baru: { label: 'Pesanan Diproses', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400', icon: Loader2 },
-    pembayaran_diterima: { label: 'Pembayaran Diterima', color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400', icon: CheckCircle2 },
+    pembayaran_diterima: { label: 'Pembayaran Diterima', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400', icon: CheckCircle2 },
     diproses: { label: 'Pesanan Diproses', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400', icon: Loader2 },
     diproses_mitra: { label: 'Diproses Mitra', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400', icon: Loader2 },
     dikirim: { label: 'Dikirim', color: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400', icon: Loader2 },
-    selesai: { label: 'Selesai', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-[#4ade80]', icon: CheckCircle2 },
+    selesai: { label: 'Selesai', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400', icon: CheckCircle2 },
     dibatalkan: { label: 'Dibatalkan', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
 };
 
 const FASE_COLOR = {
     menunggu: 'bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-300',
     berjalan: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400',
-    akhir: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-[#4ade80]',
+    akhir: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400',
 };
 
 export default function Show({ order }) {
@@ -105,7 +105,7 @@ function ShowBaru({ order }) {
                                     name="alasan_tolak"
                                     checked={selectedAlasan === opt.value}
                                     onChange={() => setSelectedAlasan(opt.value)}
-                                    className="h-4 w-4 accent-[#15803d]"
+                                    className="h-4 w-4 accent-green-700"
                                 />
                                 {opt.label}
                             </label>
@@ -118,7 +118,7 @@ function ShowBaru({ order }) {
                             value={alasanLain}
                             onChange={(e) => setAlasanLain(e.target.value)}
                             placeholder="Lainnya...."
-                            className="mt-3 w-full border-b border-gray-200 pb-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#15803d] focus:outline-none dark:border-gray-700 dark:bg-transparent dark:text-gray-100"
+                            className="mt-3 w-full border-b border-gray-200 pb-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-green-700 focus:outline-none dark:border-gray-700 dark:bg-transparent dark:text-gray-100"
                         />
                     )}
 
@@ -127,7 +127,7 @@ function ShowBaru({ order }) {
                             type="button"
                             onClick={tolakPesanan}
                             disabled={!bisaLanjut || isRejecting}
-                            className="w-full rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700"
+                            className="w-full rounded-xl bg-green-700 py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700"
                         >
                             {isRejecting ? 'Memproses...' : 'Selanjutnya'}
                         </button>
@@ -143,7 +143,7 @@ function ShowBaru({ order }) {
             <Head title={`Rincian Order - ${order.order_number}`} />
 
             <div className="bg-green-50/60 px-4 py-4 dark:bg-green-950/10">
-                <div className="flex items-center justify-between rounded-2xl bg-[#15803d] px-4 py-3.5 text-white shadow-sm dark:bg-green-700">
+                <div className="flex items-center justify-between rounded-2xl bg-green-700 px-4 py-3.5 text-white shadow-sm dark:bg-green-700">
                     <div>
                         <p className="flex items-center gap-1.5 text-base font-bold">
                             <img src="/images/logo-titipsini.png" alt="" className="h-5 w-auto object-contain" />
@@ -240,7 +240,7 @@ function ShowBaru({ order }) {
                         type="button"
                         onClick={ambilPesanan}
                         disabled={isAccepting}
-                        className="w-full rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-60 dark:bg-green-700"
+                        className="w-full rounded-xl bg-green-700 py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-60 dark:bg-green-700"
                     >
                         {isAccepting ? 'Memproses...' : 'Ambil Pesanan'}
                     </button>
@@ -248,7 +248,7 @@ function ShowBaru({ order }) {
                         type="button"
                         onClick={() => setStep('alasan')}
                         disabled={isAccepting}
-                        className="w-full rounded-xl border border-[#15803d] py-3 text-sm font-bold text-[#15803d] hover:bg-green-50 disabled:opacity-60 dark:border-green-600 dark:text-green-400"
+                        className="w-full rounded-xl border border-green-700 py-3 text-sm font-bold text-green-700 hover:bg-green-50 disabled:opacity-60 dark:border-green-600 dark:text-green-400"
                     >
                         Tolak
                     </button>
@@ -413,7 +413,7 @@ function ShowDiproses({ order }) {
                                             </div>
                                         ))}
                                         {kondisiAwalFiles.length < 5 && (
-                                            <label className="flex h-20 w-20 items-center justify-center rounded-md border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#15803d] hover:bg-green-50 dark:border-gray-700 dark:hover:border-green-600 dark:hover:bg-green-950/30 transition">
+                                            <label className="flex h-20 w-20 items-center justify-center rounded-md border-2 border-dashed border-gray-300 cursor-pointer hover:border-green-700 hover:bg-green-50 dark:border-gray-700 dark:hover:border-green-600 dark:hover:bg-green-950/30 transition">
                                                 <input
                                                     type="file"
                                                     accept="image/*"
@@ -440,7 +440,7 @@ function ShowDiproses({ order }) {
                                         onChange={(e) => setKondisiAwalCatatan(e.target.value)}
                                         rows={2}
                                         placeholder="Catatan kondisi barang..."
-                                        className="w-full rounded-lg border border-gray-200 p-2 text-xs text-gray-800 placeholder-gray-400 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
+                                        className="w-full rounded-lg border border-gray-200 p-2 text-xs text-gray-800 placeholder-gray-400 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
                                     />
                                 </label>
                             </div>
@@ -460,7 +460,7 @@ function ShowDiproses({ order }) {
                                     type="button"
                                     onClick={submitKondisiAwal}
                                     disabled={isSubmittingKondisiAwal || kondisiAwalFiles.length === 0}
-                                    className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700 transition"
+                                    className="flex-1 rounded-lg bg-green-700 py-2 text-xs font-bold text-white hover:bg-green-700 disabled:opacity-50 dark:bg-green-700 transition"
                                 >
                                     {isSubmittingKondisiAwal ? 'Menyimpan...' : 'Simpan & Tandai Dititip'}
                                 </button>
@@ -477,7 +477,7 @@ function ShowDiproses({ order }) {
             <Head title={`Rincian Order - ${order.order_number}`} />
 
             <div className="min-h-full bg-green-50/60 px-4 py-4 space-y-4 dark:bg-green-950/10">
-                <div className="flex items-center justify-between rounded-2xl bg-[#15803d] px-4 py-3.5 text-white shadow-sm dark:bg-green-700">
+                <div className="flex items-center justify-between rounded-2xl bg-green-700 px-4 py-3.5 text-white shadow-sm dark:bg-green-700">
                     <div>
                         <p className="flex items-center gap-1.5 text-base font-bold">
                             <img src="/images/logo-titipsini.png" alt="" className="h-5 w-auto object-contain" />
@@ -518,7 +518,7 @@ function ShowDiproses({ order }) {
                                 type="button"
                                 onClick={advanceFase}
                                 disabled={isAdvancingFase}
-                                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-700 dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
                             >
                                 <ArrowRightCircle size={16} />
                                 {isAdvancingFase ? 'Memproses...' : order.next_fase_action_label}
@@ -563,7 +563,7 @@ function ShowDiproses({ order }) {
                             type="button"
                             onClick={openKondisiAwalModal}
                             disabled={isMarkingAsPickedUp || isSubmittingKondisiAwal}
-                            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-700 dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
                         >
                             <CheckCircle2 size={16} />
                             {isSubmittingKondisiAwal ? 'Menyimpan Dokumentasi...' : 'Tandai Sudah Dititip'}
@@ -581,7 +581,7 @@ function ShowDiproses({ order }) {
                             type="button"
                             onClick={serahkanBarang}
                             disabled={isConfirmingPickup}
-                            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-700 dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
                         >
                             <CheckCircle2 size={16} />
                             {isConfirmingPickup ? 'Memproses...' : 'Tandai Selesai'}
@@ -684,7 +684,7 @@ function ShowDiproses({ order }) {
                             {isSaldo ? 'Pembayaran Saldo' : isCash ? 'Pembayaran Tunai' : 'Bukti Pembayaran'}
                         </p>
                         {(isSaldo || order.payment_verified_at) && (
-                            <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700 dark:bg-green-950/40 dark:text-[#4ade80]">
+                            <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400">
                                 <ShieldCheck size={12} />
                                 Terverifikasi
                             </span>
@@ -709,7 +709,7 @@ function ShowDiproses({ order }) {
                                     type="button"
                                     onClick={verifikasiPembayaran}
                                     disabled={isVerifying}
-                                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-700 dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
                                 >
                                     <HandCoins size={16} />
                                     {isVerifying ? 'Memproses...' : 'Konfirmasi Uang Tunai Diterima'}
@@ -737,7 +737,7 @@ function ShowDiproses({ order }) {
                                     type="button"
                                     onClick={verifikasiPembayaran}
                                     disabled={isVerifying}
-                                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#15803d] dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
+                                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-700 dark:bg-green-700 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition"
                                 >
                                     <ShieldCheck size={16} />
                                     {isVerifying ? 'Memverifikasi...' : 'Verifikasi Pembayaran'}
@@ -759,7 +759,7 @@ function ShowDiproses({ order }) {
                                 Bukti Pembayaran Denda
                             </p>
                             {order.status_denda === 'terverifikasi' && (
-                                <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700 dark:bg-green-950/40 dark:text-[#4ade80]">
+                                <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400">
                                     <ShieldCheck size={12} />
                                     Terverifikasi
                                 </span>

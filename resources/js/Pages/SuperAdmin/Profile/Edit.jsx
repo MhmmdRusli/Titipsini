@@ -67,14 +67,14 @@ export default function Edit({ user, sessions = [] }) {
       <SuperAdminLayout title="Profil Saya">
         <Link
           href={route("super-admin.dashboard")}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:underline dark:text-emerald-400"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 hover:underline dark:text-green-400"
         >
           <ArrowLeft size={14} />
           Kembali ke Dashboard
         </Link>
 
         {flash?.success && (
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-xs font-semibold text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-300">
             <CheckCircle2 size={16} />
             {flash.success}
           </div>
@@ -94,7 +94,7 @@ export default function Edit({ user, sessions = [] }) {
                     className="h-28 w-28 rounded-2xl object-cover ring-1 ring-slate-200 dark:ring-slate-700"
                   />
                 ) : (
-                  <div className="flex h-28 w-28 items-center justify-center rounded-2xl bg-emerald-100 text-3xl font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                  <div className="flex h-28 w-28 items-center justify-center rounded-2xl bg-green-100 text-3xl font-bold text-green-700 dark:bg-green-950 dark:text-green-300">
                     {(user?.name ?? "S").charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -102,7 +102,7 @@ export default function Edit({ user, sessions = [] }) {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md transition hover:bg-emerald-700"
+                  className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-xl bg-green-600 text-white shadow-md transition hover:bg-green-700"
                   title="Ganti foto profil"
                 >
                   <Camera size={16} />
@@ -126,7 +126,7 @@ export default function Edit({ user, sessions = [] }) {
                   type="button"
                   onClick={handleAvatarUpload}
                   disabled={avatarForm.processing}
-                  className="w-full rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60"
+                  className="w-full rounded-xl bg-green-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-60"
                 >
                   {avatarForm.processing ? "Mengunggah..." : "Simpan Foto Baru"}
                 </button>
@@ -151,7 +151,7 @@ export default function Edit({ user, sessions = [] }) {
                   type="text"
                   value={profileForm.data.name}
                   onChange={(e) => profileForm.setData("name", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
                 {profileForm.errors.name && (
                   <p className="mt-1 text-xs font-medium text-rose-500">{profileForm.errors.name}</p>
@@ -166,7 +166,7 @@ export default function Edit({ user, sessions = [] }) {
                   type="email"
                   value={profileForm.data.email}
                   onChange={(e) => profileForm.setData("email", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
                 {profileForm.errors.email && (
                   <p className="mt-1 text-xs font-medium text-rose-500">{profileForm.errors.email}</p>
@@ -182,7 +182,7 @@ export default function Edit({ user, sessions = [] }) {
                   value={profileForm.data.phone}
                   onChange={(e) => profileForm.setData("phone", e.target.value)}
                   placeholder="Opsional"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
                 {profileForm.errors.phone && (
                   <p className="mt-1 text-xs font-medium text-rose-500">{profileForm.errors.phone}</p>
@@ -192,7 +192,7 @@ export default function Edit({ user, sessions = [] }) {
               <button
                 type="submit"
                 disabled={profileForm.processing}
-                className="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60"
+                className="rounded-xl bg-green-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-green-700 disabled:opacity-60"
               >
                 {profileForm.processing ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
@@ -203,7 +203,7 @@ export default function Edit({ user, sessions = [] }) {
         {/* Riwayat Login / Sesi Aktif */}
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-2">
-            <ShieldCheck size={16} className="text-emerald-600 dark:text-emerald-400" />
+            <ShieldCheck size={16} className="text-green-600 dark:text-green-400" />
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Riwayat Login &amp; Sesi Aktif</h3>
           </div>
           <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
@@ -229,7 +229,7 @@ export default function Edit({ user, sessions = [] }) {
                       <p className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
                         {session.browser} &middot; {session.platform}
                         {session.is_current_device && (
-                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                          <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-bold text-green-600 dark:bg-green-950/50 dark:text-green-400">
                             Perangkat ini
                           </span>
                         )}

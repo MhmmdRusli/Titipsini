@@ -23,9 +23,9 @@ const STATUS_CONFIG = {
     klaim_diajukan: { label: 'Klaim Diajukan', color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400', icon: Clock },
     menunggu_pemeriksaan_admin: { label: 'Menunggu Pemeriksaan Admin', color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400', icon: Clock },
     menunggu_klarifikasi_mitra: { label: 'Menunggu Klarifikasi Mitra', color: 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400', icon: Clock },
-    disetujui: { label: 'Disetujui', color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400', icon: CheckCircle2 },
+    disetujui: { label: 'Disetujui', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400', icon: CheckCircle2 },
     diproses_finance: { label: 'Diproses Finance', color: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400', icon: Clock },
-    refund_berhasil: { label: 'Refund Berhasil', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-[#4ade80]', icon: CheckCircle2 },
+    refund_berhasil: { label: 'Refund Berhasil', color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400', icon: CheckCircle2 },
     ditolak: { label: 'Ditolak', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: XCircle },
     sengketa: { label: 'Sengketa', color: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400', icon: AlertTriangle },
 };
@@ -133,7 +133,7 @@ export default function Show({ claim }) {
                             </div>
                             <div>
                                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total Pesanan</p>
-                                <p className="mt-1 text-sm font-bold text-[#15803d] dark:text-[#4ade80]">{formatRupiah(claim.order.total_price)}</p>
+                                <p className="mt-1 text-sm font-bold text-green-700 dark:text-green-400">{formatRupiah(claim.order.total_price)}</p>
                             </div>
                             <div>
                                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status Order</p>
@@ -206,7 +206,7 @@ export default function Show({ claim }) {
                     {claim.jumlah_klaim && (
                         <div className="rounded-xl border border-gray-100 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
                             <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Jumlah Klaim Diajukan</p>
-                            <p className="mt-1 text-lg font-bold text-[#15803d] dark:text-[#4ade80]">{formatRupiah(claim.jumlah_klaim)}</p>
+                            <p className="mt-1 text-lg font-bold text-green-700 dark:text-green-400">{formatRupiah(claim.jumlah_klaim)}</p>
                         </div>
                     )}
 
@@ -232,9 +232,9 @@ export default function Show({ claim }) {
 
                     {/* Admin Validation Result */}
                     {claim.admin_validated_at && (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-                            <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">Hasil Pemeriksaan Admin</p>
-                            <div className="mt-2 space-y-1 text-xs text-emerald-700/90 dark:text-emerald-300/80">
+                        <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-950/30">
+                            <p className="text-xs font-semibold text-green-800 dark:text-green-300 uppercase tracking-wide">Hasil Pemeriksaan Admin</p>
+                            <div className="mt-2 space-y-1 text-xs text-green-700/90 dark:text-green-300/80">
                                 <p><strong>Diperiksa oleh:</strong> {claim.admin_validator_name ?? 'Admin'} pada {claim.admin_validated_at}</p>
                                 {claim.admin_catatan && <p><strong>Catatan:</strong> {claim.admin_catatan}</p>}
                                 {claim.persentase_refund && <p><strong>Persentase Refund:</strong> {claim.persentase_refund}%</p>}
@@ -245,9 +245,9 @@ export default function Show({ claim }) {
 
                     {/* Refund Details */}
                     {['disetujui', 'diproses_finance', 'refund_berhasil'].includes(claim.status) && (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-                            <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">Detail Refund Disetujui</p>
-                            <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-emerald-700/90 dark:text-emerald-300/80">
+                        <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-950/30">
+                            <p className="text-xs font-semibold text-green-800 dark:text-green-300 uppercase tracking-wide">Detail Refund Disetujui</p>
+                            <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-green-700/90 dark:text-green-300/80">
                                 <div><strong>Persentase:</strong> {claim.persentase_refund ?? '-'}%</div>
                                 <div><strong>Jumlah:</strong> {claim.jumlah_refund ? formatRupiah(claim.jumlah_refund) : '-'}</div>
                             </div>
@@ -307,7 +307,7 @@ export default function Show({ claim }) {
                                 <button
                                     onClick={() => { setPersentaseRefund(claim.persentase_refund ?? 60); handleAction('setujui'); }}
                                     disabled={isSubmitting}
-                                    className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition"
+                                    className="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition"
                                 >
                                     <CheckCircle2 size={16} />
                                     Setujui Klaim
@@ -362,7 +362,7 @@ export default function Show({ claim }) {
                                             onChange={(e) => setPersentaseRefund(Math.max(1, Math.min(100, parseInt(e.target.value) || 0)))}
                                             min="1"
                                             max="100"
-                                            className="mt-1 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                            className="mt-1 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                                         />
                                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                             Estimasi refund: {claim.order?.total_price ? formatRupiah(Math.round(claim.order.total_price * persentaseRefund / 100)) : '-'}
@@ -375,7 +375,7 @@ export default function Show({ claim }) {
                                             onChange={(e) => setAdminCatatan(e.target.value)}
                                             rows={2}
                                             placeholder="Catatan untuk customer/mitra/finance..."
-                                            className="mt-1 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
+                                            className="mt-1 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
                                         />
                                     </div>
                                 </div>
@@ -390,7 +390,7 @@ export default function Show({ claim }) {
                                         rows={3}
                                         required
                                         placeholder={actionType === 'tolak' ? 'Alasan penolakan klaim...' : 'Alasan pengenaikan ke sengketa...'}
-                                        className="mt-1 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
+                                        className="mt-1 w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600"
                                     />
                                 </div>
                             )}
@@ -407,7 +407,7 @@ export default function Show({ claim }) {
                                     onClick={confirmAction}
                                     disabled={isSubmitting}
                                     className={`flex-1 rounded-xl py-2.5 text-sm font-bold text-white transition ${
-                                        actionType === 'setujui' ? 'bg-emerald-600 hover:bg-emerald-700' :
+                                        actionType === 'setujui' ? 'bg-green-600 hover:bg-green-700' :
                                         actionType === 'tolak' ? 'bg-red-600 hover:bg-red-700' :
                                         'bg-amber-600 hover:bg-amber-700'
                                     } disabled:opacity-50`}
@@ -446,7 +446,7 @@ export default function Show({ claim }) {
                         )}
                         {['disetujui', 'diproses_finance', 'refund_berhasil'].includes(claim.status) && (
                             <div className="relative">
-                                <div className="absolute left-[-6px] top-0.5 h-2 w-2 rounded-full bg-emerald-500" />
+                                <div className="absolute left-[-6px] top-0.5 h-2 w-2 rounded-full bg-green-500" />
                                 <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Disetujui Admin</p>
                                 <p className="text-[10px] text-gray-500 dark:text-gray-400">Persentase: {claim.persentase_refund}% | Jumlah: {claim.jumlah_refund ? formatRupiah(claim.jumlah_refund) : '-'}</p>
                             </div>

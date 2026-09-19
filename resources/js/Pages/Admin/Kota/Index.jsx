@@ -100,14 +100,14 @@ export default function KotaIndex({ kota, filters }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari nama kota..."
-                        className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 py-2 pl-9 pr-3 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:border-green-600 dark:focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-green-600 dark:focus:ring-emerald-500 shadow-sm"
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 py-2 pl-9 pr-3 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-600 dark:focus:ring-green-500 shadow-sm"
                     />
                 </form>
 
                 <button
                     type="button"
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 rounded-xl bg-green-700 dark:bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-emerald-700 transition shadow-sm select-none"
+                    className="flex items-center gap-2 rounded-xl bg-green-700 dark:bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-green-700 transition shadow-sm select-none"
                 >
                     <Plus size={16} />
                     Tambah Kota
@@ -145,7 +145,7 @@ export default function KotaIndex({ kota, filters }) {
                                                 className="h-8 w-8 rounded-lg object-cover border border-gray-200 dark:border-gray-700 shadow-sm"
                                             />
                                         ) : (
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-green-700 dark:text-emerald-400 shadow-sm">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 shadow-sm">
                                                 <MapPin size={15} />
                                             </div>
                                         )}
@@ -158,7 +158,7 @@ export default function KotaIndex({ kota, filters }) {
                                     <span
                                         className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold border ${
                                             item.is_active
-                                                ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                                                ? 'bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800'
                                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
                                         }`}
                                     >
@@ -170,7 +170,7 @@ export default function KotaIndex({ kota, filters }) {
                                         <button
                                             type="button"
                                             onClick={() => openEditModal(item)}
-                                            className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-green-700 dark:hover:text-emerald-400 transition"
+                                            className="rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-green-700 dark:hover:text-green-400 transition"
                                             title="Edit Kota"
                                         >
                                             <Pencil size={15} />
@@ -201,7 +201,7 @@ export default function KotaIndex({ kota, filters }) {
                                 preserveScroll
                                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                                     link.active
-                                        ? 'bg-green-700 dark:bg-emerald-600 text-white shadow-sm'
+                                        ? 'bg-green-700 dark:bg-green-600 text-white shadow-sm'
                                         : link.url
                                         ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
                                         : 'text-gray-300 dark:text-gray-600 border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 cursor-not-allowed'
@@ -248,7 +248,7 @@ export default function KotaIndex({ kota, filters }) {
                                     type="text"
                                     value={data.nama}
                                     onChange={(e) => setData('nama', e.target.value)}
-                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-2 text-xs text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:border-green-600 dark:focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-green-600 dark:focus:ring-emerald-500 shadow-sm"
+                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-2 text-xs text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-600 dark:focus:ring-green-500 shadow-sm"
                                     placeholder="Contoh: Bandung"
                                 />
                                 {errors.nama && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.nama}</p>}
@@ -260,7 +260,7 @@ export default function KotaIndex({ kota, filters }) {
                                     type="text"
                                     value={data.provinsi}
                                     onChange={(e) => setData('provinsi', e.target.value)}
-                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-2 text-xs text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:border-green-600 dark:focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-green-600 dark:focus:ring-emerald-500 shadow-sm"
+                                    className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-2 text-xs text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-600 dark:focus:ring-green-500 shadow-sm"
                                     placeholder="Contoh: Jawa Barat"
                                 />
                                 {errors.provinsi && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.provinsi}</p>}
@@ -272,7 +272,7 @@ export default function KotaIndex({ kota, filters }) {
                                     type="button"
                                     onClick={() => setData('is_active', !data.is_active)}
                                     className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                        data.is_active ? 'bg-green-600 dark:bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'
+                                        data.is_active ? 'bg-green-600 dark:bg-green-500' : 'bg-gray-300 dark:bg-gray-700'
                                     }`}
                                 >
                                     <span
@@ -294,7 +294,7 @@ export default function KotaIndex({ kota, filters }) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="rounded-xl bg-green-700 dark:bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-emerald-700 disabled:opacity-60 shadow-sm transition select-none"
+                                    className="rounded-xl bg-green-700 dark:bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-800 dark:hover:bg-green-700 disabled:opacity-60 shadow-sm transition select-none"
                                 >
                                     {editingKota ? 'Simpan Perubahan' : 'Tambah Kota'}
                                 </button>

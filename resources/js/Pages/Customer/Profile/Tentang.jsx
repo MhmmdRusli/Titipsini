@@ -32,7 +32,7 @@ export default function Tentang({ version }) {
                         className="flex items-center justify-between border-b border-gray-50 dark:border-gray-700/60 px-4 py-3 transition hover:bg-gray-50 dark:hover:bg-gray-700/50"
                     >
                         <span className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-200">
-                            <FileText size={17} className="text-[#15803d] dark:text-[#4ade80]" />
+                            <FileText size={17} className="text-green-700 dark:text-green-400" />
                             Syarat & Ketentuan
                         </span>
                         <ChevronRight size={16} className="text-gray-300 dark:text-gray-600" />
@@ -42,7 +42,7 @@ export default function Tentang({ version }) {
                         className="flex items-center justify-between px-4 py-3 transition hover:bg-gray-50 dark:hover:bg-gray-700/50"
                     >
                         <span className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-200">
-                            <ShieldCheck size={17} className="text-[#15803d] dark:text-[#4ade80]" />
+                            <ShieldCheck size={17} className="text-green-700 dark:text-green-400" />
                             Kebijakan Privasi
                         </span>
                         <ChevronRight size={16} className="text-gray-300 dark:text-gray-600" />

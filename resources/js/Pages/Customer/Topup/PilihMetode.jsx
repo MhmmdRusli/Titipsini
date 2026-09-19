@@ -66,7 +66,7 @@ export default function PilihMetode() {
                             onClick={() => selectMetode('transfer_bank')}
                             className={`flex flex-col items-center gap-2 rounded-xl border py-4 text-sm font-medium transition ${
                                 data.metode_pembayaran === 'transfer_bank'
-                                    ? 'border-[#15803d] bg-green-50 dark:bg-green-950/40 text-[#15803d] dark:text-[#4ade80] dark:border-[#22c55e]'
+                                    ? 'border-green-700 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 dark:border-green-500'
                                     : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                             }`}
                         >
@@ -78,7 +78,7 @@ export default function PilihMetode() {
                             onClick={() => selectMetode('e_wallet')}
                             className={`flex flex-col items-center gap-2 rounded-xl border py-4 text-sm font-medium transition ${
                                 data.metode_pembayaran === 'e_wallet'
-                                    ? 'border-[#15803d] bg-green-50 dark:bg-green-950/40 text-[#15803d] dark:text-[#4ade80] dark:border-[#22c55e]'
+                                    ? 'border-green-700 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 dark:border-green-500'
                                     : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                             }`}
                         >
@@ -99,7 +99,7 @@ export default function PilihMetode() {
                         <select
                             value={data.channel}
                             onChange={(e) => setData('channel', e.target.value)}
-                            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-gray-800 dark:text-gray-100 focus:border-[#15803d] focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:focus:border-[#22c55e] dark:focus:ring-[#22c55e]"
+                            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-gray-800 dark:text-gray-100 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700 dark:focus:border-green-500 dark:focus:ring-green-500"
                         >
                             <option value="">Pilih salah satu</option>
                             {channels.map((c) => (
@@ -131,7 +131,7 @@ export default function PilihMetode() {
                                 onClick={() => setData('nominal', n)}
                                 className={`rounded-lg border py-2.5 text-sm font-medium transition ${
                                     data.nominal === n
-                                        ? 'border-[#15803d] bg-green-50 dark:bg-green-950/40 text-[#15803d] dark:text-[#4ade80] dark:border-[#22c55e]'
+                                        ? 'border-green-700 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 dark:border-green-500'
                                         : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                                 }`}
                             >
@@ -144,7 +144,7 @@ export default function PilihMetode() {
                 <button
                     type="submit"
                     disabled={processing || !data.metode_pembayaran || !data.channel || !data.nominal}
-                    className="mt-2 w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-40"
+                    className="mt-2 w-full rounded-xl bg-green-700 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition disabled:opacity-40"
                 >
                     Lanjutkan
                 </button>
@@ -165,7 +165,7 @@ export default function PilihMetode() {
                         <p className="mt-1 text-center text-3xl font-bold text-gray-900 dark:text-gray-100">
                             {formatRupiah(parseInt(numpadValue || '0', 10))}
                         </p>
-                        <p className="mt-1 text-center text-[11px] text-[#15803d] dark:text-[#4ade80]">Min. Rp 10.000</p>
+                        <p className="mt-1 text-center text-[11px] text-green-700 dark:text-green-400">Min. Rp 10.000</p>
 
                         <div className="mt-5 grid grid-cols-3 gap-2">
                             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'back'].map((key, i) => (
@@ -185,7 +185,7 @@ export default function PilihMetode() {
                             type="button"
                             onClick={confirmNumpad}
                             disabled={parseInt(numpadValue || '0', 10) < 10000}
-                            className="mt-4 w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3 text-sm font-bold text-white shadow-sm transition disabled:opacity-40"
+                            className="mt-4 w-full rounded-xl bg-green-700 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-600 py-3 text-sm font-bold text-white shadow-sm transition disabled:opacity-40"
                         >
                             Lanjutkan
                         </button>

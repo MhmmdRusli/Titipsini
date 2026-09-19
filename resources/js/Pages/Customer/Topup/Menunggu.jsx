@@ -48,7 +48,7 @@ export default function Menunggu({ topup }) {
                 <div className="mt-5 space-y-2">
                     <Link
                         href="/app/saldo/riwayat"
-                        className="block w-full rounded-xl bg-[#15803d] hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 py-3 text-center text-sm font-bold text-white shadow-sm transition"
+                        className="block w-full rounded-xl bg-green-700 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-600 py-3 text-center text-sm font-bold text-white shadow-sm transition"
                     >
                         Lihat Riwayat Top Up
                     </Link>

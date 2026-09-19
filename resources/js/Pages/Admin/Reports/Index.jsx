@@ -17,7 +17,7 @@ const TABS = [
 ];
 
 const LAYANAN_STYLE = {
-    kendaraan: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60',
+    kendaraan: 'bg-green-50 dark:bg-green-950/60 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800/60',
     barang: 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60',
     bangunan: 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60',
 };
@@ -62,7 +62,7 @@ export default function Index({ reports = [], filters = {} }) {
                             onClick={() => applyFilters({ jenis_layanan: tab.key })}
                             className={`rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 shadow-sm ${
                                 activeTab === tab.key
-                                    ? 'bg-emerald-600 text-white shadow-emerald-600/20'
+                                    ? 'bg-green-600 text-white shadow-green-600/20'
                                     : 'bg-white dark:bg-[#111827] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800'
                             }`}
                         >
@@ -90,12 +90,12 @@ export default function Index({ reports = [], filters = {} }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari pelapor, vendor, jenis layanan..."
-                        className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] pl-9 pr-3 py-2 text-xs text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 shadow-sm transition-colors"
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] pl-9 pr-3 py-2 text-xs text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:border-green-600 focus:outline-none focus:ring-1 focus:ring-green-600 shadow-sm transition-colors"
                     />
                 </div>
                 <button
                     type="submit"
-                    className="rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all select-none"
+                    className="rounded-xl bg-green-600 hover:bg-green-700 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all select-none"
                 >
                     Cari
                 </button>
@@ -152,7 +152,7 @@ export default function Index({ reports = [], filters = {} }) {
                                     <td className="px-4 py-3.5 text-right select-none">
                                         <Link
                                             href={route('admin.reports.show', r.id)}
-                                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/60 transition-colors"
+                                            className="inline-flex items-center gap-1 text-xs font-bold text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 bg-green-50 dark:bg-green-950/60 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-800/60 transition-colors"
                                         >
                                             Detail
                                             <ChevronRight size={14} />

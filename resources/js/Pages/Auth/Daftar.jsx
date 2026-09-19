@@ -57,7 +57,7 @@ export default function Daftar() {
     };
 
     const inputBase =
-        'w-full rounded-lg border-none bg-slate-50 py-3 px-4 text-sm focus:ring-2 focus:ring-[#3B8F55]';
+        'w-full rounded-lg border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600';
 
     const inputClass = (field) =>
         `${inputBase} ${errors[field] ? 'ring-2 ring-red-500 bg-red-50' : ''}`;
@@ -65,7 +65,7 @@ export default function Daftar() {
     const roleOptionClass = (selected) =>
         `flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${
             selected
-                ? 'border-[#3B8F55] bg-green-50'
+                ? 'border-green-600 bg-green-50'
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
         }`;
 
@@ -83,7 +83,7 @@ export default function Daftar() {
 
             {/* Progress Bar */}
             <div className="mt-4 h-1.5 w-full rounded-full bg-gray-100">
-                <div className="h-1.5 w-1/4 rounded-full bg-[#3B8F55]" />
+                <div className="h-1.5 w-1/4 rounded-full bg-green-700" />
             </div>
 
             {/* Logo Area */}
@@ -94,7 +94,7 @@ export default function Daftar() {
                         alt="Logo Titipsini" 
                         className="h-8 w-auto object-contain"
                     />
-                    <span className="text-xl font-extrabold text-[#3B8F55] tracking-tight">
+                        <span className="text-xl font-extrabold text-green-700 tracking-tight">
                         Titipsini<span className="text-yellow-400">●</span>Com
                     </span>
                 </div>
@@ -114,7 +114,7 @@ export default function Daftar() {
                     >
                         <div className="flex items-center gap-2">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                role === 'customer' ? 'bg-[#3B8F55]' : 'bg-gray-100'
+                                role === 'customer' ? 'bg-green-700' : 'bg-gray-100'
                             }`}>
                                 <User size={20} className={role === 'customer' ? 'text-white' : 'text-gray-500'} />
                             </div>
@@ -123,7 +123,7 @@ export default function Daftar() {
                                 <p className="text-xs text-gray-500">Menitipkan barang</p>
                             </div>
                         </div>
-                        {role === 'customer' && <Check className="ml-auto text-[#3B8F55]" size={20} />}
+                        {role === 'customer' && <Check className="ml-auto text-green-700" size={20} />}
                     </button>
                     <button
                         type="button"
@@ -132,7 +132,7 @@ export default function Daftar() {
                     >
                         <div className="flex items-center gap-2">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                role === 'partner' ? 'bg-[#3B8F55]' : 'bg-gray-100'
+                                role === 'partner' ? 'bg-green-700' : 'bg-gray-100'
                             }`}>
                                 <Shield size={20} className={role === 'partner' ? 'text-white' : 'text-gray-500'} />
                             </div>
@@ -141,7 +141,7 @@ export default function Daftar() {
                                 <p className="text-xs text-gray-500">Menyediakan tempat titipan</p>
                             </div>
                         </div>
-                        {role === 'partner' && <Check className="ml-auto text-[#3B8F55]" size={20} />}
+                        {role === 'partner' && <Check className="ml-auto text-green-700" size={20} />}
                     </button>
                 </div>
             </div>
@@ -186,7 +186,7 @@ export default function Daftar() {
                             <span className="text-red-500">*</span>Nomor Telepon
                         </label>
                         <div
-                            className={`flex items-center rounded-lg border bg-slate-50 focus-within:ring-2 focus-within:ring-[#3B8F55] transition ${
+                            className={`flex items-center rounded-lg border bg-slate-50 focus-within:ring-2 focus-within:ring-green-700 transition ${
                                 errors.phone ? 'ring-2 ring-red-500 bg-red-50' : ''
                             }`}
                         >
@@ -283,18 +283,18 @@ export default function Daftar() {
                     {errors.password_confirmation && <p className="mt-1 text-xs text-red-500">{errors.password_confirmation}</p>}
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={processing}
-                    className="w-full rounded-lg bg-[#3B8F55] py-3 text-sm font-semibold text-white transition hover:bg-[#2d6d3f] disabled:opacity-60 mt-2"
-                >
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className="w-full rounded-lg bg-green-700 py-3 text-sm font-semibold text-white transition hover:bg-green-800 disabled:opacity-60 mt-2"
+                    >
                     {processing ? 'Memproses...' : 'Lanjutkan'}
                 </button>
             </form>
 
             <p className="mt-6 text-center text-sm text-gray-500">
                 Sudah punya akun?{' '}
-                <Link href="/login" className="font-semibold text-[#3B8F55]">
+                <Link href="/login" className="font-semibold text-green-700">
                     Masuk disini
                 </Link>
             </p>

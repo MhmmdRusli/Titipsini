@@ -1,0 +1,91 @@
+export const THEME = {
+    colors: {
+        primary: {
+            DEFAULT: '#15803d',
+            hover: '#166534',
+            light: '#dcfce7',
+            dark: '#14532d',
+            text: 'text-green-700',
+            bg: 'bg-green-700',
+            hoverBg: 'hover:bg-green-800',
+            lightBg: 'bg-green-50',
+            lightText: 'text-green-700',
+            border: 'border-green-600',
+            lightBorder: 'border-green-200',
+            darkBg: 'dark:bg-green-950/40',
+            darkText: 'dark:text-green-400',
+        },
+    },
+    status: {
+        badge: {
+            success: 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400',
+            warning: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400',
+            error: 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400',
+            info: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
+            neutral: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+            processing: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400',
+        },
+    },
+    card: {
+        container: 'rounded-xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800',
+        header: 'border-b border-gray-100 px-4 py-2.5 dark:border-gray-700',
+        body: 'p-4',
+    },
+    table: {
+        header: 'bg-gray-50 dark:bg-gray-800/60',
+        divider: 'divide-y divide-gray-100 dark:divide-gray-800',
+        rowBorder: 'border-t border-gray-100 dark:border-gray-800',
+        cell: 'px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400',
+    },
+    button: {
+        primary: 'rounded-xl bg-green-700 py-3 text-sm font-bold text-white hover:bg-green-800 disabled:opacity-50 dark:bg-green-600 dark:hover:bg-green-700',
+        primarySm: 'rounded-lg bg-green-700 py-2 text-xs font-bold text-white hover:bg-green-800 disabled:opacity-50 dark:bg-green-600 dark:hover:bg-green-700',
+        outline: 'rounded-xl border border-green-600 py-3 text-sm font-bold text-green-700 hover:bg-green-50 disabled:opacity-60 dark:border-green-700 dark:text-green-400',
+    },
+    input: {
+        base: 'mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600',
+        plain: 'w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-600',
+    },
+    dark: {
+        bg: 'dark:bg-gray-800',
+        bgLight: 'dark:bg-gray-900/40',
+        border: 'dark:border-gray-700',
+        text: 'dark:text-gray-300',
+        textLight: 'dark:text-gray-400',
+        bgCard: 'dark:bg-gray-800/90',
+    },
+};
+
+export const STATUS_CONFIG = {
+    baru: { label: 'Belum Bayar', colorClass: THEME.status.badge.warning },
+    diproses: { label: 'Dititipkan', colorClass: THEME.status.badge.info },
+    pembayaran_diterima: { label: 'Pembayaran Diterima', colorClass: THEME.status.badge.processing },
+    selesai: { label: 'Selesai', colorClass: THEME.status.badge.success },
+    dibatalkan: { label: 'Dibatalkan', colorClass: THEME.status.badge.error },
+    diproses_mitra: { label: 'Diproses Mitra', colorClass: THEME.status.badge.processing },
+    dikirim: { label: 'Dikirim', colorClass: THEME.status.badge.info },
+    terverifikasi: { label: 'Terverifikasi', colorClass: THEME.status.badge.success },
+    ditolak: { label: 'Ditolak', colorClass: THEME.status.badge.error },
+    menunggu: { label: 'Menunggu', colorClass: THEME.status.badge.warning },
+    berjalan: { label: 'Berjalan', colorClass: THEME.status.badge.info },
+    akhir: { label: 'Akhir', colorClass: THEME.status.badge.success },
+    menunggu_pembayaran: { label: 'Belum Dibayar', colorClass: THEME.status.badge.warning },
+    menunggu_verifikasi: { label: 'Menunggu Verifikasi', colorClass: THEME.status.badge.warning },
+    ditangguhkan: { label: 'Ditangguhkan', colorClass: THEME.status.badge.warning },
+    pendaftar: { label: 'Pendaftar', colorClass: THEME.status.badge.neutral },
+};
+
+export const PRIMARY_COLOR_CLASSES = {
+    bg: 'bg-green-700',
+    bgHover: 'hover:bg-green-800',
+    darkBg: 'dark:bg-green-600',
+    darkBgHover: 'dark:hover:bg-green-700',
+    text: 'text-green-700',
+    textLight: 'text-green-600',
+    lightBg: 'bg-green-50',
+    lightBgHover: 'hover:bg-green-100',
+    lightBorder: 'border-green-600',
+    lightBorderHover: 'hover:bg-green-50',
+    darkText: 'dark:text-green-400',
+    darkBorder: 'dark:border-green-700',
+};

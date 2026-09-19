@@ -66,7 +66,7 @@ export default function ProfileIndex({ user }) {
             }`}
         >
             <span className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-gray-200">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-[#22c55e] transition group-hover:scale-110">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-500 transition group-hover:scale-110">
                     <Icon size={17} />
                 </div>
                 {label}
@@ -118,7 +118,7 @@ export default function ProfileIndex({ user }) {
 
             <div className="pb-8">
                 {/* Header Card */}
-                <header className="relative overflow-hidden bg-gradient-to-br from-[#16a34a] via-[#15803d] to-[#14532d] dark:from-green-800 dark:via-green-700 dark:to-green-950 px-6 pt-6 pb-12 text-white rounded-b-[36px] shadow-md">
+                <header className="relative overflow-hidden bg-gradient-to-br from-green-500 via-green-700 to-[#14532d] dark:from-green-800 dark:via-green-700 dark:to-green-950 px-6 pt-6 pb-12 text-white rounded-b-[36px] shadow-md">
                     <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-xl pointer-events-none" />
                     <div className="absolute right-20 -bottom-10 h-32 w-32 rounded-full bg-black/10 blur-lg pointer-events-none" />
 
@@ -135,7 +135,7 @@ export default function ProfileIndex({ user }) {
                                     user.name.charAt(0).toUpperCase()
                                 )}
                             </div>
-                            <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-[#15803d] bg-emerald-400" />
+                            <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-green-700 bg-green-400" />
                         </div>
                         <div>
                             <p className="text-lg font-extrabold tracking-tight">
@@ -154,7 +154,7 @@ export default function ProfileIndex({ user }) {
                     <section className="relative rounded-2xl border border-gray-100 bg-white p-5 shadow-lg shadow-gray-100/50 dark:border-gray-700/80 dark:bg-gray-800 dark:shadow-none">
                         <Link
                             href="/app/profile/edit"
-                            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-950/50 dark:text-[#22c55e] transition hover:scale-105"
+                            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-500 transition hover:scale-105"
                             title="Edit Profil"
                         >
                             <Pencil size={14} />

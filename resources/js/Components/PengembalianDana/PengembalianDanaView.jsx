@@ -19,7 +19,7 @@ const ICON_MAP = {
 const STATUS_STYLE = {
     menunggu: 'bg-amber-100 text-amber-700',
     siap_refund: 'bg-blue-100 text-blue-700',
-    disetujui: 'bg-emerald-100 text-emerald-700',
+    disetujui: 'bg-green-100 text-green-700',
     ditolak: 'bg-red-100 text-red-700',
 };
 
@@ -32,7 +32,7 @@ const STATUS_LABEL = {
 
 const ADMIN_APPROVAL_STYLE = {
     pending: 'bg-amber-100 text-amber-700',
-    approved: 'bg-emerald-100 text-emerald-700',
+    approved: 'bg-green-100 text-green-700',
     rejected: 'bg-red-100 text-red-700',
 };
 
@@ -71,10 +71,10 @@ function formatDate(value) {
 function ApproveModal({ refund, persenRefund, onClose, onConfirm }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+            <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-green-800">
                 <div className="flex items-start justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-950/60 dark:text-green-400">
                             <CheckCircle2 size={18} />
                         </div>
                         <div>
@@ -92,20 +92,20 @@ function ApproveModal({ refund, persenRefund, onClose, onConfirm }) {
                 </div>
 
                 <div className="space-y-4 px-5 py-4">
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                    <div className="rounded-xl border border-green-200 bg-green-50 p-3 dark:border-green-900/40 dark:bg-green-950/30">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700 dark:text-green-300">
                             Total Pesanan
                         </p>
-                        <p className="mt-0.5 text-xl font-bold text-emerald-700 dark:text-emerald-300">
+                        <p className="mt-0.5 text-xl font-bold text-green-700 dark:text-green-300">
                             {formatRupiah(refund.total_price ?? 0)}
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                    <div className="rounded-xl border border-green-200 bg-green-50 p-3 dark:border-green-900/40 dark:bg-green-950/30">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700 dark:text-green-300">
                             Refund Akan Diproses
                         </p>
-                        <p className="mt-0.5 text-xl font-bold text-emerald-700 dark:text-emerald-300">
+                        <p className="mt-0.5 text-xl font-bold text-green-700 dark:text-green-300">
                             {formatRupiah(Math.round((refund.total_price ?? 0) * persenRefund / 100))}
                         </p>
                         <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
@@ -114,7 +114,7 @@ function ApproveModal({ refund, persenRefund, onClose, onConfirm }) {
                     </div>
                 </div>
 
-                <div className="flex gap-3 border-t border-gray-200 bg-gray-50 px-5 py-3 dark:border-gray-700 dark:bg-gray-900/40">
+                <div className="flex gap-3 border-t border-gray-200 bg-gray-50 px-5 py-3 dark:border-gray-700 dark:bg-green-800/40">
                     <button
                         type="button"
                         onClick={onClose}
@@ -125,7 +125,7 @@ function ApproveModal({ refund, persenRefund, onClose, onConfirm }) {
                     <button
                         type="button"
                         onClick={onConfirm}
-                        className="flex-1 rounded-xl border border-emerald-500 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-gray-900 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
+                        className="flex-1 rounded-xl border border-green-500 bg-white px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 dark:border-green-900/60 dark:bg-gray-900 dark:text-green-400 dark:hover:bg-green-950/40"
                     >
                         Konfirmasi Setujui
                     </button>
@@ -154,7 +154,7 @@ function RejectModal({ refund, onClose, urlTolak }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-green-800">
                 <div className="mb-4 flex items-start justify-between">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
@@ -211,10 +211,10 @@ export default function PengembalianDanaView({
     urlIndex,
     urlSetujui,    // contoh: '/super-admin/pengembalian-dana/__ID__/setujui' atau '/finance/pengembalian-dana/__ID__/setujui'
     urlTolak,      // contoh: '/super-admin/pengembalian-dana/__ID__/tolak'
-    gradientFrom = 'emerald-600',
+    gradientFrom = 'green-600',
     gradientTo = 'green-700',
-    accentColor = 'emerald',
-    accentText = 'emerald-100',
+    accentColor = 'green',
+    accentText = 'green-100',
     accentBg = 'white/10',
     infoText = null,
     titlePage = 'Pengembalian Dana',
@@ -314,8 +314,8 @@ export default function PengembalianDanaView({
             <Head title={titlePage} />
 
             {flash?.success && (
-                <div className="mb-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+                <div className="mb-4 flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 text-green-900 shadow-sm dark:border-green-900/40 dark:bg-green-950/30 dark:text-green-300">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">
                         <CheckCircle2 size={18} />
                     </div>
                     <div className="text-xs font-semibold">{flash.success}</div>
@@ -355,7 +355,7 @@ export default function PengembalianDanaView({
 
                     <button
                         onClick={exportPdf}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-green-700 shadow-sm transition hover:bg-green-50"
                     >
                         <Download size={16} />
                         Download PDF
@@ -397,7 +397,7 @@ export default function PengembalianDanaView({
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari kode order / nama customer"
-                        className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-800 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 dark:border-gray-800 dark:bg-[#111827] dark:text-gray-200"
+                        className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-800 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                     />
                 </form>
 
@@ -415,7 +415,7 @@ export default function PengembalianDanaView({
                                 className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
                                     status === tab.value
                                         ? `bg-${accentColor}-600 text-white shadow-sm`
-                                        : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-[#111827] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-gray-800'
+                                        : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-green-800 dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-gray-800'
                                 }`}
                             >
                                 <Icon size={12} />
@@ -426,10 +426,10 @@ export default function PengembalianDanaView({
                 </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-[#111827]">
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-green-800">
                 <div className="overflow-x-auto">
                     <table className="min-w-full text-left text-xs">
-                        <thead className="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-gray-900/60">
+                        <thead className="bg-gray-50 text-[11px] uppercase tracking-wide text-gray-500 dark:bg-green-800/60">
                             <tr>
                                 <th className="px-3 py-2">Order</th>
                                 <th className="px-3 py-2">Customer / Vendor</th>
@@ -446,7 +446,7 @@ export default function PengembalianDanaView({
                                 <tr>
                                     <td colSpan={8} className="px-3 py-10 text-center">
                                         <div className="mx-auto max-w-md">
-                                            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                                            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-600">
                                                 <FileText size={22} />
                                             </div>
                                             <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">
@@ -466,7 +466,7 @@ export default function PengembalianDanaView({
                                     const canFinanceAct = adminApproved && item.status === 'siap_refund';
 
                                     return (
-                                        <tr key={item.id} className="hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20">
+                                        <tr key={item.id} className="hover:bg-green-50/30 dark:hover:bg-green-950/20">
                                             <td className="px-3 py-2.5">
                                                 <div className="font-semibold text-gray-900 dark:text-gray-100">
                                                     {item.order_code ?? '-'}
@@ -485,7 +485,7 @@ export default function PengembalianDanaView({
                                                     <a href={item.evidence_url}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-400"
+                                                        className="inline-flex items-center gap-1.5 rounded-lg bg-green-50 px-2 py-1 text-[11px] font-semibold text-green-700 hover:bg-green-100 dark:bg-green-950/60 dark:text-green-400"
                                                     >
                                                         <ExternalLink size={12} />
                                                         Lihat
@@ -495,7 +495,7 @@ export default function PengembalianDanaView({
                                                 )}
                                             </td>
                                             <td className="px-3 py-2.5">
-                                                <div className="font-bold text-emerald-700 dark:text-emerald-400">
+                                                <div className="font-bold text-green-700 dark:text-green-400">
                                                     {formatRupiah(item.refund_amount ?? item.refund_estimasi)}
                                                 </div>
                                                 {!item.refund_amount && (
@@ -523,7 +523,7 @@ export default function PengembalianDanaView({
                                             </td>
                                             <td className="px-3 py-2.5">
                                                 <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                                                    STATUS_STYLE[item.status] ?? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
+                                                    STATUS_STYLE[item.status] ?? 'bg-gray-100 text-gray-600 dark:bg-green-800 dark:text-gray-300'
                                                 }`}>
                                                     {STATUS_LABEL[item.status] ?? item.status}
                                                 </span>
@@ -546,7 +546,7 @@ export default function PengembalianDanaView({
                                                     <div className="flex gap-1.5">
                                                         <button
                                                             onClick={() => setModal({ mode: 'approve', refund: item })}
-                                                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-500 bg-white px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-gray-900 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
+                                                            className="inline-flex items-center gap-1 rounded-lg border border-green-500 bg-white px-2 py-1 text-[11px] font-semibold text-green-700 hover:bg-green-50 dark:border-green-900/60 dark:bg-gray-900 dark:text-green-400 dark:hover:bg-green-950/40"
                                                         >
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                                                 <polyline points="20 6 9 17 4 12" />

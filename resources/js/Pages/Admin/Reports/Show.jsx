@@ -52,7 +52,7 @@ export default function Show({ report }) {
 
             {/* Breadcrumb */}
             <nav className="mb-6 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 select-none">
-                <Link href={route('admin.reports.index')} className="transition-colors hover:text-emerald-600 dark:hover:text-emerald-400">
+                <Link href={route('admin.reports.index')} className="transition-colors hover:text-green-600 dark:hover:text-green-400">
                     Laporan
                 </Link>
                 <ChevronRight size={14} className="text-gray-400 dark:text-gray-600" />
@@ -62,7 +62,7 @@ export default function Show({ report }) {
             {/* Header Banner Ringkasan */}
             <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] p-6 shadow-sm transition-colors sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 ring-4 ring-emerald-50/50 dark:ring-emerald-950/30">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950/60 text-green-700 dark:text-green-400 ring-4 ring-green-50/50 dark:ring-green-950/30">
                         <ShieldAlert size={24} />
                     </div>
                     <div>
@@ -104,7 +104,7 @@ export default function Show({ report }) {
                     <div>
                         <div className="mb-4 flex items-center justify-between">
                             <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-gray-100">
-                                <FileText size={18} className="text-emerald-600 dark:text-emerald-400" />
+                                <FileText size={18} className="text-green-600 dark:text-green-400" />
                                 Informasi Laporan
                             </h3>
                             <span className="rounded-md bg-amber-50 dark:bg-amber-950/60 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60">
@@ -124,7 +124,7 @@ export default function Show({ report }) {
                         {/* Foto Barang Bukti */}
                         <div className="mb-5 flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 p-4">
                             <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/60 text-green-700 dark:text-green-400">
                                     <ImageIcon size={20} />
                                 </div>
                                 <div>
@@ -167,15 +167,15 @@ export default function Show({ report }) {
                     <div>
                         <div className="mb-4 flex items-center justify-between">
                             <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-gray-100">
-                                <Store size={18} className="text-emerald-600 dark:text-emerald-400" />
+                                <Store size={18} className="text-green-600 dark:text-green-400" />
                                 Biodata Vendor Terlapor
                             </h3>
                             <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                                 isSuspended 
                                     ? 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/60' 
-                                    : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60'
+                                    : 'bg-green-50 dark:bg-green-950/60 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800/60'
                             }`}>
-                                <span className={`h-1.5 w-1.5 rounded-full ${isSuspended ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                                <span className={`h-1.5 w-1.5 rounded-full ${isSuspended ? 'bg-red-500' : 'bg-green-500'}`} />
                                 {isSuspended ? 'Ditangguhkan' : 'Aktif'}
                             </span>
                         </div>
@@ -204,7 +204,7 @@ export default function Show({ report }) {
                                     type="button"
                                     onClick={handleRestore}
                                     disabled={restoreForm.processing}
-                                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50"
+                                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 hover:bg-green-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-green-500/20 disabled:opacity-50"
                                 >
                                     <CheckCircle2 size={16} />
                                     {restoreForm.processing ? 'Memproses...' : 'Pulihkan Akun'}

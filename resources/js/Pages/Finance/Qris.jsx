@@ -55,7 +55,7 @@ export default function Qris({ qris_url, merchant_name }) {
     return (
         <FinanceLayout title="Kelola QRIS">
             <div className="max-w-3xl mx-auto space-y-6">
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-[#111827] transition-colors">
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800 transition-colors">
                     <div className="mb-6 flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-700 dark:bg-green-950/60 dark:border dark:border-green-800/50 dark:text-green-400">
                             <QrCode size={20} />
@@ -147,12 +147,12 @@ export default function Qris({ qris_url, merchant_name }) {
                             <button
                                 type="submit"
                                 disabled={processing || !data.qris_image}
-                                className="rounded-xl bg-green-700 dark:bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 dark:hover:bg-emerald-500 disabled:opacity-50"
+                                className="rounded-xl bg-green-700 dark:bg-green-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 dark:hover:bg-green-500 disabled:opacity-50"
                             >
                                 Simpan QRIS
                             </button>
                             {recentlySuccessful && (
-                                <span className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-emerald-400">
+                                <span className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
                                     <CheckCircle2 size={14} />
                                     QRIS berhasil disimpan
                                 </span>

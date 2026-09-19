@@ -63,7 +63,7 @@ export default function BuktiPembayaran({ order, qris_url, merchant_name, saldo 
 
                 {!sudahLunas && (
                     <div className="mb-5 rounded-2xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-800 p-5 shadow-sm">
-                        <div className="flex items-center gap-2 mb-3 text-[#15803d] dark:text-[#4ade80] font-semibold text-sm">
+                        <div className="flex items-center gap-2 mb-3 text-green-700 dark:text-green-400 font-semibold text-sm">
                             <WalletMinimal size={18} />
                             <span>Bayar dengan Saldo Titipsini</span>
                         </div>
@@ -129,7 +129,7 @@ export default function BuktiPembayaran({ order, qris_url, merchant_name, saldo 
                         </div>
                         <div className="flex justify-between">
                             <span>Total Tagihan:</span>
-                            <span className="font-bold text-[#15803d] dark:text-[#4ade80]">
+                            <span className="font-bold text-green-700 dark:text-green-400">
                                 {formatRupiah(total)}
                             </span>
                         </div>
@@ -140,7 +140,7 @@ export default function BuktiPembayaran({ order, qris_url, merchant_name, saldo 
                             Foto / Screenshot Bukti Transfer
                         </label>
                         
-                        <div className="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 p-6 hover:border-[#15803d] dark:hover:border-[#4ade80] transition bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer">
+                        <div className="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 p-6 hover:border-green-700 dark:hover:border-green-400 transition bg-gray-50/50 dark:bg-gray-900/30 cursor-pointer">
                             {previewUrl ? (
                                 <div className="flex flex-col items-center gap-2">
                                     <img 
@@ -148,7 +148,7 @@ export default function BuktiPembayaran({ order, qris_url, merchant_name, saldo 
                                         alt="Preview Bukti" 
                                         className="max-h-48 rounded-lg border border-gray-200 dark:border-gray-700 object-contain"
                                     />
-                                    <span className="text-xs text-[#15803d] dark:text-[#4ade80] font-medium flex items-center gap-1 mt-2">
+                                    <span className="text-xs text-green-700 dark:text-green-400 font-medium flex items-center gap-1 mt-2">
                                         <CheckCircle2 size={14} /> File Siap Diunggah
                                     </span>
                                 </div>
@@ -176,7 +176,7 @@ export default function BuktiPembayaran({ order, qris_url, merchant_name, saldo 
                     <button
                         type="submit"
                         disabled={processing || !data.payment_receipt}
-                        className="w-full rounded-xl bg-[#15803d] hover:bg-[#166534] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] py-3 text-sm font-bold text-white shadow-sm disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed transition"
+                        className="w-full rounded-xl bg-green-700 hover:bg-green-800 dark:bg-green-500 dark:hover:bg-green-500 py-3 text-sm font-bold text-white shadow-sm disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed transition"
                     >
                         {processing ? 'Mengunggah...' : 'Kirim Bukti Pembayaran'}
                     </button>

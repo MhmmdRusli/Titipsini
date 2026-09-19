@@ -62,7 +62,7 @@ export default function CustomerLayout({ children, title, backHref }) {
                                     alt="Logo"
                                     className="h-6 w-auto object-contain"
                                 />
-                                <span className="text-base font-bold tracking-tight text-[#15803d] dark:text-[#4ade80]">
+                                <span className="text-base font-bold tracking-tight text-green-700 dark:text-green-400">
                                     Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                                 </span>
                             </Link>
@@ -85,7 +85,7 @@ export default function CustomerLayout({ children, title, backHref }) {
                                 key={href}
                                 href={href}
                                 className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${
-                                    active ? 'text-[#15803d] dark:text-[#4ade80]' : 'text-gray-500 dark:text-gray-400'
+                                    active ? 'text-green-700 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
                                 }`}
                             >
                                 <Icon size={20} />

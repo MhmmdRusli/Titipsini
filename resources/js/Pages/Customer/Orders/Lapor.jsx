@@ -105,7 +105,7 @@ export default function Lapor({ order }) {
                                             onClick={() => setData('category', key)}
                                             className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition ${
                                                 active
-                                                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30'
+                                                    ? 'border-green-500 bg-green-50 dark:bg-green-950/30'
                                                     : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900/40 hover:border-gray-300 dark:hover:border-gray-600'
                                             }`}
                                         >
@@ -113,7 +113,7 @@ export default function Lapor({ order }) {
                                                 size={20}
                                                 className={`mt-0.5 shrink-0 ${
                                                     active
-                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                        ? 'text-green-600 dark:text-green-400'
                                                         : 'text-gray-400'
                                                 }`}
                                             />
@@ -121,7 +121,7 @@ export default function Lapor({ order }) {
                                                 <p
                                                     className={`text-sm font-semibold ${
                                                         active
-                                                            ? 'text-emerald-700 dark:text-emerald-300'
+                                                            ? 'text-green-700 dark:text-green-300'
                                                             : 'text-gray-800 dark:text-gray-100'
                                                     }`}
                                                 >
@@ -134,7 +134,7 @@ export default function Lapor({ order }) {
                                             <div
                                                 className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition ${
                                                     active
-                                                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                                                        ? 'border-green-600 bg-green-600 text-white'
                                                         : 'border-gray-300 dark:border-gray-600 bg-transparent'
                                                 }`}
                                             >

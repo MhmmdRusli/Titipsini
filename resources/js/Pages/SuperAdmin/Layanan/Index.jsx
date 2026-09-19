@@ -25,7 +25,7 @@ const STATUS_OPTIONS = [
 const STATUS_STYLE = {
     pendaftar: 'bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-900/60 dark:text-slate-300 dark:border-slate-800',
     verifikasi_akun: 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800/50',
-    terverifikasi: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/50',
+    terverifikasi: 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/60 dark:text-green-400 dark:border-green-800/50',
     ditolak: 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/60 dark:text-red-400 dark:border-red-800/50',
     ditangguhkan: 'bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/60 dark:text-orange-400 dark:border-orange-800/50',
 };
@@ -83,7 +83,7 @@ export default function LayananIndex({ layanan, filters }) {
                             onClick={() => applyFilters({ kategori: tab.key })}
                             className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 shadow-sm ${
                                 activeKategori === tab.key
-                                    ? 'bg-[#15803d] text-white shadow-emerald-700/20 dark:bg-emerald-600'
+                                    ? 'bg-green-700 text-white shadow-green-700/20 dark:bg-green-600'
                                     : 'bg-white dark:bg-[#111827] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800'
                             }`}
                         >
@@ -105,14 +105,14 @@ export default function LayananIndex({ layanan, filters }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari nama layanan atau nama vendor..."
-                        className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] pl-9 pr-3 py-2 text-xs text-gray-800 dark:text-gray-200 focus:border-[#15803d] dark:focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:focus:ring-emerald-500 shadow-sm"
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] pl-9 pr-3 py-2 text-xs text-gray-800 dark:text-gray-200 focus:border-green-700 dark:focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-700 dark:focus:ring-green-500 shadow-sm"
                     />
                 </form>
 
                 <select
                     value={activeStatus}
                     onChange={(e) => applyFilters({ status: e.target.value })}
-                    className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] px-3 py-2 text-xs text-gray-700 dark:text-gray-200 focus:border-[#15803d] dark:focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-[#15803d] dark:focus:ring-emerald-500 shadow-sm"
+                    className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] px-3 py-2 text-xs text-gray-700 dark:text-gray-200 focus:border-green-700 dark:focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-700 dark:focus:ring-green-500 shadow-sm"
                 >
                     {STATUS_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -122,7 +122,7 @@ export default function LayananIndex({ layanan, filters }) {
                 <button
                     type="submit"
                     onClick={handleSearchSubmit}
-                    className="rounded-xl bg-[#15803d] dark:bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 dark:hover:bg-emerald-500 shadow-sm transition-all select-none"
+                    className="rounded-xl bg-green-700 dark:bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-700 dark:hover:bg-green-500 shadow-sm transition-all select-none"
                 >
                     Cari
                 </button>
@@ -180,7 +180,7 @@ export default function LayananIndex({ layanan, filters }) {
                                 <td className="px-4 py-3.5 text-right select-none">
                                     <Link
                                         href={`${BASE_PATH}/${item.id}`}
-                                        className="inline-flex items-center gap-1 text-xs font-bold text-[#15803d] dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 bg-green-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-lg border border-green-200 dark:border-emerald-800/50 transition-colors"
+                                        className="inline-flex items-center gap-1 text-xs font-bold text-green-700 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 bg-green-50 dark:bg-green-950/60 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-800/50 transition-colors"
                                     >
                                         Detail
                                         <ChevronRight size={14} />
@@ -203,7 +203,7 @@ export default function LayananIndex({ layanan, filters }) {
                             preserveScroll
                             className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
                                 link.active
-                                    ? 'bg-[#15803d] dark:bg-emerald-600 text-white shadow-sm'
+                                    ? 'bg-green-700 dark:bg-green-600 text-white shadow-sm'
                                     : link.url
                                     ? 'bg-white dark:bg-[#111827] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800'
                                     : 'cursor-not-allowed text-gray-300 dark:text-gray-600 border border-gray-100 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-900/30'

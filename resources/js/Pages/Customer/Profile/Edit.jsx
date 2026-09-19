@@ -35,7 +35,7 @@ export default function ProfileEdit({ user }) {
         ${
             hasError
                 ? 'border-red-400 focus:border-red-500 focus:ring-red-500/10'
-                : 'border-gray-200 dark:border-gray-700 focus:border-[#15803d] focus:ring-[#15803d]/10 dark:focus:border-[#4ade80]'
+                : 'border-gray-200 dark:border-gray-700 focus:border-green-700 focus:ring-green-700/10 dark:focus:border-green-400'
         }
     `;
 
@@ -52,12 +52,12 @@ export default function ProfileEdit({ user }) {
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-full ring-4 ring-emerald-50 dark:ring-emerald-950/40 transition duration-300 group-hover:opacity-95 focus:outline-none shadow-md"
+                                className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-full ring-4 ring-green-50 dark:ring-green-950/40 transition duration-300 group-hover:opacity-95 focus:outline-none shadow-md"
                             >
                                 {preview ? (
                                     <img src={preview} alt={data.name} className="h-full w-full object-cover" />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#15803d] to-emerald-600 text-3xl font-bold text-white">
+                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-green-700 to-green-600 text-3xl font-bold text-white">
                                         {data.name ? data.name.charAt(0).toUpperCase() : 'U'}
                                     </div>
                                 )}
@@ -72,7 +72,7 @@ export default function ProfileEdit({ user }) {
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-[#15803d] text-white shadow-lg ring-4 ring-white dark:ring-gray-900 hover:bg-emerald-700 hover:scale-105 transition"
+                                className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-green-700 text-white shadow-lg ring-4 ring-white dark:ring-gray-900 hover:bg-green-700 hover:scale-105 transition"
                             >
                                 <Camera size={16} />
                             </button>
@@ -132,12 +132,12 @@ export default function ProfileEdit({ user }) {
                                             onClick={() => setData('gender', option.value)}
                                             className={`relative flex items-center justify-between rounded-2xl border p-3.5 text-left transition-all shadow-sm ${
                                                 isSelected
-                                                    ? 'border-[#15803d] bg-emerald-50/50 dark:bg-emerald-950/30 text-[#15803d] dark:text-[#4ade80] font-semibold ring-2 ring-[#15803d]/20'
+                                                    ? 'border-green-700 bg-green-50/50 dark:bg-green-950/30 text-green-700 dark:text-green-400 font-semibold ring-2 ring-green-700/20'
                                                     : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                                             }`}
                                         >
                                             <span className="text-sm">{option.label}</span>
-                                            {isSelected && <CheckCircle2 size={18} className="text-[#15803d] dark:text-[#4ade80]" />}
+                                            {isSelected && <CheckCircle2 size={18} className="text-green-700 dark:text-green-400" />}
                                         </button>
                                     );
                                 })}
@@ -191,7 +191,7 @@ export default function ProfileEdit({ user }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#15803d] hover:bg-emerald-700 active:scale-[0.99] py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-700/25 transition-all disabled:opacity-60"
+                            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-green-700 hover:bg-green-700 active:scale-[0.99] py-3.5 text-sm font-bold text-white shadow-lg shadow-green-700/25 transition-all disabled:opacity-60"
                         >
                             {processing ? (
                                 <>

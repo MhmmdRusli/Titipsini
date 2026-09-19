@@ -50,7 +50,7 @@ export default function ForgotPassword() {
                             alt="Logo"
                             className="h-8 w-auto object-contain"
                         />
-                        <span className="text-xl font-extrabold tracking-tight text-[#15803d]">
+                        <span className="text-xl font-extrabold tracking-tight text-green-700">
                             Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
                         </span>
                     </div>
@@ -107,7 +107,7 @@ export default function ForgotPassword() {
                             className={`w-full rounded-xl py-3.5 text-sm font-bold text-white transition-all shadow-sm active:scale-[0.99] disabled:opacity-50 mt-6 ${
                                 isFilled
                                     ? 'bg-[#237737] hover:bg-[#1c602c]'
-                                    : 'bg-[#15803d] hover:bg-[#166534]'
+                                    : 'bg-green-700 hover:bg-green-800'
                             }`}
                         >
                             Kirim
@@ -140,7 +140,7 @@ export default function ForgotPassword() {
 
                             <Link
                                 href={route('login')}
-                                className="mt-6 block w-full rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white transition-all hover:bg-[#166534] active:scale-[0.99]"
+                                className="mt-6 block w-full rounded-xl bg-green-700 py-3 text-sm font-bold text-white transition-all hover:bg-green-800 active:scale-[0.99]"
                             >
                                 Lanjutkan
                             </Link>

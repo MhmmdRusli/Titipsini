@@ -184,7 +184,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Nama kota ataupun nama vendor"
-                        className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
+                        className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:placeholder:text-gray-500"
                     />
                 </form>
 
@@ -194,7 +194,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                         type="button"
                         onClick={handleCurrentLocation}
                         disabled={geoLoading}
-                        className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[#15803d] bg-white px-4 py-2.5 text-sm font-medium text-[#15803d] shadow-sm hover:bg-[#e8f5ee] dark:border-[#22c55e] dark:bg-gray-800 dark:text-[#4ade80] dark:hover:bg-green-950/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-green-700 bg-white px-4 py-2.5 text-sm font-medium text-green-700 shadow-sm hover:bg-[#e8f5ee] dark:border-green-500 dark:bg-gray-800 dark:text-green-400 dark:hover:bg-green-950/30 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <MapPin size={16} />
                         {geoLoading ? 'Mendeteksi lokasi...' : 'Gunakan Lokasi Saat Ini'}
@@ -205,7 +205,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                     <button
                         type="button"
                         onClick={() => setSheet('picker')}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#15803d] px-3 py-1.5 text-xs font-semibold text-white dark:bg-[#22c55e]"
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-700 px-3 py-1.5 text-xs font-semibold text-white dark:bg-green-500"
                     >
                         <MapPin size={13} />
                         {kota}
@@ -238,7 +238,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex min-w-0 items-center gap-2">
-                                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-[#15803d] dark:bg-green-950/40 dark:text-green-400">
+                                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400">
                                             <CategoryIcon size={15} />
                                         </span>
                                         <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{m.nama}</p>
@@ -272,13 +272,13 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                         type="button"
                                         disabled={!m.isBuka || m.is_orderable === false || sedangTutup || isFull}
                                         onClick={() => { if (m.is_orderable !== false && ! sedangTutup && !isFull) router.visit(`/app/services/${kategori}/${m.id}/titip`); }}
-                                        className="flex-1 rounded-lg bg-[#15803d] py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-[#22c55e] dark:disabled:bg-gray-700"
+                                        className="flex-1 rounded-lg bg-green-700 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-green-500 dark:disabled:bg-gray-700"
                                     >
                                         {isFull ? 'Penuh' : sedangTutup ? 'Layanan Sedang Tutup' : 'Titip Disini'}
                                     </button>
                                     <Link
                                         href={`/app/services/${kategori}/${m.id}/detail`}
-                                        className="flex-1 rounded-lg border border-[#15803d] py-2 text-center text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
+                                        className="flex-1 rounded-lg border border-green-700 py-2 text-center text-xs font-bold text-green-700 dark:border-green-500 dark:text-green-400"
                                     >
                                         Detail Mitra
                                     </Link>
@@ -302,7 +302,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                         <button
                             type="button"
                             onClick={() => setSheet('picker')}
-                            className="mt-4 rounded-full bg-[#15803d] px-4 py-2 text-xs font-bold text-white dark:bg-[#22c55e]"
+                            className="mt-4 rounded-full bg-green-700 px-4 py-2 text-xs font-bold text-white dark:bg-green-500"
                         >
                             Ganti Kota
                         </button>
@@ -335,14 +335,14 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                             <button
                                 type="button"
                                 onClick={() => setSheet('picker')}
-                                className="flex-1 rounded-full border border-[#15803d] py-2.5 text-xs font-bold text-[#15803d] dark:border-[#22c55e] dark:text-[#4ade80]"
+                                className="flex-1 rounded-full border border-green-700 py-2.5 text-xs font-bold text-green-700 dark:border-green-500 dark:text-green-400"
                             >
                                 KOTA LAIN
                             </button>
                             <button
                                 type="button"
                                 onClick={() => applyKota(detectedKota)}
-                                className="flex-1 rounded-full bg-[#15803d] py-2.5 text-xs font-bold text-white dark:bg-[#22c55e]"
+                                className="flex-1 rounded-full bg-green-700 py-2.5 text-xs font-bold text-white dark:bg-green-500"
                             >
                                 OKE
                             </button>
@@ -353,7 +353,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                 type="button"
                                 onClick={handleCurrentLocation}
                                 disabled={geoLoading}
-                                className="flex w-full items-center justify-center gap-2 rounded-full border border-[#15803d] bg-white px-4 py-2.5 text-sm font-medium text-[#15803d] shadow-sm hover:bg-[#e8f5ee] dark:border-[#22c55e] dark:bg-gray-800 dark:text-[#4ade80] dark:hover:bg-green-950/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex w-full items-center justify-center gap-2 rounded-full border border-green-700 bg-white px-4 py-2.5 text-sm font-medium text-green-700 shadow-sm hover:bg-[#e8f5ee] dark:border-green-500 dark:bg-gray-800 dark:text-green-400 dark:hover:bg-green-950/30 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <MapPin size={16} />
                                 {geoLoading ? 'Mendeteksi lokasi...' : 'Gunakan Lokasi Saat Ini'}
@@ -393,7 +393,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                     value={cityQuery}
                                     onChange={(e) => setCityQuery(e.target.value)}
                                     placeholder="Pencarian"
-                                    className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-9 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#15803d] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                                    className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-9 pr-9 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
                                 />
                                 {cityQuery && (
                                     <button
@@ -417,7 +417,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                             <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                                 {detectedKota}
                                             </span>
-                                            <span className="ml-2 text-xs font-medium text-[#15803d] dark:text-[#4ade80]">
+                                            <span className="ml-2 text-xs font-medium text-green-700 dark:text-green-400">
                                                 Anda di sini
                                             </span>
                                         </span>
@@ -431,7 +431,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                         disabled={geoLoading}
                                         className="flex w-full items-center gap-2 border-b border-gray-100 py-3 text-left dark:border-gray-800"
                                     >
-                                        <MapPin size={16} className="text-[#15803d] dark:text-[#4ade80]" />
+                                        <MapPin size={16} className="text-green-700 dark:text-green-400" />
                                         <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                             {geoLoading ? 'Mendeteksi lokasi...' : 'Gunakan Lokasi Saya'}
                                         </span>

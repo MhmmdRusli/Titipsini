@@ -20,7 +20,7 @@ const STATUS_CONFIG = {
     },
     pembayaran_diterima: {
         label: 'Pembayaran Diterima',
-        color: 'text-emerald-600 dark:text-emerald-400',
+        color: 'text-green-600 dark:text-green-400',
         icon: CheckCircle2,
     },
     diproses: {
@@ -50,7 +50,7 @@ const STATUS_CONFIG = {
     },
     selesai: {
         label: 'Pesanan Selesai',
-        color: 'text-[#15803d] dark:text-[#4ade80]',
+        color: 'text-green-700 dark:text-green-400',
         icon: CheckCircle2,
     },
     dibatalkan: {
@@ -271,7 +271,7 @@ export default function OrderShow({ order, qris_url }) {
                 {/* ================= KARTU INVOICE ================= */}
                 <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-800/90">
                     {/* Header hijau: logo brand + tanggal & ID pesanan */}
-                    <div className="flex items-center justify-between gap-3 bg-[#15803d] px-5 py-4 dark:bg-[#0f5c2c]">
+                    <div className="flex items-center justify-between gap-3 bg-green-700 px-5 py-4 dark:bg-green-800">
                         <div className="flex items-center gap-2">
                             <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white/15">
                                 <img src="/images/admin-titipsini.png" alt="Titipsini" className="h-full w-full object-contain" />
@@ -382,7 +382,7 @@ export default function OrderShow({ order, qris_url }) {
                         {/* Grand Total */}
                         <div className="flex items-center justify-between border-t border-gray-100 pt-3 dark:border-gray-700/60">
                             <span className="text-sm font-bold text-gray-800 dark:text-gray-100">Total Pembayaran</span>
-                            <span className="text-lg font-extrabold text-[#15803d] dark:text-[#4ade80]">
+                            <span className="text-lg font-extrabold text-green-700 dark:text-green-400">
                                 {formatRupiah(order.total_price)}
                             </span>
                         </div>
@@ -419,7 +419,7 @@ export default function OrderShow({ order, qris_url }) {
                             <span
                                 className={`text-xs font-bold ${
                                     statusPembayaran === 'Berhasil'
-                                        ? 'text-[#15803d] dark:text-[#4ade80]'
+                                        ? 'text-green-700 dark:text-green-400'
                                         : statusPembayaran === 'Menunggu Verifikasi'
                                         ? 'text-amber-600 dark:text-amber-400'
                                         : 'text-red-500 dark:text-red-400'
@@ -452,7 +452,7 @@ export default function OrderShow({ order, qris_url }) {
                                 </p>
 
                                 {order.denda_paid_at ? (
-                                    <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                                    <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400">
                                         <CheckCircle2 size={14} /> Lunas pada {order.denda_paid_at}
                                     </p>
                                 ) : order.bukti_denda ? (
@@ -577,7 +577,7 @@ export default function OrderShow({ order, qris_url }) {
                         </button>
                         <Link
                             href={`/app/orders/${order.id}/pembayaran`}
-                            className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#15803d] py-3.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 transition duration-200 active:scale-[0.98]"
+                            className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-green-700 py-3.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 transition duration-200 active:scale-[0.98]"
                         >
                             Bayar Sekarang
                         </Link>
@@ -605,7 +605,7 @@ export default function OrderShow({ order, qris_url }) {
                             type="button"
                             onClick={requestPickup}
                             disabled={isRequestingPickup}
-                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#15803d] py-3 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-[#22c55e] dark:hover:bg-green-600 transition duration-200 active:scale-[0.98] disabled:opacity-60"
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-700 py-3 text-sm font-bold text-white shadow-lg shadow-green-600/20 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 transition duration-200 active:scale-[0.98] disabled:opacity-60"
                         >
                             {isRequestingPickup ? 'Memproses...' : 'Ajukan Pengambilan'}
                         </button>
