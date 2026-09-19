@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
+import { Calendar, Sparkles, RotateCcw, ChevronDown } from 'lucide-react';
 import FinanceLayout from '@/Layouts/FinanceLayout';
 
 // Helper Format Rupiah
@@ -17,7 +18,7 @@ function formatDate(dateString) {
     });
 }
 
-// Card style diperbarui agar konsisten di dark mode
+// Card style agar konsisten di dark mode
 const cardCls = 'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/60';
 
 const MONTHS = [
@@ -42,13 +43,63 @@ const YEARS = [
     { value: '2023', label: '2023' },
 ];
 
+// Dropdown capsule custom — dibuat dari div/button biasa (bukan <select> native)
+// supaya tampilannya gak pernah "bocor" kena styling form-control bawaan browser,
+// baik gara-gara dark mode maupun quirk browser lain.
+function FilterDropdown({ label, options, value, onChange, isOpen, onToggle }) {
+    const activeLabel = options.find((o) => o.value === value)?.label ?? label;
+
+    return (
+        <div className="relative">
+            <button
+                type="button"
+                onClick={onToggle}
+                className="flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-xs font-semibold text-white shadow-inner transition hover:bg-white/30"
+            >
+                <span>{activeLabel}</span>
+                <ChevronDown
+                    size={12}
+                    className={`shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                />
+            </button>
+
+            {isOpen && (
+                <div className="absolute left-0 top-full z-20 mt-1.5 max-h-64 w-40 overflow-y-auto rounded-lg bg-slate-900 py-1 text-xs font-medium text-white shadow-lg ring-1 ring-white/10">
+                    <button
+                        type="button"
+                        onClick={() => onChange('')}
+                        className={`block w-full px-3 py-1.5 text-left transition hover:bg-slate-700 ${
+                            !value ? 'bg-slate-800 font-bold text-yellow-300' : ''
+                        }`}
+                    >
+                        {label}
+                    </button>
+                    {options.map((opt) => (
+                        <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => onChange(opt.value)}
+                            className={`block w-full px-3 py-1.5 text-left transition hover:bg-slate-700 ${
+                                value === opt.value ? 'bg-slate-800 font-bold text-yellow-300' : ''
+                            }`}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function Index({ items, summary, filters }) {
     const [bulan, setBulan] = useState(filters.bulan || '');
     const [tahun, setTahun] = useState(filters.tahun || new Date().getFullYear().toString());
+    const [openMenu, setOpenMenu] = useState(null); // 'bulan' | 'tahun' | null
 
-    const handleMonthChange = (e) => {
-        const value = e.target.value;
+    const handleMonthChange = (value) => {
         setBulan(value);
+        setOpenMenu(null);
         router.get(
             '/finance/pendapatan',
             value ? { bulan: value, tahun: tahun } : { tahun: tahun },
@@ -56,9 +107,9 @@ export default function Index({ items, summary, filters }) {
         );
     };
 
-    const handleYearChange = (e) => {
-        const value = e.target.value;
+    const handleYearChange = (value) => {
         setTahun(value);
+        setOpenMenu(null);
         router.get(
             '/finance/pendapatan',
             bulan ? { bulan: bulan, tahun: value } : { tahun: value },
@@ -69,6 +120,7 @@ export default function Index({ items, summary, filters }) {
     const handleReset = () => {
         setBulan('');
         setTahun(new Date().getFullYear().toString());
+        setOpenMenu(null);
         router.get('/finance/pendapatan', {}, { preserveState: true, preserveScroll: true, replace: true });
     };
 
@@ -78,60 +130,75 @@ export default function Index({ items, summary, filters }) {
 
             <div className="space-y-6">
                 {/* Header Banner */}
-                <div className="relative overflow-hidden rounded-2xl bg-green-700 p-6 text-white shadow-sm">
-                    <div className="absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-white/5 pointer-events-none"></div>
-                    <div className="absolute -bottom-20 -right-4 h-80 w-80 rounded-full bg-white/5 pointer-events-none"></div>
+                <div className="relative mb-8 rounded-2xl bg-green-700 p-8 text-white shadow-md">
+                    {/* Layer dekorasi — overflow-hidden cuma dipasang di sini, jadi gak ikut
+                        motong elemen lain (seperti dropdown filter) yang keluar batas banner */}
+                    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+                        <div className="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-white/5 border border-white/10"></div>
+                        <div className="absolute right-20 -bottom-20 h-48 w-48 rounded-full bg-white/5 border border-white/10"></div>
+                    </div>
 
-                    <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
                         <div>
-                            <div className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-3 py-1 text-[11px] font-bold tracking-wider text-yellow-400 uppercase">
-                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                                </svg>
-                                Finance Dashboard
+                            {/* Badge Pill Khusus di Kiri Atas */}
+                            <div className="inline-flex items-center gap-1.5 rounded-lg border border-yellow-400/40 bg-yellow-500/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-yellow-300">
+                                <Sparkles size={12} className="text-yellow-400" />
+                                <span>FINANCE DASHBOARD</span>
                             </div>
-                            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                            <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
                                 Pendapatan Platform
                             </h1>
-                            <p className="mt-1 text-sm text-green-100/80">
+                            <p className="mt-1.5 max-w-xl text-xs text-green-100/90 leading-relaxed">
                                 Rekapitulasi komisi platform Titipsini yang terkumpul dari transaksi mitra.
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-md">
-                            <select
-                                value={bulan}
-                                onChange={handleMonthChange}
-                                className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-1.5 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-white/30"
-                                style={{ color: 'white' }}
-                            >
-                                <option value="">Semua Bulan</option>
-                                {MONTHS.map((m) => (
-                                    <option key={m.value} value={m.value}>{m.label}</option>
-                                ))}
-                            </select>
+                        {/* Filter Capsule di Kanan Banner — dropdown custom, tampilannya tetap
+                            (translucent white pill + panel navy) di kondisi apa pun. */}
+                        <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs text-white backdrop-blur-sm shadow-sm">
+                            <div className="flex items-center gap-2">
+                                <Calendar size={14} className="text-yellow-400 shrink-0" />
+                                <FilterDropdown
+                                    label="Semua Bulan"
+                                    options={MONTHS}
+                                    value={bulan}
+                                    onChange={handleMonthChange}
+                                    isOpen={openMenu === 'bulan'}
+                                    onToggle={() => setOpenMenu((prev) => (prev === 'bulan' ? null : 'bulan'))}
+                                />
+                            </div>
+
                             <span className="text-white/40">|</span>
-                            <select
+
+                            <FilterDropdown
+                                label={new Date().getFullYear().toString()}
+                                options={YEARS}
                                 value={tahun}
                                 onChange={handleYearChange}
-                                className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-1.5 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-white/30"
-                                style={{ color: 'white' }}
-                            >
-                                {YEARS.map((y) => (
-                                    <option key={y.value} value={y.value}>{y.label}</option>
-                                ))}
-                            </select>
+                                isOpen={openMenu === 'tahun'}
+                                onToggle={() => setOpenMenu((prev) => (prev === 'tahun' ? null : 'tahun'))}
+                            />
+
                             {bulan && (
-                                <button
-                                    type="button"
-                                    onClick={handleReset}
-                                    className="rounded-lg bg-rose-500/20 px-2.5 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/30"
-                                >
-                                    Reset
-                                </button>
+                                <>
+                                    <span className="text-white/40">|</span>
+                                    <button
+                                        type="button"
+                                        onClick={handleReset}
+                                        className="inline-flex items-center gap-1 rounded-lg bg-rose-500/30 px-2.5 py-1.5 text-[11px] font-semibold text-rose-100 transition hover:bg-rose-500/50"
+                                    >
+                                        <RotateCcw size={11} />
+                                        <span>Reset</span>
+                                    </button>
+                                </>
                             )}
                         </div>
                     </div>
+
+                    {/* Overlay transparan buat nutup dropdown pas klik di luar area filter */}
+                    {openMenu && (
+                        <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)}></div>
+                    )}
                 </div>
 
                 {/* 3 Summary Cards */}
@@ -147,11 +214,6 @@ export default function Index({ items, summary, filters }) {
                             </p>
                             <p className="mt-1 text-xs font-medium text-green-700 dark:text-green-400">Keuntungan bersih platform</p>
                         </div>
-                        <div className="absolute -bottom-6 -right-3 h-24 w-24 text-green-600/20 dark:text-green-400/20 pointer-events-none -z-0">
-                            <svg className="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
                     </div>
 
                     {/* Card 2: Volume Transaksi */}
@@ -164,11 +226,6 @@ export default function Index({ items, summary, filters }) {
                                 {formatRupiah(summary.totalTransaksi)}
                             </p>
                             <p className="mt-1 text-xs font-medium text-slate-400 dark:text-slate-500">Nilai bruto seluruh transaksi</p>
-                        </div>
-                        <div className="absolute -bottom-6 -right-3 h-24 w-24 text-slate-500/20 dark:text-slate-400/20 pointer-events-none -z-0">
-                            <svg className="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5a1.5 1.5 0 011.5 1.5v9.75a1.5 1.5 0 01-1.5 1.5H3.75a1.5 1.5 0 01-1.5-1.5V6a1.5 1.5 0 011.5-1.5zm13.5 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6 7.5h1.5S9 7.5 9 9s-1.5 1.5-1.5 1.5H6" />
-                            </svg>
                         </div>
                     </div>
 
@@ -183,11 +240,6 @@ export default function Index({ items, summary, filters }) {
                                 <span className="text-2xl font-normal text-slate-500 dark:text-slate-400">order</span>
                             </p>
                             <p className="mt-1 text-xs font-medium text-slate-400 dark:text-slate-500">Jumlah transaksi berhasil</p>
-                        </div>
-                        <div className="absolute -bottom-6 -right-3 h-24 w-24 text-slate-500/20 dark:text-slate-400/20 pointer-events-none -z-0">
-                            <svg className="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                            </svg>
                         </div>
                     </div>
                 </div>
