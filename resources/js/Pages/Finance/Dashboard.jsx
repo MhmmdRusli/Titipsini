@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { 
     ArrowDownToLine, 
     CircleDollarSign, 
@@ -41,26 +41,48 @@ const currency = (value) => new Intl.NumberFormat('id-ID', {
 }).format(value || 0);
 
 // StatCard persis seperti kode contoh (Watermark ikon besar + Border Accent Kiri)
-function StatCard({ label, value, detail, icon: Icon, accent, borderAccent }) {
-    return (
-        <div className={`group relative overflow-hidden rounded-2xl border bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-800 p-5 shadow-sm transition-all duration-300 hover:shadow-md ${borderAccent}`}>
-            {/* Watermark ikon transparan */}
+function StatCard({ label, value, detail, icon: Icon, iconColor, badgeBg, href, isCurrency = false }) {
+    const cardContent = (
+        <div className="relative h-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <Icon
-                size={88}
+                size={100}
                 strokeWidth={1}
-                className="pointer-events-none absolute -bottom-4 -right-4 text-gray-900/[0.035] dark:text-white/[0.04] transition-transform duration-300 group-hover:scale-110"
+                className={`pointer-events-none absolute -bottom-5 -right-5 opacity-10 ${iconColor} dark:opacity-20`}
             />
-
-            <div className="relative flex select-none items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{label}</p>
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ${accent}`}>
-                    <Icon size={20} />
+            <div className="relative z-10 flex h-full flex-col justify-between">
+                <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{label}</p>
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${badgeBg} ${iconColor}`}>
+                        <Icon size={18} />
+                    </div>
                 </div>
+                <div className="mt-3">
+                    <p
+                        className={`font-black tracking-tight text-slate-900 dark:text-white ${
+                            isCurrency ? "break-words text-xl md:text-2xl" : "text-2xl md:text-3xl"
+                        }`}
+                    >
+                        {isCurrency ? value : Number(value ?? 0).toLocaleString("id-ID")}
+                    </p>
+                </div>
+                {detail && (
+                    <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500">{detail}</p>
+                    </div>
+                )}
             </div>
-            <p className="relative mt-4 select-none text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">{value}</p>
-            {detail && <p className="relative mt-1 select-none text-xs text-gray-400 dark:text-gray-500">{detail}</p>}
         </div>
     );
+
+    if (href) {
+        return (
+            <Link href={href} className="block transition-transform hover:scale-[1.01]">
+                {cardContent}
+            </Link>
+        );
+    }
+
+    return cardContent;
 }
 
 // Banner Filter Dropdown persis dari contoh kode
@@ -198,26 +220,28 @@ export default function Dashboard({ stats = {}, transactions, filters = {}, citi
                 <StatCard 
                     label="Total Pemasukan" 
                     value={currency(stats.totalIncome)} 
-                    detail="Dari transaksi selesai" 
                     icon={CircleDollarSign} 
-                    accent="bg-green-100 text-green-700 dark:bg-green-950/80 dark:text-green-400"
-                    borderAccent="border-l-2 border-l-green-600"
+                    badgeBg="bg-green-100 dark:bg-green-950/80"
+                    iconColor="text-green-700 dark:text-green-400"
+                    detail="Dari transaksi selesai" 
+                    isCurrency={true}
                 />
                 <StatCard 
                     label="Pendapatan Hari Ini" 
                     value={currency(stats.todayIncome)} 
-                    detail="Transaksi selesai hari ini" 
                     icon={ArrowDownToLine} 
-                    accent="bg-green-100 text-green-700 dark:bg-green-950/80 dark:text-green-400"
-                    borderAccent="border-l-2 border-l-green-600"
+                    badgeBg="bg-green-100 dark:bg-green-950/80"
+                    iconColor="text-green-700 dark:text-green-400"
+                    detail="Transaksi selesai hari ini" 
+                    isCurrency={true}
                 />
                 <StatCard 
                     label="Transaksi Pending" 
                     value={stats.pendingTransactions || 0} 
-                    detail="Menunggu diproses" 
                     icon={Clock3} 
-                    accent="bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-400"
-                    borderAccent="border-l-2 border-l-amber-500"
+                    badgeBg="bg-amber-100 dark:bg-amber-950/80"
+                    iconColor="text-amber-700 dark:text-amber-400"
+                    detail="Menunggu diproses" 
                 />
             </div>
 
