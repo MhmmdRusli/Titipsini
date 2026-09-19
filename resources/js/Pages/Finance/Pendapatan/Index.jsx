@@ -103,6 +103,7 @@ export default function Index({ items, summary, filters }) {
                                 value={bulan}
                                 onChange={handleMonthChange}
                                 className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-1.5 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+                                style={{ colorScheme: 'light' }}
                             >
                                 <option value="" className="text-gray-900">Semua Bulan</option>
                                 {MONTHS.map((m) => (
@@ -114,6 +115,7 @@ export default function Index({ items, summary, filters }) {
                                 value={tahun}
                                 onChange={handleYearChange}
                                 className="cursor-pointer rounded-lg border-0 bg-transparent px-3 py-1.5 text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-white/30"
+                                style={{ colorScheme: 'light' }}
                             >
                                 {YEARS.map((y) => (
                                     <option key={y.value} value={y.value} className="text-gray-900">{y.label}</option>
