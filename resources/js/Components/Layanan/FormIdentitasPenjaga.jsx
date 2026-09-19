@@ -26,6 +26,8 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
         alamat_lengkap: editingItem?.alamat_lengkap ?? '',
         status: editingItem?.status ?? 'pemilik',
         upload_berkas: editingItem?.upload_berkas ?? '',
+        latitude: editingItem?.latitude ?? '',
+        longitude: editingItem?.longitude ?? '',
     });
 
     const [daftarProvinsi, setDaftarProvinsi] = useState([]);

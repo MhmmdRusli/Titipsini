@@ -21,18 +21,20 @@ const MAKS_FOTO = 8;
 
 export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, onSukses }) {
     const { data, setData, post, put, processing, errors, transform } = useForm({
-    kategori,
-    nama_usaha: editingItem?.nama_usaha ?? '',
-    jenis_kendaraan: editingItem?.jenis_kendaraan ?? '',
-    provinsi: editingItem?.provinsi ?? '',
-    kabupaten_kota: editingItem?.kabupaten_kota ?? '',
-    kecamatan: editingItem?.kecamatan ?? '',
-    alamat_lengkap: editingItem?.alamat_lengkap ?? '',
-    catatan_alamat: editingItem?.catatan_alamat ?? '',
-    foto_lahan: [],
-    panjang: editingItem?.panjang ?? '',
-    lebar: editingItem?.lebar ?? '',
-});
+        kategori,
+        nama_usaha: editingItem?.nama_usaha ?? '',
+        jenis_kendaraan: editingItem?.jenis_kendaraan ?? '',
+        provinsi: editingItem?.provinsi ?? '',
+        kabupaten_kota: editingItem?.kabupaten_kota ?? '',
+        kecamatan: editingItem?.kecamatan ?? '',
+        alamat_lengkap: editingItem?.alamat_lengkap ?? '',
+        catatan_alamat: editingItem?.catatan_alamat ?? '',
+        foto_lahan: [],
+        panjang: editingItem?.panjang ?? '',
+        lebar: editingItem?.lebar ?? '',
+        latitude: editingItem?.latitude ?? '',
+        longitude: editingItem?.longitude ?? '',
+    });
 
     // Data wilayah bertingkat: provinsi -> kabupaten/kota -> kecamatan.
     // Memakai endpoint /api/wilayah yang sudah ada di project.

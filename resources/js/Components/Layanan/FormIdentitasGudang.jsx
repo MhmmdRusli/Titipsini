@@ -19,10 +19,12 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
         kecamatan: editingItem?.kecamatan ?? '',
         alamat_lengkap: editingItem?.alamat_lengkap ?? '',
         catatan_alamat: editingItem?.catatan_alamat ?? '',
-        foto_lahan: [], // array File baru yang mau diupload
+        foto_lahan: [],
         panjang: editingItem?.panjang ?? '',
         lebar: editingItem?.lebar ?? '',
         jumlah_tampung: editingItem?.jumlah_tampung ?? '',
+        latitude: editingItem?.latitude ?? '',
+        longitude: editingItem?.longitude ?? '',
     });
 
     const [daftarProvinsi, setDaftarProvinsi] = useState([]);
@@ -169,6 +171,8 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
                     kabupaten_kota: lokasi.city,
                     kecamatan: lokasi.district,
                     alamat_lengkap: lokasi.address,
+                    latitude: latitude.toString(),
+                    longitude: longitude.toString(),
                 }));
                 setProvinsiId('');
                 setKabupatenId('');
@@ -193,6 +197,8 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
                     kabupaten_kota: lokasi.city,
                     kecamatan: lokasi.district,
                     alamat_lengkap: lokasi.address,
+                    latitude: latitude.toString(),
+                    longitude: longitude.toString(),
                 }));
                 setKabupatenId('');
                 setKecamatanId('');
@@ -216,6 +222,8 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
                 kabupaten_kota: matchedKabupaten.name,
                 kecamatan: matchedKecamatan?.name ?? lokasi.district,
                 alamat_lengkap: lokasi.address,
+                latitude: latitude.toString(),
+                longitude: longitude.toString(),
             }));
         } catch (error) {
             if (error.code === 1) {

@@ -20,6 +20,8 @@ class Service extends Model
         'foto_kendaraan',
         'kota',
         'kecamatan',
+        'latitude',
+        'longitude',
         'harga',
         'is_active',
         // Kolom baru khusus kategori Barang (alamat gudang)
