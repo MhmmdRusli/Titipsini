@@ -220,19 +220,49 @@ class ServiceController extends Controller
 
         // Determine which cities to include in search (nearby = same province)
         $targetKotas = [];
+        $targetProvinsi = [];
         if ($searchQuery) {
+            // 1. Get provinsi from matching kota table names
             $matchedKotas = \App\Models\Kota::where('is_active', true)
-                ->where(function ($q) use ($searchQuery) {
-                    $q->where('nama', 'like', "%{$searchQuery}%");
-                })
+                ->where('nama', 'like', "%{$searchQuery}%")
                 ->pluck('provinsi')
+                ->map(fn ($p) => strtolower($p))
                 ->unique();
             
-            if ($matchedKotas->isNotEmpty()) {
+            // 2. Also get provinsi from matching services
+            $matchedServiceProvinsi = \App\Models\Service::where('is_active', true)
+                ->where(function ($q) use ($searchQuery) {
+                    $q->where('kota', 'like', "%{$searchQuery}%")
+                        ->orWhere('kecamatan', 'like', "%{$searchQuery}%")
+                        ->orWhere('provinsi', 'like', "%{$searchQuery}%");
+                })
+                ->whereNotNull('provinsi')
+                ->where('provinsi', '!=', '')
+                ->distinct('provinsi')
+                ->pluck('provinsi')
+                ->map(fn ($p) => strtolower($p));
+            
+            $allProvinsi = $matchedKotas->merge($matchedServiceProvinsi)->unique()->values();
+            
+            if ($allProvinsi->isNotEmpty()) {
+                $targetProvinsi = $allProvinsi->toArray();
+                
+                // Get kotas from kota table (case-insensitive provinsi)
+                $placeholders = implode(',', array_fill(0, count($targetProvinsi), '?'));
                 $targetKotas = \App\Models\Kota::where('is_active', true)
-                    ->whereIn('provinsi', $matchedKotas)
+                    ->whereRaw("LOWER(provinsi) IN ({$placeholders})", $targetProvinsi)
                     ->pluck('nama')
                     ->toArray();
+                
+                // Also get kotas from services (case-insensitive provinsi)
+                $serviceKotas = \App\Models\Service::where('is_active', true)
+                    ->whereRaw("LOWER(provinsi) IN ({$placeholders})", $targetProvinsi)
+                    ->distinct('kota')
+                    ->pluck('kota')
+                    ->filter()
+                    ->toArray();
+                
+                $targetKotas = array_unique(array_merge($targetKotas, $serviceKotas));
             }
         }
 
@@ -1097,11 +1127,13 @@ class ServiceController extends Controller
                 ->value('provinsi');
             
             if ($provinsi) {
-                $targetKotas = \App\Models\Kota::where('provinsi', $provinsi)
+                $provinsiLower = strtolower($provinsi);
+                // Use case-insensitive matching for provinsi
+                $targetKotas = \App\Models\Kota::whereRaw('LOWER(provinsi) = ?', [$provinsiLower])
                     ->where('is_active', true)
                     ->pluck('nama')
                     ->toArray();
-                $targetProvinsi = [$provinsi];
+                $targetProvinsi = [$provinsiLower];
             }
         } elseif ($searchQuery) {
             // Search query: match kota/kecamatan/nama in services, then expand to same province
@@ -1123,19 +1155,25 @@ class ServiceController extends Controller
                 ->where('nama', 'like', "%{$searchQuery}%")
                 ->pluck('provinsi');
             
-            $allProvinsi = $provinsiFromServices->merge($provinsiFromKotaTable)->unique()->values();
+            // Normalize all provinsi to lowercase for case-insensitive matching
+            $allProvinsi = $provinsiFromServices->merge($provinsiFromKotaTable)
+                ->map(fn ($p) => strtolower($p))
+                ->unique()
+                ->values();
             
             if ($allProvinsi->isNotEmpty()) {
                 $targetProvinsi = $allProvinsi->toArray();
+                // Use case-insensitive matching for provinsi in kota table
+                $placeholders = implode(',', array_fill(0, count($targetProvinsi), '?'));
                 $targetKotas = \App\Models\Kota::where('is_active', true)
-                    ->whereIn('provinsi', $targetProvinsi)
+                    ->whereRaw("LOWER(provinsi) IN ({$placeholders})", $targetProvinsi)
                     ->pluck('nama')
                     ->toArray();
                 
-                // Also include cities from services that match the province
+                // Also include cities from services that match the province (case-insensitive)
                 $serviceKotas = \App\Models\Service::where('kategori', $kategori)
                     ->where('is_active', true)
-                    ->whereIn('provinsi', $targetProvinsi)
+                    ->whereRaw("LOWER(provinsi) IN ({$placeholders})", $targetProvinsi)
                     ->distinct('kota')
                     ->pluck('kota')
                     ->filter()

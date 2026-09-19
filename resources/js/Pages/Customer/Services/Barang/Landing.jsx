@@ -23,7 +23,7 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
         setCityLoading(true);
         debounceRef.current = setTimeout(async () => {
             try {
-                const { data } = await axios.get('/api/cities', { params: { search: cityQuery } });
+                const { data } = await axios.get('/api/cities', { params: { search: cityQuery, kategori: 'barang' } });
                 setCityResults(data ?? []);
             } catch {
                 setCityResults([]);
