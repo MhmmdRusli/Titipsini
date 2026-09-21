@@ -116,6 +116,8 @@ export default function Index({ orders, counts, filters }) {
                                                 <span className="text-xs font-semibold text-red-500">Dibatalkan</span>
                                             ) : selesai ? (
                                                 <span className="text-xs font-semibold text-green-800 dark:text-green-300">Selesai</span>
+                                            ) : order.status === 'pengambilan_diajukan' ? (
+                                                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Pengembalian Diajukan</span>
                                             ) : (
                                                 <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Diproses</span>
                                             )}

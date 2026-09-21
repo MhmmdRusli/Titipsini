@@ -268,6 +268,7 @@ function ShowDiproses({ order }) {
     const [isConfirmingPickup, setIsConfirmingPickup] = useState(false);
     const [isMarkingAsPickedUp, setIsMarkingAsPickedUp] = useState(false);
     const [showKondisiAwalModal, setShowKondisiAwalModal] = useState(false);
+    const [showFinishModal, setShowFinishModal] = useState(false);
     const [kondisiAwalFiles, setKondisiAwalFiles] = useState([]);
     const [kondisiAwalPreviews, setKondisiAwalPreviews] = useState([]);
     const [kondisiAwalCatatan, setKondisiAwalCatatan] = useState('');
@@ -306,13 +307,21 @@ function ShowDiproses({ order }) {
     }
 
     function serahkanBarang() {
-        if (!confirm('Konfirmasi bahwa pesanan telah diserahkan kepada customer?')) return;
+        setShowFinishModal(true);
+    }
+
+    function submitSerahkanBarang() {
+        setShowFinishModal(false);
         setIsConfirmingPickup(true);
         router.patch(
             `/mitra/pesanan/${order.id}/serahkan`,
             {},
             { preserveScroll: true, onFinish: () => setIsConfirmingPickup(false) }
         );
+    }
+
+    function closeFinishModal() {
+        setShowFinishModal(false);
     }
 
     function openKondisiAwalModal() {
@@ -467,8 +476,45 @@ function ShowDiproses({ order }) {
                             </div>
                         </div>
                     </div>
+            </div>
+
+            {showFinishModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400">
+                                <CheckCircle2 size={19} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                                    Serahkan Pesanan?
+                                </h2>
+                                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                    Konfirmasi bahwa pesanan telah diserahkan kepada customer.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={closeFinishModal}
+                                className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={submitSerahkanBarang}
+                                disabled={isConfirmingPickup}
+                                className="rounded-xl bg-green-700 px-4 py-2 text-xs font-bold text-white hover:bg-green-800 disabled:opacity-50 dark:bg-green-600 dark:hover:bg-green-700"
+                            >
+                                {isConfirmingPickup ? 'Memproses...' : 'Serahkan'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </MitraLayout>
+            )}
+        </MitraLayout>
         );
     }
 
@@ -802,6 +848,43 @@ function ShowDiproses({ order }) {
                     </div>
                 )}
             </div>
+
+            {showFinishModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400">
+                                <CheckCircle2 size={19} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                                    Serahkan Pesanan?
+                                </h2>
+                                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                    Konfirmasi bahwa pesanan telah diserahkan kepada customer.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={closeFinishModal}
+                                className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={submitSerahkanBarang}
+                                disabled={isConfirmingPickup}
+                                className="rounded-xl bg-green-700 px-4 py-2 text-xs font-bold text-white hover:bg-green-800 disabled:opacity-50 dark:bg-green-600 dark:hover:bg-green-700"
+                            >
+                                {isConfirmingPickup ? 'Memproses...' : 'Serahkan'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </MitraLayout>
     );
 }
