@@ -63,6 +63,7 @@ export default function OrdersIndex({ orders, filters }) {
     const [reviewing, setReviewing] = useState(false);
     const [toast, setToast] = useState(null);
     const toastTimer = useRef(null);
+    const [extendError, setExtendError] = useState(null);
 
     // 👇 DIHAPUS: completeConfirmOrder (state) dan completeOrder() (fungsi)
     // dihapus. Customer tidak lagi menyelesaikan order sendiri (pickup
@@ -75,6 +76,10 @@ export default function OrdersIndex({ orders, filters }) {
         setToast({ type, message });
         if (toastTimer.current) clearTimeout(toastTimer.current);
         toastTimer.current = setTimeout(() => setToast(null), 3200);
+    }
+
+    function showExtendError(orderId) {
+        setExtendError(orderId);
     }
 
     const [expandedAddresses, setExpandedAddresses] = useState({});
@@ -331,7 +336,13 @@ export default function OrdersIndex({ orders, filters }) {
                                                 {hasPickup && (
                                                     <button
                                                         type="button"
-                                                        onClick={() => router.get(`/app/orders/${order.id}/extend`)}
+                                                        onClick={() => {
+                                                            if (order.status !== 'diproses') {
+                                                                showExtendError(order.id);
+                                                            } else {
+                                                                router.get(`/app/orders/${order.id}/extend`);
+                                                            }
+                                                        }}
                                                         className="w-full rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-medium text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
                                                     >
                                                         Perpanjang Waktu Jasa
@@ -462,6 +473,35 @@ export default function OrdersIndex({ orders, filters }) {
             {/* 👇 DIHAPUS: modal completeConfirmOrder ("Selesaikan Pesanan?")
                 dihapus total. Customer tidak lagi bisa menyelesaikan order
                 sendiri - lihat catatan di completeOrder() di atas. */}
+
+            {extendError && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400">
+                                <XCircle size={19} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                                    Pesanan Tidak Bisa Diperpanjang
+                                </h2>
+                                <p className="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                                    Hanya pesanan yang sedang dititipkan yang bisa diperpanjang.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mt-5 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setExtendError(null)}
+                                className="rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 transition"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 .no-scrollbar {
