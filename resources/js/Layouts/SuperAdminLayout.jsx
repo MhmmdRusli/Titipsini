@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 
 
+
 // Menu Super Admin — sesuai struktur sidebar yang dipakai.
 const navItems = [
     { label: 'Kota', href: '/super-admin/kota', icon: MapPin },
@@ -42,9 +43,11 @@ const navItems = [
     { label: 'Total Transaksi', href: '/super-admin/total-transaksi', icon: ArrowLeftRight },
     { label: 'Laporan Pelayanan', href: '/super-admin/laporan-layanan', icon: FileBarChart },
     { label: 'Sampah', href: '/super-admin/sampah', icon: Trash2 },
-    // 👇 DITAMBAHKAN: menu Profil Saya di sidebar, mengarah ke halaman
-    // SuperAdmin\ProfileController@edit (edit nama/email, avatar, riwayat sesi).
+
+    // Menu Profil Saya di sidebar.
+    // Mengarah ke halaman SuperAdmin\ProfileController@edit.
     { label: 'Profil Saya', href: '/super-admin/profil', icon: UserCircle },
+
     {
         label: 'Pengaturan',
         href: '/super-admin/pengaturan',
@@ -65,9 +68,16 @@ function weatherFromCode(code) {
     if (code === 0) return { label: 'Cerah', Icon: Sun };
     if ([1, 2, 3].includes(code)) return { label: 'Berawan', Icon: Cloud };
     if ([45, 48].includes(code)) return { label: 'Berkabut', Icon: CloudFog };
-    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { label: 'Hujan', Icon: CloudRain };
-    if ([71, 73, 75, 77, 85, 86].includes(code)) return { label: 'Bersalju', Icon: CloudSnow };
-    if ([95, 96, 99].includes(code)) return { label: 'Badai Petir', Icon: CloudLightning };
+    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) {
+        return { label: 'Hujan', Icon: CloudRain };
+    }
+    if ([71, 73, 75, 77, 85, 86].includes(code)) {
+        return { label: 'Bersalju', Icon: CloudSnow };
+    }
+    if ([95, 96, 99].includes(code)) {
+        return { label: 'Badai Petir', Icon: CloudLightning };
+    }
+
     return { label: 'Cerah Berawan', Icon: Cloud };
 }
 
@@ -76,11 +86,22 @@ function useJamTanggal() {
 
     useEffect(() => {
         const timer = setInterval(() => setNow(new Date()), 1000);
+
         return () => clearInterval(timer);
     }, []);
 
-    const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const tanggal = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const jam = now.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+
+    const tanggal = now.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
 
     return { jam, tanggal };
 }
@@ -95,11 +116,14 @@ function useCuaca(propsCuaca) {
                 suhu: propsCuaca.suhu || '30°C',
                 Icon: Cloud,
             });
+
             return;
         }
 
         const fetchWeather = (lat, lon) => {
-            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+            fetch(
+                `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+            )
                 .then((res) => res.json())
                 .then((data) => {
                     if (data?.current_weather) {
@@ -128,6 +152,7 @@ function useCuaca(propsCuaca) {
 export default function SuperAdminLayout({ children, title }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
+
     const { jam, tanggal } = useJamTanggal();
     const cuaca = useCuaca(props.cuaca);
 
@@ -135,8 +160,11 @@ export default function SuperAdminLayout({ children, title }) {
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const [isDarkMode, setIsDarkMode] = useState(() => {
-        return localStorage.getItem('theme') === 'dark' ||
-            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        return (
+            localStorage.getItem('theme') === 'dark' ||
+            (!('theme' in localStorage) &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches)
+        );
     });
 
     useEffect(() => {
@@ -153,13 +181,17 @@ export default function SuperAdminLayout({ children, title }) {
 
     const [openMenu, setOpenMenu] = useState(() => {
         const active = navItems.find(
-            (item) => item.children && item.children.some((c) => url.startsWith(c.href))
+            (item) =>
+                item.children &&
+                item.children.some((c) => url.startsWith(c.href))
         );
+
         return active?.label ?? null;
     });
 
     const handleLogout = () => {
         setIsLoggingOut(true);
+
         router.post('/logout', {}, {
             onFinish: () => {
                 setIsLoggingOut(false);
@@ -170,56 +202,152 @@ export default function SuperAdminLayout({ children, title }) {
 
     return (
         <div className="flex h-screen bg-[#f8fafc] dark:bg-[#0b0f19] text-gray-800 dark:text-gray-100 overflow-hidden transition-colors duration-300">
+
             <style>{`
+                /* =====================================================
+                   DARK MODE - GENERAL
+                   ===================================================== */
+
                 .dark main .bg-white {
                     background-color: #1e293b !important;
                     color: #f1f5f9 !important;
                     border-color: #334155 !important;
                 }
+
                 .dark main .text-gray-900,
                 .dark main .text-gray-800,
                 .dark main .text-gray-700 {
                     color: #f1f5f9 !important;
                 }
+
                 .dark main .text-[#111827] {
                     color: #f1f5f9 !important;
                 }
+
                 .dark main .text-gray-500,
                 .dark main .text-gray-600 {
                     color: #94a3b8 !important;
                 }
+
                 .dark main .border-gray-100,
                 .dark main .border-gray-200 {
                     border-color: #334155 !important;
                 }
-                .dark main input, 
-                .dark main select, 
+
+
+                /* =====================================================
+                   DARK MODE - SEMUA INPUT
+                   ===================================================== */
+
+                .dark main input,
+                .dark main select,
                 .dark main textarea {
-                    background-color: #0f172a !important;
-                    color: #f1f5f9 !important;
-                    border-color: #334155 !important;
+                    background-color: #111827 !important;
+                    color: #f3f4f6 !important;
+                    border-color: #374151 !important;
+                    opacity: 1 !important;
+                }
+
+
+                /* =====================================================
+                   EMAIL & PASSWORD
+                   Dibuat sama dengan input Nama Lengkap:
+                   solid, dark, tidak transparan.
+                   ===================================================== */
+
+                .dark main input[type="email"],
+                .dark main input[type="password"] {
+                    background-color: #111827 !important;
+                    color: #f3f4f6 !important;
+                    border: 1px solid #374151 !important;
+                    border-color: #374151 !important;
+                    opacity: 1 !important;
+                    background-image: none !important;
+                }
+
+
+                /* =====================================================
+                   PLACEHOLDER EMAIL & PASSWORD
+                   ===================================================== */
+
+                .dark main input[type="email"]::placeholder,
+                .dark main input[type="password"]::placeholder {
+                    color: #64748b !important;
+                    opacity: 1 !important;
+                }
+
+
+                /* =====================================================
+                   FOCUS EMAIL & PASSWORD
+                   ===================================================== */
+
+                .dark main input[type="email"]:focus,
+                .dark main input[type="password"]:focus {
+                    background-color: #111827 !important;
+                    color: #f3f4f6 !important;
+                    border-color: #374151 !important;
+                    outline: none !important;
+                }
+
+
+                /* =====================================================
+                   CHROME AUTOFILL
+                   Mencegah Email/Password menjadi putih.
+                   ===================================================== */
+
+                .dark main input[type="email"]:-webkit-autofill,
+                .dark main input[type="password"]:-webkit-autofill,
+                .dark main input[type="email"]:-webkit-autofill:hover,
+                .dark main input[type="password"]:-webkit-autofill:hover,
+                .dark main input[type="email"]:-webkit-autofill:focus,
+                .dark main input[type="password"]:-webkit-autofill:focus {
+                    -webkit-text-fill-color: #f3f4f6 !important;
+                    -webkit-box-shadow: 0 0 0 1000px #111827 inset !important;
+                    box-shadow: 0 0 0 1000px #111827 inset !important;
+                    background-color: #111827 !important;
+                    background-image: none !important;
+                    border: 1px solid #374151 !important;
+                    border-color: #374151 !important;
+                    opacity: 1 !important;
                 }
             `}</style>
 
-            {/* Sidebar */}
+
+            {/* =====================================================
+                SIDEBAR
+                ===================================================== */}
+
             <aside className="w-64 shrink-0 bg-green-800 dark:bg-green-900 text-gray-100 flex flex-col border-r border-green-700 dark:border-gray-800 shadow-md h-full transition-colors">
+
                 <div className="px-5 py-6 border-b border-white/10 flex flex-col items-center text-center shrink-0">
+
                     <img
                         src="/images/admin-titipsini.png"
                         alt="Logo"
                         className="h-24 w-auto object-contain mb-2 drop-shadow-sm"
                     />
+
                     <span className="text-base font-bold tracking-tight text-white">
-                        Titipsini<span className="text-[#fbbf24] mx-0.5">•</span>Com
+                        Titipsini
+                        <span className="text-[#fbbf24] mx-0.5">•</span>
+                        Com
                     </span>
+
                     <span className="inline-flex items-center gap-1 text-[11px] text-green-200/80 font-medium mt-0.5">
                         <ShieldCheck size={12} />
                         Super Admin Portal
                     </span>
                 </div>
 
+
+                {/* =====================================================
+                    NAVIGATION
+                    ===================================================== */}
+
                 <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
+
                     {navItems.map(({ label, href, icon: Icon, children: subItems }) => {
+
                         const active = url.startsWith(href);
                         const hasChildren = !!subItems;
                         const isOpen = openMenu === label;
@@ -235,7 +363,15 @@ export default function SuperAdminLayout({ children, title }) {
                                             : 'text-green-100/80 hover:bg-white/10 hover:text-white'
                                     }`}
                                 >
-                                    <Icon size={16} className={active ? 'text-[#fbbf24]' : 'text-green-200/70'} />
+                                    <Icon
+                                        size={16}
+                                        className={
+                                            active
+                                                ? 'text-[#fbbf24]'
+                                                : 'text-green-200/70'
+                                        }
+                                    />
+
                                     {label}
                                 </Link>
                             );
@@ -243,31 +379,54 @@ export default function SuperAdminLayout({ children, title }) {
 
                         return (
                             <div key={href}>
+
                                 <button
                                     type="button"
-                                    onClick={() => setOpenMenu(isOpen ? null : label)}
+                                    onClick={() =>
+                                        setOpenMenu(isOpen ? null : label)
+                                    }
                                     className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all ${
                                         active && !isOpen
                                             ? 'bg-green-700 text-white shadow-sm font-semibold'
                                             : 'text-green-100/80 hover:bg-white/10 hover:text-white'
                                     }`}
                                 >
-                                    <Icon size={16} className={active && !isOpen ? 'text-[#fbbf24]' : 'text-green-200/70'} />
-                                    <span className="flex-1 text-left">{label}</span>
+
+                                    <Icon
+                                        size={16}
+                                        className={
+                                            active && !isOpen
+                                                ? 'text-[#fbbf24]'
+                                                : 'text-green-200/70'
+                                        }
+                                    />
+
+                                    <span className="flex-1 text-left">
+                                        {label}
+                                    </span>
+
                                     <ChevronDown
                                         size={14}
-                                        className={`transition-transform text-green-200/70 ${isOpen ? 'rotate-180 text-white' : ''}`}
+                                        className={`transition-transform text-green-200/70 ${
+                                            isOpen
+                                                ? 'rotate-180 text-white'
+                                                : ''
+                                        }`}
                                     />
                                 </button>
 
+
                                 {isOpen && (
                                     <div className="mt-1 ml-4 space-y-1 border-l border-white/15 pl-4">
-                                        {subItems.map((sub) => {
-                                            const subActive = url.startsWith(sub.href);
 
-                                            // "Tambah Akun" (isAction) tampil sebagai tombol
-                                            // menonjol dengan ikon +, terpisah secara visual
-                                            // dari daftar role Customer/Vendor/Finance/Admin.
+                                        {subItems.map((sub) => {
+
+                                            const subActive = url.startsWith(
+                                                sub.href
+                                            );
+
+
+                                            // Tambah Akun tampil sebagai tombol.
                                             if (sub.isAction) {
                                                 return (
                                                     <Link
@@ -281,6 +440,7 @@ export default function SuperAdminLayout({ children, title }) {
                                                 );
                                             }
 
+
                                             return (
                                                 <Link
                                                     key={sub.href}
@@ -291,19 +451,31 @@ export default function SuperAdminLayout({ children, title }) {
                                                             : 'text-green-100/70 hover:text-white hover:bg-white/5'
                                                     }`}
                                                 >
-                                                    <span className="text-green-200/50">—</span>
+                                                    <span className="text-green-200/50">
+                                                        —
+                                                    </span>
+
                                                     {sub.label}
                                                 </Link>
                                             );
                                         })}
+
                                     </div>
                                 )}
+
                             </div>
                         );
                     })}
+
                 </nav>
 
+
+                {/* =====================================================
+                    LOGOUT BUTTON
+                    ===================================================== */}
+
                 <div className="border-t border-white/10 p-3 shrink-0">
+
                     <button
                         type="button"
                         onClick={() => setShowLogoutModal(true)}
@@ -312,57 +484,107 @@ export default function SuperAdminLayout({ children, title }) {
                         <LogOut size={16} />
                         Keluar
                     </button>
+
                 </div>
+
             </aside>
 
-            {/* Main Content Area */}
+
+            {/* =====================================================
+                MAIN CONTENT AREA
+                ===================================================== */}
+
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto overflow-x-hidden relative">
+
                 <header className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800/80 bg-white/80 dark:bg-[#111827]/80 backdrop-blur-md px-6 py-4 shadow-sm shrink-0 sticky top-0 z-30 transition-colors duration-300">
+
                     <div>
-                        <h1 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-white">{title}</h1>
+
+                        <h1 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-white">
+                            {title}
+                        </h1>
+
                         <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+
                             <span className="flex items-center gap-1.5">
-                                <Calendar size={13} className="text-green-600 dark:text-green-400" />
+                                <Calendar
+                                    size={13}
+                                    className="text-green-600 dark:text-green-400"
+                                />
                                 {tanggal}
                             </span>
+
                             <span className="flex items-center gap-1.5 tabular-nums">
-                                <Clock size={13} className="text-green-600 dark:text-green-400" />
+                                <Clock
+                                    size={13}
+                                    className="text-green-600 dark:text-green-400"
+                                />
                                 {jam}
                             </span>
+
                             {cuaca && (
                                 <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-gray-300">
+
                                     {cuaca.Icon ? (
-                                        <cuaca.Icon size={13} className="text-amber-500" />
+                                        <cuaca.Icon
+                                            size={13}
+                                            className="text-amber-500"
+                                        />
                                     ) : (
-                                        <span className="text-amber-500">🌤️</span>
+                                        <span className="text-amber-500">
+                                            🌤️
+                                        </span>
                                     )}
+
                                     {cuaca.label}, {cuaca.suhu}
+
                                 </span>
                             )}
+
                         </div>
+
                     </div>
 
+
+                    {/* =================================================
+                        HEADER ACTIONS
+                        ================================================= */}
+
                     <div className="flex items-center gap-4">
+
                         <button
                             type="button"
                             onClick={toggleDarkMode}
                             className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shadow-sm"
-                            title={isDarkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'}
+                            title={
+                                isDarkMode
+                                    ? 'Beralih ke Mode Terang'
+                                    : 'Beralih ke Mode Gelap'
+                            }
                         >
-                            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                            {isDarkMode ? (
+                                <Sun size={18} />
+                            ) : (
+                                <Moon size={18} />
+                            )}
                         </button>
+
 
                         <div className="h-6 w-px bg-gray-200 dark:bg-gray-800" />
 
-                        {/* 👇 DIUBAH: blok nama + avatar sekarang dibungkus Link menuju
-                            halaman Profil Super Admin. Tampilan/style tidak diubah
-                            sedikit pun, cuma jadi bisa diklik. */}
+
+                        {/* Profil Super Admin */}
+
                         <Link
                             href="/super-admin/profil"
                             className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-200 rounded-xl transition hover:opacity-80"
                             title="Lihat Profil Saya"
                         >
-                            <span className="text-xs font-semibold">{user?.name ?? 'Super Admin'}</span>
+
+                            <span className="text-xs font-semibold">
+                                {user?.name ?? 'Super Admin'}
+                            </span>
+
                             {user?.avatar ? (
                                 <img
                                     src={user.avatar}
@@ -371,29 +593,55 @@ export default function SuperAdminLayout({ children, title }) {
                                 />
                             ) : (
                                 <div className="h-9 w-9 rounded-xl bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-300 flex items-center justify-center text-xs font-bold border border-green-300/40 dark:border-green-800">
-                                    {(user?.name ?? 'S').charAt(0).toUpperCase()}
+                                    {(user?.name ?? 'S')
+                                        .charAt(0)
+                                        .toUpperCase()}
                                 </div>
                             )}
+
                         </Link>
+
                     </div>
+
                 </header>
 
-                <main className="flex-1 p-6 relative z-10 transition-colors">{children}</main>
+
+                {/* =====================================================
+                    PAGE CONTENT
+                    ===================================================== */}
+
+                <main className="flex-1 p-6 relative z-10 transition-colors">
+                    {children}
+                </main>
+
             </div>
 
-            {/* Logout Modal */}
+
+            {/* =========================================================
+                LOGOUT MODAL
+                ========================================================= */}
+
             {showLogoutModal && (
+
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+
                     <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-2xl border border-gray-100 dark:border-gray-700 animate-in fade-in duration-150">
+
                         <div className="flex items-center justify-between">
+
                             <div className="flex items-center gap-3">
+
                                 <div className="p-2.5 rounded-xl bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
                                     <AlertCircle size={22} />
                                 </div>
+
                                 <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
                                     Konfirmasi Keluar
                                 </h3>
+
                             </div>
+
+
                             <button
                                 type="button"
                                 onClick={() => setShowLogoutModal(false)}
@@ -401,13 +649,17 @@ export default function SuperAdminLayout({ children, title }) {
                             >
                                 <X size={18} />
                             </button>
+
                         </div>
+
 
                         <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
                             Apakah kamu yakin ingin keluar dari halaman super admin?
                         </p>
 
+
                         <div className="mt-5 flex justify-end gap-2">
+
                             <button
                                 type="button"
                                 disabled={isLoggingOut}
@@ -416,18 +668,27 @@ export default function SuperAdminLayout({ children, title }) {
                             >
                                 Batal
                             </button>
+
+
                             <button
                                 type="button"
                                 disabled={isLoggingOut}
                                 onClick={handleLogout}
                                 className="rounded-xl bg-red-600 hover:bg-red-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition disabled:opacity-60"
                             >
-                                {isLoggingOut ? 'Memproses...' : 'Ya, Keluar'}
+                                {isLoggingOut
+                                    ? 'Memproses...'
+                                    : 'Ya, Keluar'}
                             </button>
+
                         </div>
+
                     </div>
+
                 </div>
+
             )}
+
         </div>
     );
 }
