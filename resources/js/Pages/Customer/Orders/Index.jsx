@@ -283,15 +283,16 @@ export default function OrdersIndex({ orders, filters }) {
                                         {/* Tab Menunggu Mitra menitip */}
                                         {['pembayaran_diterima', 'diproses_mitra'].includes(order.status) && (
                                             <div className="flex flex-col gap-2">
-                                                        <Link
-                                                            href={`/app/orders/${order.id}`}
-                                                            className="flex-1 rounded-lg border border-gray-300 bg-white py-2 text-center text-xs font-medium text-gray-600 transition active:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700"
-                                                        >
-                                                            Detail Pesanan
-                                                        </Link>
+                                                <button
+                                                    type="button"
+                                                    disabled
+                                                    className="flex-1 rounded-lg border border-gray-300 bg-white py-2 text-center text-xs font-medium text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700"
+                                                >
+                                                    Pesanan sedang diproses mitra
+                                                </button>
                                                 <Link
                                                     href={`/app/orders/${order.id}`}
-                                                    className="flex-1 rounded-lg border border-green-600 bg-white py-2 text-center text-xs font-medium text-green-600 transition active:bg-green-50 dark:bg-gray-800 dark:text-green-400"
+                                                    className="flex-1 rounded-lg border border-gray-300 bg-white py-2 text-center text-xs font-medium text-gray-600 transition active:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700"
                                                 >
                                                     Detail Pesanan
                                                 </Link>
