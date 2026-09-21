@@ -156,9 +156,9 @@ export default function Index({ orders, counts, filters }) {
 
                                         {/* Note: Customer pengembalian */}
                                         {order.status === 'pengambilan_diajukan' && (
-                                            <div className="mt-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                                            <p className="mt-1.5 text-[10px] font-medium text-amber-500/80">
                                                 ⚠️ Customer mengajukan pengembalian — Harap diselesaikan
-                                            </div>
+                                            </p>
                                         )}
 
                                         {/* Ulasan hanya relevan untuk pesanan yang telah selesai. */}
