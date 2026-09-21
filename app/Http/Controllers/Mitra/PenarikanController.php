@@ -47,8 +47,7 @@ class PenarikanController extends Controller
             'created_at' => $order->created_at,
         ]);
 
-        $penarikanQuery = Penarikan::where('user_id', $user->id)
-            ->whereNotIn('status', ['ditolak', 'rejected', 'failed', 'gagal']);
+        $penarikanQuery = Penarikan::where('user_id', $user->id);
 
         if ($dari) {
             $penarikanQuery->whereDate('created_at', '>=', $dari);
@@ -62,7 +61,11 @@ class PenarikanController extends Controller
             'type' => 'penarikan',
             'jumlah' => (float) $p->jumlah,
             'deskripsi' => 'Penarikan ke '.$p->nama_bank.' •••• '.substr($p->nomor_rekening, -4)
-                .($p->status === 'pending' ? ' (menunggu diproses)' : ''),
+                .($p->status === 'pending' ? ' (menunggu diproses)' 
+                    : ($p->status === 'ditolak' ? ' (ditolak' . ($p->catatan ? ': ' . $p->catatan : '') . ')' 
+                    : ' (selesai)')),
+            'status' => $p->status,
+            'catatan' => $p->catatan,
             'created_at' => $p->created_at,
         ]);
 

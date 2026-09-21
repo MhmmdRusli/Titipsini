@@ -213,19 +213,35 @@ export default function PenarikanIndex({
                     ) : (
                         mutasi.map((m) => (
                             <div key={m.id} className="flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-xs">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-50 text-green-700">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-700">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <rect x="2" y="5" width="20" height="14" rx="2" />
                                             <line x1="2" y1="10" x2="22" y2="10" />
                                         </svg>
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-gray-800">{m.deskripsi ?? (m.type === 'penghasilan' ? 'Penghasilan' : 'Penarikan Saldo')}</p>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-semibold text-gray-800 truncate">{m.deskripsi ?? (m.type === 'penghasilan' ? 'Penghasilan' : 'Penarikan Saldo')}</p>
                                         <p className="text-[10px] text-gray-400">{m.tanggal}</p>
+                                        {(m.type === 'penarikan' && m.status && m.status !== 'pending') && (
+                                            <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                                                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                                                    m.status === 'ditolak' ? 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400' :
+                                                    m.status === 'selesai' ? 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400' :
+                                                    'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
+                                                }`}>
+                                                    {m.status === 'ditolak' ? 'Ditolak' : m.status === 'selesai' ? 'Selesai' : 'Diproses'}
+                                                </span>
+                                                {m.catatan && m.status === 'ditolak' && (
+                                                    <span className="text-[10px] text-red-600 dark:text-red-400 italic line-clamp-1" title={m.catatan}>
+                                                        Alasan: {m.catatan}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                <p className={`text-xs font-bold ${m.type === 'penghasilan' ? 'text-green-700' : 'text-gray-900'}`}>
+                                <p className={`text-xs font-bold shrink-0 ${m.type === 'penghasilan' ? 'text-green-700' : 'text-gray-900'}`}>
                                     {m.type === 'penghasilan' ? '+' : '-'}{formatRupiah(m.jumlah)}
                                 </p>
                             </div>

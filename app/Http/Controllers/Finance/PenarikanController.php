@@ -37,6 +37,7 @@ class PenarikanController extends Controller
                     'created_at' => $item->created_at?->format('d M Y H:i'),
                     'processed_at' => $item->processed_at?->format('d M Y H:i'),
                     'utang_refund' => $user ? $user->utangRefund() : 0,
+                    'potensi_utang_refund' => $user ? $user->potensiUtangRefund() : 0,
                     'utang_refund_dipotong' => (int) ($item->utang_refund_dipotong ?? 0),
                     'jumlah_dikirim' => (int) ($item->jumlah_dikirim ?? 0),
                 ];
@@ -60,9 +61,10 @@ class PenarikanController extends Controller
 
             $jumlahPenarikan = (int) preg_replace('/[^0-9]/', '', (string) $penarikan->jumlah);
             
-            // Hitung utang refund mitra
-            $utangRefund = $user->utangRefund();
-            
+            // Hitung utang refund mitra (aktual + potensi, agar potongan
+            // mengikuti estimasi refund yang blm "terbayar")
+            $utangRefund = max($user->utangRefund(), $user->potensiUtangRefund());
+
             // Jumlah yang akan dikirim ke rekening (dikurangi utang refund)
             $jumlahDikirim = $jumlahPenarikan - $utangRefund;
             

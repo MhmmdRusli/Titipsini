@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import {
     ChevronLeft, ExternalLink, ShieldCheck, Ban, X,
-    User as UserIcon, Store, AlertTriangle,
+    User as UserIcon, Store, AlertTriangle, Maximize2,
 } from 'lucide-react';
 
 const APPROVAL_STYLE = {
@@ -188,6 +188,125 @@ function RejectModal({ report, onClose }) {
     );
 }
 
+/* ─────────────────────────────────────────────
+   MODAL PERBANDINGAN FOTO
+───────────────────────────────────────────── */
+function ComparisonModal({ report, onClose }) {
+    const evidenceUrl = report.evidence_url;
+    const kondisiAwalUrls = report.kondisi_awal?.foto_urls || [];
+
+    if (!evidenceUrl && kondisiAwalUrls.length === 0) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+                <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+                    <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+                                <Maximize2 size={18} />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                                    Perbandingan Foto
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    Order #{report.order_code}
+                                </p>
+                            </div>
+                        </div>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                            <X size={18} />
+                        </button>
+                    </div>
+                    <div className="flex items-center justify-center py-12 px-5">
+                        <p className="text-center text-gray-500 dark:text-gray-400">
+                            Tidak ada foto yang tersedia untuk dibandingkan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+                <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+                            <Maximize2 size={18} />
+                        </div>
+                        <div>
+                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                                Perbandingan Foto
+                            </h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Order #{report.order_code}
+                            </p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <X size={18} />
+                    </button>
+                </div>
+
+                <div className="p-5 h-[60vh] overflow-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+                        {/* Customer Evidence Photo - Left */}
+                        <div className="flex flex-col h-full min-h-0">
+                            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                Foto Bukti Customer
+                            </p>
+                            {evidenceUrl ? (
+                                <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 overflow-hidden dark:border-gray-700 dark:bg-gray-900/40 flex items-center justify-center">
+                                    <a href={evidenceUrl} target="_blank" rel="noreferrer" className="block w-full h-full">
+                                        <img
+                                            src={evidenceUrl}
+                                            alt="Bukti Customer"
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </a>
+                                </div>
+                            ) : (
+                                <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center dark:border-gray-700 dark:bg-gray-900/40">
+                                    <p className="text-center text-gray-400 italic">Tidak ada bukti customer.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Mitra Initial Condition Photos - Right */}
+                        <div className="flex flex-col h-full min-h-0">
+                            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400">
+                                Foto Mitra (Kondisi Awal) - {kondisiAwalUrls.length} foto
+                            </p>
+                            {kondisiAwalUrls.length > 0 ? (
+                                <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 overflow-auto dark:border-gray-700 dark:bg-gray-900/40 flex items-center justify-center p-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-full">
+                                        {kondisiAwalUrls.map((url, i) => (
+                                            <div key={i} className="rounded-xl border border-gray-200 bg-white overflow-hidden dark:border-gray-700 dark:bg-gray-800 flex items-center justify-center aspect-square min-h-0">
+                                                <a href={url} target="_blank" rel="noreferrer" className="block w-full h-full flex items-center justify-center">
+                                                    <img
+                                                        src={url}
+                                                        alt={`Kondisi Awal ${i + 1}`}
+                                                        className="max-w-full max-h-full object-contain"
+                                                    />
+                                                </a>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center dark:border-gray-700 dark:bg-gray-900/40">
+                                    <p className="text-center text-gray-400 italic">Mitra belum mengirim dokumentasi.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function Show({ report }) {
     const [modal, setModal] = useState(null);
 
@@ -258,9 +377,21 @@ export default function Show({ report }) {
                             </div>
 
                             <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-[#111827]">
-                                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
-                                    Perbandingan Bukti Foto
-                                </p>
+                                <div className="flex items-center justify-between mb-3">
+                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                        Perbandingan Bukti Foto
+                                    </p>
+                                    {(report.evidence_url || report.kondisi_awal?.foto_urls?.length) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setModal({ kind: 'compare' })}
+                                            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-500 bg-white px-3 py-1.5 text-[11px] font-semibold text-blue-700 hover:bg-blue-50 dark:border-blue-900/60 dark:bg-gray-900 dark:text-blue-400 dark:hover:bg-blue-950/40"
+                                        >
+                                            <Maximize2 size={12} />
+                                            Lihat Perbandingan
+                                        </button>
+                                    )}
+                                </div>
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                     {/* Foto Customer */}
                                     <div>
@@ -436,6 +567,9 @@ export default function Show({ report }) {
             )}
             {modal?.kind === 'reject' && (
                 <RejectModal report={report} onClose={() => setModal(null)} />
+            )}
+            {modal?.kind === 'compare' && (
+                <ComparisonModal report={report} onClose={() => setModal(null)} />
             )}
         </AdminLayout>
     );

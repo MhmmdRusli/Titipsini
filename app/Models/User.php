@@ -208,6 +208,29 @@ class User extends Authenticatable implements MustVerifyEmail
         return (int) max(0, $selisih);
     }
 
+    /**
+     * Potensi utang refund = Total refund yg sudah approve - Total penarikan yg sudah selesai
+     * Ini menunjukkan berapa refund yg blm "terbayar" dari penarikan mitra.
+     * Berguna untuk Finance lihat estimasi potongan SEBELUM approve penarikan pending.
+     */
+    public function potensiUtangRefund(): int
+    {
+        $ordersSelesai = \App\Models\Order::where('partner_id', $this->id)
+            ->whereIn('status', ['selesai', 'completed', 'success'])
+            ->whereNotNull('refund_amount')
+            ->where('refund_amount', '>', 0)
+            ->get();
+
+        $totalRefundApprove = $ordersSelesai->sum(fn ($o) => (float) $o->refund_amount);
+        $totalTarikSelesai = $this->totalPenarikanMitra();
+
+        // Hitung bagian refund yang sudah "terbayar" dari penarikan
+        // (penarikan mengurangi saldo, jadi otomatis cover refund)
+        $sudahTerbayar = min($totalTarikSelesai, $totalRefundApprove);
+
+        return (int) max(0, $totalRefundApprove - $sudahTerbayar);
+    }
+
     public function adaRefund(): bool
     {
         return \App\Models\Order::where('partner_id', $this->id)

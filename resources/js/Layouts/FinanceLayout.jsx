@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Clock, LayoutDashboard, LogOut, Receipt, Wallet, Sun, Moon, X, Menu, Calendar, Undo2, QrCode, ClipboardList, CircleUserRound, Cloud, CloudRain, CloudFog, CloudLightning, CloudSnow } from 'lucide-react';
+import { Clock, LayoutDashboard, LogOut, Receipt, Wallet, Sun, Moon, X, Menu, Calendar, Undo2, QrCode, ClipboardList, CircleUserRound, Cloud, CloudRain, CloudFog, CloudLightning, CloudSnow, AlertCircle } from 'lucide-react';
 
 const navItems = [
     { label: 'Dashboard', href: '/finance/dashboard', icon: LayoutDashboard },
@@ -282,8 +282,16 @@ export default function FinanceLayout({ children, title }) {
                     </div>
                 </header>
 
-                <main className="flex-1 p-6 relative z-10 transition-colors">{children}</main>
-            </div>
+<main className="flex-1 p-6 relative z-10 transition-colors">{children}</main>
+
+            {/* Flash error message */}
+            {props.flash?.error && (
+                <div className="fixed bottom-5 right-5 left-5 z-50 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-900 shadow-lg dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                    <AlertCircle size={18} className="shrink-0 text-red-600 dark:text-red-400" />
+                    <div className="text-xs font-semibold whitespace-normal break-words">{props.flash.error}</div>
+                </div>
+            )}
+        </div>
 
             {showLogoutModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
