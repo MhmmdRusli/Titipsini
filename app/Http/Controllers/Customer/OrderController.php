@@ -148,7 +148,7 @@ class OrderController extends Controller
             return back()->withErrors(['pickup' => 'Pembayaran pesanan belum diverifikasi.']);
         }
 
-        $order->update(['status' => 'pengambilan_diajukan']);
+        $order->update(['status' => 'pengambilan_diajukan', 'pickup_requested_at' => now()]);
 
         if ($order->partner_id) {
             Notifikasi::create([

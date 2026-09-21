@@ -155,7 +155,7 @@ export default function Index({ orders, counts, filters }) {
                                         </dl>
 
                                         {/* Note: Customer pengembalian */}
-                                        {order.pickup_requested_at && (
+                                        {order.status === 'pengambilan_diajukan' && (
                                             <div className="mt-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
                                                 ⚠️ Customer mengajukan pengembalian — Harap diselesaikan
                                             </div>
