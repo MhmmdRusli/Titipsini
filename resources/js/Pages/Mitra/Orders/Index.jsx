@@ -154,6 +154,13 @@ export default function Index({ orders, counts, filters }) {
                                             </div>
                                         </dl>
 
+                                        {/* Note: Customer pengembalian */}
+                                        {order.pickup_requested_at && (
+                                            <div className="mt-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                                                ⚠️ Customer mengajukan pengembalian — Harap diselesaikan
+                                            </div>
+                                        )}
+
                                         {/* Ulasan hanya relevan untuk pesanan yang telah selesai. */}
                                         {selesai && order.review && (
                                             <div className="mt-3 border-t border-dashed border-green-200 pt-3 dark:border-green-900/40">
