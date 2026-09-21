@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
     Wallet,
     CheckCircle2,
@@ -13,7 +13,6 @@ import {
     Sparkles,
     MapPin,
     Calendar,
-    AlertCircle,
     ChevronDown,
     ChevronUp,
 } from 'lucide-react';
