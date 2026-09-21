@@ -16,8 +16,7 @@ class PengaturanKomisiController extends Controller
         // Baca komisi yang tersimpan di database (bukan hardcode 10)
         $commissionRate = (float) PaymentSetting::current()->komisi_persen;
 
-        // File Komisi.jsx ada di resources/js/Pages/Admin/Pengaturan/Komisi.jsx
-        return Inertia::render('Admin/Pengaturan/Komisi', [
+        return Inertia::render('SuperAdmin/Pengaturan/Komisi', [
             'commission_rate' => $commissionRate,
         ]);
     }
