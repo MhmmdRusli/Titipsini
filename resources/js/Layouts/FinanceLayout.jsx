@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Clock, LayoutDashboard, LogOut, Receipt, Wallet, Sun, Moon, X, Menu, Calendar, Undo2, QrCode, ClipboardList, CircleUserRound } from 'lucide-react';
+import { Clock, LayoutDashboard, LogOut, Receipt, Wallet, Sun, Moon, X, Menu, Calendar, Undo2, QrCode, ClipboardList, CircleUserRound, Cloud, CloudRain, CloudFog, CloudLightning, CloudSnow } from 'lucide-react';
 
 const navItems = [
     { label: 'Dashboard', href: '/finance/dashboard', icon: LayoutDashboard },
@@ -40,10 +40,51 @@ function useJamTanggal() {
     return { jam, tanggal };
 }
 
+function useCuaca(propsCuaca) {
+    const [cuaca, setCuaca] = useState(null);
+
+    useEffect(() => {
+        if (propsCuaca) {
+            setCuaca({
+                label: propsCuaca.kondisi || 'Cerah',
+                suhu: propsCuaca.suhu || '30°C',
+                Icon: Cloud,
+            });
+            return;
+        }
+
+        const fetchWeather = (lat, lon) => {
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data?.current_weather) {
+                        setCuaca({
+                            suhu: `${Math.round(data.current_weather.temperature)}°C`,
+                            ...weatherFromCode(data.current_weather.weathercode),
+                        });
+                    }
+                })
+                .catch(() => {});
+        };
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+                () => fetchWeather(WEATHER_LAT, WEATHER_LON)
+            );
+        } else {
+            fetchWeather(WEATHER_LAT, WEATHER_LON);
+        }
+    }, [propsCuaca]);
+
+    return cuaca;
+}
+
 export default function FinanceLayout({ children, title }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
     const { jam, tanggal } = useJamTanggal();
+    const cuaca = useCuaca(props.cuaca);
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -198,6 +239,16 @@ export default function FinanceLayout({ children, title }) {
                                     <Clock size={13} className="text-green-600 dark:text-green-400" />
                                     {jam}
                                 </span>
+                                {cuaca && (
+                                    <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-gray-300">
+                                        {cuaca.Icon ? (
+                                            <cuaca.Icon size={13} className="text-amber-500" />
+                                        ) : (
+                                            <span className="text-amber-500">🌤️</span>
+                                        )}
+                                        {cuaca.label}, {cuaca.suhu}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -47,13 +47,6 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
 
-            'cuaca' => [
-                'kota' => 'Semarang',
-                'suhu' => '30°C',
-                'kondisi' => 'Cerah',
-                'icon' => '🌤️',
-            ],
-
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
