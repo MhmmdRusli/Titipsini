@@ -135,13 +135,13 @@ export default function AccountCreate() {
                                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-gray-400">
                                     Email
                                 </label>
-                                <input
-                                    type="email"
-                                    placeholder="nama@titipsini.com"
-                                    value={data.email}
-                                    onChange={(e) => setData('email', e.target.value)}
-                                    className={inputClass(errors.email)}
-                                />
+                                    <input
+                                        type="email"
+                                        placeholder="nama@titipsini.com"
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                        className={`${inputClass(errors.email)} prevent-white-autofill`}
+                                    />
                                 {errors.email && <p className="mt-1.5 text-xs font-medium text-red-500">{errors.email}</p>}
                             </div>
                         </div>
@@ -174,7 +174,7 @@ export default function AccountCreate() {
                                         placeholder="Minimal 8 karakter"
                                         value={data.password}
                                         onChange={(e) => setData('password', e.target.value)}
-                                        className={`${inputClass(errors.password)} pr-10`}
+                                        className={`${inputClass(errors.password)} pr-10 prevent-white-autofill`}
                                     />
                                     <button
                                         type="button"
@@ -198,7 +198,7 @@ export default function AccountCreate() {
                                         placeholder="Ulangi password"
                                         value={data.password_confirmation}
                                         onChange={(e) => setData('password_confirmation', e.target.value)}
-                                        className={`${inputClass(errors.password_confirmation)} pr-10`}
+                                        className={`${inputClass(errors.password_confirmation)} pr-10 prevent-white-autofill`}
                                     />
                                     <button
                                         type="button"

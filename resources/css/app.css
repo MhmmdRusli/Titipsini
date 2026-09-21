@@ -7,3 +7,23 @@
         @apply bg-gray-50 text-gray-900 antialiased;
     }
 }
+
+@layer utilities {
+    .prevent-white-autofill:-webkit-autofill,
+    .prevent-white-autofill:-webkit-autofill::first-line {
+        -webkit-text-fill-color: #111827 !important;
+        color: #111827 !important;
+        background-color: #f8fafc !important;
+        -webkit-box-shadow: 0 0 0 1000px #f8fafc inset !important;
+        box-shadow: 0 0 0 1000px #f8fafc inset !important;
+    }
+    .dark .prevent-white-autofill:-webkit-autofill,
+    .dark .prevent-white-autofill:-webkit-autofill::first-line {
+        -webkit-text-fill-color: #f3f4f6 !important;
+        color: #f3f4f6 !important;
+        background-color: #1f293b !important;
+        -webkit-box-shadow: 0 0 0 1000px #1f293b inset !important;
+        box-shadow: 0 0 0 1000px #1f293b inset !important;
+    }
+}
+
