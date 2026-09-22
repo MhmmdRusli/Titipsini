@@ -307,6 +307,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::delete('keamanan/sessions/{sessionId}', [PengaturanController::class, 'destroySession'])->name('keamanan.sessions.destroy');
     });
 
+    // Penarikan Saldo - gunakan Finance controller untuk konsistensi
+    Route::prefix('penarikan')->name('penarikan.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Finance\PenarikanController::class, 'index'])->name('index');
+        Route::post('/{penarikan}/approve', [\App\Http\Controllers\Finance\PenarikanController::class, 'approve'])->name('approve');
+        Route::post('/{penarikan}/reject', [\App\Http\Controllers\Finance\PenarikanController::class, 'reject'])->name('reject');
+    });
+
     Route::resource('berita', AdminBeritaController::class)
         ->except(['show', 'create', 'edit'])
         ->parameters(['berita' => 'berita']);

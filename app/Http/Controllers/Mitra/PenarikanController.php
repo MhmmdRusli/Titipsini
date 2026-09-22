@@ -206,6 +206,8 @@ class PenarikanController extends Controller
                 'nama_pemilik' => $penarikan->nama_pemilik,
                 'status' => $penarikan->status,
                 'tanggal' => $penarikan->created_at ? $penarikan->created_at->translatedFormat('d M Y, H:i') : '-',
+                'utang_refund_dipotong' => (int) ($penarikan->utang_refund_dipotong ?? 0),
+                'jumlah_dikirim' => (int) ($penarikan->jumlah_dikirim ?? 0),
             ],
         ]);
     }

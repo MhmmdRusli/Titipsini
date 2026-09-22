@@ -61,9 +61,9 @@ class PenarikanController extends Controller
 
             $jumlahPenarikan = (int) preg_replace('/[^0-9]/', '', (string) $penarikan->jumlah);
             
-            // Hitung utang refund mitra (aktual + potensi, agar potongan
-            // mengikuti estimasi refund yang blm "terbayar")
-            $utangRefund = max($user->utangRefund(), $user->potensiUtangRefund());
+            // Hitung utang refund mitra (aktual + potensi) - single query
+            $utangDetails = $user->utangRefundDetails();
+            $utangRefund = max($utangDetails['utang_refund'], $utangDetails['potensi_utang_refund']);
 
             // Jumlah yang akan dikirim ke rekening (dikurangi utang refund)
             $jumlahDikirim = $jumlahPenarikan - $utangRefund;

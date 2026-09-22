@@ -231,6 +231,33 @@ class User extends Authenticatable implements MustVerifyEmail
         return (int) max(0, $totalRefundApprove - $sudahTerbayar);
     }
 
+    /**
+     * Get both utangRefund and potensiUtangRefund in one query for efficiency.
+     * Returns ['utang_refund' => int, 'potensi_utang_refund' => int]
+     */
+    public function utangRefundDetails(): array
+    {
+        $ordersSelesai = \App\Models\Order::where('partner_id', $this->id)
+            ->whereIn('status', ['selesai', 'completed', 'success'])
+            ->get();
+
+        // utangRefund calculation
+        $saldoKotor = $this->hitungSaldoKotorMitra($ordersSelesai);
+        $totalTarikSelesai = $this->totalPenarikanMitra();
+        $utangRefund = (int) max(0, $totalTarikSelesai - $saldoKotor);
+
+        // potensiUtangRefund calculation
+        $ordersWithRefund = $ordersSelesai->whereNotNull('refund_amount')->where('refund_amount', '>', 0);
+        $totalRefundApprove = $ordersWithRefund->sum(fn ($o) => (float) $o->refund_amount);
+        $sudahTerbayar = min($totalTarikSelesai, $totalRefundApprove);
+        $potensiUtangRefund = (int) max(0, $totalRefundApprove - $sudahTerbayar);
+
+        return [
+            'utang_refund' => $utangRefund,
+            'potensi_utang_refund' => $potensiUtangRefund,
+        ];
+    }
+
     public function adaRefund(): bool
     {
         return \App\Models\Order::where('partner_id', $this->id)

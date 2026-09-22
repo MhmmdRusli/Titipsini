@@ -195,6 +195,28 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                         );
                     })}
                 </div>
+
+                {/* Sort Dropdown */}
+                <div className="flex items-center gap-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Urutkan:</label>
+                    <select
+                        value={`${sortConfig.key}:${sortConfig.direction}`}
+                        onChange={(e) => {
+                            const [key, direction] = e.target.value.split(':');
+                            setSortConfig({ key, direction });
+                        }}
+                        className="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                        <option value="created_at:desc">Terbaru</option>
+                        <option value="created_at:asc">Terlama</option>
+                        <option value="jumlah:desc">Jumlah Terbesar</option>
+                        <option value="jumlah:asc">Jumlah Terkecil</option>
+                        <option value="user.name:asc">Nama Mitra (A-Z)</option>
+                        <option value="user.name:desc">Nama Mitra (Z-A)</option>
+                        <option value="status:asc">Status (A-Z)</option>
+                        <option value="status:desc">Status (Z-A)</option>
+                    </select>
+                </div>
             </div>
 
             {(() => {
@@ -230,7 +252,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-200 dark:divide-gray-700/60">
-                        {penarikan.data.map((item) => (
+                        {sortedData.map((item) => (
                             <div key={item.id} className="p-4 transition-colors hover:bg-gray-50/80 sm:p-5 dark:hover:bg-gray-700/40">
                                 {/* Baris atas: identitas mitra + status + aksi.
                                     flex-col di HP -> identitas di atas, status/tombol
