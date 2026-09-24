@@ -39,7 +39,7 @@ function formatDate(value) {
     });
 }
 
-export default function VendorIndex({ partners, filters }) {
+export default function VendorIndex({ partners, filters, reportSuspendThreshold = 5 }) {
     const [search, setSearch] = useState(filters?.search ?? '');
     const activeStatus = filters?.status ?? '';
 
@@ -115,13 +115,14 @@ export default function VendorIndex({ partners, filters }) {
                             <th className="px-4 py-3 font-bold">Kota</th>
                             <th className="px-4 py-3 font-bold">Tanggal Daftar</th>
                             <th className="px-4 py-3 font-bold">Status</th>
+                            <th className="px-4 py-3 font-bold">Laporan</th>
                             <th className="px-4 py-3 font-bold text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                         {partners.data.length === 0 && (
                             <tr>
-                                <td colSpan={8} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500 select-none">
+                                <td colSpan={9} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500 select-none">
                                     <div className="flex flex-col items-center justify-center">
                                         <ShieldAlert size={32} className="text-gray-300 dark:text-gray-600 mb-2" />
                                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -149,6 +150,18 @@ export default function VendorIndex({ partners, filters }) {
                                         >
                                             {STATUS_LABEL[status] ?? status}
                                         </span>
+                                    </td>
+                                    <td className="px-4 py-3.5 select-none">
+                                        {Number(partner.report_count || 0) >= reportSuspendThreshold ? (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-[11px] font-semibold text-red-700 dark:bg-red-950/60 dark:text-red-400">
+                                                <ShieldAlert size={12} />
+                                                {partner.report_count || 0} Laporan
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                {partner.report_count || 0}
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="px-4 py-3.5 text-right select-none">
                                         <Link

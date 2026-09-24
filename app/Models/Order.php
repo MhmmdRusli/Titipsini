@@ -142,6 +142,11 @@ class Order extends Model
         return $this->belongsTo(Address::class, 'address_id');
     }
 
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class);
+    }
+
     /**
      * Hitung denda keterlambatan.
      *

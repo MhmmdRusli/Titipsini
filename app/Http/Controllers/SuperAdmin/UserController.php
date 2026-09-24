@@ -121,6 +121,7 @@ class UserController extends Controller
                         ->orWhere('phone', 'like', "%{$search}%");
                 });
             })
+            ->withCount('reports as report_count')
             ->select(['id', 'name', 'phone', 'email', 'city', 'verification_status', 'suspended_at', 'created_at'])
             ->orderBy('created_at', 'desc')
             ->paginate(10)
@@ -129,6 +130,7 @@ class UserController extends Controller
         return Inertia::render('SuperAdmin/User/VendorIndex', [
             'partners' => $partners,
             'filters' => $request->only(['status', 'search']),
+            'reportSuspendThreshold' => \App\Http\Controllers\Admin\PartnerController::REPORT_SUSPEND_THRESHOLD,
         ]);
     }
 
@@ -138,8 +140,18 @@ class UserController extends Controller
 
         $partner->load('services');
 
+        $reportCount = $partner->reports()->count();
+        $latestReports = $partner->reports()
+            ->with(['order' => fn ($q) => $q->select('id', 'order_code', 'service_type', 'created_at')])
+            ->latest()
+            ->limit(5)
+            ->get();
+
         return Inertia::render('SuperAdmin/User/VendorShow', [
             'partner' => $partner,
+            'reportCount' => $reportCount,
+            'latestReports' => $latestReports,
+            'reportSuspendThreshold' => \App\Http\Controllers\Admin\PartnerController::REPORT_SUSPEND_THRESHOLD,
         ]);
     }
 

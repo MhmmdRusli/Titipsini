@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Concerns\HasTrashMeta;
@@ -150,6 +151,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function ordersAsPartner(): HasMany
     {
         return $this->hasMany(Order::class, 'partner_id');
+    }
+
+    public function reports(): HasManyThrough
+    {
+        return $this->hasManyThrough(Report::class, Order::class, 'partner_id', 'order_id');
     }
 
     public function services(): HasMany

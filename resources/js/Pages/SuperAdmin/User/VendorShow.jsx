@@ -304,7 +304,7 @@ function SectionCard({ icon, title, subtitle, badge, children }) {
 /* ─────────────────────────────────────────────
    MAIN PAGE
 ───────────────────────────────────────────── */
-export default function VendorShow({ partner }) {
+export default function VendorShow({ partner, reportCount = 0, latestReports = [], reportSuspendThreshold = 5 }) {
     const isSuspended = Boolean(partner.suspended_at);
     const currentStatus = isSuspended ? 'ditangguhkan' : partner.verification_status;
 
@@ -412,6 +412,43 @@ export default function VendorShow({ partner }) {
                 </div>
 
                 <div className="flex flex-col gap-4">
+                {reportCount >= reportSuspendThreshold && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800/40 dark:bg-red-950/20">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5 shrink-0 text-red-600 dark:text-red-400">
+                                <IconWarn />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-red-800 dark:text-red-300">
+                                    Sudah ada {reportCount} laporan kepada vendor ini
+                                </p>
+                                <p className="mt-1 text-xs text-red-700 dark:text-red-400">
+                                    Vendor ini telah melebihi ambang batas laporan ({reportSuspendThreshold}). Pertimbangkan untuk menangguhkan akun ini.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {latestReports && latestReports.length > 0 && (
+                    <SectionCard
+                        icon={<IconWarn />}
+                        title="Laporan Terbaru"
+                        subtitle="5 laporan terakhir terhadap vendor ini"
+                    >
+                        <div className="space-y-2">
+                            {latestReports.map((r) => (
+                                <div key={r.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-gray-800 dark:bg-gray-900/40">
+                                    <p className="text-xs font-semibold text-slate-700 dark:text-gray-200">#{r.order?.order_code ?? r.order_id}</p>
+                                    <p className="mt-1 text-xs text-slate-600 dark:text-gray-300">{r.description || '-'}</p>
+                                    <p className="mt-1 text-[10px] text-slate-400 dark:text-gray-500">
+                                        {r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </SectionCard>
+                )}
                     <SectionCard
                         icon={<IconShield />}
                         title="Verifikasi Identitas"

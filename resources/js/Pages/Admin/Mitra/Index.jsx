@@ -28,7 +28,7 @@ const STATUS_LABEL = {
     ditangguhkan: 'Ditangguhkan',
 };
 
-export default function Index({ partners, filters }) {
+export default function Index({ partners, filters, reportSuspendThreshold = 5 }) {
     const { flash } = usePage().props;
     const [search, setSearch] = useState(filters?.search ?? '');
 
@@ -236,13 +236,14 @@ export default function Index({ partners, filters }) {
                                 <th className="px-4 py-3 font-bold">Kota</th>
                                 <th className="px-4 py-3 font-bold">Tanggal Bergabung</th>
                                 <th className="px-4 py-3 font-bold">Status</th>
+                                <th className="px-4 py-3 font-bold">Laporan</th>
                                 <th className="px-4 py-3 font-bold text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {partners.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={isBulkMode ? 9 : 8} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500 select-none">
+                                    <td colSpan={isBulkMode ? 10 : 9} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500 select-none">
                                         <div className="flex flex-col items-center justify-center">
                                             <Handshake size={32} className="text-gray-300 dark:text-gray-600 mb-2" />
                                             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Belum ada mitra untuk filter ini.</p>
@@ -272,7 +273,7 @@ export default function Index({ partners, filters }) {
                                         <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{partner.email}</td>
                                         <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300">{partner.city ?? '-'}</td>
                                         <td className="px-4 py-3.5 text-gray-500 dark:text-gray-400">{formatDate(partner.created_at)}</td>
-                                        <td className="px-4 py-3.5 select-none">
+                                         <td className="px-4 py-3.5 select-none">
                                             <span
                                                 className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                                                     STATUS_STYLE[displayStatus] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
@@ -280,6 +281,18 @@ export default function Index({ partners, filters }) {
                                             >
                                                 {STATUS_LABEL[displayStatus] || displayStatus}
                                             </span>
+                                        </td>
+                                        <td className="px-4 py-3.5 select-none">
+                                            {Number(partner.report_count || 0) >= reportSuspendThreshold ? (
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-[11px] font-semibold text-red-700 dark:bg-red-950/60 dark:text-red-400">
+                                                    <AlertTriangle size={12} />
+                                                    {partner.report_count || 0} Laporan
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                    {partner.report_count || 0}
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-3.5 text-right select-none">
                                             <div className="flex items-center justify-end gap-1.5">

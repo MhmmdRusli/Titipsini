@@ -16,6 +16,8 @@ use Inertia\Response;
  */
 class PartnerController extends Controller
 {
+    const REPORT_SUSPEND_THRESHOLD = 5;
+
     /**
      * Daftar mitra, dengan filter tab status dan search bar.
      * GET /admin/partners
@@ -36,7 +38,7 @@ class PartnerController extends Controller
                 } else {
                     // Filter standar berdasarkan verification_status untuk tab lainnya
                     $query->where('verification_status', $request->status)
-                          ->whereNull('suspended_at');
+                        ->whereNull('suspended_at');
                 }
             })
             ->when($request->filled('search'), function ($query) use ($request) {
@@ -48,6 +50,7 @@ class PartnerController extends Controller
                 });
             })
             // Tambahkan 'suspended_at' ke dalam select agar terbaca oleh frontend
+            ->withCount('reports as report_count')
             ->select(['id', 'name', 'phone', 'email', 'city', 'verification_status', 'suspended_at', 'created_at'])
             ->orderBy('created_at', 'desc')
             ->paginate(10)
@@ -56,6 +59,7 @@ class PartnerController extends Controller
         return Inertia::render('Admin/Mitra/Index', [
             'partners' => $partners,
             'filters' => $request->only(['status', 'search']),
+            'reportSuspendThreshold' => self::REPORT_SUSPEND_THRESHOLD,
         ]);
     }
 
@@ -69,8 +73,18 @@ class PartnerController extends Controller
 
         $partner->load('services');
 
+        $reportCount = $partner->reports()->count();
+        $latestReports = $partner->reports()
+            ->with(['order' => fn ($q) => $q->select('id', 'order_code', 'service_type', 'created_at')])
+            ->latest()
+            ->limit(5)
+            ->get();
+
         return Inertia::render('Admin/Mitra/Show', [
             'partner' => $partner,
+            'reportCount' => $reportCount,
+            'latestReports' => $latestReports,
+            'reportSuspendThreshold' => self::REPORT_SUSPEND_THRESHOLD,
         ]);
     }
 
