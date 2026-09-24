@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import { Search, Truck, X } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
@@ -7,9 +7,10 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 export default function Landing({ detectedKota = 'Yogyakarta' }) {
     const [open, setOpen] = useState(false);
     const [cityQuery, setCityQuery] = useState('');
-    const [selectedCity, setSelectedCity] = useState(detectedKota);
+    const [selectedCity, setSelectedCity] = useState('');
     const [cityResults, setCityResults] = useState([]);
     const [cityLoading, setCityLoading] = useState(false);
+    const [cityError, setCityError] = useState('');
     const debounceRef = useRef(null);
 
     useEffect(() => {
@@ -23,7 +24,7 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
         setCityLoading(true);
         debounceRef.current = setTimeout(async () => {
             try {
-                const { data } = await axios.get('/api/cities', { params: { search: cityQuery } });
+                const { data } = await axios.get('/api/cities', { params: { search: cityQuery, kategori: 'pindahan' } });
                 setCityResults(data ?? []);
             } catch {
                 setCityResults([]);
@@ -34,6 +35,15 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
 
         return () => clearTimeout(debounceRef.current);
     }, [cityQuery, open]);
+
+    const handleOke = () => {
+        if (!selectedCity) {
+            setCityError('Pilih kota dari daftar di bawah.');
+            return;
+        }
+        setCityError('');
+        router.get(`/app/services/pindahan/search?kota=${encodeURIComponent(selectedCity)}`);
+    };
 
     return (
         <CustomerLayout title="Titip Pindahan" backHref="/app/dashboard">
@@ -98,10 +108,19 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
                             <Link href="/app/services?kategori=pindahan&browse=1" className="rounded-xl border border-green-700 py-3 text-center text-xs font-bold text-green-700 dark:border-green-400 dark:text-green-400">
                                 KOTA LAIN
                             </Link>
-                            <Link href={`/app/services/pindahan/search?kota=${encodeURIComponent(selectedCity)}`} className="rounded-xl bg-green-700 py-3 text-center text-xs font-bold text-white dark:bg-green-500">
+                            <button
+                                type="button"
+                                onClick={handleOke}
+                                className="rounded-xl bg-green-700 py-3 text-center text-xs font-bold text-white dark:bg-green-500"
+                            >
                                 OKE
-                            </Link>
+                            </button>
                         </div>
+                        {cityError && (
+                            <p className="mt-2 text-center text-xs font-semibold text-red-600 dark:text-red-400">
+                                {cityError}
+                            </p>
+                        )}
                     </div>
                 </div>
             )}

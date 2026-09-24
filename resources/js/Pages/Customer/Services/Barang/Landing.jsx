@@ -37,13 +37,12 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
     }, [cityQuery, open]);
 
     const handleOke = () => {
-        const city = selectedCity.trim() || cityQuery.trim();
-        if (!city) {
-            setCityError('Pilih kota terlebih dahulu.');
+        if (!selectedCity) {
+            setCityError('Pilih kota dari daftar di bawah.');
             return;
         }
         setCityError('');
-        router.get(`/app/services/barang/search?kota=${encodeURIComponent(city)}`);
+        router.get(`/app/services/barang/search?kota=${encodeURIComponent(selectedCity)}`);
     };
 
     return (

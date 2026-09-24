@@ -6,6 +6,13 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 
 const LOCAL_STORAGE_KEY = 'titipsini:last_kota';
 
+function titipHref(kategori, serviceId) {
+    if (kategori === 'barang') {
+        return `/app/services/barang/paket-pilihan?service_id=${serviceId}`;
+    }
+    return `/app/services/${kategori}/${serviceId}/titip`;
+}
+
 const CATEGORY_ICON = {
     barang: Package,
     kendaraan: Car,
@@ -271,7 +278,7 @@ export default function Search({ kategori = 'barang', detectedKota = null, openC
                                     <button
                                         type="button"
                                         disabled={!m.isBuka || m.is_orderable === false || sedangTutup || isFull}
-                                        onClick={() => { if (m.is_orderable !== false && ! sedangTutup && !isFull) router.visit(`/app/services/${kategori}/${m.id}/titip`); }}
+                                        onClick={() => { if (m.is_orderable !== false && ! sedangTutup && !isFull) router.visit(titipHref(kategori, m.id)); }}
                                         className="flex-1 rounded-lg bg-green-700 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-green-500 dark:disabled:bg-gray-700"
                                     >
                                         {isFull ? 'Penuh' : sedangTutup ? 'Layanan Sedang Tutup' : 'Titip Disini'}
