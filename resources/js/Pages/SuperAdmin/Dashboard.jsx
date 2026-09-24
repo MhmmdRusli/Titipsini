@@ -158,7 +158,7 @@ export default function Dashboard({
         {/* Banner Hijau */}
         <div className="relative overflow-hidden rounded-2xl bg-[#007b49] p-6 text-white shadow-md">
           <div className="pointer-events-none absolute -right-10 -top-10 h-64 w-64 rounded-full bg-white/10 blur-xl" />
-          <div className="pointer-events-none absolute -bottom-12 right-24 h-48 w-48 rounded-full bg-white/5 blur-lg" />
+          <div className="pointer-events-none absolute -bottom-12 right-24ujkkkkkkljkkk h-48 w-48 rounded-full bg-white/5 blur-lg" />
 
           <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
@@ -167,7 +167,7 @@ export default function Dashboard({
                 <span>SUPER ADMIN DASHBOARD</span>
               </div>
               <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-white md:text-3xl">
-                Halo, Selamat Datang di Dashboard Admin
+                Halo, Selamat Datang di Dashboard Super Admin
               </h1>
               <p className="mt-1 text-xs text-green-100 md:text-sm">
                 Pantau seluruh aktivitas transaksi, pelanggan, dan vendor Titipsini secara terpusat.

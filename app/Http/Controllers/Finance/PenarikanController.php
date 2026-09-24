@@ -17,9 +17,24 @@ class PenarikanController extends Controller
     public function index(Request $request): Response
     {
         $status = $request->query('status', 'pending');
+        $kota = $request->query('kota');
+        $dateRange = $request->query('date_range');
 
-        $penarikan = Penarikan::with('user:id,name,email')
+        $penarikan = Penarikan::with('user:id,name,email,city')
             ->when($status !== 'semua', fn ($q) => $q->where('status', $status))
+            ->when($kota, fn ($q) => $q->whereHas('user', fn ($uq) => $uq->where('city', $kota)))
+            ->when(in_array($dateRange, ['today', '7d', '30d', '90d'], true), function ($q) use ($dateRange) {
+                $start = match ($dateRange) {
+                    'today' => now()->startOfDay(),
+                    '7d' => now()->subDays(7)->startOfDay(),
+                    '30d' => now()->subDays(30)->startOfDay(),
+                    '90d' => now()->subDays(90)->startOfDay(),
+                    default => null,
+                };
+                if ($start) {
+                    $q->where('created_at', '>=', $start);
+                }
+            })
             ->latest()
             ->paginate(15)
             ->through(function (Penarikan $item) {
@@ -44,9 +59,17 @@ class PenarikanController extends Controller
             })
             ->withQueryString();
 
+        $kotaList = \App\Models\User::query()
+            ->whereNotNull('city')
+            ->where('city', '!=', '')
+            ->distinct()
+            ->orderBy('city')
+            ->pluck('city');
+
         return Inertia::render('Finance/Penarikan/Index', [
             'penarikan' => $penarikan,
-            'filter' => ['status' => $status],
+            'filter' => ['status' => $status, 'kota' => $kota, 'date_range' => $dateRange],
+            'kotaList' => $kotaList,
             'hasAnyRefundDebt' => (bool) \App\Models\Order::whereNotNull('refund_amount')->where('refund_amount', '>', 0)->exists(),
         ]);
     }

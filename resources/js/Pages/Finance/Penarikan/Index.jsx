@@ -46,7 +46,7 @@ function formatDate(value) {
 
 const cardCls = 'overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800';
 
-export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = false }) {
+export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = false, kotaList = [] }) {
     const { flash } = usePage().props;
     const activeStatus = filter?.status ?? 'pending';
 
@@ -56,6 +56,10 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [approveError, setApproveError] = useState(null);
 
+    const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
+    const [kotaFilter, setKotaFilter] = useState(filter?.kota ?? 'all');
+    const [dateFilter, setDateFilter] = useState(filter?.date_range ?? 'all');
+
     useEffect(() => {
         if (!approveError) return;
         const t = setTimeout(() => setApproveError(null), 4000);
@@ -63,7 +67,27 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
     }, [approveError]);
 
     const changeTab = (status) => {
-        router.get('/finance/penarikan', { status }, { preserveState: true, preserveScroll: true, replace: true });
+        router.get(
+            '/finance/penarikan',
+            {
+                status: status,
+                kota: kotaFilter === 'all' ? null : kotaFilter,
+                date_range: dateFilter === 'all' ? null : dateFilter,
+            },
+            { preserveState: true, preserveScroll: true, replace: true }
+        );
+    };
+
+    const applyFilters = ({ status = activeStatus, kota = kotaFilter, date_range = dateFilter } = {}) => {
+        router.get(
+            '/finance/penarikan',
+            {
+                status,
+                kota: kota === 'all' ? null : kota,
+                date_range: date_range === 'all' ? null : date_range,
+            },
+            { preserveState: true, preserveScroll: true, replace: true }
+        );
     };
 
     const handleApprove = () => {
@@ -109,6 +133,24 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
         );
     };
 
+     const sortedData = useMemo(() => {
+        const list = penarikan?.data ?? [];
+        const accessor = (item, key) =>
+            key.split('.').reduce((acc, k) => (acc == null ? null : acc[k]), item) ?? '';
+        const sorted = [...list].sort((a, b) => {
+            let av = accessor(a, sortConfig.key);
+            let bv = accessor(b, sortConfig.key);
+            if (sortConfig.key === 'jumlah') {
+                av = Number(av) || 0;
+                bv = Number(bv) || 0;
+            }
+            if (typeof av === 'number' && typeof bv === 'number') return av - bv;
+            const cmp = String(av).localeCompare(String(bv), 'id-ID');
+            return sortConfig.direction === 'asc' ? cmp : -cmp;
+        });
+        return sorted;
+    }, [penarikan?.data, sortConfig]);
+
     return (
         <FinanceLayout>
             <Head title="Penarikan Saldo" />
@@ -130,18 +172,43 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                         </p>
                     </div>
 
-                    {/* Filter Capsule di Kanan Banner */}
-                    <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs text-white backdrop-blur-sm">
-                        <div className="flex items-center gap-2">
-                            <MapPin size={14} className="text-yellow-400" />
-                            <span>Semua Kota</span>
-                        </div>
-                        <span className="text-white/30">|</span>
-                        <div className="flex items-center gap-2">
-                            <Calendar size={14} className="text-yellow-400" />
-                            <span>Semua Waktu</span>
-                        </div>
-                    </div>
+                     {/* Filter Kota & Waktu di Kanan Banner */}
+                     <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs text-white backdrop-blur-sm">
+                         <div className="flex items-center gap-1.5">
+                             <MapPin size={14} className="text-yellow-400" />
+                             <select
+                                 value={kotaFilter}
+                                 onChange={(e) => {
+                                     setKotaFilter(e.target.value);
+                                     applyFilters({ kota: e.target.value });
+                                 }}
+                                 className="w-40 cursor-pointer appearance-none bg-white/15 text-left text-xs font-semibold text-white underline decoration-yellow-400/50 underline-offset-2 outline-none ring-1 ring-white/20 focus:ring-green-400"
+                             >
+                                 <option value="all" className="text-gray-900 bg-white">Semua Kota</option>
+                                 {kotaList.map((kota) => (
+                                     <option key={kota} value={kota} className="text-gray-900 bg-white">{kota}</option>
+                                 ))}
+                             </select>
+                         </div>
+                         <span className="text-white/30">|</span>
+                         <div className="flex items-center gap-1.5">
+                             <Calendar size={14} className="text-yellow-400" />
+                             <select
+                                 value={dateFilter}
+                                 onChange={(e) => {
+                                     setDateFilter(e.target.value);
+                                     applyFilters({ date_range: e.target.value });
+                                 }}
+                                 className="w-36 cursor-pointer appearance-none bg-white/15 text-left text-xs font-semibold text-white underline decoration-yellow-400/50 underline-offset-2 outline-none ring-1 ring-white/20 focus:ring-green-400"
+                             >
+                                 <option value="all" className="text-gray-900 bg-white">Semua Waktu</option>
+                                 <option value="today" className="text-gray-900 bg-white">Hari Ini</option>
+                                 <option value="7d" className="text-gray-900 bg-white">7 Hari Terakhir</option>
+                                 <option value="30d" className="text-gray-900 bg-white">30 Hari Terakhir</option>
+                                 <option value="90d" className="text-gray-900 bg-white">90 Hari Terakhir</option>
+                             </select>
+                         </div>
+                     </div>
                 </div>
 
                 {/* Bulatan Dekorasi Transparan Kanan Hero */}
