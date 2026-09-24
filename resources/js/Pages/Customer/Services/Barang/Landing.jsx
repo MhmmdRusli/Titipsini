@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import { Package, Search, X } from 'lucide-react';
 import CustomerLayout from '@/Layouts/CustomerLayout';
@@ -7,9 +7,10 @@ import CustomerLayout from '@/Layouts/CustomerLayout';
 export default function Landing({ detectedKota = 'Yogyakarta' }) {
     const [open, setOpen] = useState(false);
     const [cityQuery, setCityQuery] = useState('');
-    const [selectedCity, setSelectedCity] = useState(detectedKota);
+    const [selectedCity, setSelectedCity] = useState('');
     const [cityResults, setCityResults] = useState([]);
     const [cityLoading, setCityLoading] = useState(false);
+    const [cityError, setCityError] = useState('');
     const debounceRef = useRef(null);
 
     useEffect(() => {
@@ -34,6 +35,16 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
 
         return () => clearTimeout(debounceRef.current);
     }, [cityQuery, open]);
+
+    const handleOke = () => {
+        const city = selectedCity.trim() || cityQuery.trim();
+        if (!city) {
+            setCityError('Pilih kota terlebih dahulu.');
+            return;
+        }
+        setCityError('');
+        router.get(`/app/services/barang/search?kota=${encodeURIComponent(city)}`);
+    };
 
     return (
         <CustomerLayout title="Titip Barang" backHref="/app/dashboard">
@@ -74,8 +85,11 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
                             <input
                                 type="text"
                                 value={cityQuery}
-                                onChange={(e) => setCityQuery(e.target.value)}
-                                placeholder={selectedCity}
+                                onChange={(e) => {
+                                    setCityQuery(e.target.value);
+                                    setCityError('');
+                                }}
+                                placeholder="Cari atau ketik nama kota"
                                 className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-green-700 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                             />
                         </label>
@@ -86,7 +100,12 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
                                     <button
                                         key={city.nama}
                                         type="button"
-                                        onClick={() => { setSelectedCity(city.nama); setCityQuery(city.nama); setCityResults([]); }}
+                                        onClick={() => {
+                                            setSelectedCity(city.nama);
+                                            setCityQuery(city.nama);
+                                            setCityResults([]);
+                                            setCityError('');
+                                        }}
                                         className="block w-full border-b border-gray-100 px-3 py-2 text-left text-sm text-gray-700 last:border-0 dark:border-gray-700 dark:text-gray-200"
                                     >
                                         {city.nama}
@@ -98,10 +117,19 @@ export default function Landing({ detectedKota = 'Yogyakarta' }) {
                             <Link href="/app/services?kategori=barang&browse=1" className="rounded-xl border border-green-700 py-3 text-center text-xs font-bold text-green-700 dark:border-green-400 dark:text-green-400">
                                 KOTA LAIN
                             </Link>
-                            <Link href={`/app/services/barang/search?kota=${encodeURIComponent(selectedCity)}`} className="rounded-xl bg-green-700 py-3 text-center text-xs font-bold text-white dark:bg-green-500">
+                            <button
+                                type="button"
+                                onClick={handleOke}
+                                className="rounded-xl bg-green-700 py-3 text-center text-xs font-bold text-white dark:bg-green-500"
+                            >
                                 OKE
-                            </Link>
+                            </button>
                         </div>
+                        {cityError && (
+                            <p className="mt-2 text-center text-xs font-semibold text-red-600 dark:text-red-400">
+                                {cityError}
+                            </p>
+                        )}
                     </div>
                 </div>
             )}
