@@ -35,8 +35,11 @@ const wrapperClass = (hasError) => `
     }
 `;
 
+// focus:ring-0 ditambahkan di sini — tanpa ini, ring/box-shadow biru bawaan
+// plugin @tailwindcss/forms numpuk di atas ring hijau custom dari wrapperClass,
+// jadi kelihatan kayak border dobel pas field-nya di-focus.
 const inputClass =
-    'w-full bg-slate-50 dark:bg-gray-800 rounded-2xl px-4 py-3 pl-11 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none';
+    'w-full bg-slate-50 dark:bg-gray-800 rounded-2xl px-4 py-3 pl-11 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-0 !bg-none !border-0';
 
 function FieldLabel({ children }) {
     return (
@@ -473,4 +476,4 @@ export default function AddressForm({ address = null }) {
             )}
         </CustomerLayout>
     );
-}
+}       
