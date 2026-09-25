@@ -382,7 +382,7 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
                         <select
                             value={provinsiId}
                             onChange={handleProvinsiChange}
-                            className={`${inputClass(errors.provinsi)} appearance-none pr-8`}
+                            className={`${inputClass(errors.provinsi)} appearance-none bg-none pr-8`}
                         >
                             <option value="">Provinsi</option>
                             {daftarProvinsi.map((p) => (
@@ -401,7 +401,7 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
                             value={kabupatenId}
                             onChange={handleKabupatenChange}
                             disabled={!provinsiId || loadingKabupaten}
-                            className={`${inputClass(errors.kabupaten_kota)} appearance-none pr-8`}
+                            className={`${inputClass(errors.kabupaten_kota)} appearance-none bg-none pr-8`}
                         >
                             <option value="">
                                 {loadingKabupaten ? 'Memuat...' : 'Kabupaten/Kota'}
@@ -422,7 +422,7 @@ export default function FormIdentitasGudang({ kategori, editingItem, onBatal, on
                             value={kecamatanId}
                             onChange={handleKecamatanChange}
                             disabled={!kabupatenId || loadingKecamatan}
-                            className={`${inputClass(errors.kecamatan)} appearance-none pr-8`}
+                            className={`${inputClass(errors.kecamatan)} appearance-none bg-none pr-8`}
                         >
                             <option value="">
                                 {loadingKecamatan ? 'Memuat...' : 'Kecamatan'}

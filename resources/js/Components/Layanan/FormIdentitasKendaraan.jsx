@@ -133,7 +133,7 @@ export default function FormIdentitasKendaraan({ kategori, editingItem, daftarKo
                             <select
                                 value={data.merek_kendaraan}
                                 onChange={(e) => setData('merek_kendaraan', e.target.value)}
-                                className={`${inputClass(errors.merek_kendaraan)} appearance-none pr-8`}
+                                className={`${inputClass(errors.merek_kendaraan)} appearance-none bg-none pr-8`}
                             >
                                 <option value="">Merek Kendaraan</option>
                                 {MEREK_OPTIONS.map((merek) => (
@@ -151,7 +151,7 @@ export default function FormIdentitasKendaraan({ kategori, editingItem, daftarKo
                             <select
                                 value={data.jenis_pickup}
                                 onChange={(e) => setData('jenis_pickup', e.target.value)}
-                                className={`${inputClass(errors.jenis_pickup)} appearance-none pr-8`}
+                                className={`${inputClass(errors.jenis_pickup)} appearance-none bg-none pr-8`}
                             >
                                 <option value="">Jenis Kendaraan Pick Up</option>
                                 {JENIS_PICKUP_OPTIONS.map((jenis) => (
@@ -182,7 +182,7 @@ export default function FormIdentitasKendaraan({ kategori, editingItem, daftarKo
                                 <select
                                     value={data.kota}
                                     onChange={(e) => setData('kota', e.target.value)}
-                                    className={`${inputClass(errors.kota)} appearance-none pr-8`}
+                                    className={`${inputClass(errors.kota)} appearance-none bg-none pr-8`}
                                 >
                                     <option value="">Pilih kota</option>
                                     {daftarKota.map((kota) => (
