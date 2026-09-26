@@ -187,7 +187,7 @@ export default function FormBangunan({ service, buildingOptions = [], addresses 
                             <select
                                 value={form.address_id}
                                 onChange={(e) => update('address_id', e.target.value)}
-                                className="w-full appearance-none rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                                className="w-full appearance-none select-no-arrow rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                             >
                                 <option value="">Pilih alamat</option>
                                 {addresses.map((address) => (

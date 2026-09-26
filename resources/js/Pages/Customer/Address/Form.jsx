@@ -71,7 +71,7 @@ function SelectField({ icon, value, onChange, placeholder, options, disabled, er
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
-                className={`${inputClass} appearance-none pr-10 disabled:cursor-not-allowed disabled:opacity-50`}
+                className={`${inputClass} appearance-none select-no-arrow pr-10 disabled:cursor-not-allowed disabled:opacity-50`}
             >
                 <option value="">{placeholder}</option>
                 {options.map((opt) => (

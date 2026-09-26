@@ -25,5 +25,10 @@
         -webkit-box-shadow: 0 0 0 1000px #1f293b inset !important;
         box-shadow: 0 0 0 1000px #1f293b inset !important;
     }
+    .select-no-arrow {
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+    }
 }
 
