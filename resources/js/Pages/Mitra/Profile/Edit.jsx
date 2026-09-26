@@ -101,7 +101,7 @@ export default function ProfileEdit({ partner }) {
                     />
                 </div>
 
-                <Field label="Nomor Telepon" value={data.phone} onChange={(v) => setData('phone', v)} error={errors.phone} />
+                <Field label="Nomor Telepon" value={data.phone} onChange={(v) => setData('phone', v.replace(/\D/g, ''))} error={errors.phone} />
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Jenis Kelamin</label>

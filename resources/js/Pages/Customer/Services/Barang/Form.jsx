@@ -480,7 +480,7 @@ export default function FormBarang({ serviceId, addresses = [], ukuranBarangOpti
                             <select
                                 value={form.ukuranBarang}
                                 onChange={(e) => update('ukuranBarang', e.target.value)}
-                                className="appearance-none bg-none w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                                className="appearance-none w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                             >
                                 <option value="">Pilih Ukuran Barang</option>
                                 {ukuranBarangOptions.map((opt) => (

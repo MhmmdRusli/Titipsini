@@ -145,9 +145,10 @@ export default function Profile({ admin }) {
 
                 <Field label="Nomor Telepon" icon={Phone} error={errors.phone}>
                   <input
-                    type="text"
+                    type="tel"
+                    inputMode="numeric"
                     value={data.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
+                    onChange={(e) => updateField("phone", e.target.value.replace(/\D/g, ''))}
                     className="field-input"
                     autoComplete="off"
                     name="f_tp_03"

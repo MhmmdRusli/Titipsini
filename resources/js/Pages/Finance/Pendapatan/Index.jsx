@@ -64,12 +64,12 @@ function FilterDropdown({ label, options, value, onChange, isOpen, onToggle }) {
             </button>
 
             {isOpen && (
-                <div className="absolute left-0 top-full z-20 mt-1.5 max-h-64 w-40 overflow-y-auto rounded-lg bg-slate-900 py-1 text-xs font-medium text-white shadow-lg ring-1 ring-white/10">
+                <div className="absolute left-0 top-full z-20 mt-1.5 max-h-64 w-40 overflow-y-auto rounded-lg bg-white py-1 text-xs font-medium text-gray-800 shadow-lg ring-1 ring-gray-200">
                     <button
                         type="button"
                         onClick={() => onChange('')}
-                        className={`block w-full px-3 py-1.5 text-left transition hover:bg-slate-700 ${
-                            !value ? 'bg-slate-800 font-bold text-yellow-300' : ''
+                        className={`block w-full px-3 py-1.5 text-left transition hover:bg-gray-100 ${
+                            !value ? 'bg-green-50 font-bold text-green-700' : ''
                         }`}
                     >
                         {label}
@@ -79,8 +79,8 @@ function FilterDropdown({ label, options, value, onChange, isOpen, onToggle }) {
                             key={opt.value}
                             type="button"
                             onClick={() => onChange(opt.value)}
-                            className={`block w-full px-3 py-1.5 text-left transition hover:bg-slate-700 ${
-                                value === opt.value ? 'bg-slate-800 font-bold text-yellow-300' : ''
+                            className={`block w-full px-3 py-1.5 text-left transition hover:bg-gray-100 ${
+                                value === opt.value ? 'bg-green-50 font-bold text-green-700' : ''
                             }`}
                         >
                             {opt.label}

@@ -25,5 +25,25 @@
         -webkit-box-shadow: 0 0 0 1000px #1f293b inset !important;
         box-shadow: 0 0 0 1000px #1f293b inset !important;
     }
+    /* Override global dark mode select styling for hero banner filters */
+    .dark main .hero-banner-filter {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #f8fafc !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    .dark main .hero-banner-filter option {
+        background-color: #ffffff !important;
+        color: #111827 !important;
+    }
+    /* Dark mode for regular native selects (not hero banner) */
+    .dark select:not(.hero-banner-filter) {
+        background-color: #1f2937 !important;
+        color: #f3f4f6 !important;
+        border-color: #374151 !important;
+    }
+    .dark select:not(.hero-banner-filter) option {
+        background-color: #1f2937 !important;
+        color: #f3f4f6 !important;
+    }
 }
 

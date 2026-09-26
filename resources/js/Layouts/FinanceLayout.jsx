@@ -157,6 +157,16 @@ export default function FinanceLayout({ children, title }) {
                     color: #f1f5f9 !important;
                     border-color: #334155 !important;
                 }
+                /* Hero banner filter selects: jaga tampilan asli walau di dark mode */
+                .dark main .bg-green-700 select {
+                    background-color: rgba(255, 255, 255, 0.15) !important;
+                    color: #f8fafc !important;
+                    border-color: rgba(255, 255, 255, 0.2) !important;
+                }
+                .dark main .bg-green-700 select option {
+                    background-color: #ffffff !important;
+                    color: #111827 !important;
+                }
             `}</style>
 
             {sidebarOpen && (
