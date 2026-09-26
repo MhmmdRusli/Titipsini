@@ -199,7 +199,7 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
                             <select
                                 value={data.jenis_kendaraan}
                                 onChange={(e) => setData('jenis_kendaraan', e.target.value)}
-                                className={`${inputClass(errors.jenis_kendaraan)} appearance-none pr-8`}
+                                className={`${inputClass(errors.jenis_kendaraan)} appearance-none bg-none pr-8`}
                             >
                                 <option value="">Jenis Kendaraan</option>
                                 {JENIS_KENDARAAN_OPTIONS.map((opt) => (
@@ -230,7 +230,7 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
                         <select
                             value={provinsiId}
                             onChange={handleProvinsiChange}
-                            className={`${inputClass(errors.provinsi)} appearance-none pr-8`}
+                            className={`${inputClass(errors.provinsi)} appearance-none bg-none pr-8`}
                         >
                             <option value="">Provinsi</option>
                             {daftarProvinsi.map((p) => (
@@ -249,7 +249,7 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
                             value={kabupatenId}
                             onChange={handleKabupatenChange}
                             disabled={!provinsiId}
-                            className={`${inputClass(errors.kabupaten_kota)} appearance-none pr-8`}
+                            className={`${inputClass(errors.kabupaten_kota)} appearance-none bg-none pr-8`}
                         >
                             <option value="">Kabupaten/Kota</option>
                             {daftarKabupaten.map((k) => (
@@ -269,7 +269,7 @@ export default function FormAlamatLahanParkir({ kategori, editingItem, onBatal, 
                             onChange={handleKecamatanChange}
                             disabled={!kabupatenId}
                             defaultValue=""
-                            className={`${inputClass(errors.kecamatan)} appearance-none pr-8`}
+                            className={`${inputClass(errors.kecamatan)} appearance-none bg-none pr-8`}
                         >
                             <option value="">Kecamatan</option>
                             {daftarKecamatan.map((k) => (

@@ -294,20 +294,23 @@ export default function KategoriLayananView({
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="mb-1 block text-xs font-medium text-gray-600">Kota</label>
+<div>
+                                <label className="mb-1 block text-xs font-medium text-gray-600">Kota</label>
+                                <div className="relative">
                                     <select
                                         value={data.kota}
                                         onChange={(e) => setData('kota', e.target.value)}
-                                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                        className="appearance-none bg-none w-full rounded-lg border border-gray-200 px-3 py-2 pr-8 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                                     >
                                         <option value="">Pilih kota</option>
                                         {daftarKota.map((kota) => (
                                             <option key={kota} value={kota}>{kota}</option>
                                         ))}
                                     </select>
-                                    {errors.kota && <p className="mt-1 text-xs text-red-500">{errors.kota}</p>}
+                                    <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                 </div>
+                                {errors.kota && <p className="mt-1 text-xs text-red-500">{errors.kota}</p>}
+                            </div>
                                 <div>
                                     <label className="mb-1 block text-xs font-medium text-gray-600">Kecamatan</label>
                                     <input
