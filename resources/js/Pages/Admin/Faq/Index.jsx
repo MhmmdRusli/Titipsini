@@ -164,9 +164,10 @@ export default function FaqIndex({ faq }) {
                             <div>
                                 <label className="mb-1 block text-xs font-semibold text-gray-600 dark:text-gray-400">Urutan Tampil</label>
                                 <input
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
                                     value={data.urutan}
-                                    onChange={(e) => setData('urutan', e.target.value)}
+                                    onChange={(e) => setData('urutan', e.target.value.replace(/\D/g, ''))}
                                     className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3.5 py-2 text-xs text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
                                     placeholder="0"
                                 />

@@ -224,14 +224,14 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
 
             {/* Modal preview bukti transfer */}
             {previewImage && verifyTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm" onClick={() => setPreviewImage(false)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm" onClick={() => { setPreviewImage(false); setVerifyTarget(null); }}>
                     <div className="w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-xl dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
                             <div>
                                 <span className="text-xs font-semibold uppercase tracking-wider text-green-600">Bukti Transfer</span>
                                 <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{verifyTarget.order_code}</h3>
                             </div>
-                            <button type="button" onClick={() => setPreviewImage(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
+                            <button type="button" onClick={() => { setPreviewImage(false); setVerifyTarget(null); }} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800">
                                 <X size={18} />
                             </button>
                         </div>
@@ -246,7 +246,7 @@ export default function Index({ orders = { data: [], links: [], total: 0 }, filt
                             <div className="mt-5 flex items-center justify-end gap-2">
                                 <button
                                     type="button"
-                                    onClick={() => setPreviewImage(false)}
+                                    onClick={() => { setPreviewImage(false); setVerifyTarget(null); }}
                                     className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                                 >
                                     Tutup

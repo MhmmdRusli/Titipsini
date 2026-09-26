@@ -156,9 +156,10 @@ export default function ProfileEdit({ user }) {
                                 </span>
                                 <input
                                     type="tel"
+                                    inputMode="numeric"
                                     placeholder="08xxxxxxxxxx"
                                     value={data.phone}
-                                    onChange={(e) => setData('phone', e.target.value)}
+                                    onChange={(e) => setData('phone', e.target.value.replace(/\D/g, ''))}
                                     className={getInputClass(errors.phone)}
                                 />
                             </div>

@@ -178,9 +178,10 @@ export default function Edit({ user, sessions = [] }) {
                   Nomor Telepon
                 </label>
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="numeric"
                   value={profileForm.data.phone}
-                  onChange={(e) => profileForm.setData("phone", e.target.value)}
+                  onChange={(e) => profileForm.setData("phone", e.target.value.replace(/\D/g, ''))}
                   placeholder="Opsional"
                   className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />

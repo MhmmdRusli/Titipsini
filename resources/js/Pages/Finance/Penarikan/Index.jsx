@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Wallet,
     CheckCircle2,
@@ -13,8 +13,7 @@ import {
     Sparkles,
     MapPin,
     Calendar,
-    ChevronDown,
-    ChevronUp,
+    AlertCircle,
 } from 'lucide-react';
 import FinanceLayout from '@/Layouts/FinanceLayout';
 
@@ -46,7 +45,7 @@ function formatDate(value) {
 
 const cardCls = 'overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800';
 
-export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = false, kotaList = [] }) {
+export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = false }) {
     const { flash } = usePage().props;
     const activeStatus = filter?.status ?? 'pending';
 
@@ -56,10 +55,6 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [approveError, setApproveError] = useState(null);
 
-    const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
-    const [kotaFilter, setKotaFilter] = useState(filter?.kota ?? 'all');
-    const [dateFilter, setDateFilter] = useState(filter?.date_range ?? 'all');
-
     useEffect(() => {
         if (!approveError) return;
         const t = setTimeout(() => setApproveError(null), 4000);
@@ -67,27 +62,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
     }, [approveError]);
 
     const changeTab = (status) => {
-        router.get(
-            '/finance/penarikan',
-            {
-                status: status,
-                kota: kotaFilter === 'all' ? null : kotaFilter,
-                date_range: dateFilter === 'all' ? null : dateFilter,
-            },
-            { preserveState: true, preserveScroll: true, replace: true }
-        );
-    };
-
-    const applyFilters = ({ status = activeStatus, kota = kotaFilter, date_range = dateFilter } = {}) => {
-        router.get(
-            '/finance/penarikan',
-            {
-                status,
-                kota: kota === 'all' ? null : kota,
-                date_range: date_range === 'all' ? null : date_range,
-            },
-            { preserveState: true, preserveScroll: true, replace: true }
-        );
+        router.get('/finance/penarikan', { status }, { preserveState: true, preserveScroll: true, replace: true });
     };
 
     const handleApprove = () => {
@@ -133,24 +108,6 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
         );
     };
 
-     const sortedData = useMemo(() => {
-        const list = penarikan?.data ?? [];
-        const accessor = (item, key) =>
-            key.split('.').reduce((acc, k) => (acc == null ? null : acc[k]), item) ?? '';
-        const sorted = [...list].sort((a, b) => {
-            let av = accessor(a, sortConfig.key);
-            let bv = accessor(b, sortConfig.key);
-            if (sortConfig.key === 'jumlah') {
-                av = Number(av) || 0;
-                bv = Number(bv) || 0;
-            }
-            if (typeof av === 'number' && typeof bv === 'number') return av - bv;
-            const cmp = String(av).localeCompare(String(bv), 'id-ID');
-            return sortConfig.direction === 'asc' ? cmp : -cmp;
-        });
-        return sorted;
-    }, [penarikan?.data, sortConfig]);
-
     return (
         <FinanceLayout>
             <Head title="Penarikan Saldo" />
@@ -172,43 +129,18 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                         </p>
                     </div>
 
-                     {/* Filter Kota & Waktu di Kanan Banner */}
-                     <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs text-white backdrop-blur-sm">
-                         <div className="flex items-center gap-1.5">
-                             <MapPin size={14} className="text-yellow-400" />
-                             <select
-                                 value={kotaFilter}
-                                 onChange={(e) => {
-                                     setKotaFilter(e.target.value);
-                                     applyFilters({ kota: e.target.value });
-                                 }}
-                                 className="w-40 cursor-pointer appearance-none bg-white/15 text-left text-xs font-semibold text-white underline decoration-yellow-400/50 underline-offset-2 outline-none ring-1 ring-white/20 focus:ring-green-400"
-                             >
-                                 <option value="all" className="text-gray-900 bg-white">Semua Kota</option>
-                                 {kotaList.map((kota) => (
-                                     <option key={kota} value={kota} className="text-gray-900 bg-white">{kota}</option>
-                                 ))}
-                             </select>
-                         </div>
-                         <span className="text-white/30">|</span>
-                         <div className="flex items-center gap-1.5">
-                             <Calendar size={14} className="text-yellow-400" />
-                             <select
-                                 value={dateFilter}
-                                 onChange={(e) => {
-                                     setDateFilter(e.target.value);
-                                     applyFilters({ date_range: e.target.value });
-                                 }}
-                                 className="w-36 cursor-pointer appearance-none bg-white/15 text-left text-xs font-semibold text-white underline decoration-yellow-400/50 underline-offset-2 outline-none ring-1 ring-white/20 focus:ring-green-400"
-                             >
-                                 <option value="all" className="text-gray-900 bg-white">Semua Waktu</option>
-                                 <option value="today" className="text-gray-900 bg-white">Hari Ini</option>
-                                 <option value="7d" className="text-gray-900 bg-white">7 Hari Terakhir</option>
-                                 <option value="30d" className="text-gray-900 bg-white">30 Hari Terakhir</option>
-                                 <option value="90d" className="text-gray-900 bg-white">90 Hari Terakhir</option>
-                             </select>
-                         </div>
-                     </div>
+                    {/* Filter Capsule di Kanan Banner */}
+                    <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs text-white backdrop-blur-sm">
+                        <div className="flex items-center gap-2">
+                            <MapPin size={14} className="text-yellow-400" />
+                            <span>Semua Kota</span>
+                        </div>
+                        <span className="text-white/30">|</span>
+                        <div className="flex items-center gap-2">
+                            <Calendar size={14} className="text-yellow-400" />
+                            <span>Semua Waktu</span>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Bulatan Dekorasi Transparan Kanan Hero */}
@@ -262,28 +194,6 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                         );
                     })}
                 </div>
-
-                {/* Sort Dropdown */}
-                <div className="flex items-center gap-2">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Urutkan:</label>
-                    <select
-                        value={`${sortConfig.key}:${sortConfig.direction}`}
-                        onChange={(e) => {
-                            const [key, direction] = e.target.value.split(':');
-                            setSortConfig({ key, direction });
-                        }}
-                        className="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
-                    >
-                        <option value="created_at:desc">Terbaru</option>
-                        <option value="created_at:asc">Terlama</option>
-                        <option value="jumlah:desc">Jumlah Terbesar</option>
-                        <option value="jumlah:asc">Jumlah Terkecil</option>
-                        <option value="user.name:asc">Nama Mitra (A-Z)</option>
-                        <option value="user.name:desc">Nama Mitra (Z-A)</option>
-                        <option value="status:asc">Status (A-Z)</option>
-                        <option value="status:desc">Status (Z-A)</option>
-                    </select>
-                </div>
             </div>
 
             {(() => {
@@ -300,10 +210,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
             })()}
 
             {/* Main List Card — pakai kartu per baris (bukan <table>) biar gak perlu
-                scroll ke samping di layar kecil. Baris atas (identitas mitra +
-                status/aksi) bertumpuk vertikal di HP, sejajar lagi di layar >= sm.
-                Baris detail pakai grid kolom tetap (bukan flex-wrap) supaya lebar
-                tiap blok konsisten dan tidak pernah mendorong lebar kartu keluar. */}
+                scroll ke samping di layar kecil; semua info nyusun ulang (wrap) sendiri. */}
             <div className={cardCls}>
                 {penarikan.data.length === 0 ? (
                     <div className="px-6 py-20 text-center">
@@ -319,13 +226,10 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-200 dark:divide-gray-700/60">
-                        {sortedData.map((item) => (
+                        {penarikan.data.map((item) => (
                             <div key={item.id} className="p-4 transition-colors hover:bg-gray-50/80 sm:p-5 dark:hover:bg-gray-700/40">
-                                {/* Baris atas: identitas mitra + status + aksi.
-                                    flex-col di HP -> identitas di atas, status/tombol
-                                    di bawahnya masing-masing lebar penuh; sm:flex-row
-                                    mengembalikannya sejajar di layar cukup lebar. */}
-                                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+                                {/* Baris atas: identitas mitra + status + aksi */}
+                                <div className="flex flex-wrap items-start justify-between gap-3">
                                     <div className="flex min-w-0 items-center gap-3">
                                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-700 font-bold text-sm border border-green-200/50 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800">
                                             {item.user?.name?.charAt(0) ?? 'M'}
@@ -391,14 +295,11 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                     </p>
                                 )}
 
-                                {/* Detail: Nominal, Rekening, Waktu, Utang Refund — grid dengan
-                                    jumlah kolom tetap: 1 kolom di HP, 2 di tablet, 4 di desktop.
-                                    min-w-0 mematikan perilaku default grid/flex item yang menolak
-                                    menyusut di bawah lebar kontennya (itu sumber scroll horizontal
-                                    sebelumnya), dan break-words/break-all memotong teks panjang
-                                    di dalam kotaknya sendiri alih-alih mendorong keluar. */}
-                                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                                    <div className="min-w-0">
+                                {/* Detail: Nominal, Rekening, Waktu, Utang Refund — flex-wrap
+                                    biar tiap blok cuma selebar isinya (gak dipaksa melar rata
+                                    kolom kayak grid), dan baru pindah baris kalau kepepet sempit */}
+                                <div className="mt-4 flex flex-wrap gap-x-8 gap-y-4">
+                                    <div>
                                         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                                             Nominal
                                         </p>
@@ -407,44 +308,42 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                         </p>
                                     </div>
 
-                                    <div className="min-w-0">
+                                    <div>
                                         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                                             Rekening Tujuan
                                         </p>
                                         <div className="mt-1 rounded-xl border border-gray-200 bg-gray-50 p-2.5 dark:border-gray-700 dark:bg-gray-800">
-                                            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                            <div className="flex items-center gap-2 font-semibold text-xs text-gray-800 dark:text-gray-200">
                                                 <Building2 size={14} className="shrink-0 text-green-600 dark:text-green-400" />
-                                                <span className="min-w-0 break-words">{item.nama_bank}</span>
+                                                <span>{item.nama_bank}</span>
                                                 <span className="text-gray-300 dark:text-gray-600">•</span>
-                                                <span className="min-w-0 break-all font-mono text-gray-600 dark:text-gray-400">
-                                                    {item.nomor_rekening}
-                                                </span>
+                                                <span className="font-mono text-gray-600 dark:text-gray-400">{item.nomor_rekening}</span>
                                             </div>
-                                            <div className="mt-1 flex min-w-0 items-start gap-1 text-[11px] text-gray-400 dark:text-gray-500">
-                                                <User size={12} className="mt-0.5 shrink-0" />
-                                                <span className="min-w-0 break-words">a.n. {item.nama_pemilik}</span>
+                                            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
+                                                <User size={12} />
+                                                <span>a.n. {item.nama_pemilik}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="min-w-0">
+                                    <div>
                                         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                                             Waktu Pengajuan
                                         </p>
                                         <div className="mt-1 flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                                            <Clock size={14} className="shrink-0 text-gray-400 dark:text-gray-500" />
-                                            <span className="break-words">{formatDate(item.created_at)}</span>
+                                            <Clock size={14} className="text-gray-400 dark:text-gray-500" />
+                                            {formatDate(item.created_at)}
                                         </div>
                                     </div>
 
-                                    <div className="min-w-0">
+                                    <div>
                                         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                                             Utang Refund
                                         </p>
-                                        <div className="mt-1 flex flex-col items-start gap-1">
+                                        <div className="mt-1 flex flex-col gap-1">
                                             {(item.utang_refund ?? 0) > 0 ? (
                                                 <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-bold text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800">
-                                                    <AlertTriangle size={12} className="shrink-0" />
+                                                    <AlertTriangle size={12} />
                                                     Rp {formatRupiah(item.utang_refund)}
                                                     <span className="text-[9px] opacity-70">(aktual)</span>
                                                 </span>
@@ -453,7 +352,7 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                                             )}
                                             {(item.potensi_utang_refund ?? 0) > 0 && (item.utang_refund ?? 0) === 0 ? (
                                                 <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800" title="Akan dipotong otomatis saat approve">
-                                                    <AlertTriangle size={12} className="shrink-0" />
+                                                    <AlertTriangle size={12} />
                                                     Rp {formatRupiah(item.potensi_utang_refund)}
                                                     <span className="text-[9px] opacity-70">(potensi)</span>
                                                 </span>
@@ -673,4 +572,4 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
             )}
         </FinanceLayout>
     );
-}
+}   a

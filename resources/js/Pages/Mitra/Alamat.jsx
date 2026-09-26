@@ -103,8 +103,8 @@ export default function Alamat({ alamat, kotaOptions = [] }) {
                     <select
                         value={data.city}
                         onChange={(e) => setData('city', e.target.value)}
-                        className={`mt-1 w-full rounded-lg text-sm ${
-                            errors.city ? 'border-red-500' : 'border-gray-300 focus:border-green-500 focus:ring-green-500'
+                        className={`mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-10 text-sm text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 appearance-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 ${
+                            errors.city ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
                         }`}
                     >
                         <option value="">Pilih kota</option>

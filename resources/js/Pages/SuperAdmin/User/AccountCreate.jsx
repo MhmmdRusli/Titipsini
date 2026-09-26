@@ -153,9 +153,10 @@ export default function AccountCreate() {
                             </label>
                             <input
                                 type="tel"
+                                inputMode="numeric"
                                 placeholder="08xxxxxxxxxx"
                                 value={data.phone}
-                                onChange={(e) => setData('phone', e.target.value)}
+                                onChange={(e) => setData('phone', e.target.value.replace(/\D/g, ''))}
                                 className={inputClass(errors.phone)}
                             />
                             {errors.phone && <p className="mt-1.5 text-xs font-medium text-red-500">{errors.phone}</p>}

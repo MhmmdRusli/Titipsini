@@ -39,7 +39,7 @@ const wrapperClass = (hasError) => `
 // plugin @tailwindcss/forms numpuk di atas ring hijau custom dari wrapperClass,
 // jadi kelihatan kayak border dobel pas field-nya di-focus.
 const inputClass =
-    'w-full bg-slate-50 dark:bg-gray-800 rounded-2xl px-4 py-3 pl-11 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-0 !bg-none !border-0';
+    'w-full bg-slate-50 dark:bg-gray-800 rounded-2xl px-4 py-3 pl-11 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-0 !border-0';
 
 function FieldLabel({ children }) {
     return (
@@ -70,15 +70,15 @@ function SelectField({ icon, value, onChange, placeholder, options, disabled, er
     return (
         <div className={wrapperClass(error)}>
             <IconIn icon={icon} />
-            <select
+                <select
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
-                className={`${inputClass} appearance-none pr-10 disabled:cursor-not-allowed disabled:opacity-50`}
+                className={`${inputClass} appearance-none pr-10 disabled:cursor-not-allowed disabled:opacity-50 !dark:bg-gray-800`}
             >
-                <option value="">{placeholder}</option>
+                <option value="" className="bg-white dark:bg-gray-800 dark:text-gray-200">{placeholder}</option>
                 {options.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
+                    <option key={opt.id} value={opt.id} className="bg-white dark:bg-gray-800 dark:text-gray-200">
                         {opt.name}
                     </option>
                 ))}
@@ -303,9 +303,10 @@ export default function AddressForm({ address = null }) {
                                 <IconIn icon={Phone} />
                                 <input
                                     type="tel"
+                                    inputMode="numeric"
                                     placeholder="cth : 081221212100"
                                     value={data.phone}
-                                    onChange={(e) => setData('phone', e.target.value)}
+                                    onChange={(e) => setData('phone', e.target.value.replace(/\D/g, ''))}
                                     className={inputClass}
                                 />
                             </div>
