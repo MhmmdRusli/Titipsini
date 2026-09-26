@@ -70,11 +70,11 @@ function SelectField({ icon, value, onChange, placeholder, options, disabled, er
     return (
         <div className={wrapperClass(error)}>
             <IconIn icon={icon} />
-                <select
+            <select
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
-                className={`${inputClass} appearance-none pr-10 disabled:cursor-not-allowed disabled:opacity-50 !dark:bg-gray-800`}
+                className={`${inputClass} appearance-none !bg-none pr-10 disabled:cursor-not-allowed disabled:opacity-50`}
             >
                 <option value="" className="bg-white dark:bg-gray-800 dark:text-gray-200">{placeholder}</option>
                 {options.map((opt) => (

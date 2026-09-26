@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm, router, Head } from '@inertiajs/react';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 
@@ -7,6 +7,32 @@ const inputClass = (hasError) =>
         hasError ? 'ring-2 ring-red-400' : 'focus:ring-green-500'
     }`;
 
+// Konversi DD/MM/YYYY ke YYYY-MM-DD untuk input type="date"
+function toDateInputValue(value) {
+    if (!value) return '';
+    const parts = value.split('/');
+    if (parts.length === 3) {
+        const [day, month, year] = parts;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    // Sudah format YYYY-MM-DD
+    if (value.match(/^\d{4}-\d{2}-\d{2}$/)) return value;
+    return '';
+}
+
+// Konversi YYYY-MM-DD ke DD/MM/YYYY untuk submit ke backend
+function toBackendDateValue(value) {
+    if (!value) return '';
+    const parts = value.split('-');
+    if (parts.length === 3) {
+        const [year, month, day] = parts;
+        return `${day}/${month}/${year}`;
+    }
+    // Sudah format DD/MM/YYYY
+    if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) return value;
+    return value;
+}
+
 const STATUS_OPTIONS = [
     { value: 'pemilik', label: 'Pemilik' },
     { value: 'penyewa', label: 'Penyewa' },
@@ -14,12 +40,14 @@ const STATUS_OPTIONS = [
 ];
 
 export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, onSukses }) {
+    const initialTanggalLahir = useMemo(() => toDateInputValue(editingItem?.tanggal_lahir), [editingItem?.tanggal_lahir]);
+
     const { data, setData, post, processing, errors } = useForm({
         kategori,
         nama_usaha: editingItem?.nama_usaha ?? '',
         nama_penjaga: editingItem?.nama_penjaga ?? '',
         nomor_telepon: editingItem?.nomor_telepon ?? '',
-        tanggal_lahir: editingItem?.tanggal_lahir ?? '',
+        tanggal_lahir: initialTanggalLahir,
         provinsi: editingItem?.provinsi ?? '',
         kabupaten_kota: editingItem?.kabupaten_kota ?? '',
         kecamatan: editingItem?.kecamatan ?? '',
@@ -84,8 +112,14 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
     const submit = (e) => {
         e.preventDefault();
 
+        // Konversi format tanggal dari YYYY-MM-DD (date input) ke DD/MM/YYYY (backend)
+        const submitData = {
+            ...data,
+            tanggal_lahir: toBackendDateValue(data.tanggal_lahir),
+        };
+
         if (editingItem) {
-            router.post(`/mitra/layanan/${editingItem.id}`, { ...data, _method: 'put' }, {
+            router.post(`/mitra/layanan/${editingItem.id}`, { ...submitData, _method: 'put' }, {
                 preserveScroll: true,
                 preserveState: true,
                 onSuccess: onSukses,
@@ -156,8 +190,7 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
                     <input
-                        type="text"
-                        placeholder="Ex. 23/04/1991"
+                        type="date"
                         value={data.tanggal_lahir}
                         onChange={(e) => setData('tanggal_lahir', e.target.value)}
                         className={inputClass(errors.tanggal_lahir)}
