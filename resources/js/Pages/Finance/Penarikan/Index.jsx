@@ -5,7 +5,6 @@ import {
     CheckCircle2,
     X,
     AlertTriangle,
-    Clock,
     Building2,
     User,
     Check,
@@ -13,7 +12,6 @@ import {
     Sparkles,
     MapPin,
     Calendar,
-    AlertCircle,
 } from 'lucide-react';
 import FinanceLayout from '@/Layouts/FinanceLayout';
 
@@ -34,7 +32,7 @@ function formatRupiah(value) {
 
 function formatDate(value) {
     if (!value) return '-';
-    return new Date(value).toLocaleDateString('id-ID', {
+    return new Date(value).toLocaleString('id-ID', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -261,13 +259,14 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                 );
             })()}
 
-            {/* Main List Card — pakai kartu per baris (bukan <table>) biar gak perlu
-                scroll ke samping di layar kecil; semua info nyusun ulang (wrap) sendiri. */}
+            {/* Tabel penarikan: tiap kolom punya lebar tetap (w-*), angka pakai
+                tabular-nums, dan baris yang punya catatan/ringkasan dapat baris
+                detail penuh (colspan) supaya lebar kolom di atasnya gak bergeser. */}
             <div className={cardCls}>
                 {penarikan.data.length === 0 ? (
                     <div className="px-6 py-20 text-center">
                         <div className="mx-auto flex max-w-sm flex-col items-center justify-center">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 border border-gray-200 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500">
                                 <Wallet size={32} />
                             </div>
                             <h3 className="mt-4 text-base font-bold text-gray-800 dark:text-gray-200">Tidak ada pengajuan</h3>
@@ -277,187 +276,233 @@ export default function PenarikanIndex({ penarikan, filter, hasAnyRefundDebt = f
                         </div>
                     </div>
                 ) : (
-                    <div className="divide-y divide-gray-200 dark:divide-gray-700/60">
-                        {penarikan.data.map((item) => (
-                            <div key={item.id} className="p-4 transition-colors hover:bg-gray-50/80 sm:p-5 dark:hover:bg-gray-700/40">
-                                {/* Baris atas: identitas mitra + status + aksi */}
-                                <div className="flex flex-wrap items-start justify-between gap-3">
-                                    <div className="flex min-w-0 items-center gap-3">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-700 font-bold text-sm border border-green-200/50 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800">
-                                            {item.user?.name?.charAt(0) ?? 'M'}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="truncate font-bold text-gray-900 dark:text-gray-200">
-                                                {item.user?.name ?? '-'}
-                                            </p>
-                                            <p className="truncate text-[11px] text-gray-400 dark:text-gray-500">{item.user?.email ?? '-'}</p>
-                                        </div>
-                                    </div>
+                    <div className="overflow-x-auto">
+                        {/* min-w hanya untuk layar sempit: di desktop tabel tetap w-full dan
+                            lebar tiap kolom dibagi proporsional (table-fixed), jadi tidak muncul
+                            scroll horizontal yang tidak perlu. */}
+                        <table className="w-full min-w-[900px] table-fixed text-left text-xs">
+                            <thead>
+                                <tr className="border-b border-gray-200 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-800/60">
+                                    <th scope="col" className="w-[22%] px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                        Mitra
+                                    </th>
+                                    <th scope="col" className="w-[14%] px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                        Nominal
+                                    </th>
+                                    <th scope="col" className="w-[20%] px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                        Rekening Tujuan
+                                    </th>
+                                    <th scope="col" className="w-[13%] px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                        Utang Refund
+                                    </th>
+                                    <th scope="col" className="w-[12%] px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                        Pengajuan
+                                    </th>
+                                    <th scope="col" className="w-[10%] px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                        Status
+                                    </th>
+                                    <th scope="col" className="w-[9%] px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                        Aksi
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700/70">
+                                {penarikan.data.map((item) => {
+                                    const adaCatatan = item.status === 'ditolak' && item.catatan;
+                                    const adaRingkasan =
+                                        item.status === 'selesai' &&
+                                        ((item.utang_refund_dipotong ?? 0) > 0 || (item.jumlah_dikirim ?? 0) > 0);
+                                    // Kalau ada baris detail di bawahnya, padding bawah baris utama
+                                    // dikecilkan supaya jarak ke kotak detail tetap rapat.
+                                    const padY = adaCatatan || adaRingkasan ? 'pt-4 pb-1' : 'py-4';
 
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        {item.status === 'pending' && (
-                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
-                                                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                                Menunggu
-                                            </span>
-                                        )}
-                                        {item.status === 'selesai' && (
-                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800">
-                                                <CheckCircle2 size={12} />
-                                                Selesai
-                                            </span>
-                                        )}
-                                        {item.status === 'ditolak' && (
-                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800">
-                                                <X size={12} />
-                                                Ditolak
-                                            </span>
-                                        )}
+                                    return [
+                                        <tr
+                                            key={item.id}
+                                            className="align-top transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/30"
+                                        >
+                                            {/* Mitra */}
+                                            <td className={`px-5 ${padY}`}>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-green-200/60 bg-green-50 text-sm font-bold uppercase text-green-700 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300">
+                                                        {item.user?.name?.charAt(0) ?? 'M'}
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-[13px] font-bold text-gray-900 dark:text-gray-200">
+                                                            {item.user?.name ?? '-'}
+                                                        </p>
+                                                        <p className="truncate text-[11px] text-gray-400 dark:text-gray-500">
+                                                            {item.user?.email ?? '-'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
 
-                                        {item.status === 'pending' ? (
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setApproveTarget(item)}
-                                                    className="inline-flex items-center gap-1.5 rounded-xl bg-green-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-800 active:scale-95 border border-green-600"
-                                                >
-                                                    <Check size={14} />
-                                                    Setujui
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setRejectTarget(item)}
-                                                    className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                                                    title="Tolak Penarikan"
-                                                >
-                                                    <Ban size={15} />
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col items-end gap-1">
-                                                <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
-                                                    Selesai {formatDate(item.processed_at)}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
+                                            {/* Nominal */}
+                                            <td className={`px-4 ${padY} text-right`}>
+                                                <p className="text-[13px] font-extrabold tabular-nums text-gray-900 dark:text-gray-100">
+                                                    {formatRupiah(item.jumlah)}
+                                                </p>
+                                            </td>
 
-                                {item.status === 'ditolak' && item.catatan && (
-                                    <p className="mt-2 text-[11px] italic text-red-500 dark:text-red-400" title={item.catatan}>
-                                        "{item.catatan}"
-                                    </p>
-                                )}
+                                            {/* Rekening */}
+                                            <td className={`px-4 ${padY}`}>
+                                                <p className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-800 dark:text-gray-200">
+                                                    <Building2 size={13} className="shrink-0 text-green-600 dark:text-green-400" />
+                                                    <span className="truncate">{item.nama_bank ?? '-'}</span>
+                                                </p>
+                                                <p className="mt-0.5 truncate font-mono text-[11px] tabular-nums text-gray-500 dark:text-gray-400">
+                                                    {item.nomor_rekening ?? '-'}
+                                                </p>
+                                                <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-gray-400 dark:text-gray-500">
+                                                    <User size={11} className="shrink-0" />
+                                                    <span className="truncate">a.n. {item.nama_pemilik ?? '-'}</span>
+                                                </p>
+                                            </td>
 
-                                {/* Detail: Nominal, Rekening, Waktu, Utang Refund — flex-wrap
-                                    biar tiap blok cuma selebar isinya (gak dipaksa melar rata
-                                    kolom kayak grid), dan baru pindah baris kalau kepepet sempit */}
-                                <div className="mt-4 flex flex-wrap gap-x-8 gap-y-4">
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                                            Nominal
-                                        </p>
-                                        <p className="mt-1 text-base font-extrabold text-gray-900 dark:text-gray-200">
-                                            {formatRupiah(item.jumlah)}
-                                        </p>
-                                    </div>
+                                            {/* Utang refund */}
+                                            <td className={`px-4 ${padY} text-right`}>
+                                                {(item.utang_refund ?? 0) > 0 ? (
+                                                    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-red-200 bg-red-50 px-2 py-1 text-[11px] font-bold tabular-nums text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+                                                        <AlertTriangle size={11} />
+                                                        {formatRupiah(item.utang_refund)}
+                                                    </span>
+                                                ) : (item.potensi_utang_refund ?? 0) > 0 ? (
+                                                    <span
+                                                        className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-bold tabular-nums text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                                                        title="Akan dipotong otomatis saat approve"
+                                                    >
+                                                        <AlertTriangle size={11} />
+                                                        {formatRupiah(item.potensi_utang_refund)}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[12px] text-gray-300 dark:text-gray-600">—</span>
+                                                )}
+                                            </td>
 
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                                            Rekening Tujuan
-                                        </p>
-                                        <div className="mt-1 rounded-xl border border-gray-200 bg-gray-50 p-2.5 dark:border-gray-700 dark:bg-gray-800">
-                                            <div className="flex items-center gap-2 font-semibold text-xs text-gray-800 dark:text-gray-200">
-                                                <Building2 size={14} className="shrink-0 text-green-600 dark:text-green-400" />
-                                                <span>{item.nama_bank}</span>
-                                                <span className="text-gray-300 dark:text-gray-600">•</span>
-                                                <span className="font-mono text-gray-600 dark:text-gray-400">{item.nomor_rekening}</span>
-                                            </div>
-                                            <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
-                                                <User size={12} />
-                                                <span>a.n. {item.nama_pemilik}</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                            {/* Tanggal */}
+                                            <td className={`px-4 ${padY}`}>
+                                                <p className="whitespace-nowrap text-[12px] font-medium text-gray-700 dark:text-gray-300">
+                                                    {formatDate(item.created_at)}
+                                                </p>
+                                                {item.status !== 'pending' && item.processed_at && (
+                                                    <p className="mt-0.5 whitespace-nowrap text-[11px] text-gray-400 dark:text-gray-500">
+                                                        Diproses {formatDate(item.processed_at)}
+                                                    </p>
+                                                )}
+                                            </td>
 
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                                            Waktu Pengajuan
-                                        </p>
-                                        <div className="mt-1 flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                                            <Clock size={14} className="text-gray-400 dark:text-gray-500" />
-                                            {formatDate(item.created_at)}
-                                        </div>
-                                    </div>
+                                            {/* Status */}
+                                            <td className={`px-4 ${padY}`}>
+                                                {item.status === 'pending' && (
+                                                    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                                                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+                                                        Menunggu
+                                                    </span>
+                                                )}
+                                                {item.status === 'selesai' && (
+                                                    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-[11px] font-bold text-green-700 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300">
+                                                        <CheckCircle2 size={12} />
+                                                        Selesai
+                                                    </span>
+                                                )}
+                                                {item.status === 'ditolak' && (
+                                                    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[11px] font-bold text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+                                                        <X size={12} />
+                                                        Ditolak
+                                                    </span>
+                                                )}
+                                            </td>
 
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                                            Utang Refund
-                                        </p>
-                                        <div className="mt-1 flex flex-col gap-1">
-                                            {(item.utang_refund ?? 0) > 0 ? (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-bold text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800">
-                                                    <AlertTriangle size={12} />
-                                                    Rp {formatRupiah(item.utang_refund)}
-                                                    <span className="text-[9px] opacity-70">(aktual)</span>
-                                                </span>
-                                            ) : (
-                                                <span className="text-[11px] text-gray-400 dark:text-gray-500">-</span>
-                                            )}
-                                            {(item.potensi_utang_refund ?? 0) > 0 && (item.utang_refund ?? 0) === 0 ? (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800" title="Akan dipotong otomatis saat approve">
-                                                    <AlertTriangle size={12} />
-                                                    Rp {formatRupiah(item.potensi_utang_refund)}
-                                                    <span className="text-[9px] opacity-70">(potensi)</span>
-                                                </span>
-                                            ) : null}
-                                        </div>
-                                    </div>
-                                </div>
+                                            {/* Aksi */}
+                                            <td className={`px-5 ${padY} text-right`}>
+                                                {item.status === 'pending' ? (
+                                                    <div className="flex items-center justify-end gap-1.5">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setApproveTarget(item)}
+                                                            className="inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg border border-green-600 bg-green-700 px-3 text-[11px] font-bold text-white shadow-sm transition hover:bg-green-800 active:scale-95"
+                                                        >
+                                                            <Check size={13} />
+                                                            Setujui
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setRejectTarget(item)}
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                                            title="Tolak Penarikan"
+                                                        >
+                                                            <Ban size={14} />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[11px] text-gray-300 dark:text-gray-600">—</span>
+                                                )}
+                                            </td>
+                                        </tr>,
 
-                                {/* Info tambahan untuk yang sudah selesai */}
-                                {item.status === 'selesai' && ((item.utang_refund_dipotong ?? 0) > 0 || (item.jumlah_dikirim ?? 0) > 0) && (
-                                    <div className="mt-3 flex flex-wrap gap-3 border-t border-gray-100 pt-3 text-[11px] dark:border-gray-700">
-                                        {(item.utang_refund_dipotong ?? 0) > 0 && (
-                                            <span className="font-medium text-red-600 dark:text-red-400">
-                                                Dipotong utang: Rp {formatRupiah(item.utang_refund_dipotong)}
-                                            </span>
-                                        )}
-                                        {(item.jumlah_dikirim ?? 0) > 0 && (
-                                            <span className="font-medium text-green-600 dark:text-green-400">
-                                                Dikirim: Rp {formatRupiah(item.jumlah_dikirim)}
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                                        // Baris detail: catatan penolakan / rincian dana yang dikirim.
+                                        // colspan penuh supaya tidak menggeser lebar kolom di atasnya.
+                                        (adaCatatan || adaRingkasan) && (
+                                            <tr key={`${item.id}-detail`} className="bg-gray-50/60 dark:bg-gray-800/40">
+                                                <td colSpan={7} className="px-5 pb-4">
+                                                    {adaRingkasan && (
+                                                        <div className="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 dark:border-gray-700 dark:bg-gray-800">
+                                                            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                                                Rincian
+                                                            </span>
+                                                            {(item.utang_refund_dipotong ?? 0) > 0 && (
+                                                                <span className="text-[11px] font-semibold tabular-nums text-red-600 dark:text-red-400">
+                                                                    Dipotong utang: {formatRupiah(item.utang_refund_dipotong)}
+                                                                </span>
+                                                            )}
+                                                            {(item.jumlah_dikirim ?? 0) > 0 && (
+                                                                <span className="text-[11px] font-semibold tabular-nums text-green-600 dark:text-green-400">
+                                                                    Dikirim ke rekening: {formatRupiah(item.jumlah_dikirim)}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {adaCatatan && (
+                                                        <p className="rounded-lg border border-red-200 bg-white px-3.5 py-2.5 text-[11px] italic leading-relaxed text-red-600 dark:border-red-800 dark:bg-gray-800 dark:text-red-300">
+                                                            Catatan: {item.catatan}
+                                                        </p>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ),
+                                    ];
+                                })}
+                            </tbody>
+                        </table>
                     </div>
                 )}
             </div>
 
             {/* Pagination Container */}
             {penarikan.data.length > 0 && (
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-4 border border-gray-200 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white px-5 py-3.5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Menampilkan <span className="font-bold text-gray-800 dark:text-gray-200">{penarikan.from}</span> -{' '}
-                        <span className="font-bold text-gray-800 dark:text-gray-200">{penarikan.to}</span> dari Total{' '}
-                        <span className="font-bold text-gray-800 dark:text-gray-200">{penarikan.total}</span> Data
+                        Menampilkan <span className="font-bold tabular-nums text-gray-800 dark:text-gray-200">{penarikan.from}</span>
+                        {' - '}
+                        <span className="font-bold tabular-nums text-gray-800 dark:text-gray-200">{penarikan.to}</span> dari total{' '}
+                        <span className="font-bold tabular-nums text-gray-800 dark:text-gray-200">{penarikan.total}</span> data
                     </p>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap items-center gap-1">
                         {penarikan.links.map((link, i) => (
                             <Link
                                 key={i}
                                 href={link.url ?? '#'}
                                 preserveScroll
                                 preserveState
+                                disabled={!link.url}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
-                                className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all border ${
+                                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                                     link.active
-                                        ? 'bg-green-700 text-white border-green-600 shadow-sm'
+                                        ? 'border-green-600 bg-green-700 text-white shadow-sm'
                                         : link.url
-                                        ? 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-600'
-                                        : 'cursor-not-allowed text-gray-300 border-gray-100 bg-gray-50/50 dark:text-gray-600 dark:border-gray-700 dark:bg-gray-800'
+                                          ? 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                                          : 'pointer-events-none border-gray-100 bg-gray-50/50 text-gray-300 dark:border-gray-800 dark:bg-gray-800/50 dark:text-gray-600'
                                 }`}
                             />
                         ))}
