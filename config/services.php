@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Xendit (payout / disbursement to partner bank accounts)
+    |--------------------------------------------------------------------------
+    */
+    'xendit' => [
+        'enabled' => env('XENDIT_ENABLED', false),
+        'key' => env('XENDIT_API_KEY'),
+        'base_url' => env('XENDIT_BASE_URL', 'https://api.xendit.co'),
+        'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
+        'webhook_url' => env('XENDIT_WEBHOOK_URL'),
+    ],
+
 ];

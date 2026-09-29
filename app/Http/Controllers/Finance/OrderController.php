@@ -14,10 +14,19 @@ class OrderController extends Controller
 {
     public function index(Request $request): Response
     {
+        $search = trim((string) $request->query('search', ''));
+
         $orders = Order::with(['customer:id,name,phone', 'partner:id,name,phone'])
             ->where('status', 'menunggu_verifikasi_finance')
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('order_code', 'like', "%{$search}%")
+                        ->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', "%{$search}%"));
+                });
+            })
             ->latest()
             ->paginate(10)
+            ->withQueryString()
             ->through(function ($order) {
                 return [
                     'id' => $order->id,
@@ -36,6 +45,7 @@ class OrderController extends Controller
 
         return Inertia::render('Finance/Orders/Index', [
             'orders' => $orders,
+            'filters' => ['search' => $search],
         ]);
     }
 

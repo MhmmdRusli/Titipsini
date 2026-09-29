@@ -16,7 +16,9 @@ class Penarikan extends Model
 
     protected function casts(): array
     {
-        return ['processed_at' => 'datetime'];
+        return [
+            'processed_at' => 'datetime',
+        ];
     }
 
     public function user(): BelongsTo

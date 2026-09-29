@@ -78,40 +78,40 @@ class PenarikanController extends Controller
     {
         abort_unless($penarikan->status === 'pending', 400, 'Penarikan ini sudah diproses sebelumnya.');
 
-        DB::transaction(function () use ($penarikan) {
-            $user = $penarikan->user;
-            $user->refresh();
+        $user = $penarikan->user;
+        $user->refresh();
 
-            $jumlahPenarikan = (int) preg_replace('/[^0-9]/', '', (string) $penarikan->jumlah);
-            
-            // Hitung utang refund mitra (aktual + potensi) - single query
-            $utangDetails = $user->utangRefundDetails();
-            $utangRefund = max($utangDetails['utang_refund'], $utangDetails['potensi_utang_refund']);
+        $jumlahPenarikan = (int) preg_replace('/[^0-9]/', '', (string) $penarikan->jumlah);
 
-            // Jumlah yang akan dikirim ke rekening (dikurangi utang refund)
-            $jumlahDikirim = $jumlahPenarikan - $utangRefund;
-            
-            if ($jumlahDikirim <= 0) {
-                throw ValidationException::withMessages([
-                    'approve' => "Jumlah penarikan (Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ") lebih kecil atau sama dengan utang refund (Rp " . number_format($utangRefund, 0, ',', '.') . "). Tidak ada dana yang dikirim.",
-                ]);
-            }
+        // Hitung utang refund mitra (aktual + potensi) - single query
+        $utangDetails = $user->utangRefundDetails();
+        $utangRefund = max($utangDetails['utang_refund'], $utangDetails['potensi_utang_refund']);
 
-            $saldoTersediaUntukPenarikanIni = $user->saldoMitra();
+        // Jumlah bersih yang akan dikirim ke rekening (dikurangi utang refund)
+        $jumlahDikirim = $jumlahPenarikan - $utangRefund;
 
-            if ($saldoTersediaUntukPenarikanIni < $jumlahPenarikan) {
-                throw ValidationException::withMessages([
-                    'approve' => "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")",
-                ]);
-            }
+        if ($jumlahDikirim <= 0) {
+            throw ValidationException::withMessages([
+                'approve' => "Jumlah penarikan (Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ") lebih kecil atau sama dengan utang refund (Rp " . number_format($utangRefund, 0, ',', '.') . "). Tidak ada dana yang dikirim.",
+            ]);
+        }
 
+        $saldoTersediaUntukPenarikanIni = $user->saldoMitra();
+
+        if ($saldoTersediaUntukPenarikanIni < $jumlahPenarikan) {
+            throw ValidationException::withMessages([
+                'approve' => "Saldo mitra tidak mencukupi lagi. (Saldo: Rp " . number_format($saldoTersediaUntukPenarikanIni, 0, ',', '.') . ", Penarikan: Rp " . number_format($jumlahPenarikan, 0, ',', '.') . ")",
+            ]);
+        }
+
+        DB::transaction(function () use ($penarikan, $user, $jumlahPenarikan, $utangRefund, $jumlahDikirim) {
             // Catat mutasi penarikan penuh (untuk tracking)
             SaldoMutasi::create([
                 'user_id' => $user->id,
                 'type' => 'penarikan',
                 'jumlah' => $jumlahPenarikan,
-                'deskripsi' => 'Penarikan ke '.$penarikan->nama_bank.' •••• '.substr($penarikan->nomor_rekening, -4)
-                    .($utangRefund > 0 ? " (dipotong utang refund Rp " . number_format($utangRefund, 0, ',', '.') . ")" : ''),
+                'deskripsi' => 'Penarikan ke ' . $penarikan->nama_bank . ' •••• ' . substr($penarikan->nomor_rekening, -4)
+                    . ($utangRefund > 0 ? " (dipotong utang refund Rp " . number_format($utangRefund, 0, ',', '.') . ")" : ''),
                 'reference_type' => Penarikan::class,
                 'reference_id' => $penarikan->id,
             ]);
@@ -122,20 +122,26 @@ class PenarikanController extends Controller
                     'user_id' => $user->id,
                     'type' => 'penarikan',
                     'jumlah' => -$utangRefund,
-                    'deskripsi' => 'Potongan utang refund dari penarikan ke '.$penarikan->nama_bank,
+                    'deskripsi' => 'Potongan utang refund dari penarikan ke ' . $penarikan->nama_bank,
                     'reference_type' => Penarikan::class,
                     'reference_id' => $penarikan->id,
                 ]);
             }
+
+            $catatan = $penarikan->catatan ?: '';
+
+            if ($utangRefund > 0) {
+                $catatan .= "\nDipotong utang refund: Rp " . number_format($utangRefund, 0, ',', '.') . ". Dikirim ke rekening: Rp " . number_format($jumlahDikirim, 0, ',', '.') . '.';
+            }
+
+            $catatan .= "\nTransfer bank dilakukan manual oleh tim finance.";
 
             $penarikan->update([
                 'status' => 'selesai',
                 'processed_at' => now(),
                 'utang_refund_dipotong' => $utangRefund,
                 'jumlah_dikirim' => $jumlahDikirim,
-                'catatan' => $utangRefund > 0 
-                    ? ($penarikan->catatan ? $penarikan->catatan . "\n" : '') . "Dipotong utang refund: Rp " . number_format($utangRefund, 0, ',', '.') . ". Dikirim ke rekening: Rp " . number_format($jumlahDikirim, 0, ',', '.')
-                    : $penarikan->catatan,
+                'catatan' => $catatan,
             ]);
         });
 
@@ -150,6 +156,8 @@ class PenarikanController extends Controller
             'catatan' => 'nullable|string|max:255',
         ]);
 
+        // Saldo tidak pernah dipotong di awal, jadi di sini tidak perlu
+        // dikembalikan - cukup ubah statusnya saja.
         $penarikan->update([
             'status' => 'ditolak',
             'catatan' => $validated['catatan'] ?? null,
