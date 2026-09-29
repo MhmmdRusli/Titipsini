@@ -175,21 +175,20 @@ export default function Dashboard({
             </div>
 
             {/* Filter Dropdown Berbentuk Kapsul Fix Transparan Dark Mode */}
-            <div className="flex items-center rounded-xl border border-white/30 bg-white/10 p-1 backdrop-blur-md">
-              <div className="relative flex items-center border-r border-white/20 px-3 py-1.5">
+            <div className="flex items-center rounded-xl border border-white/30 bg-white/10 dark:bg-[#007b49]/95 p-1 backdrop-blur-md dark:backdrop-blur-none">
+<div className="relative flex items-center border-r border-white/20 px-3 py-1.5">
                 <Calendar size={14} className="mr-2 text-amber-300" />
                 <select
                   value={bulan === "0" ? "Semua" : (BULAN_FULL[Number(bulan) - 1] ?? "Januari")}
                   onChange={(e) => handleBulanChange(e.target.value)}
-                  style={{ backgroundColor: "transparent", color: "white" }}
-                  className="appearance-none !bg-transparent dark:!bg-transparent text-xs font-semibold !text-white border-none outline-none focus:outline-none focus:ring-0 focus:!bg-transparent active:!bg-transparent shadow-none cursor-pointer pr-5"
+                  className="appearance-none w-full bg-transparent dark:bg-[#007b49]/95 filter-dropdown text-xs font-semibold text-white border-none outline-none focus:outline-none focus:ring-0 shadow-none cursor-pointer pr-5"
                 >
                   {BULAN_FULL.map((opt) => (
-                    <option key={opt} value={opt} className="bg-[#007b49] text-white dark:bg-[#007b49]">
+                    <option key={opt} value={opt} className="bg-white text-gray-900 dark:bg-[#007b49] dark:text-white">
                       {opt}
                     </option>
                   ))}
-                  <option value="Semua" className="bg-[#007b49] text-white dark:bg-[#007b49]">
+                  <option value="Semua" className="bg-white text-gray-900 dark:bg-[#007b49] dark:text-white">
                     Semua
                   </option>
                 </select>
@@ -200,11 +199,10 @@ export default function Dashboard({
                 <select
                   value={tahun}
                   onChange={(e) => handleTahunChange(e.target.value)}
-                  style={{ backgroundColor: "transparent", color: "white" }}
-                  className="appearance-none !bg-transparent dark:!bg-transparent text-xs font-semibold !text-white border-none outline-none focus:outline-none focus:ring-0 focus:!bg-transparent active:!bg-transparent shadow-none cursor-pointer pr-5"
+                  className="appearance-none w-full bg-transparent dark:bg-[#007b49]/95 filter-dropdown text-xs font-semibold text-white border-none outline-none focus:outline-none focus:ring-0 shadow-none cursor-pointer pr-5"
                 >
                   {TAHUN_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt} className="bg-[#007b49] text-white dark:bg-[#007b49]">
+                    <option key={opt} value={opt} className="bg-white text-gray-900 dark:bg-[#007b49] dark:text-white">
                       {opt}
                     </option>
                   ))}

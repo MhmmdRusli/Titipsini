@@ -294,25 +294,24 @@ export default function Dashboard({
 /* ---------------------------------------------------------------- */
 
 function BannerSelect({ icon: Icon, label, value, options, onChange, divider = false }) {
-  return (
-    <div className={`relative flex items-center px-3 py-1.5 ${divider ? "border-r border-white/20" : ""}`}>
-      <Icon size={14} className="mr-2 text-amber-300" />
-      <select
-        aria-label={label}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{ backgroundColor: "transparent", color: "white" }}
-        className="cursor-pointer appearance-none rounded-md border-none pr-5 text-xs font-semibold shadow-none outline-none !bg-transparent !text-white focus:outline-none focus:ring-0 focus:!bg-transparent focus-visible:ring-2 focus-visible:ring-amber-300 active:!bg-transparent dark:!bg-transparent"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value} className="bg-[#007b49] text-white dark:bg-[#007b49]">
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown size={12} className="pointer-events-none absolute right-2 text-white/80" />
-    </div>
-  );
+    return (
+        <div className={`relative flex items-center px-3 py-1.5 ${divider ? "border-r border-white/20" : ""}`}>
+            <Icon size={14} className="mr-2 text-amber-300" />
+            <select
+                aria-label={label}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="cursor-pointer appearance-none rounded-md border-none pr-5 text-xs font-semibold shadow-none outline-none focus:outline-none focus:ring-0 focus-visible:ring-2 focus-visible:ring-amber-300 filter-dropdown"
+            >
+                {options.map((opt) => (
+                    <option key={opt.value} value={opt.value} className="bg-white text-gray-900 dark:bg-[#007b49] dark:text-white">
+                        {opt.label}
+                    </option>
+                ))}
+            </select>
+            <ChevronDown size={12} className="pointer-events-none absolute right-2 text-white/80" />
+        </div>
+    );
 }
 
 function StatCard({ label, value, icon: Icon, iconColor, badgeBg, href, isCurrency = false }) {

@@ -180,6 +180,20 @@ export default function AdminLayout({ children, title }) {
                     color: #f1f5f9 !important;
                     border-color: #334155 !important;
                 }
+
+                /* =====================================================
+                    DARK MODE - FILTER DROPDOWN (Dashboard)
+                    Override: jangan hitam, tetap hijau transparan
+                    ===================================================== */
+                .dark main select.filter-dropdown {
+                    background-color: transparent !important;
+                    background-image: none !important;
+                }
+
+                .dark main select.filter-dropdown option {
+                    background-color: #007b49 !important;
+                    color: #ffffff !important;
+                }
             `}</style>
 
             {/* Sidebar */}

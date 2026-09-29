@@ -235,9 +235,9 @@ export default function SuperAdminLayout({ children, title }) {
                 }
 
 
-                /* =====================================================
-                   DARK MODE - SEMUA INPUT
-                   ===================================================== */
+/* =====================================================
+                    DARK MODE - SEMUA INPUT
+                    ===================================================== */
 
                 .dark main input,
                 .dark main select,
@@ -246,6 +246,20 @@ export default function SuperAdminLayout({ children, title }) {
                     color: #f3f4f6 !important;
                     border-color: #374151 !important;
                     opacity: 1 !important;
+                }
+
+                /* =====================================================
+                    DARK MODE - FILTER DROPDOWN (Dashboard)
+                    Override: jangan hitam, tetap hijau transparan
+                    ===================================================== */
+                .dark main select.filter-dropdown {
+                    background-color: transparent !important;
+                    background-image: none !important;
+                }
+
+                .dark main select.filter-dropdown option {
+                    background-color: #007b49 !important;
+                    color: #ffffff !important;
                 }
 
 
