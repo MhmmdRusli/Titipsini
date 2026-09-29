@@ -181,7 +181,7 @@ export default function Dashboard({
                 <select
                   value={bulan === "0" ? "Semua" : (BULAN_FULL[Number(bulan) - 1] ?? "Januari")}
                   onChange={(e) => handleBulanChange(e.target.value)}
-                  className="appearance-none w-full bg-transparent dark:bg-[#007b49]/95 filter-dropdown text-xs font-semibold text-white border-none outline-none focus:outline-none focus:ring-0 shadow-none cursor-pointer pr-5"
+                  className="appearance-none bg-none w-full bg-transparent dark:bg-[#007b49]/95 filter-dropdown text-xs font-semibold text-white border-none outline-none focus:outline-none focus:ring-0 shadow-none cursor-pointer pr-5"
                 >
                   {BULAN_FULL.map((opt) => (
                     <option key={opt} value={opt} className="bg-white text-gray-900 dark:bg-[#007b49] dark:text-white">
@@ -199,7 +199,7 @@ export default function Dashboard({
                 <select
                   value={tahun}
                   onChange={(e) => handleTahunChange(e.target.value)}
-                  className="appearance-none w-full bg-transparent dark:bg-[#007b49]/95 filter-dropdown text-xs font-semibold text-white border-none outline-none focus:outline-none focus:ring-0 shadow-none cursor-pointer pr-5"
+                  className="appearance-none bg-none w-full bg-transparent dark:bg-[#007b49]/95 filter-dropdown text-xs font-semibold text-white border-none outline-none focus:outline-none focus:ring-0 shadow-none cursor-pointer pr-5"
                 >
                   {TAHUN_OPTIONS.map((opt) => (
                     <option key={opt} value={opt} className="bg-white text-gray-900 dark:bg-[#007b49] dark:text-white">

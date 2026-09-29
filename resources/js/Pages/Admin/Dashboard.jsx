@@ -301,10 +301,11 @@ function BannerSelect({ icon: Icon, label, value, options, onChange, divider = f
                 aria-label={label}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="cursor-pointer appearance-none rounded-md border-none pr-5 text-xs font-semibold shadow-none outline-none focus:outline-none focus:ring-0 focus-visible:ring-2 focus-visible:ring-amber-300 filter-dropdown"
+                style={{ backgroundColor: "transparent", color: "white" }}
+                className="cursor-pointer appearance-none bg-none rounded-md border-none pr-5 text-xs font-semibold shadow-none outline-none focus:outline-none focus:ring-0 focus-visible:ring-2 focus-visible:ring-amber-300 filter-dropdown"
             >
                 {options.map((opt) => (
-                    <option key={opt.value} value={opt.value} className="bg-white text-gray-900 dark:bg-[#007b49] dark:text-white">
+                    <option key={opt.value} value={opt.value} style={{ backgroundColor: "#007b49", color: "white" }}>
                         {opt.label}
                     </option>
                 ))}
