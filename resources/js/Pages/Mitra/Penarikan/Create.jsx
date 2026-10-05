@@ -296,11 +296,11 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                     {/* Card Saldo Aktif */}
                     <div className="mt-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-xs">
                         <p className="text-[10px] text-gray-400">Total Saldo Aktif <span className="text-[8px]">▼</span></p>
-                        <p className="mt-0.5 text-base font-extrabold text-gray-900">Rp{formatRupiah(saldoNum)}</p>
+                        <p className="mt-0.5 text-base font-extrabold text-gray-900 dark:text-gray-100">Rp{formatRupiah(saldoNum)}</p>
                     </div>
 
                     {utangRefund > 0 ? (
-                        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30 p-3 text-[11px] text-red-700">
+                        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
                             <p className="font-bold">Ada utang refund</p>
                             <p className="mt-0.5">
                                 Kamu memiliki utang refund sebesar <span className="font-semibold">Rp{formatRupiah(utangRefund)}</span>.
@@ -308,7 +308,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                             </p>
                         </div>
                     ) : adaRefund ? (
-                        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30 p-3 text-[11px] text-amber-700">
+                        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
                             <p className="font-bold">Refund telah dipotong dari saldo</p>
                             <p className="mt-0.5">
                                 Ada refund yang telah disetujui dan dipotong dari penghasilan kamu.
@@ -318,7 +318,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                     ) : null}
 
                     {/* Preset Nominal */}
-                    <p className="mt-4 text-xs font-bold text-gray-900">Jumlah Penarikan (Rp)</p>
+                    <p className="mt-4 text-xs font-bold text-gray-900 dark:text-gray-100">Jumlah Penarikan (Rp)</p>
                     <div className="mt-2 grid grid-cols-3 gap-2">
                         {PRESETS.map((value) => (
                             <button
@@ -337,15 +337,16 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                     </div>
 
                     {/* Input Jumlah Manual */}
-                    <p className="mt-4 text-xs font-bold text-gray-900">Masukkan Jumlah</p>
-                    <div className="mt-1 flex items-center border-b border-gray-200 py-1">
-                        <span className="text-sm font-bold text-gray-900 mr-1">Rp</span>
+                    <p className="mt-4 text-xs font-bold text-gray-900 dark:text-gray-100">Masukkan Jumlah</p>
+                    <div className="mt-1 flex items-center border-b border-gray-200 py-1 dark:border-gray-600">
+                        <span className="mr-1 text-sm font-bold text-gray-900 dark:text-gray-100">Rp</span>
                         <input
                             type="text"
                             inputMode="numeric"
                             value={data.jumlah ? formatRupiah(jumlahNumber) : '0'}
                             onChange={handleJumlahChange}
-                            className="w-full border-none p-0 text-sm font-bold text-gray-900 focus:outline-none focus:ring-0"
+                            aria-label="Jumlah penarikan"
+                            className="w-full border-none bg-transparent p-0 text-sm font-bold text-gray-900 caret-green-700 focus:bg-transparent focus:outline-none focus:ring-0 dark:bg-transparent dark:text-gray-100 dark:caret-green-400 dark:focus:bg-transparent"
                         />
                     </div>
 
@@ -358,7 +359,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                     )}
 
                     {/* Rekening Tujuan */}
-                    <p className="mt-5 text-xs font-bold text-gray-900">Rekening Tujuan</p>
+                    <p className="mt-5 text-xs font-bold text-gray-900 dark:text-gray-100">Rekening Tujuan</p>
                     <div className="mt-2 space-y-2">
                         {rekeningList.map((item) => {
                             const isSelected = selectedRekeningId === item.id;
@@ -368,7 +369,7 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                     onClick={() => setSelectedRekeningId(item.id)}
                                     className={`cursor-pointer rounded-xl border p-3 shadow-xs transition-all ${
                                         isSelected
-                                            ? 'border-green-700 bg-green-50/20 ring-1 ring-green-700'
+                                            ? 'border-green-700 bg-green-50 ring-1 ring-green-700 dark:border-green-500 dark:bg-green-950/40 dark:ring-green-500'
                                             : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-200'
                                     }`}
                                 >
@@ -382,8 +383,8 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
                                                 className="h-3.5 w-3.5 text-green-700 focus:ring-green-700"
                                             />
                                             <div>
-                                                <p className="text-[11px] font-bold text-gray-800">{item.nama_bank}</p>
-                                                <p className="text-[10px] text-gray-400">
+                                                <p className="text-[11px] font-bold text-gray-800 dark:text-gray-100">{item.nama_bank}</p>
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400">
                                                     {item.nomor_rekening} an {item.nama_pemilik}
                                                 </p>
                                             </div>
@@ -404,25 +405,25 @@ export default function PenarikanCreate({ saldo = 0, initialRekeningList = [], r
 
                         {/* PANEL DETAIL REKENING TERPILIH */}
                         {selectedRekening && (
-                            <div className="mt-3 rounded-xl border border-green-200 bg-green-50/40 p-3.5">
-                                <div className="flex items-center gap-1.5 border-b border-green-100 pb-2 mb-2">
-                                    <CheckCircle2 size={13} className="text-green-700" />
-                                    <p className="text-[10px] font-bold text-green-700 uppercase tracking-wider">
+                            <div className="mt-3 rounded-xl border border-green-200 bg-green-50 p-3.5 dark:border-green-800 dark:bg-green-950/40">
+                                <div className="mb-2 flex items-center gap-1.5 border-b border-green-100 pb-2 dark:border-green-900">
+                                    <CheckCircle2 size={13} className="text-green-700 dark:text-green-400" />
+                                    <p className="text-[10px] font-bold uppercase tracking-wider text-green-700 dark:text-green-400">
                                         Detail Rekening Terpilih
                                     </p>
                                 </div>
                                 <div className="space-y-1.5 text-[10px]">
                                     <div className="flex justify-between">
-                                        <span className="text-gray-400">Bank Tujuan:</span>
-                                        <span className="font-bold text-gray-800">{selectedRekening.nama_bank}</span>
+                                        <span className="text-gray-500 dark:text-gray-400">Bank Tujuan:</span>
+                                        <span className="font-bold text-gray-800 dark:text-gray-100">{selectedRekening.nama_bank}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-400">No. Rekening:</span>
-                                        <span className="font-bold text-gray-800">{selectedRekening.nomor_rekening}</span>
+                                        <span className="text-gray-500 dark:text-gray-400">No. Rekening:</span>
+                                        <span className="font-bold text-gray-800 dark:text-gray-100">{selectedRekening.nomor_rekening}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-400">Atas Nama:</span>
-                                        <span className="font-bold text-gray-800">{selectedRekening.nama_pemilik}</span>
+                                        <span className="text-gray-500 dark:text-gray-400">Atas Nama:</span>
+                                        <span className="font-bold text-gray-800 dark:text-gray-100">{selectedRekening.nama_pemilik}</span>
                                     </div>
                                 </div>
                             </div>

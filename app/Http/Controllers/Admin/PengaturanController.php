@@ -8,6 +8,7 @@ use App\Models\PaymentSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -70,7 +71,27 @@ class PengaturanController extends Controller
      */
     public function keamanan(): Response
     {
-        return Inertia::render('Admin/Pengaturan/Keamanan');
+        $loginHistory = [];
+        if (config('session.driver') === 'database') {
+            $loginHistory = DB::table(config('session.table', 'sessions'))
+                ->where('user_id', auth()->id())
+                ->orderByDesc('last_activity')
+                ->limit(20)
+                ->get(['id', 'ip_address', 'user_agent', 'last_activity'])
+                ->map(fn ($session) => [
+                    'id' => $session->id,
+                    'device' => $session->user_agent ?: 'Perangkat tidak dikenal',
+                    'device_type' => str_contains(strtolower((string) $session->user_agent), 'mobile') ? 'mobile' : 'desktop',
+                    'location' => $session->ip_address,
+                    'last_activity' => $session->last_activity,
+                    'current' => $session->id === session()->getId(),
+                ])
+                ->all();
+        }
+
+        return Inertia::render('Admin/Pengaturan/Keamanan', [
+            'loginHistory' => $loginHistory,
+        ]);
     }
 
     /**
@@ -88,6 +109,26 @@ class PengaturanController extends Controller
         ]);
 
         return back()->with('success', 'Password keamanan berhasil diperbarui.');
+    }
+
+    public function destroySession(string $sessionId): RedirectResponse
+    {
+        DB::table(config('session.table', 'sessions'))
+            ->where('id', $sessionId)
+            ->where('user_id', auth()->id())
+            ->delete();
+
+        return back()->with('success', 'Sesi berhasil dikeluarkan.');
+    }
+
+    public function destroyOtherSessions(): RedirectResponse
+    {
+        DB::table(config('session.table', 'sessions'))
+            ->where('user_id', auth()->id())
+            ->where('id', '!=', session()->getId())
+            ->delete();
+
+        return back()->with('success', 'Semua sesi lain berhasil dikeluarkan.');
     }
 
     public function denda()

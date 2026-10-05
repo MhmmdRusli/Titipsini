@@ -5,9 +5,9 @@ import AdminLayout from '@/Layouts/AdminLayout';
 
 export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
     const { data, setData, put, processing, errors, recentlySuccessful, reset } = useForm({
-        kata_sandi_lama: '',
-        kata_sandi_baru: '',
-        kata_sandi_baru_confirmation: '',
+        current_password: '',
+        password: '',
+        password_confirmation: '',
     });
 
     const [show, setShow] = useState({
@@ -33,9 +33,9 @@ export default function Keamanan({ remainingChanges = 2, loginHistory = [] }) {
     };
 
     const fields = [
-        { key: 'lama', name: 'kata_sandi_lama', label: 'Kata sandi lama', autoComplete: 'current-password' },
-        { key: 'baru', name: 'kata_sandi_baru', label: 'Kata sandi baru', autoComplete: 'new-password' },
-        { key: 'konfirmasi', name: 'kata_sandi_baru_confirmation', label: 'Konfirmasi kata sandi baru', autoComplete: 'new-password' },
+        { key: 'lama', name: 'current_password', label: 'Kata sandi lama', autoComplete: 'current-password' },
+        { key: 'baru', name: 'password', label: 'Kata sandi baru', autoComplete: 'new-password' },
+        { key: 'konfirmasi', name: 'password_confirmation', label: 'Konfirmasi kata sandi baru', autoComplete: 'new-password' },
     ];
 
     const limitReached = remainingChanges <= 0;
