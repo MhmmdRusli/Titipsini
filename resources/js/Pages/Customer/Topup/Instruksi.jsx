@@ -219,7 +219,7 @@ export default function Instruksi({ topup }) {
                 </div>
             </div>
 
-            <div className="fixed inset-x-0 bottom-16 px-4 pb-2 z-10 max-w-md mx-auto">
+            <div className="fixed inset-x-0 bottom-20 px-4 pb-4 z-10 max-w-md mx-auto">
                 <button
                     type="button"
                     disabled={processing || !data.bukti_transfer}
