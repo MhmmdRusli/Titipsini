@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { Calendar, Sparkles, RotateCcw, ChevronDown } from 'lucide-react';
 import FinanceLayout from '@/Layouts/FinanceLayout';
@@ -64,7 +64,7 @@ function FilterDropdown({ label, options, value, onChange, isOpen, onToggle }) {
             </button>
 
             {isOpen && (
-                <div className="absolute left-0 top-full z-20 mt-1.5 max-h-64 w-40 overflow-y-auto rounded-lg bg-white py-1 text-xs font-medium text-gray-800 shadow-lg ring-1 ring-gray-200">
+                <div className="absolute left-0 top-full z-50 mt-1.5 max-h-64 w-40 overflow-y-auto rounded-lg bg-white py-1 text-xs font-medium text-gray-800 shadow-lg ring-1 ring-gray-200">
                     <button
                         type="button"
                         onClick={() => onChange('')}
@@ -93,9 +93,23 @@ function FilterDropdown({ label, options, value, onChange, isOpen, onToggle }) {
 }
 
 export default function Index({ items, summary, filters }) {
-    const [bulan, setBulan] = useState(filters.bulan || '');
-    const [tahun, setTahun] = useState(filters.tahun || new Date().getFullYear().toString());
+    const safeItems = items ?? { data: [], links: [], total: 0 };
+    const safeSummary = summary ?? { totalKomisi: 0, totalTransaksi: 0, jumlahTransaksi: 0 };
+    const [bulan, setBulan] = useState(filters?.bulan || '');
+    const [tahun, setTahun] = useState(filters?.tahun || new Date().getFullYear().toString());
     const [openMenu, setOpenMenu] = useState(null); // 'bulan' | 'tahun' | null
+    const dropdownRef = useRef(null);
+
+    // Tutup dropdown saat klik di luar
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setOpenMenu(null);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleMonthChange = (value) => {
         setBulan(value);
@@ -130,7 +144,7 @@ export default function Index({ items, summary, filters }) {
 
             <div className="space-y-6">
                 {/* Header Banner */}
-                <div className="relative mb-8 rounded-2xl bg-green-700 p-8 text-white shadow-md">
+                <div className="relative mb-8 rounded-2xl bg-green-700 p-8 text-white shadow-md" ref={dropdownRef}>
                     {/* Layer dekorasi — overflow-hidden cuma dipasang di sini, jadi gak ikut
                         motong elemen lain (seperti dropdown filter) yang keluar batas banner */}
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
@@ -192,17 +206,12 @@ export default function Index({ items, summary, filters }) {
                                     </button>
                                 </>
                             )}
-                        </div>
+</div>
                     </div>
-
-                    {/* Overlay transparan buat nutup dropdown pas klik di luar area filter */}
-                    {openMenu && (
-                        <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)}></div>
-                    )}
                 </div>
 
-                {/* 3 Summary Cards */}
-                <div className="grid gap-4 sm:grid-cols-3">
+            {/* 3 Summary Cards */}
+            <div className="grid gap-4 sm:grid-cols-3">
                     {/* Card 1: Total Komisi */}
                     <div className="relative flex flex-col h-full overflow-hidden rounded-2xl border border-green-200 bg-gradient-to-br from-green-50 via-green-100/40 to-white p-5 shadow-sm transition hover:shadow-md dark:border-green-900/40 dark:from-green-950/40 dark:via-green-950/20 dark:to-gray-900">
                         <div>
@@ -210,7 +219,7 @@ export default function Index({ items, summary, filters }) {
                                 Total Komisi Platform
                             </span>
                             <p className="mt-2 text-3xl font-extrabold text-green-950 dark:text-green-300">
-                                {formatRupiah(summary.totalKomisi)}
+                                {formatRupiah(safeSummary.totalKomisi)}
                             </p>
                             <p className="mt-1 text-xs font-medium text-green-700 dark:text-green-400">Keuntungan bersih platform</p>
                         </div>
@@ -223,7 +232,7 @@ export default function Index({ items, summary, filters }) {
                                 Volume Transaksi
                             </span>
                             <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-                                {formatRupiah(summary.totalTransaksi)}
+                                {formatRupiah(safeSummary.totalTransaksi)}
                             </p>
                             <p className="mt-1 text-xs font-medium text-slate-400 dark:text-slate-500">Nilai bruto seluruh transaksi</p>
                         </div>
@@ -236,7 +245,7 @@ export default function Index({ items, summary, filters }) {
                                 Total Transaksi
                             </span>
                             <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-                                {summary.jumlahTransaksi}{' '}
+                                {safeSummary.jumlahTransaksi}{' '}
                                 <span className="text-2xl font-normal text-slate-500 dark:text-slate-400">order</span>
                             </p>
                             <p className="mt-1 text-xs font-medium text-slate-400 dark:text-slate-500">Jumlah transaksi berhasil</p>
@@ -259,14 +268,14 @@ export default function Index({ items, summary, filters }) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-slate-700 dark:divide-slate-700 dark:text-slate-300">
-                                {items.data.length === 0 ? (
+                                {safeItems.data.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-6 py-12 text-center text-sm text-slate-400 dark:text-slate-500">
                                             Tidak ada data pendapatan pada periode ini.
                                         </td>
                                     </tr>
                                 ) : (
-                                    items.data.map((item) => (
+                                    safeItems.data.map((item) => (
                                         <tr key={item.id} className="transition hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
                                             <td className="px-6 py-4 font-mono text-xs font-normal text-slate-600 dark:text-slate-300">
                                                 #{item.order_code}
@@ -296,13 +305,13 @@ export default function Index({ items, summary, filters }) {
                     </div>
 
                     {/* Pagination */}
-                    {items.links?.length > 3 && (
+                    {safeItems.links?.length > 3 && (
                         <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700">
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                Menampilkan <span className="font-semibold text-slate-700 dark:text-slate-300">{items.from ?? 0}</span> - <span className="font-semibold text-slate-700 dark:text-slate-300">{items.to ?? 0}</span> dari <span className="font-semibold text-slate-700 dark:text-slate-300">{items.total ?? 0}</span> data
+                                Menampilkan <span className="font-semibold text-slate-700 dark:text-slate-300">{safeItems.from ?? 0}</span> - <span className="font-semibold text-slate-700 dark:text-slate-300">{safeItems.to ?? 0}</span> dari <span className="font-semibold text-slate-700 dark:text-slate-300">{safeItems.total ?? 0}</span> data
                             </p>
                             <div className="flex flex-wrap gap-1">
-                                {items.links.map((link, idx) => (
+                                {safeItems.links.map((link, idx) => (
                                     <button
                                         key={idx}
                                         type="button"

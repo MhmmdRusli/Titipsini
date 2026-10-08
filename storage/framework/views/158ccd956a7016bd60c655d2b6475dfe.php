@@ -48,4 +48,4 @@
 <?php $component = $__componentOriginal74daf2d0a9c625ad90327a6043d15980; ?>
 <?php unset($__componentOriginal74daf2d0a9c625ad90327a6043d15980); ?>
 <?php endif; ?>
-<?php /**PATH C:\laragon\www\titipsini-web\vendor\laravel\framework\src\Illuminate\Foundation\Providers/../resources/exceptions/renderer/components/header.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\Siti Mintarsih\Documents\GitHub\Titipsini\vendor\laravel\framework\src\Illuminate\Foundation\Providers/../resources/exceptions/renderer/components/header.blade.php ENDPATH**/ ?>

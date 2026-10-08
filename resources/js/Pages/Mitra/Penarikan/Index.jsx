@@ -231,8 +231,13 @@ export default function PenarikanIndex({
                                                     'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
                                                 }`}>
                                                     {m.status === 'ditolak' ? 'Ditolak' : m.status === 'selesai' ? 'Selesai' : 'Diproses'}
-                                                </span>
-                                                {m.catatan && m.status === 'ditolak' && (
+                                                    </span>
+                                                    {m.disbursement_status && (
+                                                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold ${m.disbursement_status === 'COMPLETED' ? 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300' : m.disbursement_status === 'FAILED' ? 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300'}`}>
+                                                            {m.disbursement_status === 'COMPLETED' ? 'Sudah masuk rekening' : m.disbursement_status === 'FAILED' ? 'Transfer gagal' : 'Sedang dikirim'}
+                                                        </span>
+                                                    )}
+                                                    {m.catatan && m.status === 'ditolak' && (
                                                     <span className="text-[10px] text-red-600 dark:text-red-400 italic line-clamp-1" title={m.catatan}>
                                                         Alasan: {m.catatan}
                                                     </span>

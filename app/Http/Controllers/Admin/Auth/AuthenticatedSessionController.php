@@ -39,7 +39,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(match (Auth::user()->role) {
+        // Portal internal selalu diarahkan ke dashboard sesuai role.
+        // URL intended bisa berisi halaman customer dari sesi sebelum login.
+        return redirect(match (Auth::user()->role) {
             'finance' => '/finance/dashboard',
             'super_admin' => '/super-admin/dashboard',
             default => '/admin/dashboard',

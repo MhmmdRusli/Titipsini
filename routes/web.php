@@ -45,6 +45,7 @@ use App\Http\Controllers\Mitra\Auth\PasswordResetLinkController as MitraPassword
 use App\Http\Controllers\Mitra\Auth\RegisteredUserController as MitraRegisteredUserController;
 use App\Http\Controllers\Mitra\Auth\VerifyEmailController as MitraVerifyEmailController;
 use App\Http\Controllers\Mitra\BantuanController as MitraBantuanController;
+use App\Http\Controllers\Mitra\ClaimController as MitraClaimController;
 use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
 use App\Http\Controllers\Mitra\JamOperasionalController;
 use App\Http\Controllers\Mitra\KeamananController;
@@ -305,13 +306,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('keamanan', [PengaturanController::class, 'keamanan'])->name('keamanan');
         Route::put('keamanan', [PengaturanController::class, 'updateKeamanan'])->name('keamanan.update');
         Route::delete('keamanan/sessions/{sessionId}', [PengaturanController::class, 'destroySession'])->name('keamanan.sessions.destroy');
-    });
-
-    // Penarikan Saldo - gunakan Finance controller untuk konsistensi
-    Route::prefix('penarikan')->name('penarikan.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Finance\PenarikanController::class, 'index'])->name('index');
-        Route::post('/{penarikan}/approve', [\App\Http\Controllers\Finance\PenarikanController::class, 'approve'])->name('approve');
-        Route::post('/{penarikan}/reject', [\App\Http\Controllers\Finance\PenarikanController::class, 'reject'])->name('reject');
+        Route::delete('keamanan/sessions', [PengaturanController::class, 'destroyOtherSessions'])->name('keamanan.sessions.destroy-all');
     });
 
     Route::resource('berita', AdminBeritaController::class)
@@ -433,6 +428,12 @@ Route::middleware(['auth', 'role:partner', 'partner.suspended'])->prefix('mitra'
 
     Route::patch('/pesanan/{order}/fase', [\App\Http\Controllers\Mitra\OrderController::class, 'updateFase'])
         ->name('orders.updateFase');
+
+    Route::prefix('klaim')->name('klaim.')->group(function () {
+        Route::get('/', [MitraClaimController::class, 'index'])->name('index');
+        Route::get('/{claim}', [MitraClaimController::class, 'show'])->name('show');
+        Route::post('/{claim}/klarifikasi', [MitraClaimController::class, 'submitKlarifikasi'])->name('klarifikasi');
+    });
 
     Route::get('/pendapatan/riwayat', [MitraPendapatanController::class, 'riwayat'])->name('pendapatan.riwayat');
 });

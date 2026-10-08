@@ -57,4 +57,4 @@
     </script>
 </body>
 </html>
-<?php /**PATH C:\laragon\www\titipsini-web\vendor\laravel\framework\src\Illuminate\Foundation\Providers/../resources/exceptions/renderer/components/layout.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\Siti Mintarsih\Documents\GitHub\Titipsini\vendor\laravel\framework\src\Illuminate\Foundation\Providers/../resources/exceptions/renderer/components/layout.blade.php ENDPATH**/ ?>

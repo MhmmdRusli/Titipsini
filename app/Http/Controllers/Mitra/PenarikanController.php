@@ -84,6 +84,8 @@ class PenarikanController extends Controller
                 'jumlah' => $m['jumlah'],
                 'deskripsi' => $m['deskripsi'],
                 'tanggal' => $m['created_at'] ? $m['created_at']->translatedFormat('d M Y, H:i') : '-',
+                'status' => $m['status'] ?? null,
+                'catatan' => $m['catatan'] ?? null,
             ]);
 
         return Inertia::render('Mitra/Penarikan/Index', [

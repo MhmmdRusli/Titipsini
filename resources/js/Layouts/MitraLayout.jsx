@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Package, Bell, User, CheckCircle2, XCircle, X, ArrowLeft } from 'lucide-react';
+import { LayoutGrid, Package, Bell, User, CheckCircle2, XCircle, X, ArrowLeft, Sun, Moon } from 'lucide-react';
 
 const navItems = [
     { label: 'Beranda', href: '/mitra/dashboard', icon: LayoutGrid },
@@ -58,6 +58,11 @@ function Toast({ type, message, onClose }) {
 export default function MitraLayout({ children, title, hideBack = false, onBack }) {
     const { url, props } = usePage();
     const [toast, setToast] = useState(null);
+    const [isDark, setIsDark] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        const savedTheme = localStorage.getItem('theme');
+        return savedTheme ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    });
     const pathname = url.split('?')[0];
     const matchedTitle = Object.entries(pageTitles)
         .sort(([firstPath], [secondPath]) => secondPath.length - firstPath.length)
@@ -69,6 +74,11 @@ export default function MitraLayout({ children, title, hideBack = false, onBack 
     const showBackButton = !isDashboard && !hideBackButton && !hideBack;
 
     useEffect(() => {
+        document.documentElement.classList.toggle('dark', isDark);
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }, [isDark]);
+
+    useEffect(() => {
         if (props.flash?.success) {
             setToast({ type: 'success', message: props.flash.success });
         } else if (props.flash?.error) {
@@ -77,9 +87,9 @@ export default function MitraLayout({ children, title, hideBack = false, onBack 
     }, [props.flash?.success, props.flash?.error]);
 
     return (
-        <div className="min-h-dvh bg-gray-200 sm:flex sm:items-center sm:justify-center sm:py-6">
-            <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-gray-50 sm:h-[850px] sm:shadow-xl">
-                <header className="z-10 shrink-0 border-b border-gray-200 bg-white">
+        <div className="min-h-dvh bg-gray-200 dark:bg-gray-950 sm:flex sm:items-center sm:justify-center sm:py-6">
+            <div className="relative mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-gray-50 dark:bg-gray-900 sm:h-[850px] sm:shadow-xl">
+                <header className="z-10 shrink-0 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
                     <div
                         className="flex min-h-14 items-center px-4 pb-3"
                         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
@@ -110,9 +120,18 @@ export default function MitraLayout({ children, title, hideBack = false, onBack 
                                     </span>
                                 </>
                             ) : (
-                                <span className="text-base font-bold tracking-tight text-gray-900">{navbarTitle}</span>
+                                <span className="text-base font-bold tracking-tight text-gray-900 dark:text-gray-100">{navbarTitle}</span>
                             )}
                         </Link>
+                        <button
+                            type="button"
+                            onClick={() => setIsDark((current) => !current)}
+                            aria-label={isDark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'}
+                            title={isDark ? 'Mode terang' : 'Mode gelap'}
+                            className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                        </button>
                     </div>
                 </header>
 
@@ -125,7 +144,7 @@ export default function MitraLayout({ children, title, hideBack = false, onBack 
                 <main className="flex-1 overflow-y-auto pb-28">{children}</main>
 
                 <nav
-                    className="absolute inset-x-0 bottom-0 z-10 flex justify-around border-t border-gray-200 bg-white py-2"
+                    className="absolute inset-x-0 bottom-0 z-10 flex justify-around border-t border-gray-200 bg-white py-2 dark:border-gray-700 dark:bg-gray-800"
                     style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
                 >
                     {navItems.map(({ label, href, icon: Icon }) => {
@@ -138,7 +157,7 @@ export default function MitraLayout({ children, title, hideBack = false, onBack 
                             <Link
                                 key={href}
                                 href={href}
-                                className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${active ? 'text-green-600' : 'text-gray-500'
+                                className={`flex flex-col items-center gap-0.5 px-2 text-[11px] ${active ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
                                     }`}
                             >
                                 <Icon size={20} />
