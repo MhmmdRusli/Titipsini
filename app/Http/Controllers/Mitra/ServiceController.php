@@ -7,6 +7,7 @@ use App\Models\Kota;
 use App\Models\Service;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -272,17 +273,23 @@ class ServiceController extends Controller
     {
         $this->authorizeOwnership($request, $layanan);
 
-        if ($layanan->foto) {
-            Storage::disk('public')->delete($layanan->foto);
+        $dihapus = DB::transaction(function () use ($layanan) {
+            $adaPesananAktif = $layanan->orders()
+                ->whereNotIn('status', ['selesai', 'dibatalkan'])
+                ->exists();
+
+            if ($adaPesananAktif) {
+                return false;
+            }
+
+            $layanan->delete();
+
+            return true;
+        });
+
+        if (! $dihapus) {
+            return redirect()->back()->with('error', 'Layanan tidak dapat dihapus selama masih memiliki pesanan aktif.');
         }
-
-        if ($layanan->foto_kendaraan) {
-            Storage::disk('public')->delete($layanan->foto_kendaraan);
-        }
-
-        $this->hapusFotoLahan($layanan);
-
-        $layanan->delete();
 
         return redirect()->back()->with('success', 'Layanan berhasil dihapus.');
     }

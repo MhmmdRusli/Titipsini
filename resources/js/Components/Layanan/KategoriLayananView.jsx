@@ -46,6 +46,9 @@ export default function KategoriLayananView({
     const [modalOpen, setModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [deleteProcessing, setDeleteProcessing] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
+    const deleteRequestPending = useRef(false);
     const [fotoPreview, setFotoPreview] = useState(null);
 
     // Buka otomatis modal edit bila halaman dibuka dengan ?edit=<id>
@@ -71,6 +74,32 @@ export default function KategoriLayananView({
         is_active: true,
         foto: null,
     });
+
+    useEffect(() => {
+        const removeInvalidListener = router.on('invalid', (event) => {
+            if (!deleteRequestPending.current) return;
+
+            event.preventDefault();
+            setDeleteError(
+                event.detail.response.status === 403
+                    ? 'Kamu tidak memiliki izin untuk menghapus layanan ini.'
+                    : event.detail.response.status === 404
+                        ? 'Layanan tidak ditemukan atau sudah dihapus.'
+                        : 'Layanan gagal dihapus. Silakan coba lagi.'
+            );
+        });
+        const removeExceptionListener = router.on('exception', (event) => {
+            if (!deleteRequestPending.current) return;
+
+            event.preventDefault();
+            setDeleteError('Terjadi gangguan saat menghapus layanan. Periksa koneksi lalu coba lagi.');
+        });
+
+        return () => {
+            removeInvalidListener();
+            removeExceptionListener();
+        };
+    }, []);
 
     function openTambah(item = null) {
         if (FormKustom) {
@@ -140,8 +169,19 @@ export default function KategoriLayananView({
     }
 
     function handleDelete() {
+        if (!deleteTarget || deleteRequestPending.current) return;
+
+        deleteRequestPending.current = true;
+        setDeleteProcessing(true);
+        setDeleteError('');
         router.delete(`/mitra/layanan/${deleteTarget.id}`, {
+            preserveScroll: true,
             onSuccess: () => setDeleteTarget(null),
+            onError: () => setDeleteError('Data layanan tidak dapat dihapus. Periksa kembali lalu coba lagi.'),
+            onFinish: () => {
+                deleteRequestPending.current = false;
+                setDeleteProcessing(false);
+            },
         });
     }
 
@@ -202,7 +242,10 @@ export default function KategoriLayananView({
                         modeDetail={!!FormKustom}
                         onTambah={() => openTambah()}
                         onUbah={(item) => openTambah(item)}
-                        onHapus={setDeleteTarget}
+                        onHapus={(item) => {
+                            setDeleteError('');
+                            setDeleteTarget(item);
+                        }}
                     />
                 )}
             </div>
@@ -369,20 +412,26 @@ export default function KategoriLayananView({
                     <div className="w-full max-w-xs rounded-xl bg-white p-5 shadow-2xl">
                         <h2 className="text-sm font-bold text-gray-900">Hapus Layanan?</h2>
                         <p className="mt-2 text-xs text-gray-500">
-                            "{deleteTarget.nama}" akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+                            Apakah kamu yakin ingin menghapus layanan "{deleteTarget.nama}"? Layanan yang dihapus tidak akan ditampilkan lagi kepada customer.
                         </p>
+                        {deleteError && <p role="alert" className="mt-3 text-xs text-red-600">{deleteError}</p>}
                         <div className="mt-4 flex justify-end gap-2">
                             <button
-                                onClick={() => setDeleteTarget(null)}
-                                className="rounded-lg px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100"
+                                onClick={() => {
+                                    setDeleteTarget(null);
+                                    setDeleteError('');
+                                }}
+                                disabled={deleteProcessing}
+                                className="rounded-lg px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                             >
                                 Batal
                             </button>
                             <button
                                 onClick={handleDelete}
-                                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                                disabled={deleteProcessing}
+                                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Hapus
+                                {deleteProcessing ? 'Menghapus...' : 'Ya, Hapus'}
                             </button>
                         </div>
                     </div>
@@ -567,22 +616,36 @@ function TahapHub({ kategori, judulHub, subheading, labelBox, labelTambah, layan
                                     </div>
 
                                 {modeDetail ? (
-                                    <Link
-                                        href={`/mitra/layanan/${item.id}`}
-                                        className="shrink-0 text-xs font-semibold text-green-600 hover:underline"
-                                    >
-                                        Detail
-                                    </Link>
+                                    <div className="flex shrink-0 items-center gap-1">
+                                        <Link
+                                            href={`/mitra/layanan/${item.id}`}
+                                            className="px-1 text-xs font-semibold text-green-600 hover:underline"
+                                        >
+                                            Detail
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={() => onHapus(item)}
+                                            aria-label={`Hapus layanan ${item.nama}`}
+                                            className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
                                 ) : (
                                     <div className="flex shrink-0 items-center gap-1">
                                         <button
+                                            type="button"
                                             onClick={() => onUbah(item)}
+                                            aria-label={`Ubah layanan ${item.nama}`}
                                             className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-green-700"
                                         >
                                             <Pencil size={14} />
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={() => onHapus(item)}
+                                            aria-label={`Hapus layanan ${item.nama}`}
                                             className="rounded-md p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
                                         >
                                             <Trash2 size={14} />

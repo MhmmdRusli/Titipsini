@@ -2,14 +2,31 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTrashMeta;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Concerns\HasTrashMeta;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Service extends Model
 {
-      use SoftDeletes, HasTrashMeta;
+    use HasTrashMeta, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::forceDeleted(function (Service $service): void {
+            $fotoLahan = $service->foto_lahan ?? [];
+            $fotos = array_filter(
+                array_merge([$service->foto, $service->foto_kendaraan], $fotoLahan),
+                static fn ($path) => is_string($path) && $path !== ''
+            );
+
+            if ($fotos !== []) {
+                Storage::disk('public')->delete($fotos);
+            }
+        });
+    }
+
     protected $fillable = [
         'user_id',
         'kategori',
@@ -48,7 +65,7 @@ class Service extends Model
         'jenis_pickup',
     ];
 
-            protected function casts(): array
+    protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
@@ -61,6 +78,7 @@ class Service extends Model
             'deleted_at' => 'datetime',
         ];
     }
+
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -100,14 +118,15 @@ class Service extends Model
             && $this->vendor->verification_status === 'terverifikasi'
             && $this->vendor->jadwalOperasionalValid();
     }
+
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(User::class);
     }
 
     public function orders()
     {
-        return $this->hasMany(\App\Models\Order::class, 'service_id');
+        return $this->hasMany(Order::class, 'service_id');
     }
 
     /**
@@ -130,6 +149,7 @@ class Service extends Model
         if (! $this->jumlah_tampung) {
             return 999; // unlimited jika tidak set
         }
+
         return max(0, $this->jumlah_tampung - $this->getActiveOrdersCount());
     }
 
@@ -141,6 +161,7 @@ class Service extends Model
         if (! $this->jumlah_tampung) {
             return false;
         }
+
         return $this->getActiveOrdersCount() >= $this->jumlah_tampung;
     }
 
@@ -159,6 +180,7 @@ class Service extends Model
             ];
         }
         $used = $this->getActiveOrdersCount();
+
         return [
             'total' => $this->jumlah_tampung,
             'used' => $used,
