@@ -52,7 +52,7 @@ export default function FormIdentitasPenjaga({ kategori, editingItem, onBatal, o
         kabupaten_kota: editingItem?.kabupaten_kota ?? '',
         kecamatan: editingItem?.kecamatan ?? '',
         alamat_lengkap: editingItem?.alamat_lengkap ?? '',
-        status: editingItem?.status ?? 'pemilik',
+        status: editingItem?.status_kepemilikan ?? editingItem?.status ?? 'pemilik',
         upload_berkas: editingItem?.upload_berkas ?? '',
         latitude: editingItem?.latitude ?? '',
         longitude: editingItem?.longitude ?? '',

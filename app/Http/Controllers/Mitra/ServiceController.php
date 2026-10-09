@@ -169,6 +169,11 @@ class ServiceController extends Controller
         if (isset($validated['nama_usaha'])) {
             $validated['nama'] = $validated['nama_usaha'];
 
+            if ($validated['kategori'] === 'bangunan') {
+                $validated['status_kepemilikan'] = $validated['status'];
+                unset($validated['status']);
+            }
+
             // Untuk barang, set kota dari kabupaten_kota
             if ($validated['kategori'] === 'barang') {
                 $validated['kota'] = $validated['kabupaten_kota'];
@@ -243,14 +248,14 @@ class ServiceController extends Controller
 
         if ($request->hasFile('foto')) {
             if ($layanan->foto) {
-                Storage::delete($layanan->foto);
+                Storage::disk('public')->delete($layanan->foto);
             }
             $validated['foto'] = $request->file('foto')->store('services', 'public');
         }
 
         if ($request->hasFile('foto_kendaraan')) {
             if ($layanan->foto_kendaraan) {
-                Storage::delete($layanan->foto_kendaraan);
+                Storage::disk('public')->delete($layanan->foto_kendaraan);
             }
             $validated['foto_kendaraan'] = $request->file('foto_kendaraan')->store('foto-kendaraan', 'public');
         }
@@ -268,7 +273,11 @@ class ServiceController extends Controller
         $this->authorizeOwnership($request, $layanan);
 
         if ($layanan->foto) {
-            Storage::delete($layanan->foto);
+            Storage::disk('public')->delete($layanan->foto);
+        }
+
+        if ($layanan->foto_kendaraan) {
+            Storage::disk('public')->delete($layanan->foto_kendaraan);
         }
 
         $this->hapusFotoLahan($layanan);

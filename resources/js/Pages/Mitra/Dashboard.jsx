@@ -12,7 +12,6 @@ const LAYANAN_ICON = {
 
 const KATEGORI_LAYANAN = ['barang', 'kendaraan', 'bangunan', 'pindahan'];
 
-// Href per kategori - masing-masing sekarang punya halaman kelola sendiri
 const LAYANAN_HREF = {
     barang: '/mitra/layanan/barang',
     kendaraan: '/mitra/layanan/kendaraan',
@@ -34,11 +33,8 @@ function formatRupiah(value) {
 export default function Dashboard({ partner = {}, saldo = 0, toko = {}, layanan = [], pesanan = {}, just_logged_in = false }) {
     const { auth } = usePage().props;
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-
-    // 1. Ambil status mentah dari props partner atau auth.user
     const rawStatus = partner?.verification_status ?? auth?.user?.verification_status ?? partner?.is_verified ?? auth?.user?.is_verified;
 
-    // 2. Logika pemeriksaan ketat: Hanya dianggap terverifikasi jika nilainya eksplisit 'terverifikasi', 'verified', atau true
     const isVerified = (() => {
         if (typeof rawStatus === 'boolean') return rawStatus;
         if (typeof rawStatus === 'number') return rawStatus === 1;

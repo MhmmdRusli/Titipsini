@@ -7,9 +7,9 @@ function Baris({ label, value }) {
     if (value === null || value === undefined || value === '') return null;
     return (
         <div className="flex gap-4 py-2 text-sm">
-            <span className="w-40 shrink-0 text-gray-500">{label}</span>
+            <span className="w-32 shrink-0 text-gray-500 sm:w-40">{label}</span>
             <span className="text-gray-500">:</span>
-            <span className="flex-1 text-gray-900 break-words">{value}</span>
+            <span className="min-w-0 flex-1 break-words text-gray-900">{value}</span>
         </div>
     );
 }
@@ -27,6 +27,7 @@ export default function Detail({ layanan }) {
     const status = layanan.verification_status ?? 'pending';
     const kategori = layanan.kategori || 'barang';
     const judulDetail = KATEGORI_LABELS[kategori] || 'Detail Layanan';
+    const halamanKategori = ['barang', 'kendaraan', 'bangunan', 'pindahan'].includes(kategori) ? kategori : 'barang';
 
     const handleToggleActive = () => {
         if (loadingToggle) return;
@@ -83,7 +84,7 @@ export default function Detail({ layanan }) {
             <Head title={judulDetail} />
 
             <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
-                <Link href="/mitra/layanan/pindahan" className="text-gray-500 hover:text-gray-700">
+                <Link href={`/mitra/layanan/${halamanKategori}`} className="text-gray-500 hover:text-gray-700">
                     <ChevronLeft size={20} />
                 </Link>
                 <h1 className="text-base font-semibold text-gray-900">{judulDetail}</h1>
