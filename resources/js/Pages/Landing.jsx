@@ -269,7 +269,7 @@ export default function Landing() {
                         <h4 className="font-bold text-white text-xl mb-4">Perusahaan</h4>
                         <ul className="space-y-3 text-lg text-white/90">
                             <li><a href="#tentang" onClick={(e) => scrollToSection(e, 'tentang')} className="hover:underline">Tentang Kami</a></li>
-                            <li><a href="#kontak" className="hover:underline">Kontak Kami</a></li>
+                            <li><a href="tel:85643333061" className="hover:underline">Kontak Kami: 856-4333-3061</a></li>
                         </ul>
                     </div>
 
